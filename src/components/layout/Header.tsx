@@ -94,7 +94,7 @@ export const Header = () => {
               </Button>
             </DropdownMenuTrigger>
             <DropdownMenuContent align="end" className="w-56 bg-white">
-              <DropdownMenuItem asChild>
+              <DropdownMenuItem>
                 <button 
                   className="w-full text-left cursor-pointer px-2 py-1.5 text-sm"
                   onClick={handleProfileClick}
@@ -102,7 +102,7 @@ export const Header = () => {
                   Profile
                 </button>
               </DropdownMenuItem>
-              <DropdownMenuItem asChild>
+              <DropdownMenuItem>
                 <button 
                   className="w-full text-left cursor-pointer px-2 py-1.5 text-sm"
                   onClick={handleSettingsClick}
@@ -111,7 +111,7 @@ export const Header = () => {
                 </button>
               </DropdownMenuItem>
               <DropdownMenuSeparator />
-              <DropdownMenuItem asChild>
+              <DropdownMenuItem>
                 <button 
                   className="w-full text-left cursor-pointer px-2 py-1.5 text-sm"
                   onClick={handleSignOut}
