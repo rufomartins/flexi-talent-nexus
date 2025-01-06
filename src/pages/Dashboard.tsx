@@ -4,7 +4,7 @@ import { AddTalentModal } from "@/components/talents/AddTalentModal"
 import { useQuery } from "@tanstack/react-query"
 import { supabase } from "@/integrations/supabase/client"
 import { Loader2 } from "lucide-react"
-import { useAuth } from "@/contexts/AuthContext"
+import { useAuth } from "@/contexts/auth"
 
 export default function Dashboard() {
   const [addTalentOpen, setAddTalentOpen] = useState(false)
