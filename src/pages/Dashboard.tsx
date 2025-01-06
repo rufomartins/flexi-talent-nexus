@@ -1,228 +1,49 @@
-import { Search, Bell, ChevronDown, Menu, LogOut } from "lucide-react";
-import { useState } from "react";
-import { Card } from "@/components/ui/card";
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { Button } from "@/components/ui/button";
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
-import { useAuth } from "@/contexts/AuthContext";
+import { Button } from "@/components/ui/button"
+import { useState } from "react"
+import { AddTalentModal } from "@/components/talents/AddTalentModal"
 
-const Dashboard = () => {
-  const [searchQuery, setSearchQuery] = useState("");
-  const [isSidebarOpen, setIsSidebarOpen] = useState(true);
-  const { userDetails, signOut } = useAuth();
-
-  const stats = [
-    {
-      title: "New registrations",
-      value: "2",
-      subtext: "last 30 days",
-      trend: "+200%",
-    },
-    {
-      title: "Number of active castings",
-      value: "2",
-      subtext: "active castings",
-      trend: "0%",
-    },
-    {
-      title: "Recent talent activities",
-      value: "3",
-      subtext: "last 30 days",
-      trend: "+300%",
-    },
-    {
-      title: "Birthdays",
-      value: "0",
-      subtext: "this month",
-    },
-    {
-      title: "New auditions",
-      value: "0",
-      subtext: "this month",
-    },
-    {
-      title: "Unreviewed audition tapes",
-      value: "0",
-      subtext: "",
-    },
-  ];
+export default function Dashboard() {
+  const [addTalentOpen, setAddTalentOpen] = useState(false)
 
   return (
-    <div className="min-h-screen bg-[#F8F9FA]">
-      {/* Top Bar */}
-      <header className="bg-white border-b">
-        <div className="max-w-[1400px] mx-auto px-4">
-          <div className="flex justify-between items-center h-16">
-            <div className="flex items-center gap-4">
-              <Button
-                variant="ghost"
-                size="icon"
-                onClick={() => setIsSidebarOpen(!isSidebarOpen)}
-              >
-                <Menu className="h-5 w-5" />
-              </Button>
-              <span className="text-xl font-semibold">GTMD.studio</span>
-            </div>
+    <div className="container mx-auto p-6">
+      <div className="flex justify-between items-center mb-6">
+        <h1 className="text-2xl font-bold">Dashboard</h1>
+        <Button onClick={() => setAddTalentOpen(true)}>
+          Add new talent
+        </Button>
+      </div>
 
-            <div className="flex-1 max-w-xl mx-8">
-              <div className="relative">
-                <Search className="absolute left-3 top-2.5 h-5 w-5 text-muted-foreground" />
-                <input
-                  type="text"
-                  placeholder="Quickfind..."
-                  className="w-full pl-10 pr-4 py-2 bg-[#F8F9FA] rounded-md focus:outline-none focus:ring-2 focus:ring-primary/20"
-                  value={searchQuery}
-                  onChange={(e) => setSearchQuery(e.target.value)}
-                />
-              </div>
-            </div>
-
-            <div className="flex items-center gap-4">
-              <button className="relative p-2 text-gray-600 hover:text-gray-900">
-                <Bell className="h-6 w-6" />
-                <span className="absolute top-1 right-1 h-2 w-2 bg-red-500 rounded-full"></span>
-              </button>
-
-              <DropdownMenu>
-                <DropdownMenuTrigger asChild>
-                  <div className="flex items-center gap-2 cursor-pointer">
-                    <Avatar>
-                      <AvatarImage
-                        src={
-                          userDetails?.avatar_url ||
-                          `https://ui-avatars.com/api/?name=${
-                            userDetails?.full_name || "User"
-                          }`
-                        }
-                      />
-                      <AvatarFallback>
-                        {userDetails?.full_name?.[0] || "U"}
-                      </AvatarFallback>
-                    </Avatar>
-                    <div className="flex items-center">
-                      <div>
-                        <p className="text-sm font-medium text-gray-700">
-                          {userDetails?.full_name || "User"}
-                        </p>
-                        <p className="text-xs text-gray-500">
-                          {userDetails?.role || "Loading..."}
-                        </p>
-                      </div>
-                      <ChevronDown className="ml-1 h-4 w-4" />
-                    </div>
-                  </div>
-                </DropdownMenuTrigger>
-                <DropdownMenuContent align="end" className="w-48">
-                  <DropdownMenuItem onClick={signOut}>
-                    <LogOut className="mr-2 h-4 w-4" />
-                    <span>Log out</span>
-                  </DropdownMenuItem>
-                </DropdownMenuContent>
-              </DropdownMenu>
-            </div>
-          </div>
+      <AddTalentModal 
+        open={addTalentOpen}
+        onOpenChange={setAddTalentOpen}
+      />
+      
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+        <div className="bg-card rounded-lg shadow p-6">
+          <h2 className="text-lg font-semibold mb-2">Total Talents</h2>
+          <p className="text-3xl font-bold">0</p>
         </div>
-      </header>
+        
+        <div className="bg-card rounded-lg shadow p-6">
+          <h2 className="text-lg font-semibold mb-2">Active Projects</h2>
+          <p className="text-3xl font-bold">0</p>
+        </div>
+        
+        <div className="bg-card rounded-lg shadow p-6">
+          <h2 className="text-lg font-semibold mb-2">Pending Reviews</h2>
+          <p className="text-3xl font-bold">0</p>
+        </div>
+      </div>
 
-      <div className="flex">
-        {/* Sidebar */}
-        <aside
-          className={`w-64 bg-white border-r ${isSidebarOpen ? "" : "hidden"}`}
-        >
-          <nav className="p-4 space-y-2">
-            {[
-              "Dashboard",
-              "Talents",
-              "Search",
-              "Groups",
-              "Add new talent",
-              "Castings",
-              "Calendar",
-              "Contacts",
-              "Settings",
-            ].map((item) => (
-              <a
-                key={item}
-                href="#"
-                className={`flex items-center px-4 py-2 rounded-md ${
-                  item === "Dashboard"
-                    ? "bg-primary text-white"
-                    : "text-gray-700 hover:bg-gray-100"
-                }`}
-              >
-                {item}
-              </a>
-            ))}
-          </nav>
-        </aside>
-
-        {/* Main Content */}
-        <main className="flex-1 p-8">
-          {/* Stats Grid */}
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-8">
-            {stats.map((stat) => (
-              <Card key={stat.title} className="p-6">
-                <div className="flex flex-col">
-                  <span className="text-sm text-gray-600">{stat.title}</span>
-                  <div className="flex items-baseline mt-2">
-                    <span className="text-3xl font-semibold">{stat.value}</span>
-                    {stat.trend && (
-                      <span className="ml-2 text-sm text-green-500">
-                        {stat.trend}
-                      </span>
-                    )}
-                  </div>
-                  {stat.subtext && (
-                    <span className="text-sm text-gray-500 mt-1">
-                      {stat.subtext}
-                    </span>
-                  )}
-                </div>
-              </Card>
-            ))}
-          </div>
-
-          {/* Recent Updates */}
-          <Card className="p-6">
-            <div className="flex justify-between items-center mb-6">
-              <h2 className="text-xl font-semibold">Recent updates</h2>
-              <select className="px-4 py-2 border rounded-md bg-white">
-                <option>Filter</option>
-                <option>All updates</option>
-                <option>Profiles</option>
-                <option>Castings</option>
-                <option>Auditions</option>
-              </select>
-            </div>
-
-            <div className="space-y-6">
-              {/* Example update item */}
-              <div className="flex items-center justify-between">
-                <div className="flex items-center gap-4">
-                  <Avatar>
-                    <AvatarImage src="https://ui-avatars.com/api/?name=Chuck+No" />
-                    <AvatarFallback>CN</AvatarFallback>
-                  </Avatar>
-                  <div>
-                    <div className="font-medium">Chuck No</div>
-                    <div className="text-sm text-gray-500">
-                      Profile updated by talent
-                    </div>
-                  </div>
-                </div>
-                <span className="text-sm text-gray-500">1 days ago</span>
-              </div>
-            </div>
-          </Card>
-        </main>
+      <div className="mt-8">
+        <h2 className="text-xl font-semibold mb-4">Recent Activity</h2>
+        <div className="bg-card rounded-lg shadow p-6">
+          <p className="text-muted-foreground text-center py-8">
+            No recent activity to display
+          </p>
+        </div>
       </div>
     </div>
-  );
-};
-
-export default Dashboard;
+  )
+}

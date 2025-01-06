@@ -69,6 +69,82 @@ export type Database = {
         }
         Relationships: []
       }
+      email_templates: {
+        Row: {
+          content: string
+          created_at: string | null
+          created_by: string | null
+          id: string
+          name: string
+          subject: string
+          updated_at: string | null
+        }
+        Insert: {
+          content: string
+          created_at?: string | null
+          created_by?: string | null
+          id?: string
+          name: string
+          subject: string
+          updated_at?: string | null
+        }
+        Update: {
+          content?: string
+          created_at?: string | null
+          created_by?: string | null
+          id?: string
+          name?: string
+          subject?: string
+          updated_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "email_templates_created_by_fkey"
+            columns: ["created_by"]
+            isOneToOne: false
+            referencedRelation: "users"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      talent_profiles: {
+        Row: {
+          category: string | null
+          created_at: string | null
+          evaluation_status: string | null
+          id: string
+          internal_remarks: string | null
+          updated_at: string | null
+          user_id: string | null
+        }
+        Insert: {
+          category?: string | null
+          created_at?: string | null
+          evaluation_status?: string | null
+          id?: string
+          internal_remarks?: string | null
+          updated_at?: string | null
+          user_id?: string | null
+        }
+        Update: {
+          category?: string | null
+          created_at?: string | null
+          evaluation_status?: string | null
+          id?: string
+          internal_remarks?: string | null
+          updated_at?: string | null
+          user_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "talent_profiles_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: true
+            referencedRelation: "users"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       user_activity_logs: {
         Row: {
           action_type: string
@@ -135,9 +211,14 @@ export type Database = {
           avatar_url: string | null
           company_id: string | null
           created_at: string | null
+          first_name: string | null
           full_name: string | null
+          gender: string | null
           id: string
           last_login: string | null
+          last_name: string | null
+          mobile_phone: string | null
+          nationality: string | null
           role: Database["public"]["Enums"]["user_role"]
           status: Database["public"]["Enums"]["user_status"]
         }
@@ -145,9 +226,14 @@ export type Database = {
           avatar_url?: string | null
           company_id?: string | null
           created_at?: string | null
+          first_name?: string | null
           full_name?: string | null
+          gender?: string | null
           id: string
           last_login?: string | null
+          last_name?: string | null
+          mobile_phone?: string | null
+          nationality?: string | null
           role?: Database["public"]["Enums"]["user_role"]
           status?: Database["public"]["Enums"]["user_status"]
         }
@@ -155,9 +241,14 @@ export type Database = {
           avatar_url?: string | null
           company_id?: string | null
           created_at?: string | null
+          first_name?: string | null
           full_name?: string | null
+          gender?: string | null
           id?: string
           last_login?: string | null
+          last_name?: string | null
+          mobile_phone?: string | null
+          nationality?: string | null
           role?: Database["public"]["Enums"]["user_role"]
           status?: Database["public"]["Enums"]["user_status"]
         }
