@@ -2,11 +2,12 @@ import { useState } from "react";
 import { Card } from "@/components/ui/card";
 import { Switch } from "@/components/ui/switch";
 import { Button } from "@/components/ui/button";
-import { MoreVertical, Image, Video } from "lucide-react";
+import { MoreVertical, Image, Video, AlertCircle } from "lucide-react";
 import { formatFileSize, formatDate } from "@/lib/utils";
 import { Checkbox } from "@/components/ui/checkbox";
 import { useUpdateMediaMutation } from "@/hooks/use-media";
 import { AspectRatio } from "@/components/ui/aspect-ratio";
+import { useToast } from "@/components/ui/use-toast";
 
 interface MediaCardProps {
   media: {
@@ -28,6 +29,8 @@ export const MediaCard = ({ media, onSelect, isSelected }: MediaCardProps) => {
   const updateMedia = useUpdateMediaMutation();
   const [isSettingPosition, setIsSettingPosition] = useState(false);
   const [position, setPosition] = useState(media.position);
+  const [imageError, setImageError] = useState(false);
+  const { toast } = useToast();
 
   const handlePositionSave = async () => {
     await updateMedia.mutateAsync({
@@ -51,7 +54,20 @@ export const MediaCard = ({ media, onSelect, isSelected }: MediaCardProps) => {
     });
   };
 
-  const mediaUrl = `${import.meta.env.VITE_SUPABASE_URL}/storage/v1/object/public/talent-files/${media.file_path}`;
+  const handleMediaError = () => {
+    setImageError(true);
+    toast({
+      title: "Error loading media",
+      description: "Unable to load the media file. Please try again later.",
+      variant: "destructive",
+    });
+  };
+
+  // Construct the full URL for the media file
+  const mediaUrl = new URL(
+    `/storage/v1/object/public/talent-files/${media.file_path}`,
+    import.meta.env.VITE_SUPABASE_URL
+  ).toString();
 
   return (
     <Card className="relative bg-white overflow-hidden">
@@ -78,17 +94,24 @@ export const MediaCard = ({ media, onSelect, isSelected }: MediaCardProps) => {
       </div>
 
       <AspectRatio ratio={16 / 9} className="bg-muted">
-        {media.file_type.startsWith("image/") ? (
+        {imageError ? (
+          <div className="w-full h-full flex flex-col items-center justify-center bg-muted">
+            <AlertCircle className="h-12 w-12 text-destructive mb-2" />
+            <span className="text-sm text-muted-foreground">Failed to load media</span>
+          </div>
+        ) : media.file_type.startsWith("image/") ? (
           <img
             src={mediaUrl}
             alt={media.file_name}
             className="w-full h-full object-cover"
+            onError={handleMediaError}
           />
         ) : media.file_type.startsWith("video/") ? (
           <video
             src={mediaUrl}
             className="w-full h-full object-cover"
             controls
+            onError={handleMediaError}
           />
         ) : (
           <div className="w-full h-full flex items-center justify-center bg-muted">
