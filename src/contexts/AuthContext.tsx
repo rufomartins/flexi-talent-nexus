@@ -135,12 +135,14 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       });
     } catch (error: any) {
       console.error("Sign in error:", error);
-      setLoading(false);
       toast({
         title: "Error",
         description: error.message,
         variant: "destructive",
       });
+      throw error;
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -161,7 +163,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         description: "You have been successfully signed out.",
       });
 
-      // The navigation will be handled by the onAuthStateChange listener
+      // Navigation will be handled by the onAuthStateChange listener
     } catch (error: any) {
       console.error("Sign out error:", error);
       toast({
@@ -169,7 +171,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         description: "There was an error signing out.",
         variant: "destructive",
       });
-      throw error; // Re-throw to be caught by the component
+      throw error;
     }
   };
 

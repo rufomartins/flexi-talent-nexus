@@ -39,9 +39,7 @@ export const Header = () => {
 
   const handleSignOut = async () => {
     try {
-      console.log("Attempting to sign out...")
       await signOut()
-      console.log("Sign out successful")
     } catch (error) {
       console.error("Error signing out:", error)
       toast({
@@ -96,14 +94,14 @@ export const Header = () => {
               </Button>
             </DropdownMenuTrigger>
             <DropdownMenuContent align="end" className="w-56">
-              <DropdownMenuItem onClick={handleProfileClick}>
+              <DropdownMenuItem className="cursor-pointer" onSelect={handleProfileClick}>
                 Profile
               </DropdownMenuItem>
-              <DropdownMenuItem onClick={handleSettingsClick}>
+              <DropdownMenuItem className="cursor-pointer" onSelect={handleSettingsClick}>
                 Settings
               </DropdownMenuItem>
               <DropdownMenuSeparator />
-              <DropdownMenuItem onClick={handleSignOut}>
+              <DropdownMenuItem className="cursor-pointer" onSelect={handleSignOut}>
                 Log out
               </DropdownMenuItem>
             </DropdownMenuContent>
