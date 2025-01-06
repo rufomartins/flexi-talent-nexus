@@ -4,6 +4,7 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Settings2 } from "lucide-react";
 import { format } from "date-fns";
+import { useState } from "react";
 
 interface User {
   id: string;
@@ -20,6 +21,8 @@ interface UserTableProps {
 }
 
 export const UserTable = ({ users }: UserTableProps) => {
+  const [failedAvatars, setFailedAvatars] = useState<Set<string>>(new Set());
+
   const getInitials = (name: string | null) => {
     if (!name) return "U";
     return name
@@ -53,6 +56,10 @@ export const UserTable = ({ users }: UserTableProps) => {
     }
   };
 
+  const handleAvatarError = (userId: string) => {
+    setFailedAvatars(prev => new Set(prev).add(userId));
+  };
+
   return (
     <Table>
       <TableHeader>
@@ -69,7 +76,12 @@ export const UserTable = ({ users }: UserTableProps) => {
           <TableRow key={user.id}>
             <TableCell className="flex items-center gap-3">
               <Avatar>
-                <AvatarImage src={user.avatar_url || undefined} />
+                {user.avatar_url && !failedAvatars.has(user.id) ? (
+                  <AvatarImage 
+                    src={user.avatar_url} 
+                    onError={() => handleAvatarError(user.id)}
+                  />
+                ) : null}
                 <AvatarFallback>{getInitials(user.full_name)}</AvatarFallback>
               </Avatar>
               <div>
