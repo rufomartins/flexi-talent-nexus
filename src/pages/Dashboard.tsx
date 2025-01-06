@@ -4,37 +4,44 @@ import { AddTalentModal } from "@/components/talents/AddTalentModal"
 import { useQuery } from "@tanstack/react-query"
 import { supabase } from "@/integrations/supabase/client"
 import { Loader2 } from "lucide-react"
+import { useAuth } from "@/contexts/AuthContext"
 
 export default function Dashboard() {
   const [addTalentOpen, setAddTalentOpen] = useState(false)
+  const { user } = useAuth()
 
   const { data: talentsCount, isLoading: talentsLoading } = useQuery({
     queryKey: ['talents-count'],
     queryFn: async () => {
+      if (!user) return 0;
+      
       const { count, error } = await supabase
         .from('talent_profiles')
         .select('*', { count: 'exact', head: true })
 
       if (error) {
         console.error('Error fetching talents count:', error)
-        throw error
+        return 0
       }
 
       return count || 0
-    }
+    },
+    enabled: !!user
   })
 
   const { data: projectsCount, isLoading: projectsLoading } = useQuery({
     queryKey: ['projects-count'],
     queryFn: async () => {
-      // For now, returning 0 as there's no projects table yet
-      return 0
-    }
+      return 0 // For now, returning 0 as there's no projects table yet
+    },
+    enabled: !!user
   })
 
   const { data: reviewsCount, isLoading: reviewsLoading } = useQuery({
     queryKey: ['reviews-count'],
     queryFn: async () => {
+      if (!user) return 0;
+
       const { count, error } = await supabase
         .from('talent_profiles')
         .select('*', { count: 'exact', head: true })
@@ -42,19 +49,17 @@ export default function Dashboard() {
 
       if (error) {
         console.error('Error fetching reviews count:', error)
-        throw error
+        return 0
       }
 
       return count || 0
-    }
+    },
+    enabled: !!user
   })
 
-  if (talentsLoading || projectsLoading || reviewsLoading) {
-    return (
-      <div className="h-screen w-screen flex items-center justify-center">
-        <Loader2 className="h-8 w-8 animate-spin" />
-      </div>
-    )
+  // Show loading state only for initial load
+  if (!user) {
+    return null; // Let the ProtectedRoute handle the redirect
   }
 
   return (
@@ -74,17 +79,35 @@ export default function Dashboard() {
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
         <div className="bg-card rounded-lg shadow p-6">
           <h2 className="text-lg font-semibold mb-2">Total Talents</h2>
-          <p className="text-3xl font-bold">{talentsCount}</p>
+          <p className="text-3xl font-bold">
+            {talentsLoading ? (
+              <Loader2 className="h-6 w-6 animate-spin" />
+            ) : (
+              talentsCount
+            )}
+          </p>
         </div>
         
         <div className="bg-card rounded-lg shadow p-6">
           <h2 className="text-lg font-semibold mb-2">Active Projects</h2>
-          <p className="text-3xl font-bold">{projectsCount}</p>
+          <p className="text-3xl font-bold">
+            {projectsLoading ? (
+              <Loader2 className="h-6 w-6 animate-spin" />
+            ) : (
+              projectsCount
+            )}
+          </p>
         </div>
         
         <div className="bg-card rounded-lg shadow p-6">
           <h2 className="text-lg font-semibold mb-2">Pending Reviews</h2>
-          <p className="text-3xl font-bold">{reviewsCount}</p>
+          <p className="text-3xl font-bold">
+            {reviewsLoading ? (
+              <Loader2 className="h-6 w-6 animate-spin" />
+            ) : (
+              reviewsCount
+            )}
+          </p>
         </div>
       </div>
 
