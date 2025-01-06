@@ -10,6 +10,7 @@ import {
 import { Input } from "@/components/ui/input"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { useAuth } from "@/hooks/useAuth"
+import { useNavigate } from "react-router-dom"
 import type { Database } from "@/integrations/supabase/types"
 
 const assertUser = (user: unknown) => {
@@ -32,6 +33,16 @@ const assertUser = (user: unknown) => {
 
 export const Header = () => {
   const { user, signOut } = useAuth()
+  const navigate = useNavigate()
+
+  const handleSignOut = async () => {
+    try {
+      await signOut()
+      navigate("/login")
+    } catch (error) {
+      console.error("Error signing out:", error)
+    }
+  }
 
   return (
     <header className="h-16 bg-white border-b">
@@ -74,7 +85,7 @@ export const Header = () => {
               <DropdownMenuItem>Profile</DropdownMenuItem>
               <DropdownMenuItem>Settings</DropdownMenuItem>
               <DropdownMenuSeparator />
-              <DropdownMenuItem onClick={() => signOut()}>
+              <DropdownMenuItem onClick={handleSignOut}>
                 Log out
               </DropdownMenuItem>
             </DropdownMenuContent>
