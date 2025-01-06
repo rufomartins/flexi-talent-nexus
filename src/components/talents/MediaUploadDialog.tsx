@@ -3,13 +3,15 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/u
 import { Button } from "@/components/ui/button";
 import { useToast } from "@/components/ui/use-toast";
 import { supabase } from "@/integrations/supabase/client";
-import { Enums } from "@/integrations/supabase/types";
+import { Database } from "@/integrations/supabase/types";
+
+type UserRole = Database["public"]["Enums"]["user_role"];
 
 interface MediaUploadDialogProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
   talentId: string;
-  talentRole: Enums["user_role"];
+  talentRole: UserRole;
 }
 
 export const MediaUploadDialog = ({

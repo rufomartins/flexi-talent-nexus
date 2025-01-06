@@ -13,6 +13,7 @@ interface MediaCardProps {
     file_name: string;
     file_path: string;
     file_size: number;
+    file_type: string;
     created_at: string;
     is_profile: boolean;
     is_shared: boolean;
