@@ -34,51 +34,80 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
       if (error) {
         console.error("Error fetching user details:", error);
+        setLoading(false); // Important: Set loading to false even on error
+        toast({
+          title: "Error",
+          description: "Failed to load user details. Please try again.",
+          variant: "destructive",
+        });
         return;
       }
 
-      console.log("User details fetched:", data);
+      console.log("User details fetched successfully:", data);
       setUserDetails(data);
+      setLoading(false);
     } catch (error) {
-      console.error("Error in fetchUserDetails:", error);
+      console.error("Exception in fetchUserDetails:", error);
+      setLoading(false);
+      toast({
+        title: "Error",
+        description: "An unexpected error occurred while loading user details.",
+        variant: "destructive",
+      });
     }
   };
 
   useEffect(() => {
     console.log("AuthProvider mounted");
+    let mounted = true;
     
-    // Get initial session
-    supabase.auth.getSession().then(({ data: { session } }) => {
-      console.log("Initial session check:", session ? "Found session" : "No session");
-      setSession(session);
-      setUser(session?.user ?? null);
-      if (session?.user) {
-        fetchUserDetails(session.user.id);
+    const initializeAuth = async () => {
+      try {
+        const { data: { session } } = await supabase.auth.getSession();
+        console.log("Initial session check:", session ? "Found session" : "No session");
+        
+        if (mounted) {
+          setSession(session);
+          setUser(session?.user ?? null);
+          if (session?.user) {
+            await fetchUserDetails(session.user.id);
+          } else {
+            setLoading(false);
+          }
+        }
+      } catch (error) {
+        console.error("Error in initializeAuth:", error);
+        if (mounted) {
+          setLoading(false);
+        }
       }
-      setLoading(false);
-    });
+    };
 
-    // Listen for auth changes
+    initializeAuth();
+
     const {
       data: { subscription },
     } = supabase.auth.onAuthStateChange(async (event, session) => {
       console.log("Auth state changed:", event, session ? "Has session" : "No session");
-      setSession(session);
-      setUser(session?.user ?? null);
       
-      if (session?.user) {
-        await fetchUserDetails(session.user.id);
-        navigate("/dashboard");
-      } else {
-        setUserDetails(null);
-        if (event === "SIGNED_OUT") {
-          navigate("/login");
+      if (mounted) {
+        setSession(session);
+        setUser(session?.user ?? null);
+        
+        if (session?.user) {
+          await fetchUserDetails(session.user.id);
+        } else {
+          setUserDetails(null);
+          setLoading(false);
+          if (event === "SIGNED_OUT") {
+            navigate("/login");
+          }
         }
       }
-      setLoading(false);
     });
 
     return () => {
+      mounted = false;
       subscription.unsubscribe();
     };
   }, [navigate]);
@@ -106,13 +135,12 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       });
     } catch (error: any) {
       console.error("Sign in error:", error);
+      setLoading(false);
       toast({
         title: "Error",
         description: error.message,
         variant: "destructive",
       });
-    } finally {
-      setLoading(false);
     }
   };
 
