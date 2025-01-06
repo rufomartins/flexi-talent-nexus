@@ -16,10 +16,10 @@ export const Header = () => {
   const { user, signOut } = useAuth()
 
   return (
-    <header className="border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
+    <header className="fixed top-0 right-0 left-0 z-50 border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 shadow-sm">
       <div className="flex h-14 items-center gap-4 px-6">
         <div className="flex-1 flex items-center gap-4">
-          <span className="font-semibold">GTMD.studio</span>
+          <span className="font-semibold whitespace-nowrap">GTMD.studio</span>
           <div className="flex-1 flex justify-center max-w-xl">
             <div className="w-full max-w-sm flex items-center">
               <Input

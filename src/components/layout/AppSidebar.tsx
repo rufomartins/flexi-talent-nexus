@@ -14,6 +14,9 @@ import {
   SidebarMenu,
   SidebarMenuButton,
   SidebarMenuItem,
+  SidebarMenuSub,
+  SidebarMenuSubButton,
+  SidebarMenuSubItem,
 } from "@/components/ui/sidebar"
 import { useAuth } from "@/hooks/useAuth"
 import { cn } from "@/lib/utils"
@@ -35,18 +38,20 @@ export const AppSidebar = () => {
       icon: Users,
       href: "/talents",
       show: true,
-    },
-    {
-      title: "Search",
-      icon: Search,
-      href: "/search",
-      show: true,
-    },
-    {
-      title: "Add New Talent",
-      icon: PlusCircle,
-      href: "/talents/new",
-      show: true,
+      subItems: [
+        {
+          title: "Search",
+          icon: Search,
+          href: "/search",
+          show: true,
+        },
+        {
+          title: "Add New Talent",
+          icon: PlusCircle,
+          href: "/talents/new",
+          show: true,
+        },
+      ],
     },
     {
       title: "Castings",
@@ -111,6 +116,25 @@ export const AppSidebar = () => {
                     <span>{item.title}</span>
                   </a>
                 </SidebarMenuButton>
+                {item.subItems && (
+                  <SidebarMenuSub>
+                    {item.subItems
+                      .filter((subItem) => subItem.show)
+                      .map((subItem) => (
+                        <SidebarMenuSubItem key={subItem.href}>
+                          <SidebarMenuSubButton
+                            asChild
+                            isActive={location.pathname === subItem.href}
+                          >
+                            <a href={subItem.href}>
+                              <subItem.icon className="h-4 w-4" />
+                              <span>{subItem.title}</span>
+                            </a>
+                          </SidebarMenuSubButton>
+                        </SidebarMenuSubItem>
+                      ))}
+                  </SidebarMenuSub>
+                )}
               </SidebarMenuItem>
             ))}
         </SidebarMenu>
