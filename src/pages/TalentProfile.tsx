@@ -58,6 +58,10 @@ const TalentProfile = () => {
     return <div>Loading...</div>;
   }
 
+  if (!talent) {
+    return <div>Talent not found</div>;
+  }
+
   const talentRoles: { value: TalentRole; label: string }[] = [
     { value: "ugc_talent", label: "UGC Talent" },
     { value: "translator", label: "Translator" },
@@ -94,7 +98,7 @@ const TalentProfile = () => {
                   <ChevronRight className="h-4 w-4" />
                 </BreadcrumbSeparator>
                 <BreadcrumbItem>
-                  <BreadcrumbPage>{talent?.user.full_name}</BreadcrumbPage>
+                  <BreadcrumbPage>{talent.user.full_name || 'Unknown'}</BreadcrumbPage>
                 </BreadcrumbItem>
               </BreadcrumbList>
             </Breadcrumb>
@@ -145,10 +149,10 @@ const TalentProfile = () => {
               <div className="w-64">
                 <Label>Profile</Label>
                 <Avatar className="w-64 h-64 mt-2">
-                  <AvatarImage src={talent?.user.avatar_url || undefined} />
+                  <AvatarImage src={talent.user.avatar_url || undefined} />
                   <AvatarFallback>
-                    {talent?.user.first_name?.[0]}
-                    {talent?.user.last_name?.[0]}
+                    {talent.user.first_name?.[0]}
+                    {talent.user.last_name?.[0]}
                   </AvatarFallback>
                 </Avatar>
               </div>
@@ -158,23 +162,23 @@ const TalentProfile = () => {
                 <div className="grid grid-cols-2 gap-4">
                   <div>
                     <Label htmlFor="firstName">First Name</Label>
-                    <Input id="firstName" defaultValue={talent?.user.first_name || ''} readOnly />
+                    <Input id="firstName" defaultValue={talent.user.first_name || ''} readOnly />
                   </div>
                   <div>
                     <Label htmlFor="lastName">Last Name</Label>
-                    <Input id="lastName" defaultValue={talent?.user.last_name || ''} readOnly />
+                    <Input id="lastName" defaultValue={talent.user.last_name || ''} readOnly />
                   </div>
                 </div>
 
                 <div>
                   <Label htmlFor="email">Email</Label>
-                  <Input id="email" defaultValue={talent?.user.email || ''} readOnly />
+                  <Input id="email" defaultValue={talent.user.email || ''} readOnly />
                 </div>
 
                 <div className="grid grid-cols-2 gap-4">
                   <div>
                     <Label htmlFor="gender">Gender</Label>
-                    <Select defaultValue={talent?.user.gender || ''}>
+                    <Select defaultValue={talent.user.gender || ''}>
                       <SelectTrigger>
                         <SelectValue placeholder="Select gender" />
                       </SelectTrigger>
@@ -187,7 +191,7 @@ const TalentProfile = () => {
                   </div>
                   <div>
                     <Label htmlFor="category">Actor/Talent category</Label>
-                    <Select defaultValue={talent?.talent_profile.category || ''}>
+                    <Select defaultValue={talent.talent_profile.category || ''}>
                       <SelectTrigger>
                         <SelectValue placeholder="Select category" />
                       </SelectTrigger>
@@ -206,13 +210,13 @@ const TalentProfile = () => {
                   <div>
                     <Label htmlFor="phone">Mobile Phone</Label>
                     <div className="relative">
-                      <Input id="phone" defaultValue={talent?.user.mobile_phone || ''} />
+                      <Input id="phone" defaultValue={talent.user.mobile_phone || ''} />
                       <Phone className="absolute right-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400" />
                     </div>
                   </div>
                   <div>
                     <Label htmlFor="status">Status</Label>
-                    <Select defaultValue={talent?.talent_profile.evaluation_status || ''}>
+                    <Select defaultValue={talent.talent_profile.evaluation_status || ''}>
                       <SelectTrigger>
                         <SelectValue placeholder="Select status" />
                       </SelectTrigger>
@@ -229,20 +233,20 @@ const TalentProfile = () => {
 
                 <div>
                   <Label htmlFor="remarks">Internal Remarks</Label>
-                  <Input id="remarks" defaultValue={talent?.talent_profile.internal_remarks || ''} />
+                  <Input id="remarks" defaultValue={talent.talent_profile.internal_remarks || ''} />
                 </div>
 
                 <div className="grid grid-cols-2 gap-4">
                   <div>
                     <Label htmlFor="nationality">Nationality</Label>
-                    <Input id="nationality" defaultValue={talent?.user.nationality || ''} />
+                    <Input id="nationality" defaultValue={talent.user.nationality || ''} />
                   </div>
                 </div>
 
                 <div className="grid grid-cols-2 gap-4 text-sm text-gray-500">
                   <div>
-                    <p>Created at: {talent?.user.created_at ? format(new Date(talent.user.created_at), 'PPpp') : 'N/A'}</p>
-                    <p>Updated at: {talent?.user.updated_at ? format(new Date(talent.user.updated_at), 'PPpp') : 'N/A'}</p>
+                    <p>Created at: {talent.user.created_at ? format(new Date(talent.user.created_at), 'PPpp') : 'N/A'}</p>
+                    <p>Updated at: {talent.user.updated_at ? format(new Date(talent.user.updated_at), 'PPpp') : 'N/A'}</p>
                   </div>
                 </div>
 
@@ -259,8 +263,6 @@ const TalentProfile = () => {
             </div>
           </div>
         </TabsContent>
-
-        {/* Other tab contents will be implemented separately */}
       </Tabs>
     </div>
   );
