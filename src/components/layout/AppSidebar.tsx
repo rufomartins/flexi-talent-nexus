@@ -6,6 +6,8 @@ import {
   Search,
   Settings,
   Users,
+  Briefcase,
+  DollarSign,
 } from "lucide-react"
 import {
   Sidebar,
@@ -34,17 +36,25 @@ export const AppSidebar = () => {
       icon: Users,
       href: "/talents",
       show: true,
+      subItems: [
+        {
+          title: "Search",
+          icon: Search,
+          href: "/talents/search",
+          show: true,
+        },
+        {
+          title: "Add New Talent",
+          icon: PlusCircle,
+          href: "/talents/new",
+          show: true,
+        },
+      ],
     },
     {
-      title: "Search",
-      icon: Search,
-      href: "/search",
-      show: true,
-    },
-    {
-      title: "Add New Talent",
-      icon: PlusCircle,
-      href: "/talents/new",
+      title: "Projects",
+      icon: Briefcase,
+      href: "/projects",
       show: true,
     },
     {
@@ -58,6 +68,12 @@ export const AppSidebar = () => {
       icon: Calendar,
       href: "/calendar",
       show: true,
+    },
+    {
+      title: "Financial",
+      icon: DollarSign,
+      href: "/financial",
+      show: user?.role === "super_admin" || user?.role === "admin",
     },
     {
       title: "Settings",
@@ -74,20 +90,42 @@ export const AppSidebar = () => {
           {menuItems
             .filter((item) => item.show)
             .map((item) => (
-              <SidebarMenuItem key={item.href}>
-                <SidebarMenuButton
-                  asChild
-                  className={cn(
-                    "h-12 px-4 hover:bg-muted/80",
-                    location.pathname === item.href && "bg-muted text-primary"
-                  )}
-                >
-                  <a href={item.href} className="flex items-center gap-3">
-                    <item.icon className="h-5 w-5" />
-                    <span className="text-sm font-medium">{item.title}</span>
-                  </a>
-                </SidebarMenuButton>
-              </SidebarMenuItem>
+              <div key={item.href}>
+                <SidebarMenuItem>
+                  <SidebarMenuButton
+                    asChild
+                    className={cn(
+                      "h-12 px-4 hover:bg-muted/80",
+                      location.pathname === item.href && "bg-muted text-primary"
+                    )}
+                  >
+                    <a href={item.href} className="flex items-center gap-3">
+                      <item.icon className="h-5 w-5" />
+                      <span className="text-sm font-medium">{item.title}</span>
+                    </a>
+                  </SidebarMenuButton>
+                </SidebarMenuItem>
+                
+                {item.subItems?.map((subItem) => (
+                  <SidebarMenuItem key={subItem.href}>
+                    <SidebarMenuButton
+                      asChild
+                      className={cn(
+                        "h-12 px-8 hover:bg-muted/80",
+                        location.pathname === subItem.href &&
+                          "bg-muted text-primary"
+                      )}
+                    >
+                      <a href={subItem.href} className="flex items-center gap-3">
+                        <subItem.icon className="h-5 w-5" />
+                        <span className="text-sm font-medium">
+                          {subItem.title}
+                        </span>
+                      </a>
+                    </SidebarMenuButton>
+                  </SidebarMenuItem>
+                ))}
+              </div>
             ))}
         </SidebarMenu>
       </SidebarContent>
