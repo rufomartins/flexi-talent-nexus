@@ -16,13 +16,16 @@ import {
   SidebarMenuButton,
   SidebarMenuItem,
 } from "@/components/ui/sidebar"
-import { useAuth } from "@/hooks/useAuth"
+import { useAuth } from "@/contexts/AuthContext"
 import { cn } from "@/lib/utils"
 import { useLocation } from "react-router-dom"
 
 export const AppSidebar = () => {
-  const { user } = useAuth()
+  const { user, userDetails } = useAuth()
   const location = useLocation()
+
+  // Check if user is super_admin or admin
+  const isAdminOrSuperAdmin = userDetails?.role === "super_admin" || userDetails?.role === "admin"
 
   const menuItems = [
     {
@@ -73,13 +76,13 @@ export const AppSidebar = () => {
       title: "Financial",
       icon: DollarSign,
       href: "/financial",
-      show: user?.role === "super_admin" || user?.role === "admin",
+      show: isAdminOrSuperAdmin,
     },
     {
       title: "Settings",
       icon: Settings,
       href: "/settings",
-      show: user?.role === "super_admin" || user?.role === "admin",
+      show: isAdminOrSuperAdmin,
     },
   ]
 
