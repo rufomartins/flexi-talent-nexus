@@ -8,6 +8,7 @@ import ProtectedRoute from "@/components/ProtectedRoute";
 import Login from "./pages/Login";
 import Dashboard from "./pages/Dashboard";
 import Users from "./pages/Users";
+import TalentProfile from "./pages/TalentProfile";
 
 const queryClient = new QueryClient();
 
@@ -33,6 +34,14 @@ const App = () => (
               element={
                 <ProtectedRoute>
                   <Users />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/talents/:id"
+              element={
+                <ProtectedRoute>
+                  <TalentProfile />
                 </ProtectedRoute>
               }
             />
