@@ -7,11 +7,17 @@ import { AppSidebar } from "./AppSidebar"
 export const MainLayout = ({ children }: { children: React.ReactNode }) => {
   return (
     <SidebarProvider>
-      <div className="min-h-screen flex w-full">
-        <AppSidebar />
-        <div className="flex-1 flex flex-col">
-          <Header />
-          <main className="flex-1 p-6 mt-14 bg-white overflow-auto">
+      <div className="min-h-screen">
+        {/* Header - fixed with highest z-index */}
+        <Header />
+
+        {/* Main Layout */}
+        <div className="flex pt-14 min-h-screen">
+          {/* Sidebar - fixed below header */}
+          <AppSidebar />
+
+          {/* Main Content - with proper margin */}
+          <main className="flex-1 ml-64 p-6 bg-white overflow-auto">
             {children}
           </main>
         </div>
