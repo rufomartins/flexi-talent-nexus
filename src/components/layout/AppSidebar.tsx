@@ -16,7 +16,7 @@ import {
   SidebarMenuItem,
   SidebarMenuButton,
 } from "@/components/ui/sidebar"
-import { useAuth } from "@/contexts/AuthContext"
+import { useAuth } from "@/contexts/auth"
 import { cn } from "@/lib/utils"
 import { useLocation } from "react-router-dom"
 
@@ -89,8 +89,6 @@ export const AppSidebar = () => {
       show: isAdminOrSuperAdmin,
     },
   ]
-
-  console.log("Menu items after filtering:", menuItems.filter(item => item.show)) // Debug log
 
   return (
     <Sidebar>

@@ -6,6 +6,7 @@ import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom"
 import { AuthProvider } from "@/contexts/auth"
 import { MainLayout } from "@/components/layout/MainLayout"
 import ProtectedRoute from "@/components/ProtectedRoute"
+import { ThemeProvider } from "next-themes"
 import Login from "./pages/Login"
 import Dashboard from "./pages/Dashboard"
 import Users from "./pages/Users"
@@ -14,50 +15,52 @@ import TalentProfile from "./pages/TalentProfile"
 const queryClient = new QueryClient()
 
 const App = () => (
-  <QueryClientProvider client={queryClient}>
-    <TooltipProvider>
-      <BrowserRouter>
-        <AuthProvider>
-          <Routes>
-            <Route path="/login" element={<Login />} />
-            <Route
-              path="/dashboard"
-              element={
-                <ProtectedRoute>
-                  <MainLayout>
-                    <Dashboard />
-                  </MainLayout>
-                </ProtectedRoute>
-              }
-            />
-            <Route
-              path="/users"
-              element={
-                <ProtectedRoute>
-                  <MainLayout>
-                    <Users />
-                  </MainLayout>
-                </ProtectedRoute>
-              }
-            />
-            <Route
-              path="/talents/:id"
-              element={
-                <ProtectedRoute>
-                  <MainLayout>
-                    <TalentProfile />
-                  </MainLayout>
-                </ProtectedRoute>
-              }
-            />
-            <Route path="/" element={<Navigate to="/login" replace />} />
-          </Routes>
-          <Toaster />
-          <Sonner />
-        </AuthProvider>
-      </BrowserRouter>
-    </TooltipProvider>
-  </QueryClientProvider>
+  <ThemeProvider attribute="class" defaultTheme="light">
+    <QueryClientProvider client={queryClient}>
+      <TooltipProvider>
+        <BrowserRouter>
+          <AuthProvider>
+            <Routes>
+              <Route path="/login" element={<Login />} />
+              <Route
+                path="/dashboard"
+                element={
+                  <ProtectedRoute>
+                    <MainLayout>
+                      <Dashboard />
+                    </MainLayout>
+                  </ProtectedRoute>
+                }
+              />
+              <Route
+                path="/users"
+                element={
+                  <ProtectedRoute>
+                    <MainLayout>
+                      <Users />
+                    </MainLayout>
+                  </ProtectedRoute>
+                }
+              />
+              <Route
+                path="/talents/:id"
+                element={
+                  <ProtectedRoute>
+                    <MainLayout>
+                      <TalentProfile />
+                    </MainLayout>
+                  </ProtectedRoute>
+                }
+              />
+              <Route path="/" element={<Navigate to="/login" replace />} />
+            </Routes>
+            <Toaster />
+            <Sonner />
+          </AuthProvider>
+        </BrowserRouter>
+      </TooltipProvider>
+    </QueryClientProvider>
+  </ThemeProvider>
 )
 
 export default App
