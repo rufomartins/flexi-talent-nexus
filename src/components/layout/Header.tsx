@@ -9,10 +9,8 @@ import {
 } from "@/components/ui/dropdown-menu"
 import { Input } from "@/components/ui/input"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
-import { useAuth } from "@/contexts/AuthContext"
-import { useNavigate } from "react-router-dom"
+import { useAuth } from "@/contexts/auth"
 import { useToast } from "@/hooks/use-toast"
-import type { Database } from "@/integrations/supabase/types"
 
 export const Header = () => {
   const { signOut } = useAuth();
@@ -79,7 +77,10 @@ export const Header = () => {
                 Settings
               </DropdownMenuItem>
               <DropdownMenuSeparator />
-              <DropdownMenuItem onClick={handleSignOut} className="cursor-pointer text-red-600 focus:text-red-600">
+              <DropdownMenuItem 
+                onClick={handleSignOut} 
+                className="cursor-pointer text-red-600 hover:text-red-700 focus:text-red-700 hover:bg-red-50"
+              >
                 Log out
               </DropdownMenuItem>
             </DropdownMenuContent>
