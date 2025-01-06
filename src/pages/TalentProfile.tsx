@@ -4,7 +4,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { Breadcrumb, BreadcrumbItem, BreadcrumbLink, BreadcrumbList, BreadcrumbPage, BreadcrumbSeparator } from "@/components/ui/breadcrumb";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Button } from "@/components/ui/button";
-import { Home, ChevronRight, Mail, Phone, Trash2, Save } from "lucide-react";
+import { Home, ChevronRight, Phone, Trash2, Save } from "lucide-react";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -117,14 +117,6 @@ const TalentProfile = () => {
                   <div>
                     <Label htmlFor="lastName">Last Name</Label>
                     <Input id="lastName" defaultValue={talent?.last_name} />
-                  </div>
-                </div>
-
-                <div>
-                  <Label htmlFor="email">Email</Label>
-                  <div className="relative">
-                    <Input id="email" defaultValue={talent?.email} />
-                    <Mail className="absolute right-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400" />
                   </div>
                 </div>
 
