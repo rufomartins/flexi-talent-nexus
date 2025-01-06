@@ -32,7 +32,7 @@ export const AppSidebar = () => {
       title: "Dashboard",
       icon: Home,
       href: "/dashboard",
-      show: true,
+      show: true, // Always show Dashboard
     },
     {
       title: "Talents",
@@ -76,13 +76,13 @@ export const AppSidebar = () => {
       title: "Financial",
       icon: DollarSign,
       href: "/financial",
-      show: isAdminOrSuperAdmin,
+      show: isAdminOrSuperAdmin, // Show only for admin and super_admin
     },
     {
       title: "Settings",
       icon: Settings,
       href: "/settings",
-      show: isAdminOrSuperAdmin,
+      show: isAdminOrSuperAdmin, // Show only for admin and super_admin
     },
   ]
 
