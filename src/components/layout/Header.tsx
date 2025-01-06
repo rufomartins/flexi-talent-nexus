@@ -44,6 +44,16 @@ export const Header = () => {
     }
   }
 
+  const handleProfileClick = () => {
+    // Navigate to profile page when implemented
+    console.log("Profile clicked")
+  }
+
+  const handleSettingsClick = () => {
+    // Navigate to settings page when implemented
+    console.log("Settings clicked")
+  }
+
   return (
     <header className="h-16 bg-white border-b">
       <div className="h-full flex">
@@ -82,10 +92,14 @@ export const Header = () => {
               </Button>
             </DropdownMenuTrigger>
             <DropdownMenuContent align="end" className="w-56">
-              <DropdownMenuItem>Profile</DropdownMenuItem>
-              <DropdownMenuItem>Settings</DropdownMenuItem>
+              <DropdownMenuItem className="cursor-pointer" onSelect={handleProfileClick}>
+                Profile
+              </DropdownMenuItem>
+              <DropdownMenuItem className="cursor-pointer" onSelect={handleSettingsClick}>
+                Settings
+              </DropdownMenuItem>
               <DropdownMenuSeparator />
-              <DropdownMenuItem onClick={handleSignOut}>
+              <DropdownMenuItem className="cursor-pointer" onSelect={handleSignOut}>
                 Log out
               </DropdownMenuItem>
             </DropdownMenuContent>
