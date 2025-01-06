@@ -10,7 +10,9 @@ import {
 import { Input } from "@/components/ui/input"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { useAuth } from "@/hooks/useAuth"
-import type { User } from "@/types/user"
+import type { Database } from "@/integrations/supabase/types"
+
+type UserType = Database['public']['Tables']['users']['Row']
 
 export const Header = () => {
   const { user, signOut } = useAuth()
@@ -38,7 +40,10 @@ export const Header = () => {
           <DropdownMenuTrigger asChild>
             <Button variant="ghost" className="h-8 w-8 rounded-full">
               <Avatar className="h-8 w-8">
-                <AvatarImage src={user?.avatar_url ?? ''} alt={`${user?.first_name ?? ''} ${user?.last_name ?? ''}`} />
+                <AvatarImage 
+                  src={(user as UserType)?.avatar_url ?? ''} 
+                  alt={`${(user as UserType)?.first_name ?? ''} ${(user as UserType)?.last_name ?? ''}`} 
+                />
                 <AvatarFallback>
                   <UserIcon className="h-4 w-4" />
                 </AvatarFallback>
