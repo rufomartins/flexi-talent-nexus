@@ -224,6 +224,57 @@ export type Database = {
           },
         ]
       }
+      talent_jobs: {
+        Row: {
+          company: string | null
+          created_at: string | null
+          description: string | null
+          end_date: string | null
+          id: string
+          job_title: string
+          start_date: string | null
+          talent_id: string | null
+          updated_at: string | null
+        }
+        Insert: {
+          company?: string | null
+          created_at?: string | null
+          description?: string | null
+          end_date?: string | null
+          id?: string
+          job_title: string
+          start_date?: string | null
+          talent_id?: string | null
+          updated_at?: string | null
+        }
+        Update: {
+          company?: string | null
+          created_at?: string | null
+          description?: string | null
+          end_date?: string | null
+          id?: string
+          job_title?: string
+          start_date?: string | null
+          talent_id?: string | null
+          updated_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "talent_jobs_talent_id_fkey"
+            columns: ["talent_id"]
+            isOneToOne: false
+            referencedRelation: "user_profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "talent_jobs_talent_id_fkey"
+            columns: ["talent_id"]
+            isOneToOne: false
+            referencedRelation: "users"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       talent_media: {
         Row: {
           created_at: string | null
@@ -284,30 +335,39 @@ export type Database = {
       talent_profiles: {
         Row: {
           category: string | null
+          country: string | null
           created_at: string | null
           evaluation_status: string | null
           id: string
           internal_remarks: string | null
+          phone_number: string | null
           updated_at: string | null
           user_id: string | null
+          whatsapp_number: string | null
         }
         Insert: {
           category?: string | null
+          country?: string | null
           created_at?: string | null
           evaluation_status?: string | null
           id?: string
           internal_remarks?: string | null
+          phone_number?: string | null
           updated_at?: string | null
           user_id?: string | null
+          whatsapp_number?: string | null
         }
         Update: {
           category?: string | null
+          country?: string | null
           created_at?: string | null
           evaluation_status?: string | null
           id?: string
           internal_remarks?: string | null
+          phone_number?: string | null
           updated_at?: string | null
           user_id?: string | null
+          whatsapp_number?: string | null
         }
         Relationships: [
           {
