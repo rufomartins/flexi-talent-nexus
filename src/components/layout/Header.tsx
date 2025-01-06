@@ -93,16 +93,31 @@ export const Header = () => {
                 </Avatar>
               </Button>
             </DropdownMenuTrigger>
-            <DropdownMenuContent align="end" className="w-56">
-              <DropdownMenuItem className="cursor-pointer" onSelect={handleProfileClick}>
-                Profile
+            <DropdownMenuContent align="end" className="w-56 bg-white">
+              <DropdownMenuItem asChild>
+                <button 
+                  className="w-full text-left cursor-pointer px-2 py-1.5 text-sm"
+                  onClick={handleProfileClick}
+                >
+                  Profile
+                </button>
               </DropdownMenuItem>
-              <DropdownMenuItem className="cursor-pointer" onSelect={handleSettingsClick}>
-                Settings
+              <DropdownMenuItem asChild>
+                <button 
+                  className="w-full text-left cursor-pointer px-2 py-1.5 text-sm"
+                  onClick={handleSettingsClick}
+                >
+                  Settings
+                </button>
               </DropdownMenuItem>
               <DropdownMenuSeparator />
-              <DropdownMenuItem className="cursor-pointer" onSelect={handleSignOut}>
-                Log out
+              <DropdownMenuItem asChild>
+                <button 
+                  className="w-full text-left cursor-pointer px-2 py-1.5 text-sm"
+                  onClick={handleSignOut}
+                >
+                  Log out
+                </button>
               </DropdownMenuItem>
             </DropdownMenuContent>
           </DropdownMenu>
