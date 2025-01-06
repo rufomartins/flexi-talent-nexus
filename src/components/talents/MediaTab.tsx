@@ -38,8 +38,8 @@ export const MediaTab = ({ talent }: MediaTabProps) => {
     },
   });
 
-  const canUploadMedia = talent.user.role !== "translator" && 
-                        talent.user.role !== "reviewer";
+  const NO_MEDIA_ROLES = ['translator', 'reviewer'] as const;
+  const canUploadMedia = !NO_MEDIA_ROLES.includes(talent.user.role as typeof NO_MEDIA_ROLES[number]);
 
   const handleDownloadSelection = async () => {
     // Implementation for downloading selected media
