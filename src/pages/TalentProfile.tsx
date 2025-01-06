@@ -9,6 +9,7 @@ import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigge
 import { TalentProfileTabs } from "@/components/talents/TalentProfileTabs";
 import { ExperienceTab } from "@/components/talents/ExperienceTab";
 import { Loader2 } from "lucide-react";
+import { TalentProfileData } from "@/types/talent-profile";
 
 const TalentProfile = () => {
   const { id } = useParams();
@@ -34,9 +35,12 @@ const TalentProfile = () => {
       if (profileError) throw profileError;
 
       return {
-        user,
+        user: {
+          ...user,
+          updated_at: user.created_at, // Fallback to created_at if updated_at is not available
+        },
         talent_profile: talentProfile,
-      };
+      } as TalentProfileData;
     },
   });
 
