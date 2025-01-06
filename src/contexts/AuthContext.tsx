@@ -31,38 +31,64 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       if (session?.user) {
         fetchUserDetails(session.user.id);
       }
+      setLoading(false);
     });
 
     // Listen for auth changes
     const {
       data: { subscription },
     } = supabase.auth.onAuthStateChange(async (event, session) => {
+      console.log("Auth state changed:", event);
       setSession(session);
       setUser(session?.user ?? null);
+      
       if (session?.user) {
         await fetchUserDetails(session.user.id);
       } else {
         setUserDetails(null);
+        if (event === "SIGNED_OUT") {
+          navigate("/login");
+        }
       }
       setLoading(false);
     });
 
-    return () => subscription.unsubscribe();
-  }, []);
+    // Check session expiration
+    const checkSession = setInterval(async () => {
+      const { data: { session } } = await supabase.auth.getSession();
+      if (!session && window.location.pathname !== "/login") {
+        toast({
+          title: "Session expired",
+          description: "Please log in again.",
+          variant: "destructive",
+        });
+        navigate("/login");
+      }
+    }, 60000); // Check every minute
+
+    return () => {
+      subscription.unsubscribe();
+      clearInterval(checkSession);
+    };
+  }, [navigate, toast]);
 
   const fetchUserDetails = async (userId: string) => {
-    const { data, error } = await supabase
-      .from("users")
-      .select("*")
-      .eq("id", userId)
-      .single();
+    try {
+      const { data, error } = await supabase
+        .from("users")
+        .select("*")
+        .eq("id", userId)
+        .single();
 
-    if (error) {
-      console.error("Error fetching user details:", error);
-      return;
+      if (error) {
+        console.error("Error fetching user details:", error);
+        return;
+      }
+
+      setUserDetails(data);
+    } catch (error) {
+      console.error("Error in fetchUserDetails:", error);
     }
-
-    setUserDetails(data);
   };
 
   const signIn = async (email: string, password: string, rememberMe: boolean) => {
@@ -73,6 +99,13 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       });
 
       if (error) throw error;
+
+      // Store remember me preference
+      if (rememberMe) {
+        localStorage.setItem("rememberMe", "true");
+      } else {
+        localStorage.removeItem("rememberMe");
+      }
 
       toast({
         title: "Welcome back!",
@@ -92,6 +125,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const signOut = async () => {
     try {
       await supabase.auth.signOut();
+      localStorage.removeItem("rememberMe");
       navigate("/login");
       toast({
         title: "Signed out",
