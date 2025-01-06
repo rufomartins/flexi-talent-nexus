@@ -40,6 +40,7 @@ export const Header = () => {
   const handleSignOut = async () => {
     try {
       await signOut()
+      navigate('/login')
     } catch (error) {
       console.error("Error signing out:", error)
       toast({
@@ -93,31 +94,16 @@ export const Header = () => {
                 </Avatar>
               </Button>
             </DropdownMenuTrigger>
-            <DropdownMenuContent align="end" className="w-56 bg-white">
-              <DropdownMenuItem>
-                <button 
-                  className="w-full text-left cursor-pointer px-2 py-1.5 text-sm"
-                  onClick={handleProfileClick}
-                >
-                  Profile
-                </button>
+            <DropdownMenuContent align="end" className="w-56">
+              <DropdownMenuItem onClick={handleProfileClick}>
+                Profile
               </DropdownMenuItem>
-              <DropdownMenuItem>
-                <button 
-                  className="w-full text-left cursor-pointer px-2 py-1.5 text-sm"
-                  onClick={handleSettingsClick}
-                >
-                  Settings
-                </button>
+              <DropdownMenuItem onClick={handleSettingsClick}>
+                Settings
               </DropdownMenuItem>
               <DropdownMenuSeparator />
-              <DropdownMenuItem>
-                <button 
-                  className="w-full text-left cursor-pointer px-2 py-1.5 text-sm"
-                  onClick={handleSignOut}
-                >
-                  Log out
-                </button>
+              <DropdownMenuItem onClick={handleSignOut}>
+                Log out
               </DropdownMenuItem>
             </DropdownMenuContent>
           </DropdownMenu>
