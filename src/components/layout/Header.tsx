@@ -9,7 +9,7 @@ import {
 } from "@/components/ui/dropdown-menu"
 import { Input } from "@/components/ui/input"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
-import { useAuth } from "@/hooks/useAuth"
+import { useAuth } from "@/contexts/AuthContext"
 import { useNavigate } from "react-router-dom"
 import type { Database } from "@/integrations/supabase/types"
 
@@ -45,12 +45,10 @@ export const Header = () => {
   }
 
   const handleProfileClick = () => {
-    // Navigate to profile page when implemented
     console.log("Profile clicked")
   }
 
   const handleSettingsClick = () => {
-    // Navigate to settings page when implemented
     console.log("Settings clicked")
   }
 
@@ -92,15 +90,30 @@ export const Header = () => {
               </Button>
             </DropdownMenuTrigger>
             <DropdownMenuContent align="end" className="w-56">
-              <DropdownMenuItem className="cursor-pointer" onSelect={handleProfileClick}>
-                Profile
+              <DropdownMenuItem asChild>
+                <button 
+                  className="w-full text-left cursor-pointer" 
+                  onClick={handleProfileClick}
+                >
+                  Profile
+                </button>
               </DropdownMenuItem>
-              <DropdownMenuItem className="cursor-pointer" onSelect={handleSettingsClick}>
-                Settings
+              <DropdownMenuItem asChild>
+                <button 
+                  className="w-full text-left cursor-pointer" 
+                  onClick={handleSettingsClick}
+                >
+                  Settings
+                </button>
               </DropdownMenuItem>
               <DropdownMenuSeparator />
-              <DropdownMenuItem className="cursor-pointer" onSelect={handleSignOut}>
-                Log out
+              <DropdownMenuItem asChild>
+                <button 
+                  className="w-full text-left cursor-pointer" 
+                  onClick={handleSignOut}
+                >
+                  Log out
+                </button>
               </DropdownMenuItem>
             </DropdownMenuContent>
           </DropdownMenu>
