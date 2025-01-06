@@ -24,7 +24,7 @@ export const MediaUploadDialog = ({
   const [uploading, setUploading] = useState(false);
   const { toast } = useToast();
 
-  const getAllowedTypes = (role: Enums["user_role"]) => {
+  const getAllowedTypes = (role: UserRole) => {
     switch (role) {
       case "voice_over_artist":
         return "audio/mpeg,audio/wav";
