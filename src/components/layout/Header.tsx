@@ -90,30 +90,15 @@ export const Header = () => {
               </Button>
             </DropdownMenuTrigger>
             <DropdownMenuContent align="end" className="w-56">
-              <DropdownMenuItem asChild>
-                <button 
-                  className="w-full text-left cursor-pointer" 
-                  onClick={handleProfileClick}
-                >
-                  Profile
-                </button>
+              <DropdownMenuItem onClick={handleProfileClick}>
+                Profile
               </DropdownMenuItem>
-              <DropdownMenuItem asChild>
-                <button 
-                  className="w-full text-left cursor-pointer" 
-                  onClick={handleSettingsClick}
-                >
-                  Settings
-                </button>
+              <DropdownMenuItem onClick={handleSettingsClick}>
+                Settings
               </DropdownMenuItem>
               <DropdownMenuSeparator />
-              <DropdownMenuItem asChild>
-                <button 
-                  className="w-full text-left cursor-pointer" 
-                  onClick={handleSignOut}
-                >
-                  Log out
-                </button>
+              <DropdownMenuItem onClick={handleSignOut}>
+                Log out
               </DropdownMenuItem>
             </DropdownMenuContent>
           </DropdownMenu>
