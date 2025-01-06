@@ -1,6 +1,6 @@
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
-import { Loader2, Plus } from "lucide-react";
+import { Loader2, Plus, Filter, RotateCcw, Trash2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { TalentProfileData } from "@/types/talent-profile";
@@ -36,9 +36,12 @@ export const ExperienceTab = ({ talent }: ExperienceTabProps) => {
   return (
     <div className="space-y-8">
       <div className="flex items-start gap-8">
-        <div className="w-64">
+        <div className="w-64 relative">
+          <span className="absolute top-2 left-2 bg-primary text-white text-xs px-2 py-1 rounded-md z-10">
+            Profile
+          </span>
           <Avatar className="w-64 h-64">
-            <AvatarImage src={talent.user.avatar_url || undefined} />
+            <AvatarImage src={talent.user.avatar_url || undefined} className="object-cover" />
             <AvatarFallback>
               {talent.user.first_name?.[0]}
               {talent.user.last_name?.[0]}
@@ -48,16 +51,27 @@ export const ExperienceTab = ({ talent }: ExperienceTabProps) => {
 
         <div className="flex-1">
           <div className="flex items-center justify-between mb-6">
-            <div className="flex items-center gap-3">
+            <div className="flex items-center gap-4">
+              <Button variant="outline" size="sm" className="gap-2">
+                <Filter className="h-4 w-4" />
+                Filter
+              </Button>
               <h1 className="text-2xl font-semibold">
                 {talent.user.first_name} {talent.user.last_name}
               </h1>
-              <Badge variant="outline" className="bg-green-50 text-green-700 border-green-200">
+              <Badge className="bg-green-600 hover:bg-green-700 text-white border-0">
                 Approved
               </Badge>
             </div>
-            <div className="flex items-center gap-4">
-              <Button variant="outline" className="gap-2">
+            <div className="flex items-center gap-2">
+              <Button variant="outline" size="sm" className="gap-2">
+                <Trash2 className="h-4 w-4" />
+              </Button>
+              <Button variant="outline" size="sm" className="gap-2">
+                <RotateCcw className="h-4 w-4" />
+                Save
+              </Button>
+              <Button variant="outline" size="sm" className="gap-2">
                 <Plus className="h-4 w-4" />
                 Add experience
               </Button>
