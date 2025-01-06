@@ -24,6 +24,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const { toast } = useToast();
 
   const fetchUserDetails = async (userId: string) => {
+    console.log("Fetching user details for:", userId);
     try {
       const { data, error } = await supabase
         .from("users")
@@ -36,6 +37,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         return;
       }
 
+      console.log("User details fetched:", data);
       setUserDetails(data);
     } catch (error) {
       console.error("Error in fetchUserDetails:", error);
@@ -43,8 +45,11 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   };
 
   useEffect(() => {
+    console.log("AuthProvider mounted");
+    
     // Get initial session
     supabase.auth.getSession().then(({ data: { session } }) => {
+      console.log("Initial session check:", session ? "Found session" : "No session");
       setSession(session);
       setUser(session?.user ?? null);
       if (session?.user) {
@@ -57,12 +62,13 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     const {
       data: { subscription },
     } = supabase.auth.onAuthStateChange(async (event, session) => {
-      console.log("Auth state changed:", event);
+      console.log("Auth state changed:", event, session ? "Has session" : "No session");
       setSession(session);
       setUser(session?.user ?? null);
       
       if (session?.user) {
         await fetchUserDetails(session.user.id);
+        navigate("/dashboard");
       } else {
         setUserDetails(null);
         if (event === "SIGNED_OUT") {
@@ -78,6 +84,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   }, [navigate]);
 
   const signIn = async (email: string, password: string, rememberMe: boolean) => {
+    console.log("Attempting sign in for:", email);
     try {
       setLoading(true);
       const { data, error } = await supabase.auth.signInWithPassword({
@@ -93,12 +100,12 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         localStorage.removeItem("rememberMe");
       }
 
-      // Don't navigate here - let the auth state change handler do it
       toast({
         title: "Welcome back!",
         description: "You have successfully logged in.",
       });
     } catch (error: any) {
+      console.error("Sign in error:", error);
       toast({
         title: "Error",
         description: error.message,
@@ -110,6 +117,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   };
 
   const signOut = async () => {
+    console.log("Attempting sign out");
     try {
       setLoading(true);
       await supabase.auth.signOut();
@@ -119,6 +127,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         description: "You have been successfully signed out.",
       });
     } catch (error: any) {
+      console.error("Sign out error:", error);
       toast({
         title: "Error",
         description: "There was an error signing out.",

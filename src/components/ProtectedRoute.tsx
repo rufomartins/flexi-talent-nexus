@@ -13,22 +13,29 @@ const ProtectedRoute = ({ children, allowedRoles }: ProtectedRouteProps) => {
   const navigate = useNavigate();
 
   useEffect(() => {
-    // Only redirect if we're sure there's no user (loading is complete)
+    console.log("ProtectedRoute state:", { 
+      loading, 
+      hasUser: !!user, 
+      hasUserDetails: !!userDetails,
+      allowedRoles 
+    });
+
     if (!loading && !user) {
+      console.log("No user found after loading, redirecting to login");
       navigate("/login");
       return;
     }
 
-    // Check role restrictions only after we have both user and userDetails
     if (!loading && user && userDetails && allowedRoles) {
       if (!allowedRoles.includes(userDetails.role)) {
+        console.log("User role not allowed, redirecting to dashboard");
         navigate("/dashboard");
       }
     }
   }, [user, userDetails, loading, navigate, allowedRoles]);
 
-  // Show loading state only during initial authentication check
   if (loading) {
+    console.log("Showing loading state");
     return (
       <div className="h-screen w-screen flex items-center justify-center">
         <Loader2 className="h-8 w-8 animate-spin" />
@@ -36,13 +43,13 @@ const ProtectedRoute = ({ children, allowedRoles }: ProtectedRouteProps) => {
     );
   }
 
-  // If we're not loading and have no user, return null (useEffect will handle redirect)
   if (!user) {
+    console.log("No user, returning null");
     return null;
   }
 
-  // If we need to check roles but don't have userDetails yet, show loading
   if (allowedRoles && !userDetails) {
+    console.log("Waiting for user details");
     return (
       <div className="h-screen w-screen flex items-center justify-center">
         <Loader2 className="h-8 w-8 animate-spin" />
@@ -50,6 +57,7 @@ const ProtectedRoute = ({ children, allowedRoles }: ProtectedRouteProps) => {
     );
   }
 
+  console.log("Rendering protected content");
   return <>{children}</>;
 };
 
