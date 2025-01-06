@@ -1,22 +1,21 @@
-import { Toaster } from "@/components/ui/toaster";
-import { Toaster as Sonner } from "@/components/ui/sonner";
-import { TooltipProvider } from "@/components/ui/tooltip";
-import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
-import { AuthProvider } from "@/contexts/AuthContext";
-import ProtectedRoute from "@/components/ProtectedRoute";
-import Login from "./pages/Login";
-import Dashboard from "./pages/Dashboard";
-import Users from "./pages/Users";
-import TalentProfile from "./pages/TalentProfile";
+import { Toaster } from "@/components/ui/toaster"
+import { Toaster as Sonner } from "@/components/ui/sonner"
+import { TooltipProvider } from "@/components/ui/tooltip"
+import { QueryClient, QueryClientProvider } from "@tanstack/react-query"
+import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom"
+import { AuthProvider } from "@/contexts/AuthContext"
+import { MainLayout } from "@/components/layout/MainLayout"
+import ProtectedRoute from "@/components/ProtectedRoute"
+import Login from "./pages/Login"
+import Dashboard from "./pages/Dashboard"
+import Users from "./pages/Users"
+import TalentProfile from "./pages/TalentProfile"
 
-const queryClient = new QueryClient();
+const queryClient = new QueryClient()
 
 const App = () => (
   <QueryClientProvider client={queryClient}>
     <TooltipProvider>
-      <Toaster />
-      <Sonner />
       <BrowserRouter>
         <AuthProvider>
           <Routes>
@@ -25,7 +24,9 @@ const App = () => (
               path="/dashboard"
               element={
                 <ProtectedRoute>
-                  <Dashboard />
+                  <MainLayout>
+                    <Dashboard />
+                  </MainLayout>
                 </ProtectedRoute>
               }
             />
@@ -33,7 +34,9 @@ const App = () => (
               path="/users"
               element={
                 <ProtectedRoute>
-                  <Users />
+                  <MainLayout>
+                    <Users />
+                  </MainLayout>
                 </ProtectedRoute>
               }
             />
@@ -41,7 +44,9 @@ const App = () => (
               path="/talents/:id"
               element={
                 <ProtectedRoute>
-                  <TalentProfile />
+                  <MainLayout>
+                    <TalentProfile />
+                  </MainLayout>
                 </ProtectedRoute>
               }
             />
@@ -51,6 +56,6 @@ const App = () => (
       </BrowserRouter>
     </TooltipProvider>
   </QueryClientProvider>
-);
+)
 
-export default App;
+export default App
