@@ -13,10 +13,9 @@ export interface User {
   nationality: string | null;
   avatar_url: string | null;
   created_at: string | null;
-  updated_at: string | null;
+  last_login: string | null;
   role: UserRole;
   status: UserStatus;
-  last_login?: string | null;
   company_id?: string | null;
   full_name: string | null;
 }
