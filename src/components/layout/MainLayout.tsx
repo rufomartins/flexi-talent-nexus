@@ -7,19 +7,17 @@ export const MainLayout = ({ children }: { children: React.ReactNode }) => {
     <SidebarProvider>
       <div className="flex flex-col min-h-screen">
         {/* Fixed header container */}
-        <div className="fixed top-0 left-0 right-0 z-50">
-          <Header />
-        </div>
+        <Header />
 
         {/* Main layout container */}
-        <div className="flex pt-16 min-h-screen">
-          {/* Sidebar - fixed position aligned with header */}
+        <div className="flex min-h-screen">
+          {/* Sidebar - fixed position with proper top offset */}
           <aside className="fixed left-0 top-16 bottom-0 w-64 bg-background border-r overflow-y-auto">
             <AppSidebar />
           </aside>
 
-          {/* Main content */}
-          <main className="flex-1 ml-64 p-6 bg-muted/50">
+          {/* Main content - with proper top padding and margin */}
+          <main className="flex-1 ml-64 pt-16 p-6 bg-muted/50">
             {children}
           </main>
         </div>
