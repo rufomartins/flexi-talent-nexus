@@ -34,23 +34,23 @@ export const Header = () => {
   const { user, signOut } = useAuth()
 
   return (
-    <header className="fixed top-0 left-0 right-0 h-16 bg-white z-50">
+    <header className="h-16 bg-white border-b">
       <div className="h-full flex">
         {/* Logo section with fixed width */}
-        <div className="w-64 flex-shrink-0 border-r border-b flex items-center px-4">
+        <div className="w-64 flex-shrink-0 border-r flex items-center px-6">
           <span className="text-xl font-semibold">GTMD.studio</span>
         </div>
         
         {/* Rest of header */}
-        <div className="flex-1 border-b flex items-center justify-between px-4">
+        <div className="flex-1 flex items-center justify-between px-6">
           <div className="flex-1 flex justify-center max-w-xl">
             <div className="w-full max-w-sm flex items-center">
               <Input
                 type="search"
                 placeholder="Quick find..."
-                className="h-8 w-full"
+                className="h-9"
               />
-              <Button variant="ghost" size="icon" className="h-8 w-8 ml-1">
+              <Button variant="ghost" size="icon" className="h-9 w-9 ml-1">
                 <Search className="h-4 w-4" />
                 <span className="sr-only">Search</span>
               </Button>

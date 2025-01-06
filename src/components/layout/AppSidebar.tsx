@@ -1,6 +1,5 @@
 import {
   Calendar,
-  DollarSign,
   Home,
   MessageSquare,
   PlusCircle,
@@ -14,9 +13,6 @@ import {
   SidebarMenu,
   SidebarMenuButton,
   SidebarMenuItem,
-  SidebarMenuSub,
-  SidebarMenuSubButton,
-  SidebarMenuSubItem,
 } from "@/components/ui/sidebar"
 import { useAuth } from "@/hooks/useAuth"
 import { cn } from "@/lib/utils"
@@ -38,31 +34,17 @@ export const AppSidebar = () => {
       icon: Users,
       href: "/talents",
       show: true,
-      subItems: [
-        {
-          title: "Search",
-          icon: Search,
-          href: "/search",
-          show: true,
-        },
-        {
-          title: "Add New Talent",
-          icon: PlusCircle,
-          href: "/talents/new",
-          show: true,
-        },
-      ],
     },
     {
-      title: "Castings",
-      icon: Users,
-      href: "/castings",
+      title: "Search",
+      icon: Search,
+      href: "/search",
       show: true,
     },
     {
-      title: "Projects",
-      icon: Home,
-      href: "/projects",
+      title: "Add New Talent",
+      icon: PlusCircle,
+      href: "/talents/new",
       show: true,
     },
     {
@@ -70,18 +52,6 @@ export const AppSidebar = () => {
       icon: MessageSquare,
       href: "/messages",
       show: true,
-    },
-    {
-      title: "Users",
-      icon: Users,
-      href: "/users",
-      show: true,
-    },
-    {
-      title: "Financial",
-      icon: DollarSign,
-      href: "/financial",
-      show: user?.role === "super_admin" || user?.role === "admin",
     },
     {
       title: "Calendar",
@@ -93,7 +63,7 @@ export const AppSidebar = () => {
       title: "Settings",
       icon: Settings,
       href: "/settings",
-      show: true,
+      show: user?.role === "super_admin" || user?.role === "admin",
     },
   ]
 
@@ -108,33 +78,15 @@ export const AppSidebar = () => {
                 <SidebarMenuButton
                   asChild
                   className={cn(
-                    location.pathname === item.href && "bg-accent text-accent-foreground"
+                    "h-12 px-4 hover:bg-muted/80",
+                    location.pathname === item.href && "bg-muted text-primary"
                   )}
                 >
-                  <a href={item.href}>
-                    <item.icon className="h-4 w-4" />
-                    <span>{item.title}</span>
+                  <a href={item.href} className="flex items-center gap-3">
+                    <item.icon className="h-5 w-5" />
+                    <span className="text-sm font-medium">{item.title}</span>
                   </a>
                 </SidebarMenuButton>
-                {item.subItems && (
-                  <SidebarMenuSub>
-                    {item.subItems
-                      .filter((subItem) => subItem.show)
-                      .map((subItem) => (
-                        <SidebarMenuSubItem key={subItem.href}>
-                          <SidebarMenuSubButton
-                            asChild
-                            isActive={location.pathname === subItem.href}
-                          >
-                            <a href={subItem.href}>
-                              <subItem.icon className="h-4 w-4" />
-                              <span>{subItem.title}</span>
-                            </a>
-                          </SidebarMenuSubButton>
-                        </SidebarMenuSubItem>
-                      ))}
-                  </SidebarMenuSub>
-                )}
               </SidebarMenuItem>
             ))}
         </SidebarMenu>
