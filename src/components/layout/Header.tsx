@@ -42,7 +42,6 @@ export const Header = () => {
       console.log("Attempting to sign out...")
       await signOut()
       console.log("Sign out successful")
-      navigate("/login")
     } catch (error) {
       console.error("Error signing out:", error)
       toast({
@@ -64,12 +63,10 @@ export const Header = () => {
   return (
     <header className="h-16 bg-white border-b">
       <div className="h-full flex">
-        {/* Logo section with fixed width */}
         <div className="w-64 flex-shrink-0 border-r flex items-center px-6">
           <span className="text-xl font-semibold">GTMD.studio</span>
         </div>
         
-        {/* Rest of header */}
         <div className="flex-1 flex items-center justify-between px-6">
           <div className="flex-1 flex justify-center max-w-xl">
             <div className="w-full max-w-sm flex items-center">
@@ -99,14 +96,14 @@ export const Header = () => {
               </Button>
             </DropdownMenuTrigger>
             <DropdownMenuContent align="end" className="w-56">
-              <DropdownMenuItem className="cursor-pointer" onSelect={handleProfileClick}>
+              <DropdownMenuItem onClick={handleProfileClick}>
                 Profile
               </DropdownMenuItem>
-              <DropdownMenuItem className="cursor-pointer" onSelect={handleSettingsClick}>
+              <DropdownMenuItem onClick={handleSettingsClick}>
                 Settings
               </DropdownMenuItem>
               <DropdownMenuSeparator />
-              <DropdownMenuItem className="cursor-pointer" onSelect={handleSignOut}>
+              <DropdownMenuItem onClick={handleSignOut}>
                 Log out
               </DropdownMenuItem>
             </DropdownMenuContent>

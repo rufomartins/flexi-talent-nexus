@@ -147,21 +147,21 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const signOut = async () => {
     console.log("Attempting sign out");
     try {
-      setLoading(true);
       const { error } = await supabase.auth.signOut();
       if (error) throw error;
-      
-      localStorage.removeItem("rememberMe");
+
+      // Clear all auth state
       setSession(null);
       setUser(null);
       setUserDetails(null);
+      localStorage.removeItem("rememberMe");
       
       toast({
         title: "Signed out",
         description: "You have been successfully signed out.",
       });
-      
-      navigate("/login");
+
+      // The navigation will be handled by the onAuthStateChange listener
     } catch (error: any) {
       console.error("Sign out error:", error);
       toast({
@@ -169,8 +169,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         description: "There was an error signing out.",
         variant: "destructive",
       });
-    } finally {
-      setLoading(false);
+      throw error; // Re-throw to be caught by the component
     }
   };
 
