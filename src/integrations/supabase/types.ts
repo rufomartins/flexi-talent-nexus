@@ -9,6 +9,42 @@ export type Json =
 export type Database = {
   public: {
     Tables: {
+      agent_talent_relationships: {
+        Row: {
+          agent_id: string | null
+          created_at: string | null
+          id: string
+          talent_id: string | null
+        }
+        Insert: {
+          agent_id?: string | null
+          created_at?: string | null
+          id?: string
+          talent_id?: string | null
+        }
+        Update: {
+          agent_id?: string | null
+          created_at?: string | null
+          id?: string
+          talent_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "agent_talent_relationships_agent_id_fkey"
+            columns: ["agent_id"]
+            isOneToOne: false
+            referencedRelation: "users"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "agent_talent_relationships_talent_id_fkey"
+            columns: ["talent_id"]
+            isOneToOne: false
+            referencedRelation: "users"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       companies: {
         Row: {
           created_at: string | null
@@ -32,6 +68,38 @@ export type Database = {
           name?: string
         }
         Relationships: []
+      }
+      user_activity_logs: {
+        Row: {
+          action_type: string
+          created_at: string | null
+          details: Json | null
+          id: string
+          user_id: string | null
+        }
+        Insert: {
+          action_type: string
+          created_at?: string | null
+          details?: Json | null
+          id?: string
+          user_id?: string | null
+        }
+        Update: {
+          action_type?: string
+          created_at?: string | null
+          details?: Json | null
+          id?: string
+          user_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "user_activity_logs_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "users"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       user_permissions: {
         Row: {
@@ -111,7 +179,18 @@ export type Database = {
       [_ in never]: never
     }
     Enums: {
-      user_role: "super_admin" | "admin" | "super_user" | "user" | "guest"
+      user_role:
+        | "super_admin"
+        | "admin"
+        | "super_user"
+        | "user"
+        | "guest"
+        | "ugc_talent"
+        | "translator"
+        | "reviewer"
+        | "voice_over_artist"
+        | "agent"
+        | "scout"
       user_status: "active" | "inactive" | "suspended"
     }
     CompositeTypes: {
