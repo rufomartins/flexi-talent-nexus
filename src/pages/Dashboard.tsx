@@ -1,9 +1,61 @@
 import { Button } from "@/components/ui/button"
 import { useState } from "react"
 import { AddTalentModal } from "@/components/talents/AddTalentModal"
+import { useQuery } from "@tanstack/react-query"
+import { supabase } from "@/integrations/supabase/client"
+import { Loader2 } from "lucide-react"
 
 export default function Dashboard() {
   const [addTalentOpen, setAddTalentOpen] = useState(false)
+
+  const { data: talentsCount, isLoading: talentsLoading } = useQuery({
+    queryKey: ['talents-count'],
+    queryFn: async () => {
+      const { count, error } = await supabase
+        .from('talent_profiles')
+        .select('*', { count: 'exact', head: true })
+
+      if (error) {
+        console.error('Error fetching talents count:', error)
+        throw error
+      }
+
+      return count || 0
+    }
+  })
+
+  const { data: projectsCount, isLoading: projectsLoading } = useQuery({
+    queryKey: ['projects-count'],
+    queryFn: async () => {
+      // For now, returning 0 as there's no projects table yet
+      return 0
+    }
+  })
+
+  const { data: reviewsCount, isLoading: reviewsLoading } = useQuery({
+    queryKey: ['reviews-count'],
+    queryFn: async () => {
+      const { count, error } = await supabase
+        .from('talent_profiles')
+        .select('*', { count: 'exact', head: true })
+        .eq('evaluation_status', 'under_evaluation')
+
+      if (error) {
+        console.error('Error fetching reviews count:', error)
+        throw error
+      }
+
+      return count || 0
+    }
+  })
+
+  if (talentsLoading || projectsLoading || reviewsLoading) {
+    return (
+      <div className="h-screen w-screen flex items-center justify-center">
+        <Loader2 className="h-8 w-8 animate-spin" />
+      </div>
+    )
+  }
 
   return (
     <div className="container mx-auto p-6">
@@ -22,17 +74,17 @@ export default function Dashboard() {
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
         <div className="bg-card rounded-lg shadow p-6">
           <h2 className="text-lg font-semibold mb-2">Total Talents</h2>
-          <p className="text-3xl font-bold">0</p>
+          <p className="text-3xl font-bold">{talentsCount}</p>
         </div>
         
         <div className="bg-card rounded-lg shadow p-6">
           <h2 className="text-lg font-semibold mb-2">Active Projects</h2>
-          <p className="text-3xl font-bold">0</p>
+          <p className="text-3xl font-bold">{projectsCount}</p>
         </div>
         
         <div className="bg-card rounded-lg shadow p-6">
           <h2 className="text-lg font-semibold mb-2">Pending Reviews</h2>
-          <p className="text-3xl font-bold">0</p>
+          <p className="text-3xl font-bold">{reviewsCount}</p>
         </div>
       </div>
 
