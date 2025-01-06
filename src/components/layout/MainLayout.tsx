@@ -37,57 +37,61 @@ export const MainLayout = ({ children }: { children: React.ReactNode }) => {
 
   return (
     <SidebarProvider>
-      <div className="min-h-screen">
-        {/* Header - full width fixed */}
-        <header className="fixed top-0 left-0 right-0 h-14 bg-white border-b shadow-sm z-50 flex items-center">
-          {/* Header content with left padding for logo area */}
-          <div className="w-64 flex-shrink-0 px-6">
-            <span className="font-semibold whitespace-nowrap">GTMD.studio</span>
-          </div>
-          
-          <div className="flex-1 flex items-center justify-between px-6">
-            {/* Search */}
-            <div className="w-full max-w-xl">
-              <div className="w-full flex items-center">
-                <input 
-                  type="search" 
-                  placeholder="Quick find..." 
-                  className="h-8 w-full rounded-md border bg-background px-3 py-1 text-sm"
-                />
-              </div>
+      <div className="min-h-screen flex flex-col">
+        {/* Top Header Bar */}
+        <header className="fixed top-0 left-0 right-0 h-14 bg-white border-b shadow-sm z-50">
+          <div className="flex h-full">
+            {/* Fixed width section for logo */}
+            <div className="w-64 border-r flex items-center px-6 bg-white">
+              <span className="font-semibold whitespace-nowrap">GTMD.studio</span>
             </div>
-            
-            {/* User Menu */}
-            <div className="relative ml-4">
-              <DropdownMenu>
-                <DropdownMenuTrigger asChild>
-                  <button className="flex items-center justify-center w-10 h-10 rounded-full">
-                    <Avatar className="h-10 w-10">
-                      <AvatarImage 
-                        src={user ? assertUser(user).avatar_url ?? '' : ''} 
-                        alt={user ? `${assertUser(user).first_name ?? ''} ${assertUser(user).last_name ?? ''}` : ''} 
-                      />
-                      <AvatarFallback>
-                        <UserIcon className="h-4 w-4" />
-                      </AvatarFallback>
-                    </Avatar>
-                  </button>
-                </DropdownMenuTrigger>
-                <DropdownMenuContent align="end" className="w-56">
-                  <DropdownMenuItem>Profile</DropdownMenuItem>
-                  <DropdownMenuItem>Settings</DropdownMenuItem>
-                  <DropdownMenuSeparator />
-                  <DropdownMenuItem onClick={() => signOut()}>
-                    Log out
-                  </DropdownMenuItem>
-                </DropdownMenuContent>
-              </DropdownMenu>
+
+            {/* Remaining header content */}
+            <div className="flex-1 flex items-center justify-between px-6">
+              {/* Search */}
+              <div className="w-full max-w-xl">
+                <div className="w-full flex items-center">
+                  <input 
+                    type="search" 
+                    placeholder="Quick find..." 
+                    className="h-8 w-full rounded-md border bg-background px-3 py-1 text-sm"
+                  />
+                </div>
+              </div>
+              
+              {/* User Menu */}
+              <div className="relative ml-4">
+                <DropdownMenu>
+                  <DropdownMenuTrigger asChild>
+                    <button className="flex items-center justify-center w-10 h-10 rounded-full">
+                      <Avatar className="h-10 w-10">
+                        <AvatarImage 
+                          src={user ? assertUser(user).avatar_url ?? '' : ''} 
+                          alt={user ? `${assertUser(user).first_name ?? ''} ${assertUser(user).last_name ?? ''}` : ''} 
+                        />
+                        <AvatarFallback>
+                          <UserIcon className="h-4 w-4" />
+                        </AvatarFallback>
+                      </Avatar>
+                    </button>
+                  </DropdownMenuTrigger>
+                  <DropdownMenuContent align="end" className="w-56">
+                    <DropdownMenuItem>Profile</DropdownMenuItem>
+                    <DropdownMenuItem>Settings</DropdownMenuItem>
+                    <DropdownMenuSeparator />
+                    <DropdownMenuItem onClick={() => signOut()}>
+                      Log out
+                    </DropdownMenuItem>
+                  </DropdownMenuContent>
+                </DropdownMenu>
+              </div>
             </div>
           </div>
         </header>
 
-        <div className="flex h-screen pt-14">
-          {/* Sidebar - fixed with exact width matching logo area */}
+        {/* Main Content Area */}
+        <div className="flex pt-14 min-h-[calc(100vh-3.5rem)]">
+          {/* Left Sidebar - same width as logo section */}
           <aside className="fixed left-0 top-14 bottom-0 w-64 bg-background border-r z-40">
             <AppSidebar />
           </aside>
