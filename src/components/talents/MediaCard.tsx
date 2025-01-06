@@ -2,10 +2,11 @@ import { useState } from "react";
 import { Card } from "@/components/ui/card";
 import { Switch } from "@/components/ui/switch";
 import { Button } from "@/components/ui/button";
-import { MoreVertical } from "lucide-react";
+import { MoreVertical, Image, Video } from "lucide-react";
 import { formatFileSize, formatDate } from "@/lib/utils";
 import { Checkbox } from "@/components/ui/checkbox";
 import { useUpdateMediaMutation } from "@/hooks/use-media";
+import { AspectRatio } from "@/components/ui/aspect-ratio";
 
 interface MediaCardProps {
   media: {
@@ -50,8 +51,10 @@ export const MediaCard = ({ media, onSelect, isSelected }: MediaCardProps) => {
     });
   };
 
+  const mediaUrl = `${import.meta.env.VITE_SUPABASE_URL}/storage/v1/object/public/talent-files/${media.file_path}`;
+
   return (
-    <Card className="relative bg-white">
+    <Card className="relative bg-white overflow-hidden">
       <div className="absolute top-3 right-3 z-10 flex items-center gap-2">
         <Checkbox
           checked={isSelected}
@@ -74,21 +77,29 @@ export const MediaCard = ({ media, onSelect, isSelected }: MediaCardProps) => {
         </Button>
       </div>
 
-      <div className="aspect-video relative">
+      <AspectRatio ratio={16 / 9} className="bg-muted">
         {media.file_type.startsWith("image/") ? (
           <img
-            src={`${import.meta.env.VITE_SUPABASE_URL}/storage/v1/object/public/talent-files/${media.file_path}`}
+            src={mediaUrl}
             alt={media.file_name}
             className="w-full h-full object-cover"
           />
-        ) : (
+        ) : media.file_type.startsWith("video/") ? (
           <video
-            src={`${import.meta.env.VITE_SUPABASE_URL}/storage/v1/object/public/talent-files/${media.file_path}`}
+            src={mediaUrl}
             className="w-full h-full object-cover"
             controls
           />
+        ) : (
+          <div className="w-full h-full flex items-center justify-center bg-muted">
+            {media.file_type.startsWith("image/") ? (
+              <Image className="h-12 w-12 text-muted-foreground" />
+            ) : (
+              <Video className="h-12 w-12 text-muted-foreground" />
+            )}
+          </div>
         )}
-      </div>
+      </AspectRatio>
 
       <div className="p-4 space-y-3">
         <div className="flex items-center justify-between">
