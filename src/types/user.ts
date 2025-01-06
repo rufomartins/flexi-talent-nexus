@@ -18,4 +18,5 @@ export interface User {
   status: UserStatus;
   last_login?: string | null;
   company_id?: string | null;
+  full_name: string | null;
 }
