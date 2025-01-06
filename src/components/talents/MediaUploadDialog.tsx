@@ -6,8 +6,9 @@ import { Button } from "@/components/ui/button";
 import { useToast } from "@/components/ui/use-toast";
 import { Loader2 } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
+import { Database } from "@/integrations/supabase/types";
 
-type UserRole = "admin" | "super_admin" | "user" | "ugc_talent" | "voice_over_artist" | "translator" | "reviewer";
+type UserRole = Database["public"]["Enums"]["user_role"];
 
 interface MediaUploadDialogProps {
   open: boolean;
