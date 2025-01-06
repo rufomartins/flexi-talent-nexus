@@ -51,64 +51,68 @@ export const MediaCard = ({ media, onSelect, isSelected }: MediaCardProps) => {
   };
 
   return (
-    <Card className="p-4 relative">
-      <div className="absolute top-2 right-2 z-10 flex items-center gap-2">
+    <Card className="relative bg-white">
+      <div className="absolute top-3 right-3 z-10 flex items-center gap-2">
         <Checkbox
           checked={isSelected}
           onCheckedChange={() => onSelect(media.id)}
+          className="bg-white"
         />
-        <Button variant="ghost" size="icon">
+        <Button variant="ghost" size="icon" className="h-8 w-8">
           <MoreVertical className="h-4 w-4" />
         </Button>
       </div>
 
-      <div className="aspect-video relative mb-4">
+      <div className="absolute top-3 left-3 z-10">
+        <Button
+          variant="outline"
+          size="sm"
+          onClick={() => setIsSettingPosition(true)}
+          className="bg-white text-sm"
+        >
+          Set position
+        </Button>
+      </div>
+
+      <div className="aspect-video relative">
         {media.file_type.startsWith("image/") ? (
           <img
             src={`${import.meta.env.VITE_SUPABASE_URL}/storage/v1/object/public/talent-files/${media.file_path}`}
             alt={media.file_name}
-            className="w-full h-full object-cover rounded-md"
+            className="w-full h-full object-cover"
           />
         ) : (
           <video
             src={`${import.meta.env.VITE_SUPABASE_URL}/storage/v1/object/public/talent-files/${media.file_path}`}
-            className="w-full h-full object-cover rounded-md"
+            className="w-full h-full object-cover"
             controls
           />
         )}
       </div>
 
-      <div className="space-y-2">
+      <div className="p-4 space-y-3">
         <div className="flex items-center justify-between">
-          <div className="font-medium">{media.file_name}</div>
+          <div className="font-medium truncate">{media.file_name}</div>
           {isSettingPosition ? (
             <div className="flex items-center gap-2">
               <input
                 type="number"
                 value={position}
                 onChange={(e) => setPosition(Number(e.target.value))}
-                className="w-16 px-2 py-1 border rounded"
+                className="w-16 px-2 py-1 border rounded text-sm"
               />
-              <Button size="sm" onClick={handlePositionSave}>
+              <Button size="sm" onClick={handlePositionSave} className="text-sm">
                 Save
               </Button>
             </div>
-          ) : (
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={() => setIsSettingPosition(true)}
-            >
-              Set position
-            </Button>
-          )}
+          ) : null}
         </div>
 
         <div className="text-sm text-muted-foreground">
           {formatDate(media.created_at)} · {formatFileSize(media.file_size)}
         </div>
 
-        <div className="flex items-center justify-between">
+        <div className="flex items-center justify-between pt-2 border-t">
           <div className="flex items-center gap-4">
             <div className="flex items-center gap-2">
               <Switch
