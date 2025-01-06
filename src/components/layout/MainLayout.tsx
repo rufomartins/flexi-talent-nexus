@@ -11,9 +11,29 @@ import {
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { useAuth } from "@/hooks/useAuth"
 import { User as UserIcon } from "lucide-react"
+import type { Database } from "@/integrations/supabase/types"
+
+// Type assertion helper
+const assertUser = (user: unknown) => {
+  return user as {
+    avatar_url: string | null;
+    company_id: string | null;
+    created_at: string | null;
+    first_name: string | null;
+    full_name: string | null;
+    gender: string | null;
+    id: string;
+    last_login: string | null;
+    last_name: string | null;
+    mobile_phone: string | null;
+    nationality: string | null;
+    role: Database['public']['Enums']['user_role'];
+    status: Database['public']['Enums']['user_status'];
+  };
+};
 
 export const MainLayout = ({ children }: { children: React.ReactNode }) => {
-  const { user } = useAuth()
+  const { user, signOut } = useAuth()
 
   return (
     <SidebarProvider>
@@ -44,8 +64,8 @@ export const MainLayout = ({ children }: { children: React.ReactNode }) => {
                   <button className="flex items-center justify-center w-10 h-10 rounded-full">
                     <Avatar className="h-10 w-10">
                       <AvatarImage 
-                        src={user ? user.avatar_url ?? '' : ''} 
-                        alt={user ? `${user.first_name ?? ''} ${user.last_name ?? ''}` : ''} 
+                        src={user ? assertUser(user).avatar_url ?? '' : ''} 
+                        alt={user ? `${assertUser(user).first_name ?? ''} ${assertUser(user).last_name ?? ''}` : ''} 
                       />
                       <AvatarFallback>
                         <UserIcon className="h-4 w-4" />
