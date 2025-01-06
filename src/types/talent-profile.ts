@@ -17,7 +17,6 @@ export interface TalentProfileData {
     updated_at: string | null;
     role: Database["public"]["Enums"]["user_role"];
     status: Database["public"]["Enums"]["user_status"];
-    full_name: string | null;
   };
   talent_profile: {
     category: string | null;

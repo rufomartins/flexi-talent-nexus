@@ -40,7 +40,10 @@ const TalentProfile = () => {
       if (profileError) throw profileError;
 
       return {
-        user,
+        user: {
+          ...user,
+          updated_at: user.created_at // Temporarily using created_at as updated_at
+        },
         talent_profile: talentProfile,
       } as TalentProfileData;
     },
@@ -75,6 +78,10 @@ const TalentProfile = () => {
     { value: "rejected", label: "Rejected" },
   ];
 
+  const getFullName = () => {
+    return [talent.user.first_name, talent.user.last_name].filter(Boolean).join(" ") || "Unknown";
+  };
+
   return (
     <div className="min-h-screen bg-background">
       {/* Top Navigation */}
@@ -98,7 +105,7 @@ const TalentProfile = () => {
                   <ChevronRight className="h-4 w-4" />
                 </BreadcrumbSeparator>
                 <BreadcrumbItem>
-                  <BreadcrumbPage>{talent.user.full_name || 'Unknown'}</BreadcrumbPage>
+                  <BreadcrumbPage>{getFullName()}</BreadcrumbPage>
                 </BreadcrumbItem>
               </BreadcrumbList>
             </Breadcrumb>
