@@ -1,25 +1,31 @@
-import { useState } from "react";
+import { useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { Mail, Lock } from "lucide-react";
-import { useToast } from "@/hooks/use-toast";
+import { useAuth } from "@/contexts/AuthContext";
 import { Card } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
+import { Checkbox } from "@/components/ui/checkbox";
+import { useToast } from "@/hooks/use-toast";
+import { useState } from "react";
 
 const Login = () => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [rememberMe, setRememberMe] = useState(false);
+  const { signIn, user } = useAuth();
   const navigate = useNavigate();
   const { toast } = useToast();
 
+  useEffect(() => {
+    if (user) {
+      navigate("/dashboard");
+    }
+  }, [user, navigate]);
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    // TODO: Implement Supabase auth
-    toast({
-      title: "Login functionality coming soon",
-      description: "Please wait for Supabase integration",
-    });
+    await signIn(email, password, rememberMe);
   };
 
   return (
@@ -60,11 +66,9 @@ const Login = () => {
 
           <div className="flex items-center justify-between">
             <label className="flex items-center space-x-2 cursor-pointer">
-              <input
-                type="checkbox"
-                className="rounded border-gray-300 text-primary focus:ring-primary"
+              <Checkbox
                 checked={rememberMe}
-                onChange={(e) => setRememberMe(e.target.checked)}
+                onCheckedChange={(checked) => setRememberMe(checked as boolean)}
               />
               <span className="text-sm text-gray-600">Remember me</span>
             </label>
@@ -72,16 +76,21 @@ const Login = () => {
             <button
               type="button"
               className="text-sm text-primary hover:text-primary-hover"
-              onClick={() => toast({
-                title: "Forgot password?",
-                description: "This feature will be implemented soon",
-              })}
+              onClick={() =>
+                toast({
+                  title: "Reset password",
+                  description: "Password reset functionality coming soon",
+                })
+              }
             >
               Forgot password?
             </button>
           </div>
 
-          <Button type="submit" className="w-full bg-[#0D6EFD] hover:bg-[#0B5ED7]">
+          <Button
+            type="submit"
+            className="w-full bg-[#0D6EFD] hover:bg-[#0B5ED7]"
+          >
             Login
           </Button>
         </form>
