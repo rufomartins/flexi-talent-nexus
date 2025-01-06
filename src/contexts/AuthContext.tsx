@@ -156,14 +156,15 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       setSession(null);
       setUser(null);
       setUserDetails(null);
-      localStorage.removeItem("rememberMe");
+      localStorage.clear(); // Clear all localStorage
       
       toast({
         title: "Signed out",
         description: "You have been successfully signed out.",
       });
 
-      // Navigation will be handled by the onAuthStateChange listener
+      // Force a complete page reload and redirect
+      window.location.replace('/login');
     } catch (error: any) {
       console.error("Sign out error:", error);
       toast({
@@ -197,4 +198,4 @@ export const useAuth = () => {
     throw new Error("useAuth must be used within an AuthProvider");
   }
   return context;
-};
+}
