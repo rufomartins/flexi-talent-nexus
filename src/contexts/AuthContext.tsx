@@ -13,7 +13,6 @@ interface AuthContextType {
   loading: boolean;
 }
 
-// Create context with a default value matching the interface
 export const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
 export function AuthProvider({ children }: { children: React.ReactNode }) {
@@ -35,7 +34,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
       if (error) {
         console.error("Error fetching user details:", error);
-        setLoading(false); // Important: Set loading to false even on error
+        setLoading(false);
         toast({
           title: "Error",
           description: "Failed to load user details. Please try again.",
@@ -149,12 +148,20 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     console.log("Attempting sign out");
     try {
       setLoading(true);
-      await supabase.auth.signOut();
+      const { error } = await supabase.auth.signOut();
+      if (error) throw error;
+      
       localStorage.removeItem("rememberMe");
+      setSession(null);
+      setUser(null);
+      setUserDetails(null);
+      
       toast({
         title: "Signed out",
         description: "You have been successfully signed out.",
       });
+      
+      navigate("/login");
     } catch (error: any) {
       console.error("Sign out error:", error);
       toast({

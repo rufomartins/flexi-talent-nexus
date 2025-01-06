@@ -11,6 +11,7 @@ import { Input } from "@/components/ui/input"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { useAuth } from "@/contexts/AuthContext"
 import { useNavigate } from "react-router-dom"
+import { useToast } from "@/hooks/use-toast"
 import type { Database } from "@/integrations/supabase/types"
 
 const assertUser = (user: unknown) => {
@@ -34,13 +35,21 @@ const assertUser = (user: unknown) => {
 export const Header = () => {
   const { user, signOut } = useAuth()
   const navigate = useNavigate()
+  const { toast } = useToast()
 
   const handleSignOut = async () => {
     try {
+      console.log("Attempting to sign out...")
       await signOut()
+      console.log("Sign out successful")
       navigate("/login")
     } catch (error) {
       console.error("Error signing out:", error)
+      toast({
+        title: "Error",
+        description: "Failed to sign out. Please try again.",
+        variant: "destructive",
+      })
     }
   }
 
