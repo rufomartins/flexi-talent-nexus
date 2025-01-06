@@ -13,29 +13,30 @@ const ProtectedRoute = ({ children, allowedRoles }: ProtectedRouteProps) => {
   const navigate = useNavigate();
 
   useEffect(() => {
-    console.log("ProtectedRoute state:", { 
-      loading, 
-      hasUser: !!user, 
-      hasUserDetails: !!userDetails,
-      allowedRoles 
-    });
-
+    // If not loading and no user, redirect to login
     if (!loading && !user) {
-      console.log("No user found after loading, redirecting to login");
+      console.log("No authenticated user found, redirecting to login");
       navigate("/login");
       return;
     }
 
+    // If we need to check roles but don't have user details yet, wait
+    if (!loading && user && allowedRoles && !userDetails) {
+      console.log("Waiting for user details to check roles");
+      return;
+    }
+
+    // If we have user details and roles to check, verify authorization
     if (!loading && user && userDetails && allowedRoles) {
       if (!allowedRoles.includes(userDetails.role)) {
-        console.log("User role not allowed, redirecting to dashboard");
+        console.log("User role not authorized, redirecting to dashboard");
         navigate("/dashboard");
       }
     }
   }, [user, userDetails, loading, navigate, allowedRoles]);
 
-  if (loading) {
-    console.log("Showing loading state");
+  // Show loading state only when necessary
+  if (loading || (allowedRoles && !userDetails)) {
     return (
       <div className="h-screen w-screen flex items-center justify-center">
         <Loader2 className="h-8 w-8 animate-spin" />
@@ -43,21 +44,12 @@ const ProtectedRoute = ({ children, allowedRoles }: ProtectedRouteProps) => {
     );
   }
 
+  // If no user and still loading, return null (let the redirect happen)
   if (!user) {
-    console.log("No user, returning null");
     return null;
   }
 
-  if (allowedRoles && !userDetails) {
-    console.log("Waiting for user details");
-    return (
-      <div className="h-screen w-screen flex items-center justify-center">
-        <Loader2 className="h-8 w-8 animate-spin" />
-      </div>
-    );
-  }
-
-  console.log("Rendering protected content");
+  // Render children only when all checks pass
   return <>{children}</>;
 };
 
