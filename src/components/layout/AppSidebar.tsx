@@ -21,7 +21,7 @@ import { cn } from "@/lib/utils"
 import { useLocation } from "react-router-dom"
 
 export const AppSidebar = () => {
-  const { user, userDetails } = useAuth()
+  const { userDetails } = useAuth()
   const location = useLocation()
 
   // Check if user is super_admin or admin
