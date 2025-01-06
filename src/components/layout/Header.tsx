@@ -95,14 +95,14 @@ export const Header = () => {
               </Button>
             </DropdownMenuTrigger>
             <DropdownMenuContent align="end" className="w-56">
-              <DropdownMenuItem onClick={handleProfileClick}>
+              <DropdownMenuItem className="cursor-pointer" onClick={handleProfileClick}>
                 Profile
               </DropdownMenuItem>
-              <DropdownMenuItem onClick={handleSettingsClick}>
+              <DropdownMenuItem className="cursor-pointer" onClick={handleSettingsClick}>
                 Settings
               </DropdownMenuItem>
               <DropdownMenuSeparator />
-              <DropdownMenuItem onClick={handleSignOut}>
+              <DropdownMenuItem className="cursor-pointer" onClick={handleSignOut}>
                 Log out
               </DropdownMenuItem>
             </DropdownMenuContent>
