@@ -24,8 +24,12 @@ export const AppSidebar = () => {
   const { userDetails } = useAuth()
   const location = useLocation()
 
+  console.log("Current user details:", userDetails) // Debug log
+
   // Check if user is super_admin or admin
   const isAdminOrSuperAdmin = userDetails?.role === "super_admin" || userDetails?.role === "admin"
+  
+  console.log("Is admin or super admin:", isAdminOrSuperAdmin) // Debug log
 
   const menuItems = [
     {
@@ -85,6 +89,8 @@ export const AppSidebar = () => {
       show: isAdminOrSuperAdmin,
     },
   ]
+
+  console.log("Menu items after filtering:", menuItems.filter(item => item.show)) // Debug log
 
   return (
     <Sidebar>
