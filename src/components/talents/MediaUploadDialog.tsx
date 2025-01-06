@@ -1,11 +1,13 @@
 import { useState } from "react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { Label } from "@/components/ui/label";
+import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { useToast } from "@/components/ui/use-toast";
+import { Loader2 } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
-import { Database } from "@/integrations/supabase/types";
 
-type UserRole = Database["public"]["Enums"]["user_role"];
+type UserRole = "admin" | "super_admin" | "user" | "ugc_talent" | "voice_over_artist" | "translator" | "reviewer";
 
 interface MediaUploadDialogProps {
   open: boolean;
@@ -20,7 +22,7 @@ export const MediaUploadDialog = ({
   talentId,
   talentRole,
 }: MediaUploadDialogProps) => {
-  const [files, setFiles] = useState<File[]>([]);
+  const [selectedFiles, setSelectedFiles] = useState<FileList | null>(null);
   const [uploading, setUploading] = useState(false);
   const { toast } = useToast();
 
@@ -29,38 +31,42 @@ export const MediaUploadDialog = ({
       case "voice_over_artist":
         return "audio/mpeg,audio/wav";
       case "ugc_talent":
-        return "image/*,video/*";
+        return "video/*,image/*";
       default:
-        return "";
+        return "image/*";
+    }
+  };
+
+  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    if (e.target.files && e.target.files.length > 0) {
+      setSelectedFiles(e.target.files);
     }
   };
 
   const handleUpload = async () => {
-    if (files.length === 0) return;
+    if (!selectedFiles) return;
 
     setUploading(true);
     try {
-      for (const file of files) {
-        const fileExt = file.name.split(".").pop();
-        const filePath = `${talentId}/${crypto.randomUUID()}.${fileExt}`;
+      for (let i = 0; i < selectedFiles.length; i++) {
+        const file = selectedFiles[i];
+        const fileExt = file.name.split('.').pop();
+        const filePath = `${talentId}/${Math.random()}.${fileExt}`;
 
         const { error: uploadError } = await supabase.storage
-          .from("talent-files")
+          .from('talent-files')
           .upload(filePath, file);
 
         if (uploadError) throw uploadError;
 
         const { error: dbError } = await supabase
-          .from("talent_media")
+          .from('talent_media')
           .insert({
             talent_id: talentId,
             file_path: filePath,
             file_name: file.name,
             file_type: file.type,
             file_size: file.size,
-            position: 0,
-            is_profile: false,
-            is_shared: true,
           });
 
         if (dbError) throw dbError;
@@ -68,14 +74,14 @@ export const MediaUploadDialog = ({
 
       toast({
         title: "Success",
-        description: "Media files uploaded successfully",
+        description: "Files uploaded successfully",
       });
       onOpenChange(false);
-      setFiles([]);
     } catch (error) {
+      console.error('Error uploading file:', error);
       toast({
         title: "Error",
-        description: "Failed to upload media files",
+        description: "Failed to upload files",
         variant: "destructive",
       });
     } finally {
@@ -89,31 +95,32 @@ export const MediaUploadDialog = ({
         <DialogHeader>
           <DialogTitle>Upload Media</DialogTitle>
         </DialogHeader>
-
         <div className="space-y-4">
-          <input
-            type="file"
-            multiple
-            accept={getAllowedTypes(talentRole)}
-            onChange={(e) => setFiles(Array.from(e.target.files || []))}
-            className="w-full"
-          />
-
-          <div className="flex justify-end gap-2">
-            <Button
-              variant="outline"
-              onClick={() => onOpenChange(false)}
+          <div className="space-y-2">
+            <Label htmlFor="files">Select files</Label>
+            <Input
+              id="files"
+              type="file"
+              accept={getAllowedTypes(talentRole)}
+              multiple
+              onChange={handleFileChange}
               disabled={uploading}
-            >
-              Cancel
-            </Button>
-            <Button
-              onClick={handleUpload}
-              disabled={files.length === 0 || uploading}
-            >
-              {uploading ? "Uploading..." : "Upload"}
-            </Button>
+            />
           </div>
+          <Button
+            onClick={handleUpload}
+            disabled={!selectedFiles || uploading}
+            className="w-full"
+          >
+            {uploading ? (
+              <>
+                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                Uploading...
+              </>
+            ) : (
+              'Upload'
+            )}
+          </Button>
         </div>
       </DialogContent>
     </Dialog>
