@@ -1,33 +1,6 @@
 import { useState } from "react";
 import { ProjectTreeItem } from "./ProjectTreeItem";
-
-interface Task {
-  id: number;
-  name: string;
-  script_status: string;
-  translation_status: string;
-  review_status: string;
-  talent_status: string;
-  delivery_status: string;
-}
-
-interface Language {
-  id: number;
-  name: string;
-  tasks: Task[];
-}
-
-interface Country {
-  id: number;
-  name: string;
-  languages: Language[];
-}
-
-interface Project {
-  id: number;
-  name: string;
-  countries: Country[];
-}
+import type { Project } from "./types";
 
 interface ProjectTreeProps {
   projects: Project[];
@@ -59,7 +32,7 @@ export function ProjectTree({ projects, statusColors }: ProjectTreeProps) {
         {expandedNodes[`project-${project.id}`] && project.countries.map(country => (
           <div key={country.id}>
             <ProjectTreeItem
-              name={country.name}
+              name={country.country_name}
               level={1}
               isExpanded={expandedNodes[`country-${country.id}`]}
               onToggle={() => toggleNode(`country-${country.id}`)}
@@ -70,7 +43,7 @@ export function ProjectTree({ projects, statusColors }: ProjectTreeProps) {
             {expandedNodes[`country-${country.id}`] && country.languages.map(language => (
               <div key={language.id}>
                 <ProjectTreeItem
-                  name={language.name}
+                  name={language.language_name}
                   level={2}
                   isExpanded={expandedNodes[`language-${language.id}`]}
                   onToggle={() => toggleNode(`language-${language.id}`)}

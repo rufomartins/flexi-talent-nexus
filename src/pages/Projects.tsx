@@ -6,12 +6,7 @@ import { ProjectSearch } from "@/components/projects/ProjectSearch";
 import { ProjectTree } from "@/components/projects/ProjectTree";
 import { useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
-import type { ProjectFilters } from "@/components/projects/ProjectFilterPanel";
-import type { Database } from "@/integrations/supabase/types";
-
-type ProjectScriptStatus = Database["public"]["Enums"]["project_script_status"];
-type ProjectReviewStatus = Database["public"]["Enums"]["project_review_status"];
-type ProjectTalentStatus = Database["public"]["Enums"]["project_talent_status"];
+import type { Project, ProjectFilters } from "@/components/projects/types";
 
 const statsCards = [
   { title: "Active Tasks", value: 12 },
@@ -53,7 +48,7 @@ export default function Projects() {
   const [searchQuery, setSearchQuery] = useState("");
   const [filters, setFilters] = useState<ProjectFilters>({});
 
-  const { data: projects, isLoading } = useQuery({
+  const { data: projects, isLoading } = useQuery<Project[]>({
     queryKey: ['projects', searchQuery, filters],
     queryFn: async () => {
       let query = supabase
@@ -80,7 +75,6 @@ export default function Projects() {
           )
         `);
 
-      // Apply search filter
       if (searchQuery) {
         query = query.or(`
           name.ilike.%${searchQuery}%,
@@ -90,7 +84,6 @@ export default function Projects() {
         `);
       }
 
-      // Apply other filters
       if (filters.projectManager) {
         query = query.eq('project_manager_id', filters.projectManager);
       }
@@ -101,13 +94,13 @@ export default function Projects() {
         query = query.eq('project_countries.project_languages.language_name', filters.language);
       }
       if (filters.scriptStatus) {
-        query = query.eq('project_countries.project_languages.project_tasks.script_status', filters.scriptStatus as ProjectScriptStatus);
+        query = query.eq('project_countries.project_languages.project_tasks.script_status', filters.scriptStatus);
       }
       if (filters.reviewStatus) {
-        query = query.eq('project_countries.project_languages.project_tasks.review_status', filters.reviewStatus as ProjectReviewStatus);
+        query = query.eq('project_countries.project_languages.project_tasks.review_status', filters.reviewStatus);
       }
       if (filters.talentStatus) {
-        query = query.eq('project_countries.project_languages.project_tasks.talent_status', filters.talentStatus as ProjectTalentStatus);
+        query = query.eq('project_countries.project_languages.project_tasks.talent_status', filters.talentStatus);
       }
       if (filters.startDate && filters.endDate) {
         query = query.gte('created_at', filters.startDate.toISOString())
@@ -117,7 +110,7 @@ export default function Projects() {
       const { data, error } = await query;
       
       if (error) throw error;
-      return data || [];
+      return data as Project[] || [];
     },
   });
 
