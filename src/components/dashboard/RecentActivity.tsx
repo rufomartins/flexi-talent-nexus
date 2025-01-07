@@ -23,7 +23,14 @@ export const RecentActivity = () => {
         .range(from, to);
 
       if (activityType) {
-        query = query.eq('action_type', activityType);
+        // Handle different activity types based on the new filter structure
+        if (activityType.startsWith('new_registration_')) {
+          query = query.eq('action_type', 'registration')
+            .eq('details->status', activityType.replace('new_registration_', ''));
+        } else if (activityType.startsWith('project_')) {
+          query = query.eq('action_type', 'project')
+            .eq('details->status', activityType.replace('project_', ''));
+        }
       }
 
       if (dateRange) {
@@ -43,7 +50,10 @@ export const RecentActivity = () => {
         return { activities: [], totalCount: 0 };
       }
 
-      return { activities: activities || [], totalCount: count || 0 };
+      return { 
+        activities: activities || [], 
+        totalCount: count || 0 
+      };
     }
   });
 

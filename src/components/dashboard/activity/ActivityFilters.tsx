@@ -30,11 +30,12 @@ export const ActivityFilters = ({
   setDateRange,
 }: ActivityFiltersProps) => {
   const activityTypes = [
-    "login",
-    "profile_update",
-    "casting_created",
-    "talent_added",
-    "booking_confirmed"
+    { value: "new_registration_approved", label: "New Registrations - Approved" },
+    { value: "new_registration_evaluation", label: "New Registrations - Under Evaluation" },
+    { value: "new_registration_rejected", label: "New Registrations - Rejected" },
+    { value: "project_new", label: "Projects - New" },
+    { value: "project_approved", label: "Projects - Approved" },
+    { value: "project_revision", label: "Projects - Under Revision" }
   ];
 
   return (
@@ -43,14 +44,14 @@ export const ActivityFilters = ({
         value={activityType || "all"}
         onValueChange={(value) => setActivityType(value === "all" ? null : value)}
       >
-        <SelectTrigger className="w-[180px]">
+        <SelectTrigger className="w-[280px]">
           <SelectValue placeholder="Filter by type" />
         </SelectTrigger>
         <SelectContent>
           <SelectItem value="all">All types</SelectItem>
           {activityTypes.map((type) => (
-            <SelectItem key={type} value={type}>
-              {type.replace('_', ' ').charAt(0).toUpperCase() + type.slice(1)}
+            <SelectItem key={type.value} value={type.value}>
+              {type.label}
             </SelectItem>
           ))}
         </SelectContent>

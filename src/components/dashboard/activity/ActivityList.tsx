@@ -11,6 +11,9 @@ import {
 interface Activity {
   id: string;
   action_type: string;
+  details: {
+    status?: string;
+  };
   created_at: string;
 }
 
@@ -29,6 +32,22 @@ export const ActivityList = ({
   totalPages,
   onPageChange,
 }: ActivityListProps) => {
+  const formatActivityText = (activity: Activity) => {
+    const { action_type, details } = activity;
+    
+    if (action_type === 'registration') {
+      const status = details?.status || 'under_evaluation';
+      return `New registration - ${status.replace('_', ' ')}`;
+    }
+    
+    if (action_type === 'project') {
+      const status = details?.status || 'new';
+      return `Project - ${status.replace('_', ' ')}`;
+    }
+    
+    return action_type;
+  };
+
   if (isLoading) {
     return (
       <div className="flex justify-center py-8">
@@ -52,7 +71,7 @@ export const ActivityList = ({
           <li key={activity.id} className="flex items-center space-x-4">
             <div className="flex-1">
               <p className="text-sm text-muted-foreground">
-                {activity.action_type}
+                {formatActivityText(activity)}
               </p>
               <p className="text-xs text-muted-foreground">
                 {new Date(activity.created_at).toLocaleDateString()}
