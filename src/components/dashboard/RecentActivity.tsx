@@ -1,13 +1,27 @@
 import { useQuery } from "@tanstack/react-query";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { ActivityFilters } from "./activity/ActivityFilters";
 import { ActivityList } from "./activity/ActivityList";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { AlertCircle } from "lucide-react";
+import { useToast } from "@/components/ui/use-toast";
 
 type SortOrder = 'desc' | 'asc';
 type SortField = 'created_at' | 'action_type';
+
+type ActivityLog = {
+  id: string;
+  action_type: string;
+  created_at: string;
+  details?: {
+    status?: string;
+    name?: string;
+    project?: string;
+    [key: string]: any;
+  } | null;
+  user_id?: string;
+};
 
 export const RecentActivity = () => {
   const [currentPage, setCurrentPage] = useState(1);
@@ -15,9 +29,10 @@ export const RecentActivity = () => {
   const [dateRange, setDateRange] = useState<Date | undefined>();
   const [sortField, setSortField] = useState<SortField>('created_at');
   const [sortOrder, setSortOrder] = useState<SortOrder>('desc');
+  const { toast } = useToast();
   const itemsPerPage = 10;
 
-  const { data, isLoading, error } = useQuery({
+  const { data, isLoading, error, refetch } = useQuery({
     queryKey: ['recent-activities', currentPage, activityType, dateRange, sortField, sortOrder],
     queryFn: async () => {
       const from = (currentPage - 1) * itemsPerPage;
@@ -56,11 +71,36 @@ export const RecentActivity = () => {
       }
 
       return { 
-        activities: activities || [], 
+        activities: activities as ActivityLog[], 
         totalCount: count || 0 
       };
     }
   });
+
+  useEffect(() => {
+    const channel = supabase
+      .channel('activity-changes')
+      .on(
+        'postgres_changes',
+        {
+          event: 'INSERT',
+          schema: 'public',
+          table: 'user_activity_logs'
+        },
+        () => {
+          refetch();
+          toast({
+            title: "New Activity",
+            description: "A new activity has been recorded",
+          });
+        }
+      )
+      .subscribe();
+
+    return () => {
+      supabase.removeChannel(channel);
+    };
+  }, [refetch, toast]);
 
   const totalPages = data?.totalCount ? Math.ceil(data.totalCount / itemsPerPage) : 0;
 
