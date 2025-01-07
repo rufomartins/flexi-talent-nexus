@@ -16,6 +16,7 @@ import {
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import { Calendar as CalendarIcon } from "lucide-react";
+import { DateRange } from "react-day-picker";
 
 interface ProjectFilterPanelProps {
   onApplyFilters: (filters: ProjectFilters) => void;
@@ -44,26 +45,23 @@ export function ProjectFilterPanel({
   initialFilters = {} 
 }: ProjectFilterPanelProps) {
   const [filters, setFilters] = useState<ProjectFilters>(initialFilters);
-  const [dateRange, setDateRange] = useState<{
-    from?: Date;
-    to?: Date;
-  }>({
-    from: initialFilters.startDate,
-    to: initialFilters.endDate,
+  const [dateRange, setDateRange] = useState<DateRange | undefined>({
+    from: initialFilters.startDate || undefined,
+    to: initialFilters.endDate || undefined,
   });
 
   const handleApplyFilters = () => {
     onApplyFilters({
       ...filters,
-      startDate: dateRange.from,
-      endDate: dateRange.to,
+      startDate: dateRange?.from,
+      endDate: dateRange?.to,
     });
     onClose();
   };
 
   const handleClearFilters = () => {
     setFilters({});
-    setDateRange({ from: undefined, to: undefined });
+    setDateRange(undefined);
     onApplyFilters({});
     onClose();
   };

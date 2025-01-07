@@ -7,6 +7,11 @@ import { ProjectTree } from "@/components/projects/ProjectTree";
 import { useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import type { ProjectFilters } from "@/components/projects/ProjectFilterPanel";
+import type { Database } from "@/integrations/supabase/types";
+
+type ProjectScriptStatus = Database["public"]["Enums"]["project_script_status"];
+type ProjectReviewStatus = Database["public"]["Enums"]["project_review_status"];
+type ProjectTalentStatus = Database["public"]["Enums"]["project_talent_status"];
 
 const statsCards = [
   { title: "Active Tasks", value: 12 },
@@ -96,13 +101,13 @@ export default function Projects() {
         query = query.eq('project_countries.project_languages.language_name', filters.language);
       }
       if (filters.scriptStatus) {
-        query = query.eq('project_countries.project_languages.project_tasks.script_status', filters.scriptStatus);
+        query = query.eq('project_countries.project_languages.project_tasks.script_status', filters.scriptStatus as ProjectScriptStatus);
       }
       if (filters.reviewStatus) {
-        query = query.eq('project_countries.project_languages.project_tasks.review_status', filters.reviewStatus);
+        query = query.eq('project_countries.project_languages.project_tasks.review_status', filters.reviewStatus as ProjectReviewStatus);
       }
       if (filters.talentStatus) {
-        query = query.eq('project_countries.project_languages.project_tasks.talent_status', filters.talentStatus);
+        query = query.eq('project_countries.project_languages.project_tasks.talent_status', filters.talentStatus as ProjectTalentStatus);
       }
       if (filters.startDate && filters.endDate) {
         query = query.gte('created_at', filters.startDate.toISOString())
