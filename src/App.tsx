@@ -1,67 +1,20 @@
-import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { BrowserRouter as Router, Routes, Route, Navigate, Outlet } from "react-router-dom";
-import { AuthProvider } from "@/contexts/auth";
-import { Toaster } from "@/components/ui/toaster";
-import ProtectedRoute from "@/components/ProtectedRoute";
+import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
 import { MainLayout } from "@/components/layout/MainLayout";
-import Login from "@/pages/Login";
 import Dashboard from "@/pages/Dashboard";
-import Calendar from "@/pages/Calendar";
-import Bookings from "@/pages/Bookings";
-import TalentList from "@/pages/talents/TalentList";
-import TalentProfile from "@/pages/TalentProfile";
-import Castings from "@/pages/Castings";
 import Projects from "@/pages/Projects";
-import ShotList from "@/pages/ShotList";
-import Messages from "@/pages/Messages";
-
-const queryClient = new QueryClient();
+import Financial from "@/pages/Financial";
 
 function App() {
   return (
-    <QueryClientProvider client={queryClient}>
-      <Router>
-        <AuthProvider>
-          <Routes>
-            <Route path="/login" element={<Login />} />
-            <Route
-              path="/"
-              element={
-                <ProtectedRoute>
-                  <MainLayout>
-                    <Outlet />
-                  </MainLayout>
-                </ProtectedRoute>
-              }
-            >
-              <Route index element={<Navigate to="/dashboard" replace />} />
-              <Route path="dashboard" element={<Dashboard />} />
-              <Route path="calendar" element={<Calendar />} />
-              <Route path="bookings" element={<Bookings />} />
-              
-              {/* Talent routes */}
-              <Route path="talents">
-                <Route index element={<TalentList />} />
-                <Route path=":id" element={<TalentProfile />} />
-              </Route>
-
-              {/* Project routes */}
-              <Route path="projects">
-                <Route index element={<Projects />} />
-                <Route path="shot-list/:taskId" element={<ShotList />} />
-              </Route>
-
-              {/* Casting routes */}
-              <Route path="castings" element={<Castings />} />
-              
-              {/* Messages route */}
-              <Route path="messages" element={<Messages />} />
-            </Route>
-          </Routes>
-          <Toaster />
-        </AuthProvider>
-      </Router>
-    </QueryClientProvider>
+    <Router>
+      <Routes>
+        <Route path="/" element={<MainLayout />}>
+          <Route path="/dashboard" element={<Dashboard />} />
+          <Route path="/projects" element={<Projects />} />
+          <Route path="/financial" element={<Financial />} />
+        </Route>
+      </Routes>
+    </Router>
   );
 }
 
