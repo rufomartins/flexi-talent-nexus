@@ -92,7 +92,14 @@ export function ShotsTab({ shotListId }: { shotListId: string }) {
     // Update sequence_order for affected shots
     const updates = items.map((shot, index) => ({
       id: shot.id,
+      shot_number: shot.shot_number,
+      shot_list_id: shot.shot_list_id,
       sequence_order: index + 1,
+      location_id: shot.location_id,
+      description: shot.description,
+      frame_type: shot.frame_type,
+      status: shot.status,
+      notes: shot.notes
     }));
 
     try {

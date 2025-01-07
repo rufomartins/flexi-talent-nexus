@@ -32,11 +32,20 @@ export function LocationsTab({ shotListId }: { shotListId: string }) {
 
   // Add new location
   const handleAdd = async (formData: Partial<Location>) => {
+    if (!formData.name) {
+      notify.error('Location name is required');
+      return;
+    }
+
     try {
       startLoading('add');
       const { error } = await supabase
         .from('locations')
-        .insert([{ ...formData, shot_list_id: shotListId }]);
+        .insert([{ 
+          ...formData, 
+          shot_list_id: shotListId,
+          name: formData.name // Ensure name is included
+        }]);
 
       if (error) throw error;
       
@@ -53,13 +62,22 @@ export function LocationsTab({ shotListId }: { shotListId: string }) {
 
   // Update location
   const handleEdit = async (formData: Partial<Location>) => {
-    if (!editingLocation) return;
+    if (!editingLocation || !formData.name) {
+      notify.error('Location name is required');
+      return;
+    }
 
     try {
       startLoading('edit');
       const { error } = await supabase
         .from('locations')
-        .update(formData)
+        .update({
+          name: formData.name,
+          address: formData.address,
+          time_of_day: formData.time_of_day,
+          special_requirements: formData.special_requirements,
+          status: formData.status
+        })
         .eq('id', editingLocation.id);
 
       if (error) throw error;
