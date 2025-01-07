@@ -3,7 +3,7 @@ import { useState } from "react"
 import { AddTalentModal } from "@/components/talents/AddTalentModal"
 import { useQuery } from "@tanstack/react-query"
 import { supabase } from "@/integrations/supabase/client"
-import { Loader2, UserPlus, Users, FolderGit, ClipboardCheck } from "lucide-react"
+import { Loader2, UserPlus, Users, FolderGit, ClipboardCheck, Briefcase } from "lucide-react"
 import { useAuth } from "@/contexts/auth"
 
 export default function Dashboard() {
@@ -92,6 +92,26 @@ export default function Dashboard() {
     enabled: !!user
   })
 
+  const { data: activeCastingsCount, isLoading: castingsLoading } = useQuery({
+    queryKey: ['active-castings-count'],
+    queryFn: async () => {
+      if (!user) return 0;
+      
+      const { count, error } = await supabase
+        .from('castings')
+        .select('*', { count: 'exact', head: true })
+        .eq('status', 'open')
+
+      if (error) {
+        console.error('Error fetching active castings count:', error)
+        return 0
+      }
+
+      return count || 0
+    },
+    enabled: !!user
+  })
+
   if (!user) {
     return null;
   }
@@ -165,16 +185,16 @@ export default function Dashboard() {
         <div className="bg-card rounded-lg shadow p-6">
           <div className="flex items-center justify-between">
             <div>
-              <h2 className="text-lg font-semibold mb-2">Pending Reviews</h2>
-              <p className="text-sm text-muted-foreground">Awaiting evaluation</p>
+              <h2 className="text-lg font-semibold mb-2">Active Castings</h2>
+              <p className="text-sm text-muted-foreground">Open castings</p>
             </div>
-            <ClipboardCheck className="h-8 w-8 text-muted-foreground" />
+            <Briefcase className="h-8 w-8 text-muted-foreground" />
           </div>
           <p className="text-3xl font-bold mt-4">
-            {reviewsLoading ? (
+            {castingsLoading ? (
               <Loader2 className="h-6 w-6 animate-spin" />
             ) : (
-              reviewsCount
+              activeCastingsCount
             )}
           </p>
         </div>
