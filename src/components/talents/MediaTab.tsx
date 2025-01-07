@@ -3,10 +3,12 @@ import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Download, Plus, Trash2, Filter, Search, MoreVertical } from "lucide-react";
+import { Download, Plus, Trash2, Filter, Search } from "lucide-react";
 import { MediaCard } from "./MediaCard";
 import { MediaUploadDialog } from "./MediaUploadDialog";
 import { TalentProfileData } from "@/types/talent-profile";
+import { STORAGE_CONFIG } from "@/lib/storage-config";
+import { useToast } from "@/components/ui/use-toast";
 import {
   Select,
   SelectContent,
@@ -23,6 +25,8 @@ export const MediaTab = ({ talent }: MediaTabProps) => {
   const [selectedItems, setSelectedItems] = useState<string[]>([]);
   const [isUploadOpen, setIsUploadOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
+  const [mediaType, setMediaType] = useState<"all" | "photo" | "video" | "audio">("all");
+  const { toast } = useToast();
 
   const { data: media, isLoading } = useQuery({
     queryKey: ["talent-media", talent.user.id],
@@ -42,16 +46,86 @@ export const MediaTab = ({ talent }: MediaTabProps) => {
   const canUploadMedia = !NO_MEDIA_ROLES.includes(talent.user.role as typeof NO_MEDIA_ROLES[number]);
 
   const handleDownloadSelection = async () => {
-    // Implementation for downloading selected media
+    if (!selectedItems.length) return;
+
+    try {
+      for (const id of selectedItems) {
+        const mediaItem = media?.find(m => m.id === id);
+        if (mediaItem) {
+          const { data, error } = await supabase.storage
+            .from(STORAGE_CONFIG.BUCKET_NAME)
+            .download(mediaItem.file_path);
+
+          if (error) throw error;
+
+          // Create download link
+          const url = URL.createObjectURL(data);
+          const a = document.createElement('a');
+          a.href = url;
+          a.download = mediaItem.file_name;
+          document.body.appendChild(a);
+          a.click();
+          document.body.removeChild(a);
+          URL.revokeObjectURL(url);
+        }
+      }
+      toast({
+        title: "Success",
+        description: "Files downloaded successfully",
+      });
+    } catch (error) {
+      toast({
+        title: "Error",
+        description: "Failed to download files",
+        variant: "destructive",
+      });
+    }
   };
 
   const handleDeleteSelection = async () => {
-    // Implementation for deleting selected media
+    if (!selectedItems.length) return;
+
+    try {
+      // Delete files from storage
+      const filesToDelete = media
+        ?.filter(m => selectedItems.includes(m.id))
+        .map(m => m.file_path) || [];
+
+      if (filesToDelete.length) {
+        const { error: storageError } = await supabase.storage
+          .from(STORAGE_CONFIG.BUCKET_NAME)
+          .remove(filesToDelete);
+
+        if (storageError) throw storageError;
+      }
+
+      // Delete records from database
+      const { error: dbError } = await supabase
+        .from("talent_media")
+        .delete()
+        .in("id", selectedItems);
+
+      if (dbError) throw dbError;
+
+      setSelectedItems([]);
+      toast({
+        title: "Success",
+        description: "Files deleted successfully",
+      });
+    } catch (error) {
+      toast({
+        title: "Error",
+        description: "Failed to delete files",
+        variant: "destructive",
+      });
+    }
   };
 
-  const handleSearch = (value: string) => {
-    setSearchQuery(value);
-  };
+  const filteredMedia = media?.filter(item => {
+    const matchesSearch = item.file_name.toLowerCase().includes(searchQuery.toLowerCase());
+    const matchesType = mediaType === "all" || item.category === mediaType;
+    return matchesSearch && matchesType;
+  });
 
   return (
     <div className="space-y-6">
@@ -73,16 +147,6 @@ export const MediaTab = ({ talent }: MediaTabProps) => {
           <Download className="mr-2 h-4 w-4" />
           Download selection
         </Button>
-        <Select>
-          <SelectTrigger className="bg-blue-50 text-blue-600 hover:bg-blue-100 border-none w-[120px]">
-            <SelectValue placeholder="Set label" />
-          </SelectTrigger>
-          <SelectContent>
-            <SelectItem value="profile">Profile</SelectItem>
-            <SelectItem value="portfolio">Portfolio</SelectItem>
-            <SelectItem value="other">Other</SelectItem>
-          </SelectContent>
-        </Select>
         <Button
           variant="outline"
           onClick={handleDeleteSelection}
@@ -93,24 +157,15 @@ export const MediaTab = ({ talent }: MediaTabProps) => {
           Delete selection
         </Button>
         <div className="ml-auto flex items-center gap-3">
-          <Select>
+          <Select value={mediaType} onValueChange={(value: any) => setMediaType(value)}>
             <SelectTrigger className="bg-white border w-[120px]">
               <SelectValue placeholder="Filter" />
             </SelectTrigger>
             <SelectContent>
               <SelectItem value="all">All</SelectItem>
-              <SelectItem value="images">Images</SelectItem>
-              <SelectItem value="videos">Videos</SelectItem>
-            </SelectContent>
-          </Select>
-          <Select>
-            <SelectTrigger className="bg-white border w-[120px]">
-              <SelectValue placeholder="Sort" />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="newest">Newest</SelectItem>
-              <SelectItem value="oldest">Oldest</SelectItem>
-              <SelectItem value="name">Name</SelectItem>
+              <SelectItem value="photo">Photos</SelectItem>
+              <SelectItem value="video">Videos</SelectItem>
+              <SelectItem value="audio">Audio</SelectItem>
             </SelectContent>
           </Select>
           <div className="relative">
@@ -118,7 +173,7 @@ export const MediaTab = ({ talent }: MediaTabProps) => {
             <Input
               placeholder="Search..."
               value={searchQuery}
-              onChange={(e) => handleSearch(e.target.value)}
+              onChange={(e) => setSearchQuery(e.target.value)}
               className="pl-10 w-[200px]"
             />
           </div>
@@ -133,7 +188,7 @@ export const MediaTab = ({ talent }: MediaTabProps) => {
         <div>Loading...</div>
       ) : (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-          {media?.map((item) => (
+          {filteredMedia?.map((item) => (
             <MediaCard
               key={item.id}
               media={item}
