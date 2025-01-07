@@ -1,3 +1,4 @@
+import { useState, useEffect } from "react";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { supabase } from "@/integrations/supabase/client";
 
@@ -14,7 +15,17 @@ interface MessageListProps {
 }
 
 export function MessageList({ messages }: MessageListProps) {
-  const { data: { user } } = await supabase.auth.getUser();
+  const [currentUserId, setCurrentUserId] = useState<string | null>(null);
+
+  useEffect(() => {
+    const getCurrentUser = async () => {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (user) {
+        setCurrentUserId(user.id);
+      }
+    };
+    getCurrentUser();
+  }, []);
 
   return (
     <ScrollArea className="flex-1 p-4">
@@ -23,12 +34,12 @@ export function MessageList({ messages }: MessageListProps) {
           <div
             key={msg.id}
             className={`flex ${
-              msg.sender_id === user?.id ? "justify-end" : "justify-start"
+              msg.sender_id === currentUserId ? "justify-end" : "justify-start"
             }`}
           >
             <div
               className={`rounded-lg px-4 py-2 max-w-[80%] ${
-                msg.sender_id === user?.id
+                msg.sender_id === currentUserId
                   ? "bg-blue-500 text-white"
                   : "bg-gray-100"
               }`}
