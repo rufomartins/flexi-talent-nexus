@@ -1,18 +1,28 @@
 import React, { useState, useEffect } from 'react';
 import { Loader } from 'lucide-react';
-import { useDebounce } from '@/hooks/useDebounce';
+import { useFormValidation } from '@/hooks/useFormValidation';
+import { useLoadingState } from '@/hooks/useLoadingState';
+import { useFileUpload } from '@/hooks/useFileUpload';
 import { validateCastingForm } from '@/utils/validation';
+import { notify } from '@/utils/notifications';
 import { supabase } from '@/integrations/supabase/client';
-import { CastingFormData, ValidationErrors, CastingType } from '@/types/casting';
-import { Alert, AlertDescription } from '@/components/ui/alert';
+import { CastingFormData, ValidationErrors, CastingType, FILE_CONFIG } from '@/types/casting';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { RichTextEditor } from '@/components/ui/rich-text-editor';
+import { Button } from '@/components/ui/button';
 
 interface NewCastingFormProps {
   type: CastingType;
 }
 
 export const NewCastingForm: React.FC<NewCastingFormProps> = ({ type }) => {
+  const { errors, validateField, markTouched, clearErrors } = useFormValidation();
+  const { loadingStates, startLoading, stopLoading } = useLoadingState({
+    form: false,
+    fileUpload: false
+  });
+  const { files, uploadProgress, handleFileSelect, uploadFile } = useFileUpload(FILE_CONFIG);
+
   const [formData, setFormData] = useState<CastingFormData>({
     name: '',
     client_id: null,
@@ -22,7 +32,8 @@ export const NewCastingForm: React.FC<NewCastingFormProps> = ({ type }) => {
     allow_talent_portal: false,
     description: '',
     status: 'open',
-    casting_type: type
+    casting_type: type,
+    logo_url: null
   });
 
   const [errors, setErrors] = useState<ValidationErrors>({});
@@ -53,7 +64,8 @@ export const NewCastingForm: React.FC<NewCastingFormProps> = ({ type }) => {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    setIsSubmitting(true);
+    startLoading('form');
+    clearErrors();
 
     try {
       const validationErrors = validateCastingForm(formData);
@@ -62,12 +74,28 @@ export const NewCastingForm: React.FC<NewCastingFormProps> = ({ type }) => {
         return;
       }
 
-      // Submit form logic here
-      console.log('Form submitted:', formData);
+      // Handle file uploads if needed
+      if (files.logo?.file) {
+        const logoUrl = await uploadFile('logo', files.logo.file);
+        formData.logo_url = logoUrl;
+      }
+
+      // Submit form data
+      const { data, error } = await supabase
+        .from('castings')
+        .insert([formData])
+        .select()
+        .single();
+
+      if (error) throw error;
+
+      notify.success('Casting created successfully');
+      // Handle successful submission (e.g., redirect)
     } catch (error) {
       console.error('Error submitting form:', error);
+      notify.error('Failed to create casting');
     } finally {
-      setIsSubmitting(false);
+      stopLoading('form');
     }
   };
 
