@@ -19,7 +19,7 @@ import {
 } from "@/components/ui/sidebar"
 import { useAuth } from "@/contexts/auth"
 import { cn } from "@/lib/utils"
-import { useLocation } from "react-router-dom"
+import { Link, useLocation } from "react-router-dom"
 
 export const AppSidebar = () => {
   const { userDetails } = useAuth()
@@ -113,10 +113,10 @@ export const AppSidebar = () => {
                       location.pathname === item.href && "bg-muted text-primary"
                     )}
                   >
-                    <a href={item.href} className="flex items-center gap-3">
+                    <Link to={item.href} className="flex items-center gap-3">
                       <item.icon className="h-5 w-5" />
                       <span className="text-sm font-medium">{item.title}</span>
-                    </a>
+                    </Link>
                   </SidebarMenuButton>
                 </SidebarMenuItem>
                 
@@ -130,12 +130,12 @@ export const AppSidebar = () => {
                           "bg-muted text-primary"
                       )}
                     >
-                      <a href={subItem.href} className="flex items-center gap-3">
+                      <Link to={subItem.href} className="flex items-center gap-3">
                         <subItem.icon className="h-5 w-5" />
                         <span className="text-sm font-medium">
                           {subItem.title}
                         </span>
-                      </a>
+                      </Link>
                     </SidebarMenuButton>
                   </SidebarMenuItem>
                 ))}
