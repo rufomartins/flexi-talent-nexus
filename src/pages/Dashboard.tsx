@@ -6,6 +6,7 @@ import { AddTalentModal } from "@/components/talents/AddTalentModal"
 import { DashboardHeader } from "@/components/dashboard/DashboardHeader"
 import { StatsGrid } from "@/components/dashboard/StatsGrid"
 import { RecentActivity } from "@/components/dashboard/RecentActivity"
+import { ProfileCompletion } from "@/components/dashboard/ProfileCompletion"
 
 export default function Dashboard() {
   const [addTalentOpen, setAddTalentOpen] = useState(false)
@@ -137,6 +138,12 @@ export default function Dashboard() {
         onOpenChange={setAddTalentOpen}
       />
       
+      {userDetails?.role === 'ugc_talent' && (
+        <div className="mb-8 max-w-xs">
+          <ProfileCompletion />
+        </div>
+      )}
+
       <StatsGrid
         newRegistrations={newRegistrations}
         talentsCount={talentsCount}
@@ -154,5 +161,5 @@ export default function Dashboard() {
 
       <RecentActivity />
     </div>
-  )
+  );
 }
