@@ -1,39 +1,15 @@
-import React, { useState } from 'react';
-import { Search } from 'lucide-react';
+import { useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
-import { supabase } from '@/integrations/supabase/client';
-import { Button } from '@/components/ui/button';
-import { Checkbox } from '@/components/ui/checkbox';
-import { Input } from '@/components/ui/input';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { useNavigate } from 'react-router-dom';
+import { supabase } from '@/integrations/supabase/client';
+import { CastingCard } from './CastingCard';
+import { CastingListControls } from './CastingListControls';
+import { Casting, SortOption } from './types';
 
-// Update the type definitions to match the database schema
-type CastingType = 'internal' | 'external';
-type CastingStatus = 'open' | 'closed';
-
-interface CastingClient {
-  full_name: string | null;
-}
-
-interface Casting {
-  id: string;
-  name: string;
-  type: CastingType;
-  status: CastingStatus;
-  logo_url: string | null;
-  client_id: string | null;
-  client?: CastingClient | null;
-  _count?: {
-    talents: number;
-    guest_remarks: number;
-  };
-}
-
-const CastingList = () => {
+export default function CastingList() {
   const navigate = useNavigate();
   const [search, setSearch] = useState('');
-  const [sortBy, setSortBy] = useState('name');
+  const [sortBy, setSortBy] = useState<SortOption>('name');
   const [showClosed, setShowClosed] = useState(false);
 
   const { data: castings, isLoading } = useQuery({
@@ -43,7 +19,8 @@ const CastingList = () => {
         .from('castings')
         .select(`
           *,
-          client:client_id(full_name)
+          client:client_id(full_name),
+          project_manager:project_manager_id(full_name)
         `);
 
       // Apply filters
@@ -60,10 +37,14 @@ const CastingList = () => {
         case 'name':
           query = query.order('name');
           break;
-        case 'pm':
+        case 'project_manager':
           query = query.order('project_manager_id');
           break;
-        case 'date':
+        case 'creation_date':
+          query = query.order('created_at', { ascending: false });
+          break;
+        case 'client_remarks':
+          // For now, we'll sort by created_at since guest_remarks is not implemented yet
           query = query.order('created_at', { ascending: false });
           break;
         default:
@@ -74,20 +55,7 @@ const CastingList = () => {
 
       if (error) throw error;
       
-      // Transform the data to match our Casting type
-      return (data as any[]).map(casting => ({
-        id: casting.id,
-        name: casting.name,
-        type: casting.type,
-        status: casting.status,
-        logo_url: casting.logo_url,
-        client_id: casting.client_id,
-        client: casting.client,
-        _count: {
-          talents: 0, // We'll need to add this count from the database
-          guest_remarks: 0 // We'll need to add this count from the database
-        }
-      })) as Casting[];
+      return data as Casting[];
     }
   });
 
@@ -104,47 +72,14 @@ const CastingList = () => {
         <span>Castings</span>
       </div>
 
-      {/* Search and Controls */}
-      <div className="flex items-center justify-between mb-6">
-        <div className="relative flex-1 max-w-xs">
-          <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
-          <Input
-            type="text"
-            placeholder="Search..."
-            value={search}
-            onChange={(e) => setSearch(e.target.value)}
-            className="pl-10"
-          />
-        </div>
-        <div className="flex items-center space-x-4">
-          <Select value={sortBy} onValueChange={setSortBy}>
-            <SelectTrigger className="w-[180px]">
-              <SelectValue placeholder="Sort by..." />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="name">Name</SelectItem>
-              <SelectItem value="pm">Project Manager</SelectItem>
-              <SelectItem value="date">Creation date</SelectItem>
-              <SelectItem value="remarks">Client remarks</SelectItem>
-            </SelectContent>
-          </Select>
-          
-          <div className="flex items-center space-x-2">
-            <Checkbox 
-              id="showClosed" 
-              checked={showClosed}
-              onCheckedChange={(checked) => setShowClosed(checked as boolean)}
-            />
-            <label htmlFor="showClosed" className="text-sm text-gray-600">
-              Show closed
-            </label>
-          </div>
-          
-          <Button onClick={() => navigate('/castings/new')}>
-            + New casting
-          </Button>
-        </div>
-      </div>
+      <CastingListControls
+        onSearch={setSearch}
+        onSortChange={setSortBy}
+        onShowClosedChange={setShowClosed}
+        sortBy={sortBy}
+        showClosed={showClosed}
+        onNewCasting={() => navigate('/castings/new')}
+      />
 
       {/* Casting Cards */}
       <div className="space-y-4">
@@ -154,60 +89,10 @@ const CastingList = () => {
           <div className="text-center py-8 text-gray-500">No castings found</div>
         ) : (
           castings?.map((casting) => (
-            <div key={casting.id} className="bg-white rounded-lg p-6 shadow-sm">
-              <div className="flex">
-                <div className="w-24 h-24 flex-shrink-0">
-                  {casting.logo_url ? (
-                    <img 
-                      src={casting.logo_url} 
-                      alt={casting.name} 
-                      className="w-full h-full object-contain"
-                    />
-                  ) : (
-                    <div className="w-full h-full bg-gray-100 rounded-lg flex items-center justify-center">
-                      <span className="text-gray-400">No logo</span>
-                    </div>
-                  )}
-                </div>
-                <div className="ml-6 flex-1">
-                  <div className="flex justify-between items-start">
-                    <div>
-                      <h2 className="text-xl font-semibold text-gray-900">
-                        {casting.name}
-                      </h2>
-                      <p className="text-gray-600 mt-1">
-                        {casting.type === 'internal' ? 'Internal' : 'External'} Casting
-                      </p>
-                    </div>
-                    {casting.client && (
-                      <div className="text-sm text-gray-600">
-                        Client: {casting.client.full_name}
-                      </div>
-                    )}
-                  </div>
-                  <div className="flex items-center space-x-3 mt-4">
-                    <span className="inline-flex items-center space-x-1 text-sm">
-                      <span className={`w-2 h-2 rounded-full ${
-                        casting.status === 'open' ? 'bg-green-500' : 'bg-red-500'
-                      }`}></span>
-                      <span>{casting.status === 'open' ? 'Open' : 'Closed'}</span>
-                    </span>
-                    <span className="text-sm text-gray-600">
-                      {casting._count?.talents || 0} Talents
-                    </span>
-                    <span className="inline-flex items-center space-x-1 text-sm">
-                      <span className="w-2 h-2 rounded-full bg-gray-500"></span>
-                      <span>{casting._count?.guest_remarks || 0} Guest remarks</span>
-                    </span>
-                  </div>
-                </div>
-              </div>
-            </div>
+            <CastingCard key={casting.id} casting={casting} />
           ))
         )}
       </div>
     </div>
   );
-};
-
-export default CastingList;
+}
