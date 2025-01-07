@@ -518,6 +518,70 @@ export type Database = {
         }
         Relationships: []
       }
+      conversation_participants: {
+        Row: {
+          conversation_id: string | null
+          created_at: string | null
+          id: string
+          last_read_at: string | null
+          user_id: string | null
+        }
+        Insert: {
+          conversation_id?: string | null
+          created_at?: string | null
+          id?: string
+          last_read_at?: string | null
+          user_id?: string | null
+        }
+        Update: {
+          conversation_id?: string | null
+          created_at?: string | null
+          id?: string
+          last_read_at?: string | null
+          user_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "conversation_participants_conversation_id_fkey"
+            columns: ["conversation_id"]
+            isOneToOne: false
+            referencedRelation: "conversations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      conversations: {
+        Row: {
+          created_at: string | null
+          id: string
+          project_id: string | null
+          title: string | null
+          updated_at: string | null
+        }
+        Insert: {
+          created_at?: string | null
+          id?: string
+          project_id?: string | null
+          title?: string | null
+          updated_at?: string | null
+        }
+        Update: {
+          created_at?: string | null
+          id?: string
+          project_id?: string | null
+          title?: string | null
+          updated_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "conversations_project_id_fkey"
+            columns: ["project_id"]
+            isOneToOne: false
+            referencedRelation: "projects"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       email_templates: {
         Row: {
           content: string
@@ -617,6 +681,42 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
+      }
+      messages: {
+        Row: {
+          content: string | null
+          content_type: string | null
+          conversation_id: string
+          created_at: string | null
+          id: string
+          is_read: boolean | null
+          metadata: Json | null
+          sender_id: string
+          updated_at: string | null
+        }
+        Insert: {
+          content?: string | null
+          content_type?: string | null
+          conversation_id: string
+          created_at?: string | null
+          id?: string
+          is_read?: boolean | null
+          metadata?: Json | null
+          sender_id: string
+          updated_at?: string | null
+        }
+        Update: {
+          content?: string | null
+          content_type?: string | null
+          conversation_id?: string
+          created_at?: string | null
+          id?: string
+          is_read?: boolean | null
+          metadata?: Json | null
+          sender_id?: string
+          updated_at?: string | null
+        }
+        Relationships: []
       }
       project_videos: {
         Row: {
