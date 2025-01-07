@@ -3,7 +3,7 @@ import { Bold, Italic, Link, List, Quote, Code } from 'lucide-react';
 
 interface RichTextEditorProps {
   value: string;
-  onChange: (e: React.ChangeEvent<HTMLTextAreaElement>) => void;
+  onChange: (value: string) => void;
   label: string;
   error?: string;
 }
@@ -39,7 +39,7 @@ export const RichTextEditor = ({ value, onChange, label, error }: RichTextEditor
         </div>
         <textarea
           value={value}
-          onChange={onChange}
+          onChange={(e) => onChange(e.target.value)}
           className="w-full p-4 min-h-[200px] focus:outline-none resize-none"
           placeholder="Enter text here..."
         />

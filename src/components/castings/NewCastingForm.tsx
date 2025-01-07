@@ -55,7 +55,10 @@ export function NewCastingForm({ type }: NewCastingFormProps) {
     try {
       const { error } = await supabase
         .from('castings')
-        .insert(data);
+        .insert({
+          ...data,
+          created_by: (await supabase.auth.getUser()).data.user?.id
+        });
 
       if (error) throw error;
 
@@ -76,7 +79,6 @@ export function NewCastingForm({ type }: NewCastingFormProps) {
           <CastingLogoUpload 
             form={form} 
             onUploadClick={() => {
-              // Implement file upload logic here
               console.log('Upload clicked');
             }} 
           />
@@ -89,7 +91,7 @@ export function NewCastingForm({ type }: NewCastingFormProps) {
           <RichTextEditor
             label="Talent briefing (will be sent to talents in availability mails)"
             value={form.watch('talent_briefing') || ''}
-            onChange={(value) => form.setValue('talent_briefing', value)}
+            onChange={(value: string) => form.setValue('talent_briefing', value)}
             error={form.formState.errors.talent_briefing?.message}
           />
 
