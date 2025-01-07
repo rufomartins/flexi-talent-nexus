@@ -2,10 +2,13 @@ import { useState, useCallback, useEffect } from "react";
 import { debounce } from "lodash";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
+import { Database } from "@/integrations/supabase/types";
+
+type TableNames = keyof Database['public']['Tables'];
 
 export interface AutoSaveConfig {
   debounceTime: number;
-  tableName: string;
+  tableName: TableNames;
   idField: string;
 }
 
