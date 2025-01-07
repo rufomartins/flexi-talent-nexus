@@ -3,7 +3,7 @@ import { BrowserRouter as Router, Routes, Route, Navigate } from "react-router-d
 import { AuthProvider } from "@/contexts/auth";
 import { Toaster } from "@/components/ui/toaster";
 import ProtectedRoute from "@/components/ProtectedRoute";
-import MainLayout from "@/components/layout/MainLayout";
+import { MainLayout } from "@/components/layout/MainLayout";
 import Login from "@/pages/Login";
 import Dashboard from "@/pages/Dashboard";
 import Calendar from "@/pages/Calendar";
@@ -28,7 +28,6 @@ function App() {
               <Route index element={<Navigate to="/dashboard" replace />} />
               <Route path="dashboard" element={<Dashboard />} />
               <Route path="calendar" element={<Calendar />} />
-              {/* Add any additional routes here */}
             </Route>
           </Routes>
         </Router>

@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { useQuery } from "@tanstack/react-query";
-import { Calendar as CalendarIcon, Loader2 } from "lucide-react";
+import { CalendarIcon, Loader2 } from "lucide-react";
 import { format } from "date-fns";
 import { supabase } from "@/integrations/supabase/client";
 import { Calendar } from "@/components/ui/calendar";
@@ -10,6 +10,16 @@ import { useAuth } from "@/contexts/auth";
 import { AddEventDialog } from "@/components/calendar/AddEventDialog";
 import { CalendarEventsList } from "@/components/calendar/CalendarEventsList";
 import { CalendarConflictAlert } from "@/components/calendar/CalendarConflictAlert";
+
+interface CalendarEvent {
+  id: string;
+  date: string;
+  description: string;
+  casting_id: string | null;
+  castings?: {
+    name: string;
+  } | null;
+}
 
 export default function CalendarPage() {
   const [date, setDate] = useState<Date>(new Date());
@@ -35,7 +45,14 @@ export default function CalendarPage() {
         return [];
       }
 
-      return data;
+      // Transform the data to match CalendarEvent type
+      return (data || []).map(event => ({
+        id: event.id,
+        date: event.date,
+        description: event.description,
+        casting_id: event.casting_id,
+        castings: event.castings
+      })) as CalendarEvent[];
     },
     enabled: !!user,
   });
