@@ -8,7 +8,7 @@ import {
   Users,
   Briefcase,
   DollarSign,
-  Cast,
+  Film,
 } from "lucide-react"
 import {
   Sidebar,
@@ -61,7 +61,7 @@ export const AppSidebar = () => {
     },
     {
       title: "Castings",
-      icon: Cast,
+      icon: Film,
       href: "/castings",
       show: true,
     },

@@ -10,6 +10,8 @@ import Calendar from "@/pages/Calendar";
 import Bookings from "@/pages/Bookings";
 import TalentList from "@/pages/talents/TalentList";
 import TalentProfile from "@/pages/TalentProfile";
+import Castings from "@/pages/Castings";
+import Projects from "@/pages/Projects";
 
 const queryClient = new QueryClient();
 
@@ -40,6 +42,12 @@ function App() {
                 <Route index element={<TalentList />} />
                 <Route path=":id" element={<TalentProfile />} />
               </Route>
+
+              {/* Casting routes */}
+              <Route path="castings" element={<Castings />} />
+              
+              {/* Project routes */}
+              <Route path="projects" element={<Projects />} />
             </Route>
           </Routes>
           <Toaster />
