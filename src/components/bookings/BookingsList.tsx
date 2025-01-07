@@ -16,8 +16,7 @@ export function BookingsList() {
           talent_profiles (
             user_id,
             users (
-              full_name,
-              email
+              full_name
             )
           ),
           projects (
@@ -81,15 +80,15 @@ export function BookingsList() {
   )
 }
 
-function getStatusVariant(status: string) {
+function getStatusVariant(status: string): "default" | "destructive" | "outline" | "secondary" {
   switch (status) {
     case 'confirmed':
-      return 'success'
+      return 'default'
     case 'pending':
-      return 'warning'
+      return 'secondary'
     case 'cancelled':
       return 'destructive'
     default:
-      return 'secondary'
+      return 'outline'
   }
 }

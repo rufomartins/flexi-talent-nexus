@@ -35,20 +35,19 @@ export function BookingConfirmationDialog({
     try {
       setIsSubmitting(true)
 
-      // Create booking record
+      // Create booking record with required start_date and end_date
       const { error: bookingError } = await supabase
         .from('bookings')
         .insert({
           talent_id: talentId,
           casting_id: castingId,
           project_id: projectId,
-          status: 'pending'
+          status: 'pending',
+          start_date: new Date().toISOString(), // Default to current date, you might want to add date pickers
+          end_date: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString(), // Default to 30 days from now
         })
 
       if (bookingError) throw bookingError
-
-      // TODO: Send email notification to talent
-      // This will be implemented in the next step with the email service
 
       toast({
         title: "Booking confirmation sent",
