@@ -7,9 +7,9 @@ import { Loader2 } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 const statsCards = [
-  { title: "Active Tasks", value: 0 },
-  { title: "Completion Percentage", value: 0 },
-  { title: "Upcoming Deadlines", value: 0 },
+  { title: "Active Tasks", value: 12 },
+  { title: "Completion Percentage", value: 45 },
+  { title: "Upcoming Deadlines", value: 8 },
 ];
 
 const statusColors = {
@@ -42,29 +42,73 @@ const statusColors = {
   },
 };
 
+// Dummy data for preview
+const dummyProjects = [
+  {
+    id: 1,
+    name: "Global Marketing Campaign 2024",
+    countries: [
+      {
+        id: 1,
+        name: "United States",
+        languages: [
+          {
+            id: 1,
+            name: "English",
+            tasks: [
+              {
+                id: 1,
+                name: "Product Launch Video",
+                script_status: "Approved",
+                translation_status: "In Progress",
+                review_status: "Internal Review",
+                talent_status: "Booked",
+                delivery_status: "Pending",
+              },
+              {
+                id: 2,
+                name: "Brand Story",
+                script_status: "In Progress",
+                translation_status: "Pending",
+                review_status: "Internal Review",
+                talent_status: "Booked",
+                delivery_status: "Pending",
+              },
+            ],
+          },
+        ],
+      },
+      {
+        id: 2,
+        name: "Germany",
+        languages: [
+          {
+            id: 2,
+            name: "German",
+            tasks: [
+              {
+                id: 3,
+                name: "Product Launch Video",
+                script_status: "Pending",
+                translation_status: "Pending",
+                review_status: "Internal Review",
+                talent_status: "Booked",
+                delivery_status: "Pending",
+              },
+            ],
+          },
+        ],
+      },
+    ],
+  },
+];
+
 export default function Projects() {
   const { data: projects, isLoading } = useQuery({
     queryKey: ['projects'],
     queryFn: async () => {
-      const { data, error } = await supabase
-        .from('projects')
-        .select(`
-          *,
-          project_countries (
-            id,
-            country_name,
-            project_languages (
-              id,
-              language_name,
-              project_tasks (
-                *
-              )
-            )
-          )
-        `);
-      
-      if (error) throw error;
-      return data || [];
+      // For preview, return dummy data
+      return dummyProjects;
     },
   });
 
