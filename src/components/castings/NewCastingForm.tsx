@@ -1,7 +1,6 @@
 import { useState } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import * as z from "zod";
 import { useMutation } from "@tanstack/react-query";
 import { useNavigate } from "react-router-dom";
 import { Form, FormControl, FormField, FormItem, FormLabel, FormDescription } from "@/components/ui/form";
@@ -11,22 +10,10 @@ import { Switch } from "@/components/ui/switch";
 import { Textarea } from "@/components/ui/textarea";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
-import { CastingFormData, CastingType } from "@/types/casting";
+import { CastingType } from "@/types/casting";
 import { MediaUploadDialog } from "@/components/talents/MediaUploadDialog";
-
-const formSchema = z.object({
-  name: z.string().min(1, "Casting name is required"),
-  type: z.enum(["internal", "external"]),
-  status: z.enum(["open", "closed"]),
-  client_id: z.string().optional(),
-  project_manager_id: z.string().optional(),
-  scout_id: z.string().optional(),
-  logo_url: z.string().optional(),
-  briefing: z.string().optional(),
-  show_briefing_on_signup: z.boolean(),
-  allow_talent_portal_apply: z.boolean(),
-  description: z.string().optional(),
-});
+import { castingFormSchema, CastingFormData, defaultValues } from "./CastingFormSchema";
+import { CastingLogoUpload } from "./CastingLogoUpload";
 
 interface NewCastingFormProps {
   type: CastingType;
@@ -39,13 +26,8 @@ export function NewCastingForm({ type, onSuccess }: NewCastingFormProps) {
   const navigate = useNavigate();
 
   const form = useForm<CastingFormData>({
-    resolver: zodResolver(formSchema),
-    defaultValues: {
-      type,
-      status: 'open',
-      show_briefing_on_signup: false,
-      allow_talent_portal_apply: true,
-    },
+    resolver: zodResolver(castingFormSchema),
+    defaultValues: defaultValues(type),
   });
 
   const createCasting = useMutation({
@@ -84,36 +66,11 @@ export function NewCastingForm({ type, onSuccess }: NewCastingFormProps) {
     <Form {...form}>
       <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-          {/* Logo Upload */}
-          <FormField
-            control={form.control}
-            name="logo_url"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>Casting Logo</FormLabel>
-                <FormControl>
-                  <div className="flex items-center gap-4">
-                    {field.value && (
-                      <img 
-                        src={field.value} 
-                        alt="Logo" 
-                        className="w-20 h-20 object-cover rounded-lg"
-                      />
-                    )}
-                    <Button
-                      type="button"
-                      variant="outline"
-                      onClick={() => setLogoUploadOpen(true)}
-                    >
-                      Upload Logo
-                    </Button>
-                  </div>
-                </FormControl>
-              </FormItem>
-            )}
+          <CastingLogoUpload 
+            form={form} 
+            onUploadClick={() => setLogoUploadOpen(true)} 
           />
 
-          {/* Basic Information */}
           <FormField
             control={form.control}
             name="name"
@@ -128,7 +85,6 @@ export function NewCastingForm({ type, onSuccess }: NewCastingFormProps) {
           />
         </div>
 
-        {/* Briefing */}
         <FormField
           control={form.control}
           name="briefing"
@@ -212,7 +168,7 @@ export function NewCastingForm({ type, onSuccess }: NewCastingFormProps) {
           </Button>
           <Button 
             type="submit"
-            disabled={createCasting.isLoading}
+            disabled={createCasting.isPending}
           >
             Create Casting
           </Button>
@@ -222,8 +178,7 @@ export function NewCastingForm({ type, onSuccess }: NewCastingFormProps) {
       <MediaUploadDialog
         open={logoUploadOpen}
         onOpenChange={setLogoUploadOpen}
-        talentId={form.getValues("id")}
-        talentRole="ugc_talent"
+        onUploadComplete={(url) => form.setValue("logo_url", url)}
       />
     </Form>
   );
