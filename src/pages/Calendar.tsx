@@ -85,8 +85,8 @@ export default function CalendarPage() {
   };
 
   return (
-    <div className="h-full flex flex-col">
-      <div className="flex justify-between items-center mb-6 px-6 pt-6">
+    <div className="flex flex-col h-[calc(100vh-80px)]">
+      <div className="flex justify-between items-center p-6">
         <div className="flex items-center gap-2">
           <CalendarIcon className="h-6 w-6" />
           <h1 className="text-2xl font-bold">Calendar</h1>
@@ -144,7 +144,7 @@ export default function CalendarPage() {
         </div>
       </div>
 
-      <div className="flex-1 bg-white rounded-lg shadow mx-6 mb-6">
+      <div className="flex-1 bg-white rounded-lg shadow mx-6 mb-6 overflow-hidden">
         <div className="grid grid-cols-7 gap-px border-b">
           {['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'].map((day) => (
             <div
