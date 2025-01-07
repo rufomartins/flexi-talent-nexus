@@ -21,7 +21,7 @@ import { ShotTableRow } from "./components/ShotTableRow";
 export function ShotsTab({ shotListId }: { shotListId: string }) {
   const [isAddDialogOpen, setIsAddDialogOpen] = useState(false);
   const queryClient = useQueryClient();
-  const { isLoading, startLoading, stopLoading } = useLoadingState();
+  const { loadingStates, startLoading, stopLoading } = useLoadingState();
 
   const { data: shots, isLoading: isFetchingShots } = useQuery({
     queryKey: ["shots", shotListId],
@@ -141,7 +141,7 @@ export function ShotsTab({ shotListId }: { shotListId: string }) {
                 shot={shot}
                 onEdit={handleEdit}
                 onDelete={handleDelete}
-                isDeleting={isLoading.delete}
+                isDeleting={loadingStates["delete"] || false}
               />
             ))}
             {!shots?.length && (
