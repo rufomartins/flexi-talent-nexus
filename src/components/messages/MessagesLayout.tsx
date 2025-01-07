@@ -29,12 +29,12 @@ export function MessagesLayout() {
   return (
     <MessagesErrorBoundary>
       <MessagesProvider>
-        <div className="flex h-[calc(100vh-4rem)] bg-white">
+        <div className="flex h-full w-full bg-background">
           {/* Left Sidebar - Conversations List */}
           <div
             className={cn(
-              "w-[280px] border-r border-chat-input-border bg-white transition-transform duration-300 ease-in-out z-20",
-              !showLeftSidebar && "-translate-x-full"
+              "relative w-[280px] border-r border-border bg-background transition-all duration-300 ease-in-out",
+              !showLeftSidebar && "-ml-[280px]"
             )}
           >
             <Button
@@ -57,13 +57,7 @@ export function MessagesLayout() {
           </div>
 
           {/* Main Chat Area */}
-          <main
-            className={cn(
-              "flex-1 transition-all duration-300 ease-in-out",
-              showLeftSidebar && "ml-[280px]",
-              showRightSidebar && "mr-[280px]"
-            )}
-          >
+          <main className="flex-1 overflow-hidden">
             <Suspense fallback={<LoadingState />}>
               <ChatWindow participantName="John Doe" />
             </Suspense>
@@ -72,8 +66,8 @@ export function MessagesLayout() {
           {/* Right Sidebar - Info Panel */}
           <div
             className={cn(
-              "w-[280px] border-l border-chat-input-border bg-white transition-transform duration-300 ease-in-out z-20",
-              !showRightSidebar && "translate-x-full"
+              "relative w-[280px] border-l border-border bg-background transition-all duration-300 ease-in-out",
+              !showRightSidebar && "translate-x-[280px]"
             )}
           >
             <Button
@@ -89,7 +83,7 @@ export function MessagesLayout() {
               )}
             </Button>
             <div className="flex h-full flex-col">
-              <div className="border-b border-chat-input-border p-4">
+              <div className="border-b border-border p-4">
                 {/* User/Group info will go here */}
               </div>
               <Suspense fallback={<LoadingState />}>
