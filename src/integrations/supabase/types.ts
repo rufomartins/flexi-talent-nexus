@@ -94,6 +94,53 @@ export type Database = {
           },
         ]
       }
+      casting_form_fields: {
+        Row: {
+          casting_id: string | null
+          created_at: string | null
+          field_type: string
+          guest_access: boolean | null
+          id: string
+          label: string
+          position: number | null
+          required: boolean | null
+          sign_up: boolean | null
+          updated_at: string | null
+        }
+        Insert: {
+          casting_id?: string | null
+          created_at?: string | null
+          field_type: string
+          guest_access?: boolean | null
+          id?: string
+          label: string
+          position?: number | null
+          required?: boolean | null
+          sign_up?: boolean | null
+          updated_at?: string | null
+        }
+        Update: {
+          casting_id?: string | null
+          created_at?: string | null
+          field_type?: string
+          guest_access?: boolean | null
+          id?: string
+          label?: string
+          position?: number | null
+          required?: boolean | null
+          sign_up?: boolean | null
+          updated_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "casting_form_fields_casting_id_fkey"
+            columns: ["casting_id"]
+            isOneToOne: false
+            referencedRelation: "castings"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       casting_guests: {
         Row: {
           access_token: string
