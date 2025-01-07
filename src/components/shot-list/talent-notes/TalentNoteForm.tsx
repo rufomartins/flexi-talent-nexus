@@ -1,4 +1,4 @@
-import { useEffect } from 'react';
+import { useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { useQuery } from '@tanstack/react-query';
 import { Button } from '@/components/ui/button';
@@ -39,15 +39,6 @@ export function TalentNoteForm({ note, onSubmit, onCancel, isLoading }: TalentNo
 
   // Watch form values for rich text editor
   const instructions = watch('instructions');
-
-  useEffect(() => {
-    if (note) {
-      setValue('shot_reference', note.shot_reference || '');
-      setValue('instructions', note.instructions || '');
-      setValue('required_props', note.required_props || '');
-      setValue('additional_notes', note.additional_notes || '');
-    }
-  }, [note, setValue]);
 
   return (
     <form onSubmit={handleSubmit(onSubmit)} className="space-y-4 p-4 border rounded-md">
