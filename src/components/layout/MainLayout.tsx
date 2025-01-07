@@ -22,8 +22,8 @@ export const MainLayout = ({ children }: MainLayoutProps) => {
             <AppSidebar />
           </div>
 
-          {/* Main content - with proper left margin and top padding */}
-          <main className="flex-1 ml-64 pt-16 p-6 bg-muted/50">
+          {/* Main content - removed margin, adjusted padding */}
+          <main className="flex-1 pl-64 pt-16 bg-muted/50">
             {children}
           </main>
         </div>

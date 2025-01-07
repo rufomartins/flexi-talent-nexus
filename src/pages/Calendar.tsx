@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { CalendarIcon, Loader2, ChevronLeft, ChevronRight } from "lucide-react";
 import { format } from "date-fns";
@@ -85,8 +85,8 @@ export default function CalendarPage() {
   };
 
   return (
-    <div className="flex flex-col h-[calc(100vh-80px)]">
-      <div className="flex justify-between items-center px-4 py-3">
+    <div className="h-full">
+      <div className="flex justify-between items-center mb-4">
         <div className="flex items-center gap-2">
           <CalendarIcon className="h-6 w-6" />
           <h1 className="text-2xl font-bold">Calendar</h1>
@@ -144,7 +144,7 @@ export default function CalendarPage() {
         </div>
       </div>
 
-      <div className="flex-1 bg-white rounded-lg shadow mx-4 mb-4 overflow-hidden">
+      <div className="bg-white rounded-lg shadow">
         <div className="grid grid-cols-7 gap-px border-b">
           {['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'].map((day) => (
             <div
@@ -167,23 +167,21 @@ export default function CalendarPage() {
           }}
         />
 
-        <div className="p-4 border-t">
-          {isLoading ? (
-            <div className="flex items-center justify-center h-24">
-              <Loader2 className="h-8 w-8 animate-spin" />
-            </div>
-          ) : (
-            <>
-              <h2 className="text-lg font-semibold mb-4">
-                Events for {format(date, 'MMMM d, yyyy')}
-              </h2>
-              <CalendarEventsList 
-                events={events || []} 
-                selectedDate={date}
-              />
-            </>
-          )}
-        </div>
+        {isLoading ? (
+          <div className="flex items-center justify-center h-16">
+            <Loader2 className="h-6 w-6 animate-spin" />
+          </div>
+        ) : (
+          <div className="p-4 border-t">
+            <h2 className="text-lg font-semibold mb-4">
+              Events for {format(date, 'MMMM d, yyyy')}
+            </h2>
+            <CalendarEventsList 
+              events={events || []} 
+              selectedDate={date}
+            />
+          </div>
+        )}
       </div>
 
       <AddEventDialog 
