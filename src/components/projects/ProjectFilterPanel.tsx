@@ -17,22 +17,12 @@ import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import { Calendar as CalendarIcon } from "lucide-react";
 import { DateRange } from "react-day-picker";
+import type { ProjectFilters } from "./types";
 
 interface ProjectFilterPanelProps {
   onApplyFilters: (filters: ProjectFilters) => void;
   onClose: () => void;
   initialFilters?: ProjectFilters;
-}
-
-export interface ProjectFilters {
-  projectManager?: string;
-  country?: string;
-  language?: string;
-  scriptStatus?: string;
-  reviewStatus?: string;
-  talentStatus?: string;
-  startDate?: Date;
-  endDate?: Date;
 }
 
 const scriptStatusOptions = ["Pending", "In Progress", "Approved"];
@@ -120,7 +110,7 @@ export function ProjectFilterPanel({
         <label className="text-sm font-medium">Script Status</label>
         <Select
           value={filters.scriptStatus}
-          onValueChange={(value) => setFilters({ ...filters, scriptStatus: value })}
+          onValueChange={(value) => setFilters({ ...filters, scriptStatus: value as ProjectFilters["scriptStatus"] })}
         >
           <SelectTrigger>
             <SelectValue placeholder="Select status" />
@@ -139,7 +129,7 @@ export function ProjectFilterPanel({
         <label className="text-sm font-medium">Review Status</label>
         <Select
           value={filters.reviewStatus}
-          onValueChange={(value) => setFilters({ ...filters, reviewStatus: value })}
+          onValueChange={(value) => setFilters({ ...filters, reviewStatus: value as ProjectFilters["reviewStatus"] })}
         >
           <SelectTrigger>
             <SelectValue placeholder="Select status" />
@@ -158,7 +148,7 @@ export function ProjectFilterPanel({
         <label className="text-sm font-medium">Talent Status</label>
         <Select
           value={filters.talentStatus}
-          onValueChange={(value) => setFilters({ ...filters, talentStatus: value })}
+          onValueChange={(value) => setFilters({ ...filters, talentStatus: value as ProjectFilters["talentStatus"] })}
         >
           <SelectTrigger>
             <SelectValue placeholder="Select status" />
@@ -181,11 +171,11 @@ export function ProjectFilterPanel({
               variant="outline"
               className={cn(
                 "w-full justify-start text-left font-normal",
-                !dateRange.from && "text-muted-foreground"
+                !dateRange?.from && "text-muted-foreground"
               )}
             >
               <CalendarIcon className="mr-2 h-4 w-4" />
-              {dateRange.from ? (
+              {dateRange?.from ? (
                 dateRange.to ? (
                   <>
                     {format(dateRange.from, "LLL dd, y")} -{" "}
@@ -203,7 +193,7 @@ export function ProjectFilterPanel({
             <Calendar
               initialFocus
               mode="range"
-              defaultMonth={dateRange.from}
+              defaultMonth={dateRange?.from}
               selected={dateRange}
               onSelect={setDateRange}
               numberOfMonths={2}

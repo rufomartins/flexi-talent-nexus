@@ -7,8 +7,9 @@ import {
   PopoverContent,
   PopoverTrigger,
 } from "@/components/ui/popover";
-import { ProjectFilterPanel, ProjectFilters } from "./ProjectFilterPanel";
+import { ProjectFilterPanel } from "./ProjectFilterPanel";
 import { useDebounce } from "@/hooks/useDebounce";
+import type { ProjectFilters } from "./types";
 
 interface ProjectSearchProps {
   onSearch: (query: string) => void;
@@ -29,7 +30,6 @@ export function ProjectSearch({ onSearch, onFilter }: ProjectSearchProps) {
     setIsFilterOpen(false);
   };
 
-  // Effect to handle debounced search
   React.useEffect(() => {
     onSearch(debouncedSearch);
   }, [debouncedSearch, onSearch]);
