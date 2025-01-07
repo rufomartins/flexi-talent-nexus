@@ -1,8 +1,17 @@
-import { useQuery } from "@tanstack/react-query";
-import { supabase } from "@/integrations/supabase/client";
-import { Loader2 } from "lucide-react";
+import { useState } from "react"
+import { useQuery } from "@tanstack/react-query"
+import { supabase } from "@/integrations/supabase/client"
+import { Loader2, Search, Plus } from "lucide-react"
+import { Button } from "@/components/ui/button"
+import { TalentSearchDialog } from "@/components/talents/TalentSearchDialog"
+import { AddTalentModal } from "@/components/talents/AddTalentModal"
+import { useToast } from "@/hooks/use-toast"
 
 const TalentList = () => {
+  const [searchOpen, setSearchOpen] = useState(false)
+  const [addTalentOpen, setAddTalentOpen] = useState(false)
+  const { toast } = useToast()
+
   const { data: talents, isLoading } = useQuery({
     queryKey: ["talents"],
     queryFn: async () => {
@@ -19,24 +28,49 @@ const TalentList = () => {
             avatar_url
           )
         `)
-        .order("created_at", { ascending: false });
+        .order("created_at", { ascending: false })
 
-      if (error) throw error;
-      return data;
+      if (error) {
+        toast({
+          title: "Error loading talents",
+          description: error.message,
+          variant: "destructive",
+        })
+        throw error
+      }
+      return data
     },
-  });
+  })
+
+  const handleSearch = async (searchValues: any) => {
+    console.log("Search values:", searchValues)
+    // Implement search logic here
+  }
 
   if (isLoading) {
     return (
       <div className="flex items-center justify-center h-screen">
         <Loader2 className="h-8 w-8 animate-spin" />
       </div>
-    );
+    )
   }
 
   return (
     <div className="container py-6">
-      <h1 className="text-2xl font-semibold mb-6">Talents</h1>
+      <div className="flex justify-between items-center mb-6">
+        <h1 className="text-2xl font-semibold">Talents</h1>
+        <div className="flex gap-2">
+          <Button variant="outline" onClick={() => setSearchOpen(true)}>
+            <Search className="h-4 w-4 mr-2" />
+            Search
+          </Button>
+          <Button onClick={() => setAddTalentOpen(true)}>
+            <Plus className="h-4 w-4 mr-2" />
+            Add New Talent
+          </Button>
+        </div>
+      </div>
+
       <div className="grid gap-4">
         {talents?.map((talent) => (
           <div
@@ -72,8 +106,19 @@ const TalentList = () => {
           </div>
         ))}
       </div>
-    </div>
-  );
-};
 
-export default TalentList;
+      <TalentSearchDialog 
+        open={searchOpen}
+        onOpenChange={setSearchOpen}
+        onSearch={handleSearch}
+      />
+
+      <AddTalentModal
+        open={addTalentOpen}
+        onOpenChange={setAddTalentOpen}
+      />
+    </div>
+  )
+}
+
+export default TalentList
