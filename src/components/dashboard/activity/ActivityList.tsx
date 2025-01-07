@@ -1,14 +1,7 @@
 import { Loader2 } from "lucide-react";
-import { useNavigate } from "react-router-dom";
-import {
-  Pagination,
-  PaginationContent,
-  PaginationItem,
-  PaginationLink,
-  PaginationNext,
-  PaginationPrevious,
-} from "@/components/ui/pagination";
 import { Json } from "@/integrations/supabase/types";
+import { ActivityListItem } from "./ActivityListItem";
+import { ActivityPagination } from "./ActivityPagination";
 
 interface Activity {
   id: string;
@@ -32,38 +25,6 @@ export const ActivityList = ({
   totalPages,
   onPageChange,
 }: ActivityListProps) => {
-  const navigate = useNavigate();
-
-  const formatActivityText = (activity: Activity) => {
-    const { action_type, details } = activity;
-    
-    if (action_type === 'registration') {
-      const status = (details as { status?: string })?.status || 'under_evaluation';
-      return `New registration - ${status.replace('_', ' ')}`;
-    }
-    
-    if (action_type === 'project') {
-      const status = (details as { status?: string })?.status || 'new';
-      return `Project - ${status.replace('_', ' ')}`;
-    }
-    
-    return action_type;
-  };
-
-  const handleActivityClick = (activity: Activity) => {
-    const { action_type, details } = activity;
-    
-    if (action_type === 'registration') {
-      const status = (details as { status?: string })?.status || 'under_evaluation';
-      navigate(`/talents?filter=${status}`);
-    }
-    
-    if (action_type === 'project') {
-      const status = (details as { status?: string })?.status || 'new';
-      navigate(`/projects?status=${status}`);
-    }
-  };
-
   if (isLoading) {
     return (
       <div className="flex justify-center py-8">
@@ -84,69 +45,15 @@ export const ActivityList = ({
     <>
       <ul className="space-y-4">
         {activities.map((activity) => (
-          <li 
-            key={activity.id} 
-            className="flex items-center space-x-4 p-3 rounded-md hover:bg-muted/50 cursor-pointer transition-colors"
-            onClick={() => handleActivityClick(activity)}
-          >
-            <div className="flex-1">
-              <p className="text-sm text-muted-foreground">
-                {formatActivityText(activity)}
-              </p>
-              <p className="text-xs text-muted-foreground">
-                {new Date(activity.created_at).toLocaleDateString()}
-              </p>
-            </div>
-          </li>
+          <ActivityListItem key={activity.id} activity={activity} />
         ))}
       </ul>
       
-      {totalPages > 1 && (
-        <div className="mt-4">
-          <Pagination>
-            <PaginationContent>
-              {currentPage > 1 && (
-                <PaginationItem>
-                  <PaginationPrevious 
-                    href="#" 
-                    onClick={(e) => {
-                      e.preventDefault();
-                      onPageChange(currentPage - 1);
-                    }} 
-                  />
-                </PaginationItem>
-              )}
-              
-              {Array.from({ length: totalPages }, (_, i) => i + 1).map((page) => (
-                <PaginationItem key={page}>
-                  <PaginationLink
-                    href="#"
-                    onClick={(e) => {
-                      e.preventDefault();
-                      onPageChange(page);
-                    }}
-                    isActive={currentPage === page}
-                  >
-                    {page}
-                  </PaginationLink>
-                </PaginationItem>
-              ))}
-              
-              {currentPage < totalPages && (
-                <PaginationItem>
-                  <PaginationNext 
-                    href="#" 
-                    onClick={(e) => {
-                      e.preventDefault();
-                      onPageChange(currentPage + 1);
-                    }} 
-                  />
-                </PaginationItem>
-              )}
-            </PaginationContent>
-          </Pagination>
-        </div>
-      )}
+      <ActivityPagination
+        currentPage={currentPage}
+        totalPages={totalPages}
+        onPageChange={onPageChange}
+      />
     </>
   );
 };
