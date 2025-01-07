@@ -8,21 +8,27 @@ import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { useNavigate } from 'react-router-dom';
 
-type Casting = {
+// Update the type definitions to match the database schema
+type CastingType = 'internal' | 'external';
+type CastingStatus = 'open' | 'closed';
+
+interface CastingClient {
+  full_name: string | null;
+}
+
+interface Casting {
   id: string;
   name: string;
-  type: 'internal' | 'external';
-  status: 'open' | 'closed';
+  type: CastingType;
+  status: CastingStatus;
   logo_url: string | null;
   client_id: string | null;
-  client?: {
-    full_name: string;
-  };
+  client?: CastingClient | null;
   _count?: {
     talents: number;
     guest_remarks: number;
   };
-};
+}
 
 const CastingList = () => {
   const navigate = useNavigate();
@@ -67,7 +73,21 @@ const CastingList = () => {
       const { data, error } = await query;
 
       if (error) throw error;
-      return data as Casting[];
+      
+      // Transform the data to match our Casting type
+      return (data as any[]).map(casting => ({
+        id: casting.id,
+        name: casting.name,
+        type: casting.type,
+        status: casting.status,
+        logo_url: casting.logo_url,
+        client_id: casting.client_id,
+        client: casting.client,
+        _count: {
+          talents: 0, // We'll need to add this count from the database
+          guest_remarks: 0 // We'll need to add this count from the database
+        }
+      })) as Casting[];
     }
   });
 
