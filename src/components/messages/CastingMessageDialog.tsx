@@ -1,13 +1,13 @@
 import { useState, useEffect } from "react";
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
-import { Button } from "@/components/ui/button";
-import { Textarea } from "@/components/ui/textarea";
-import { Loader2, Paperclip, Send, Mic, Video } from "lucide-react";
+import { Dialog, DialogContent } from "@/components/ui/dialog";
+import { Loader2 } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 import { MessageList } from "./MessageList";
 import { VideoCallDialog } from "./VideoCallDialog";
 import { useMessaging } from "@/hooks/useMessaging";
+import { MessageInput } from "./MessageInput";
+import { MessageDialogHeader } from "./MessageDialogHeader";
 
 interface CastingMessageDialogProps {
   open: boolean;
@@ -24,7 +24,6 @@ export function CastingMessageDialog({
   castingId,
   talentName
 }: CastingMessageDialogProps) {
-  const [message, setMessage] = useState("");
   const [isLoading, setIsLoading] = useState(true);
   const [conversationId, setConversationId] = useState<string | null>(null);
   const [videoCallOpen, setVideoCallOpen] = useState(false);
@@ -112,26 +111,14 @@ export function CastingMessageDialog({
     }
   };
 
-  const handleSendMessage = async () => {
-    if (!message.trim() || !conversationId) return;
-    await sendMessage(message);
-    setMessage("");
-  };
-
   return (
     <>
       <Dialog open={open} onOpenChange={onOpenChange}>
         <DialogContent className="sm:max-w-[500px] h-[600px] flex flex-col">
-          <DialogHeader className="flex flex-row justify-between items-center">
-            <DialogTitle>Chat with {talentName}</DialogTitle>
-            <Button
-              variant="outline"
-              size="icon"
-              onClick={() => setVideoCallOpen(true)}
-            >
-              <Video className="h-4 w-4" />
-            </Button>
-          </DialogHeader>
+          <MessageDialogHeader 
+            talentName={talentName} 
+            onVideoCall={() => setVideoCallOpen(true)} 
+          />
 
           {isLoading ? (
             <div className="flex-1 flex items-center justify-center">
@@ -140,52 +127,7 @@ export function CastingMessageDialog({
           ) : (
             <>
               <MessageList messages={messages} />
-
-              <div className="border-t p-4 space-y-4">
-                <div className="flex items-center space-x-2">
-                  <Textarea
-                    value={message}
-                    onChange={(e) => setMessage(e.target.value)}
-                    placeholder="Type your message..."
-                    className="flex-1"
-                    onKeyDown={(e) => {
-                      if (e.key === "Enter" && !e.shiftKey) {
-                        e.preventDefault();
-                        handleSendMessage();
-                      }
-                    }}
-                  />
-                  <div className="flex flex-col space-y-2">
-                    <Button
-                      size="icon"
-                      variant="outline"
-                      onClick={() => {
-                        toast({
-                          title: "Coming soon",
-                          description: "File upload will be available soon",
-                        });
-                      }}
-                    >
-                      <Paperclip className="h-4 w-4" />
-                    </Button>
-                    <Button
-                      size="icon"
-                      variant="outline"
-                      onClick={() => {
-                        toast({
-                          title: "Coming soon",
-                          description: "Voice messages will be available soon",
-                        });
-                      }}
-                    >
-                      <Mic className="h-4 w-4" />
-                    </Button>
-                  </div>
-                  <Button onClick={handleSendMessage}>
-                    <Send className="h-4 w-4" />
-                  </Button>
-                </div>
-              </div>
+              <MessageInput onSendMessage={sendMessage} />
             </>
           )}
         </DialogContent>
