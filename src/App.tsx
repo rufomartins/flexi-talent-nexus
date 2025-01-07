@@ -12,6 +12,7 @@ import TalentList from "@/pages/talents/TalentList";
 import TalentProfile from "@/pages/TalentProfile";
 import Castings from "@/pages/Castings";
 import Projects from "@/pages/Projects";
+import ShotList from "@/pages/ShotList";
 import Messages from "@/pages/Messages";
 
 const queryClient = new QueryClient();
@@ -44,12 +45,15 @@ function App() {
                 <Route path=":id" element={<TalentProfile />} />
               </Route>
 
+              {/* Project routes */}
+              <Route path="projects">
+                <Route index element={<Projects />} />
+                <Route path="shot-list/:taskId" element={<ShotList />} />
+              </Route>
+
               {/* Casting routes */}
               <Route path="castings" element={<Castings />} />
               
-              {/* Project routes */}
-              <Route path="projects" element={<Projects />} />
-
               {/* Messages route */}
               <Route path="messages" element={<Messages />} />
             </Route>

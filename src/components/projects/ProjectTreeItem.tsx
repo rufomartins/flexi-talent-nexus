@@ -34,7 +34,7 @@ export function ProjectTreeItem({
 
   const handleClick = () => {
     if (level === 3 && id) {
-      navigate(`/shot-list/${id}`);
+      navigate(`/projects/shot-list/${id}`);
     } else if (hasChildren) {
       onToggle();
     }
