@@ -21,8 +21,6 @@ interface ChatWindowProps {
 
 export function ChatWindow({ conversationId, participantName }: ChatWindowProps) {
   const [messages, setMessages] = useState<Message[]>([]);
-  const [newMessage, setNewMessage] = useState("");
-  const [isTyping, setIsTyping] = useState(false);
   const { toast } = useToast();
   const { initializeAgora, toggleVideo, isVideoEnabled } = useAgoraClient(conversationId);
 
@@ -72,15 +70,15 @@ export function ChatWindow({ conversationId, participantName }: ChatWindowProps)
     };
   }, [conversationId, toast]);
 
-  const handleSendMessage = async () => {
-    if (!newMessage.trim()) return;
+  const handleSendMessage = async (message: string) => {
+    if (!message.trim()) return;
 
     const { data: { user } } = await supabase.auth.getUser();
     if (!user) return;
 
     const { error } = await supabase.from("messages").insert({
       conversation_id: conversationId,
-      content: newMessage,
+      content: message,
       sender_id: user.id,
       content_type: "text",
     });
@@ -93,8 +91,6 @@ export function ChatWindow({ conversationId, participantName }: ChatWindowProps)
       });
       return;
     }
-
-    setNewMessage("");
   };
 
   return (
@@ -106,12 +102,7 @@ export function ChatWindow({ conversationId, participantName }: ChatWindowProps)
         isVideoEnabled={isVideoEnabled}
       />
       <MessagesDisplay messages={messages} />
-      <MessageInput
-        value={newMessage}
-        onChange={setNewMessage}
-        onSend={handleSendMessage}
-        isTyping={isTyping}
-      />
+      <MessageInput onSendMessage={handleSendMessage} />
     </div>
   );
 }
