@@ -1,147 +1,112 @@
-import {
-  Calendar,
-  Home,
-  MessageSquare,
-  PlusCircle,
-  Search,
-  Settings,
-  Users,
-  Briefcase,
-  DollarSign,
-  Film,
-} from "lucide-react"
-import {
-  Sidebar,
-  SidebarContent,
-  SidebarMenu,
-  SidebarMenuItem,
-  SidebarMenuButton,
-} from "@/components/ui/sidebar"
-import { useAuth } from "@/contexts/auth"
+import { Link } from "react-router-dom"
+import { LayoutDashboard, Users, Search, UserPlus, FileSpreadsheet, Briefcase, MessageSquare, Calendar } from "lucide-react"
 import { cn } from "@/lib/utils"
-import { Link, useLocation } from "react-router-dom"
+import { buttonVariants } from "@/components/ui/button"
+import { Sidebar, SidebarContent, SidebarGroup, SidebarGroupContent } from "@/components/ui/sidebar"
 
-export const AppSidebar = () => {
-  const { userDetails } = useAuth()
-  const location = useLocation()
-
-  console.log("Current user details:", userDetails) // Debug log
-
-  // Check if user is super_admin or admin
-  const isAdminOrSuperAdmin = userDetails?.role === "super_admin" || userDetails?.role === "admin"
-  
-  console.log("Is admin or super admin:", isAdminOrSuperAdmin) // Debug log
-
-  const menuItems = [
-    {
-      title: "Dashboard",
-      icon: Home,
-      href: "/dashboard",
-      show: true,
-    },
-    {
-      title: "Talents",
-      icon: Users,
-      href: "/talents",
-      show: true,
-      subItems: [
-        {
-          title: "Search",
-          icon: Search,
-          href: "/talents/search",
-          show: true,
-        },
-        {
-          title: "Add New Talent",
-          icon: PlusCircle,
-          href: "/talents/new",
-          show: true,
-        },
-      ],
-    },
-    {
-      title: "Castings",
-      icon: Film,
-      href: "/castings",
-      show: true,
-    },
-    {
-      title: "Projects",
-      icon: Briefcase,
-      href: "/projects",
-      show: true,
-    },
-    {
-      title: "Messages",
-      icon: MessageSquare,
-      href: "/messages",
-      show: true,
-    },
-    {
-      title: "Calendar",
-      icon: Calendar,
-      href: "/calendar",
-      show: true,
-    },
-    {
-      title: "Financial",
-      icon: DollarSign,
-      href: "/financial",
-      show: isAdminOrSuperAdmin,
-    },
-    {
-      title: "Settings",
-      icon: Settings,
-      href: "/settings",
-      show: isAdminOrSuperAdmin,
-    },
-  ]
-
+export function AppSidebar() {
   return (
     <Sidebar>
       <SidebarContent>
-        <SidebarMenu>
-          {menuItems
-            .filter((item) => item.show)
-            .map((item) => (
-              <div key={item.href}>
-                <SidebarMenuItem>
-                  <SidebarMenuButton
-                    asChild
-                    className={cn(
-                      "h-12 px-4 hover:bg-muted/80",
-                      location.pathname === item.href && "bg-muted text-primary"
-                    )}
-                  >
-                    <Link to={item.href} className="flex items-center gap-3">
-                      <item.icon className="h-5 w-5" />
-                      <span className="text-sm font-medium">{item.title}</span>
-                    </Link>
-                  </SidebarMenuButton>
-                </SidebarMenuItem>
-                
-                {item.subItems?.map((subItem) => (
-                  <SidebarMenuItem key={subItem.href}>
-                    <SidebarMenuButton
-                      asChild
-                      className={cn(
-                        "h-12 px-8 hover:bg-muted/80",
-                        location.pathname === subItem.href &&
-                          "bg-muted text-primary"
-                      )}
-                    >
-                      <Link to={subItem.href} className="flex items-center gap-3">
-                        <subItem.icon className="h-5 w-5" />
-                        <span className="text-sm font-medium">
-                          {subItem.title}
-                        </span>
-                      </Link>
-                    </SidebarMenuButton>
-                  </SidebarMenuItem>
-                ))}
-              </div>
-            ))}
-        </SidebarMenu>
+        <SidebarGroup>
+          <SidebarGroupContent className="flex flex-col gap-1">
+            {/* Dashboard Link - Added above Talents */}
+            <Link
+              to="/dashboard"
+              className={cn(
+                buttonVariants({ variant: "ghost" }),
+                "justify-start gap-2 px-2"
+              )}
+            >
+              <LayoutDashboard className="h-4 w-4" />
+              Dashboard
+            </Link>
+
+            {/* Talents Link */}
+            <Link
+              to="/talents"
+              className={cn(
+                buttonVariants({ variant: "ghost" }),
+                "justify-start gap-2 px-2"
+              )}
+            >
+              <Users className="h-4 w-4" />
+              Talents
+            </Link>
+
+            {/* Search Link */}
+            <Link
+              to="/search"
+              className={cn(
+                buttonVariants({ variant: "ghost" }),
+                "justify-start gap-2 px-2"
+              )}
+            >
+              <Search className="h-4 w-4" />
+              Search
+            </Link>
+
+            {/* Add New Talent Link */}
+            <Link
+              to="/talents/new"
+              className={cn(
+                buttonVariants({ variant: "ghost" }),
+                "justify-start gap-2 px-2"
+              )}
+            >
+              <UserPlus className="h-4 w-4" />
+              Add New Talent
+            </Link>
+
+            {/* Castings Link */}
+            <Link
+              to="/castings"
+              className={cn(
+                buttonVariants({ variant: "ghost" }),
+                "justify-start gap-2 px-2"
+              )}
+            >
+              <FileSpreadsheet className="h-4 w-4" />
+              Castings
+            </Link>
+
+            {/* Projects Link */}
+            <Link
+              to="/projects"
+              className={cn(
+                buttonVariants({ variant: "ghost" }),
+                "justify-start gap-2 px-2"
+              )}
+            >
+              <Briefcase className="h-4 w-4" />
+              Projects
+            </Link>
+
+            {/* Messages Link */}
+            <Link
+              to="/messages"
+              className={cn(
+                buttonVariants({ variant: "ghost" }),
+                "justify-start gap-2 px-2"
+              )}
+            >
+              <MessageSquare className="h-4 w-4" />
+              Messages
+            </Link>
+
+            {/* Calendar Link */}
+            <Link
+              to="/calendar"
+              className={cn(
+                buttonVariants({ variant: "ghost" }),
+                "justify-start gap-2 px-2"
+              )}
+            >
+              <Calendar className="h-4 w-4" />
+              Calendar
+            </Link>
+          </SidebarGroupContent>
+        </SidebarGroup>
       </SidebarContent>
     </Sidebar>
   )
