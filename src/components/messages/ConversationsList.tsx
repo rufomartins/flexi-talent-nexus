@@ -4,6 +4,12 @@ import { ConversationItem } from "./ConversationItem";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { supabase } from "@/integrations/supabase/client";
 
+interface Message {
+  content: string;
+  created_at: string;
+  sender_id: string;
+}
+
 interface Conversation {
   id: string;
   title?: string;
@@ -13,6 +19,16 @@ interface Conversation {
   avatarUrl?: string;
   userInitials: string;
   userRole?: string;
+}
+
+interface ConversationResponse {
+  id: string;
+  title: string;
+  project_id: string;
+  messages: Message[];
+  conversation_participants: {
+    user_id: string;
+  }[];
 }
 
 export function ConversationsList() {
@@ -48,7 +64,7 @@ export function ConversationsList() {
       }
 
       // Transform data to match our interface
-      const transformedData = data.map(conv => ({
+      const transformedData = (data as ConversationResponse[]).map(conv => ({
         id: conv.id,
         title: conv.title || 'Untitled Conversation',
         lastMessage: conv.messages[0]?.content,
