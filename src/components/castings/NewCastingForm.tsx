@@ -34,7 +34,7 @@ export function NewCastingForm({ type, onSuccess }: NewCastingFormProps) {
     mutationFn: async (data: CastingFormData) => {
       const { data: casting, error } = await supabase
         .from('castings')
-        .insert([data])
+        .insert(data)
         .select()
         .single();
 
