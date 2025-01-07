@@ -1,4 +1,4 @@
-import { CircleProgress } from "lucide-react";
+import { CirclePercent } from "lucide-react";
 import { useAuth } from "@/contexts/auth";
 import { useProfileCompletion } from "@/hooks/useProfileCompletion";
 import { Skeleton } from "@/components/ui/skeleton";
@@ -21,7 +21,7 @@ export const ProfileCompletion = () => {
   return (
     <div className="flex flex-col items-center gap-4">
       <div className="relative">
-        <CircleProgress className="h-24 w-24 text-muted-foreground" />
+        <CirclePercent className="h-24 w-24 text-muted-foreground" />
         <div className="absolute inset-0 flex items-center justify-center">
           <span className="text-2xl font-bold">{completion.total}%</span>
         </div>
