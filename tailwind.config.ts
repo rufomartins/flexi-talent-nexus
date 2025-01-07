@@ -25,8 +25,8 @@ export default {
         background: "hsl(var(--background))",
         foreground: "hsl(var(--foreground))",
         primary: {
-          DEFAULT: "#0D6EFD",
-          hover: "#0B5ED7",
+          DEFAULT: "#2196F3",
+          hover: "#1976D2",
           foreground: "#FFFFFF",
         },
         secondary: {
@@ -39,7 +39,23 @@ export default {
         },
         muted: {
           DEFAULT: "#F8F9FA",
-          foreground: "#6C757D",
+          foreground: "#6B7280",
+        },
+        chat: {
+          input: {
+            border: "#E0E0E0",
+          },
+          status: {
+            online: "#10B981",
+            time: "#6B7280",
+          },
+          selected: "#F3F4F6",
+          hover: "#F5F5F5",
+        },
+        text: {
+          primary: "#111827",
+          secondary: "#6B7280",
+          placeholder: "#9CA3AF",
         },
       },
       fontFamily: {
