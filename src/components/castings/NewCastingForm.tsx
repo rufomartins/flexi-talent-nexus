@@ -27,7 +27,10 @@ export function NewCastingForm({ type, onSuccess }: NewCastingFormProps) {
 
   const form = useForm<CastingFormData>({
     resolver: zodResolver(castingFormSchema),
-    defaultValues: defaultValues(type),
+    defaultValues: {
+      ...defaultValues,
+      type,
+    },
   });
 
   const createCasting = useMutation({
