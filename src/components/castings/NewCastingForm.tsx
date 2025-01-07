@@ -36,7 +36,7 @@ export function NewCastingForm({ type }: NewCastingFormProps) {
         const { data, error } = await supabase
           .from('users')
           .select('id, full_name')
-          .eq('role', 'project_manager');
+          .eq('role', 'super_user');
 
         if (error) throw error;
         setProjectManagers(data || []);
@@ -58,12 +58,11 @@ export function NewCastingForm({ type }: NewCastingFormProps) {
       const submissionData = {
         ...formData,
         name: formData.name.trim(),
-        type: formData.type, // Ensure type is included
+        type: formData.type,
         casting_type: formData.casting_type,
         created_by: user.data.user?.id,
         created_at: new Date().toISOString(),
         updated_at: new Date().toISOString(),
-        // Ensure nullable fields are explicitly set to null when empty
         client_id: formData.client_id || null,
         project_manager_id: formData.project_manager_id || null,
         scout_id: formData.scout_id || null,

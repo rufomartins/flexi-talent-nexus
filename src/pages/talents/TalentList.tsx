@@ -43,6 +43,11 @@ const TalentList = () => {
     },
   })
 
+  const handleSearch = async (searchValues: any) => {
+    console.log("Search values:", searchValues)
+    // Implement search logic here
+  }
+
   if (isLoading) {
     return (
       <div className="flex items-center justify-center h-screen">
