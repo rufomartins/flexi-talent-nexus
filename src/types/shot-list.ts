@@ -1,6 +1,13 @@
 export interface Location {
   id: string;
-  name: string | null;
+  name: string;
+  address?: string | null;
+  time_of_day?: string | null;
+  special_requirements?: string | null;
+  status?: 'Pending' | 'Confirmed' | 'Unavailable';
+  shot_list_id?: string | null;
+  created_at?: string | null;
+  updated_at?: string | null;
 }
 
 export interface Shot {
