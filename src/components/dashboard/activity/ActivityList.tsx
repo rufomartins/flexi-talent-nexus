@@ -1,40 +1,44 @@
-import { Loader2, AlertCircle } from "lucide-react";
-import { Json } from "@/integrations/supabase/types";
+import { Skeleton } from "@/components/ui/skeleton";
 import { ActivityListItem } from "./ActivityListItem";
 import { ActivityPagination } from "./ActivityPagination";
-import { Alert, AlertDescription } from "@/components/ui/alert";
-import { Skeleton } from "@/components/ui/skeleton";
-
-interface Activity {
-  id: string;
-  action_type: string;
-  details: Json;
-  created_at: string;
-}
 
 interface ActivityListProps {
-  activities: Activity[];
+  activities: Array<{
+    id: string;
+    action_type: string;
+    created_at: string;
+    details?: {
+      status?: string;
+      name?: string;
+      project?: string;
+      [key: string]: any;
+    } | null;
+  }>;
   isLoading: boolean;
+  error: Error | null;
   currentPage: number;
   totalPages: number;
   onPageChange: (page: number) => void;
-  error?: Error | null;
 }
 
 export const ActivityList = ({
   activities,
   isLoading,
+  error,
   currentPage,
   totalPages,
   onPageChange,
-  error
 }: ActivityListProps) => {
   if (isLoading) {
     return (
       <div className="space-y-4">
         {[...Array(3)].map((_, i) => (
-          <div key={i} className="flex items-center space-x-4 p-3">
-            <Skeleton className="h-12 w-full" />
+          <div key={i} className="flex items-start space-x-4 p-4">
+            <Skeleton className="h-5 w-5 rounded-full" />
+            <div className="space-y-2 flex-1">
+              <Skeleton className="h-4 w-[250px]" />
+              <Skeleton className="h-4 w-[200px]" />
+            </div>
           </div>
         ))}
       </div>
@@ -42,37 +46,30 @@ export const ActivityList = ({
   }
 
   if (error) {
-    return (
-      <Alert variant="destructive">
-        <AlertCircle className="h-4 w-4" />
-        <AlertDescription>
-          {error.message || 'An error occurred while loading activities'}
-        </AlertDescription>
-      </Alert>
-    );
+    return null; // Error is handled by parent component
   }
 
-  if (!activities.length) {
+  if (activities.length === 0) {
     return (
-      <p className="text-muted-foreground text-center py-8">
-        No recent activity to display
-      </p>
+      <div className="text-center py-8 text-muted-foreground">
+        No activities found
+      </div>
     );
   }
 
   return (
-    <>
-      <ul className="space-y-4">
-        {activities.map((activity) => (
-          <ActivityListItem key={activity.id} activity={activity} />
-        ))}
-      </ul>
+    <div className="space-y-1">
+      {activities.map((activity) => (
+        <ActivityListItem key={activity.id} activity={activity} />
+      ))}
       
-      <ActivityPagination
-        currentPage={currentPage}
-        totalPages={totalPages}
-        onPageChange={onPageChange}
-      />
-    </>
+      <div className="mt-4 flex justify-center">
+        <ActivityPagination
+          currentPage={currentPage}
+          totalPages={totalPages}
+          onPageChange={onPageChange}
+        />
+      </div>
+    </div>
   );
 };
