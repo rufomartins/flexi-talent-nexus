@@ -59,6 +59,244 @@ export type Database = {
           },
         ]
       }
+      casting_dates: {
+        Row: {
+          casting_id: string | null
+          created_at: string | null
+          end_date: string
+          id: string
+          remarks: string | null
+          start_date: string
+        }
+        Insert: {
+          casting_id?: string | null
+          created_at?: string | null
+          end_date: string
+          id?: string
+          remarks?: string | null
+          start_date: string
+        }
+        Update: {
+          casting_id?: string | null
+          created_at?: string | null
+          end_date?: string
+          id?: string
+          remarks?: string | null
+          start_date?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "casting_dates_casting_id_fkey"
+            columns: ["casting_id"]
+            isOneToOne: false
+            referencedRelation: "castings"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      casting_guests: {
+        Row: {
+          access_token: string
+          casting_id: string | null
+          created_at: string | null
+          email: string
+          id: string
+          is_enabled: boolean | null
+          last_login: string | null
+          name: string
+        }
+        Insert: {
+          access_token: string
+          casting_id?: string | null
+          created_at?: string | null
+          email: string
+          id?: string
+          is_enabled?: boolean | null
+          last_login?: string | null
+          name: string
+        }
+        Update: {
+          access_token?: string
+          casting_id?: string | null
+          created_at?: string | null
+          email?: string
+          id?: string
+          is_enabled?: boolean | null
+          last_login?: string | null
+          name?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "casting_guests_casting_id_fkey"
+            columns: ["casting_id"]
+            isOneToOne: false
+            referencedRelation: "castings"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      casting_talents: {
+        Row: {
+          availability_status: string | null
+          casting_id: string | null
+          created_at: string | null
+          final_fee: number | null
+          id: string
+          remarks: string | null
+          round: number | null
+          talent_fee: number | null
+          talent_id: string | null
+          updated_at: string | null
+        }
+        Insert: {
+          availability_status?: string | null
+          casting_id?: string | null
+          created_at?: string | null
+          final_fee?: number | null
+          id?: string
+          remarks?: string | null
+          round?: number | null
+          talent_fee?: number | null
+          talent_id?: string | null
+          updated_at?: string | null
+        }
+        Update: {
+          availability_status?: string | null
+          casting_id?: string | null
+          created_at?: string | null
+          final_fee?: number | null
+          id?: string
+          remarks?: string | null
+          round?: number | null
+          talent_fee?: number | null
+          talent_id?: string | null
+          updated_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "casting_talents_casting_id_fkey"
+            columns: ["casting_id"]
+            isOneToOne: false
+            referencedRelation: "castings"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "casting_talents_talent_id_fkey"
+            columns: ["talent_id"]
+            isOneToOne: false
+            referencedRelation: "talent_profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      castings: {
+        Row: {
+          allow_talent_portal_apply: boolean | null
+          briefing: string | null
+          client_id: string | null
+          created_at: string | null
+          created_by: string | null
+          id: string
+          logo_url: string | null
+          name: string
+          project_manager_id: string | null
+          scout_id: string | null
+          show_briefing_on_signup: boolean | null
+          status: Database["public"]["Enums"]["casting_status"] | null
+          type: Database["public"]["Enums"]["casting_type"]
+          updated_at: string | null
+        }
+        Insert: {
+          allow_talent_portal_apply?: boolean | null
+          briefing?: string | null
+          client_id?: string | null
+          created_at?: string | null
+          created_by?: string | null
+          id?: string
+          logo_url?: string | null
+          name: string
+          project_manager_id?: string | null
+          scout_id?: string | null
+          show_briefing_on_signup?: boolean | null
+          status?: Database["public"]["Enums"]["casting_status"] | null
+          type: Database["public"]["Enums"]["casting_type"]
+          updated_at?: string | null
+        }
+        Update: {
+          allow_talent_portal_apply?: boolean | null
+          briefing?: string | null
+          client_id?: string | null
+          created_at?: string | null
+          created_by?: string | null
+          id?: string
+          logo_url?: string | null
+          name?: string
+          project_manager_id?: string | null
+          scout_id?: string | null
+          show_briefing_on_signup?: boolean | null
+          status?: Database["public"]["Enums"]["casting_status"] | null
+          type?: Database["public"]["Enums"]["casting_type"]
+          updated_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "castings_client_id_fkey"
+            columns: ["client_id"]
+            isOneToOne: false
+            referencedRelation: "user_profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "castings_client_id_fkey"
+            columns: ["client_id"]
+            isOneToOne: false
+            referencedRelation: "users"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "castings_created_by_fkey"
+            columns: ["created_by"]
+            isOneToOne: false
+            referencedRelation: "user_profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "castings_created_by_fkey"
+            columns: ["created_by"]
+            isOneToOne: false
+            referencedRelation: "users"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "castings_project_manager_id_fkey"
+            columns: ["project_manager_id"]
+            isOneToOne: false
+            referencedRelation: "user_profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "castings_project_manager_id_fkey"
+            columns: ["project_manager_id"]
+            isOneToOne: false
+            referencedRelation: "users"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "castings_scout_id_fkey"
+            columns: ["scout_id"]
+            isOneToOne: false
+            referencedRelation: "user_profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "castings_scout_id_fkey"
+            columns: ["scout_id"]
+            isOneToOne: false
+            referencedRelation: "users"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       companies: {
         Row: {
           created_at: string | null
@@ -124,6 +362,61 @@ export type Database = {
             columns: ["created_by"]
             isOneToOne: false
             referencedRelation: "users"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      guest_selections: {
+        Row: {
+          casting_id: string | null
+          comments: string | null
+          created_at: string | null
+          guest_id: string | null
+          id: string
+          preference_order: number | null
+          talent_id: string | null
+          updated_at: string | null
+        }
+        Insert: {
+          casting_id?: string | null
+          comments?: string | null
+          created_at?: string | null
+          guest_id?: string | null
+          id?: string
+          preference_order?: number | null
+          talent_id?: string | null
+          updated_at?: string | null
+        }
+        Update: {
+          casting_id?: string | null
+          comments?: string | null
+          created_at?: string | null
+          guest_id?: string | null
+          id?: string
+          preference_order?: number | null
+          talent_id?: string | null
+          updated_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "guest_selections_casting_id_fkey"
+            columns: ["casting_id"]
+            isOneToOne: false
+            referencedRelation: "castings"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "guest_selections_guest_id_fkey"
+            columns: ["guest_id"]
+            isOneToOne: false
+            referencedRelation: "casting_guests"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "guest_selections_talent_id_fkey"
+            columns: ["talent_id"]
+            isOneToOne: false
+            referencedRelation: "talent_profiles"
             referencedColumns: ["id"]
           },
         ]
@@ -599,6 +892,8 @@ export type Database = {
       [_ in never]: never
     }
     Enums: {
+      casting_status: "open" | "closed"
+      casting_type: "internal" | "external"
       user_role:
         | "super_admin"
         | "admin"
