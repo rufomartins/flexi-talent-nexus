@@ -51,19 +51,25 @@ export function ShotsTab({ shotListId }: { shotListId: string }) {
     if (!confirm("Are you sure you want to delete this shot?")) return;
 
     startLoading("delete");
-    const { error } = await supabase
-      .from("shots")
-      .delete()
-      .eq("id", shotId);
+    try {
+      const { error } = await supabase
+        .from("shots")
+        .delete()
+        .match({ id: shotId });
 
-    if (error) {
-      notify.error("Failed to delete shot");
-      console.error("Error deleting shot:", error);
-    } else {
-      notify.success("Shot deleted successfully");
-      queryClient.invalidateQueries({ queryKey: ["shots"] });
+      if (error) {
+        notify.error("Failed to delete shot");
+        console.error("Error deleting shot:", error);
+      } else {
+        notify.success("Shot deleted successfully");
+        queryClient.invalidateQueries({ queryKey: ["shots"] });
+      }
+    } catch (error) {
+      notify.error("An unexpected error occurred");
+      console.error("Error in handleDelete:", error);
+    } finally {
+      stopLoading("delete");
     }
-    stopLoading("delete");
   };
 
   const handleEdit = (shotId: string) => {
