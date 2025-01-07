@@ -95,10 +95,10 @@ export function NewCastingForm({ type }: NewCastingFormProps) {
           />
 
           <RichTextEditor
-            label="Talent briefing (will be sent to talents in availability mails)"
-            value={form.watch('talent_briefing') || ''}
-            onChange={(value: string) => form.setValue('talent_briefing', value)}
-            error={form.formState.errors.talent_briefing?.message}
+            label="Briefing (will be sent to talents in availability mails)"
+            value={form.watch('briefing') || ''}
+            onChange={(value: string) => form.setValue('briefing', value)}
+            error={form.formState.errors.briefing?.message}
           />
 
           <div>
