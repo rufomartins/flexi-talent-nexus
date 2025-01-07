@@ -238,49 +238,67 @@ export type Database = {
       }
       castings: {
         Row: {
+          allow_talent_portal: boolean | null
           allow_talent_portal_apply: boolean | null
           briefing: string | null
+          casting_type: string | null
           client_id: string | null
           created_at: string | null
           created_by: string | null
+          description: string | null
           id: string
           logo_url: string | null
           name: string
           project_manager_id: string | null
           scout_id: string | null
+          show_briefing: boolean | null
           show_briefing_on_signup: boolean | null
+          signup_banner_url: string | null
+          signup_fields: Json | null
           status: Database["public"]["Enums"]["casting_status"] | null
           type: Database["public"]["Enums"]["casting_type"]
           updated_at: string | null
         }
         Insert: {
+          allow_talent_portal?: boolean | null
           allow_talent_portal_apply?: boolean | null
           briefing?: string | null
+          casting_type?: string | null
           client_id?: string | null
           created_at?: string | null
           created_by?: string | null
+          description?: string | null
           id?: string
           logo_url?: string | null
           name: string
           project_manager_id?: string | null
           scout_id?: string | null
+          show_briefing?: boolean | null
           show_briefing_on_signup?: boolean | null
+          signup_banner_url?: string | null
+          signup_fields?: Json | null
           status?: Database["public"]["Enums"]["casting_status"] | null
           type: Database["public"]["Enums"]["casting_type"]
           updated_at?: string | null
         }
         Update: {
+          allow_talent_portal?: boolean | null
           allow_talent_portal_apply?: boolean | null
           briefing?: string | null
+          casting_type?: string | null
           client_id?: string | null
           created_at?: string | null
           created_by?: string | null
+          description?: string | null
           id?: string
           logo_url?: string | null
           name?: string
           project_manager_id?: string | null
           scout_id?: string | null
+          show_briefing?: boolean | null
           show_briefing_on_signup?: boolean | null
+          signup_banner_url?: string | null
+          signup_fields?: Json | null
           status?: Database["public"]["Enums"]["casting_status"] | null
           type?: Database["public"]["Enums"]["casting_type"]
           updated_at?: string | null
@@ -343,6 +361,30 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
+      }
+      clients: {
+        Row: {
+          created_at: string | null
+          created_by: string | null
+          id: string
+          name: string
+          updated_at: string | null
+        }
+        Insert: {
+          created_at?: string | null
+          created_by?: string | null
+          id?: string
+          name: string
+          updated_at?: string | null
+        }
+        Update: {
+          created_at?: string | null
+          created_by?: string | null
+          id?: string
+          name?: string
+          updated_at?: string | null
+        }
+        Relationships: []
       }
       companies: {
         Row: {
