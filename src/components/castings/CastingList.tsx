@@ -55,7 +55,7 @@ export default function CastingList() {
 
       if (error) throw error;
       
-      return data as Casting[];
+      return data as unknown as Casting[];
     }
   });
 
