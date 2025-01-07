@@ -30,6 +30,7 @@ export function NewCastingForm({ type, onSuccess }: NewCastingFormProps) {
     defaultValues: {
       ...defaultValues,
       type,
+      name: "", // Explicitly set name as required by the schema
     },
   });
 
@@ -37,7 +38,12 @@ export function NewCastingForm({ type, onSuccess }: NewCastingFormProps) {
     mutationFn: async (data: CastingFormData) => {
       const { data: casting, error } = await supabase
         .from('castings')
-        .insert(data)
+        .insert({
+          ...data,
+          type: data.type,
+          name: data.name,
+          status: data.status,
+        })
         .select()
         .single();
 
