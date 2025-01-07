@@ -24,6 +24,7 @@ interface CalendarEvent {
 export default function CalendarPage() {
   const [date, setDate] = useState<Date>(new Date());
   const [showAddEvent, setShowAddEvent] = useState(false);
+  const [view, setView] = useState<'month' | 'week'>('month');
   const { user } = useAuth();
   const { toast } = useToast();
 
@@ -45,7 +46,6 @@ export default function CalendarPage() {
         return [];
       }
 
-      // If we need casting info, fetch it separately for valid casting_ids
       const eventsWithCastings = await Promise.all(
         data.map(async (event) => {
           if (event.casting_id) {
@@ -74,6 +74,16 @@ export default function CalendarPage() {
 
   if (!user) return null;
 
+  const navigateMonth = (direction: 'prev' | 'next') => {
+    const newDate = new Date(date);
+    if (direction === 'prev') {
+      newDate.setMonth(date.getMonth() - 1);
+    } else {
+      newDate.setMonth(date.getMonth() + 1);
+    }
+    setDate(newDate);
+  };
+
   return (
     <div className="h-full flex flex-col">
       <div className="flex justify-between items-center mb-6 px-6 pt-6">
@@ -81,7 +91,46 @@ export default function CalendarPage() {
           <CalendarIcon className="h-6 w-6" />
           <h1 className="text-2xl font-bold">Calendar</h1>
         </div>
-        <div className="flex items-center gap-2">
+        <div className="flex items-center gap-4">
+          <div className="flex items-center bg-white rounded-lg shadow-sm border">
+            <Button 
+              variant="ghost" 
+              size="sm"
+              className="hover:bg-gray-50"
+              onClick={() => navigateMonth('prev')}
+            >
+              <ChevronLeft className="h-4 w-4" />
+            </Button>
+            <div className="px-4 py-2 font-medium">
+              {format(date, 'MMMM yyyy')}
+            </div>
+            <Button 
+              variant="ghost" 
+              size="sm"
+              className="hover:bg-gray-50"
+              onClick={() => navigateMonth('next')}
+            >
+              <ChevronRight className="h-4 w-4" />
+            </Button>
+          </div>
+          <div className="flex items-center rounded-lg border shadow-sm overflow-hidden">
+            <Button 
+              variant="ghost"
+              size="sm"
+              className={`px-4 ${view === 'month' ? 'bg-primary text-white' : 'hover:bg-gray-50'}`}
+              onClick={() => setView('month')}
+            >
+              Month
+            </Button>
+            <Button 
+              variant="ghost"
+              size="sm"
+              className={`px-4 ${view === 'week' ? 'bg-primary text-white' : 'hover:bg-gray-50'}`}
+              onClick={() => setView('week')}
+            >
+              Week
+            </Button>
+          </div>
           <Button 
             variant="outline" 
             size="sm"
