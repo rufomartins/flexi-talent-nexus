@@ -3,12 +3,13 @@ import { useState } from "react"
 import { AddTalentModal } from "@/components/talents/AddTalentModal"
 import { useQuery } from "@tanstack/react-query"
 import { supabase } from "@/integrations/supabase/client"
-import { Loader2, UserPlus, Users, FolderGit, ClipboardCheck, Briefcase } from "lucide-react"
+import { UserPlus, Users, FolderGit, Briefcase, DollarSign } from "lucide-react"
 import { useAuth } from "@/contexts/auth"
+import { StatCard } from "@/components/dashboard/StatCard"
 
 export default function Dashboard() {
   const [addTalentOpen, setAddTalentOpen] = useState(false)
-  const { user } = useAuth()
+  const { user, userDetails } = useAuth()
 
   const { data: newRegistrations, isLoading: registrationsLoading } = useQuery({
     queryKey: ['new-registrations'],
@@ -72,26 +73,6 @@ export default function Dashboard() {
     enabled: !!user
   })
 
-  const { data: reviewsCount, isLoading: reviewsLoading } = useQuery({
-    queryKey: ['reviews-count'],
-    queryFn: async () => {
-      if (!user) return 0;
-
-      const { count, error } = await supabase
-        .from('talent_profiles')
-        .select('*', { count: 'exact', head: true })
-        .eq('evaluation_status', 'under_evaluation')
-
-      if (error) {
-        console.error('Error fetching reviews count:', error)
-        return 0
-      }
-
-      return count || 0
-    },
-    enabled: !!user
-  })
-
   const { data: activeCastingsCount, isLoading: castingsLoading } = useQuery({
     queryKey: ['active-castings-count'],
     queryFn: async () => {
@@ -110,6 +91,26 @@ export default function Dashboard() {
       return count || 0
     },
     enabled: !!user
+  })
+
+  const { data: pendingPayments, isLoading: paymentsLoading } = useQuery({
+    queryKey: ['pending-payments'],
+    queryFn: async () => {
+      if (!user || userDetails?.role !== 'super_admin') return 0;
+      
+      const { data, error } = await supabase
+        .from('casting_talents')
+        .select('final_fee')
+        .not('final_fee', 'is', null)
+
+      if (error) {
+        console.error('Error fetching pending payments:', error)
+        return 0
+      }
+
+      return data.reduce((sum, item) => sum + (item.final_fee || 0), 0)
+    },
+    enabled: !!user && userDetails?.role === 'super_admin'
   })
 
   if (!user) {
@@ -131,73 +132,47 @@ export default function Dashboard() {
       />
       
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-        <div className="bg-card rounded-lg shadow p-6">
-          <div className="flex items-center justify-between">
-            <div>
-              <h2 className="text-lg font-semibold mb-2">New Registrations</h2>
-              <p className="text-sm text-muted-foreground">Last 30 days</p>
-            </div>
-            <UserPlus className="h-8 w-8 text-muted-foreground" />
-          </div>
-          <p className="text-3xl font-bold mt-4">
-            {registrationsLoading ? (
-              <Loader2 className="h-6 w-6 animate-spin" />
-            ) : (
-              newRegistrations
-            )}
-          </p>
-        </div>
+        <StatCard
+          title="New Registrations"
+          subtitle="Last 30 days"
+          value={newRegistrations}
+          icon={UserPlus}
+          isLoading={registrationsLoading}
+        />
         
-        <div className="bg-card rounded-lg shadow p-6">
-          <div className="flex items-center justify-between">
-            <div>
-              <h2 className="text-lg font-semibold mb-2">Total Talents</h2>
-              <p className="text-sm text-muted-foreground">Available</p>
-            </div>
-            <Users className="h-8 w-8 text-muted-foreground" />
-          </div>
-          <p className="text-3xl font-bold mt-4">
-            {talentsLoading ? (
-              <Loader2 className="h-6 w-6 animate-spin" />
-            ) : (
-              talentsCount
-            )}
-          </p>
-        </div>
+        <StatCard
+          title="Total Talents"
+          subtitle="Available"
+          value={talentsCount}
+          icon={Users}
+          isLoading={talentsLoading}
+        />
         
-        <div className="bg-card rounded-lg shadow p-6">
-          <div className="flex items-center justify-between">
-            <div>
-              <h2 className="text-lg font-semibold mb-2">Active Projects</h2>
-              <p className="text-sm text-muted-foreground">In progress</p>
-            </div>
-            <FolderGit className="h-8 w-8 text-muted-foreground" />
-          </div>
-          <p className="text-3xl font-bold mt-4">
-            {projectsLoading ? (
-              <Loader2 className="h-6 w-6 animate-spin" />
-            ) : (
-              projectsCount
-            )}
-          </p>
-        </div>
+        <StatCard
+          title="Active Projects"
+          subtitle="In progress"
+          value={projectsCount}
+          icon={FolderGit}
+          isLoading={projectsLoading}
+        />
 
-        <div className="bg-card rounded-lg shadow p-6">
-          <div className="flex items-center justify-between">
-            <div>
-              <h2 className="text-lg font-semibold mb-2">Active Castings</h2>
-              <p className="text-sm text-muted-foreground">Open castings</p>
-            </div>
-            <Briefcase className="h-8 w-8 text-muted-foreground" />
-          </div>
-          <p className="text-3xl font-bold mt-4">
-            {castingsLoading ? (
-              <Loader2 className="h-6 w-6 animate-spin" />
-            ) : (
-              activeCastingsCount
-            )}
-          </p>
-        </div>
+        <StatCard
+          title="Active Castings"
+          subtitle="Open castings"
+          value={activeCastingsCount}
+          icon={Briefcase}
+          isLoading={castingsLoading}
+        />
+
+        {userDetails?.role === 'super_admin' && (
+          <StatCard
+            title="Pending Payments"
+            subtitle="To talents"
+            value={pendingPayments}
+            icon={DollarSign}
+            isLoading={paymentsLoading}
+          />
+        )}
       </div>
 
       <div className="mt-8">
