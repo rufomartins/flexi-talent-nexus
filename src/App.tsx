@@ -11,6 +11,7 @@ import Login from "./pages/Login"
 import Dashboard from "./pages/Dashboard"
 import Users from "./pages/Users"
 import TalentProfile from "./pages/TalentProfile"
+import Projects from "./pages/Projects"
 
 const queryClient = new QueryClient()
 
@@ -48,6 +49,16 @@ const App = () => (
                   <ProtectedRoute>
                     <MainLayout>
                       <TalentProfile />
+                    </MainLayout>
+                  </ProtectedRoute>
+                }
+              />
+              <Route
+                path="/projects"
+                element={
+                  <ProtectedRoute>
+                    <MainLayout>
+                      <Projects />
                     </MainLayout>
                   </ProtectedRoute>
                 }
