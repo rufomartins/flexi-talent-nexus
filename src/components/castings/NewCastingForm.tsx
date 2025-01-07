@@ -24,7 +24,7 @@ export function NewCastingForm({ type }: NewCastingFormProps) {
     resolver: zodResolver(castingFormSchema),
     defaultValues: {
       ...defaultValues,
-      type
+      casting_type: type
     }
   });
 
@@ -56,10 +56,17 @@ export function NewCastingForm({ type }: NewCastingFormProps) {
       const user = await supabase.auth.getUser();
       const submissionData = {
         ...formData,
+        name: formData.name.trim(),
         created_by: user.data.user?.id,
         created_at: new Date().toISOString(),
         updated_at: new Date().toISOString(),
-        name: formData.name.trim()
+        // Ensure nullable fields are explicitly set to null when empty
+        client_id: formData.client_id || null,
+        project_manager_id: formData.project_manager_id || null,
+        scout_id: formData.scout_id || null,
+        briefing: formData.briefing || null,
+        description: formData.description || null,
+        logo_url: formData.logo_url || null
       };
 
       const { error } = await supabase
@@ -103,7 +110,7 @@ export function NewCastingForm({ type }: NewCastingFormProps) {
 
           <div>
             <label className="block text-sm font-medium mb-2">
-              Show this briefing on the sign-up form of this casting
+              Show briefing on sign-up form
             </label>
             <Select
               value={form.watch('show_briefing').toString()}
@@ -121,7 +128,7 @@ export function NewCastingForm({ type }: NewCastingFormProps) {
 
           <div>
             <label className="block text-sm font-medium mb-2">
-              Allow talents to apply to this casting using their "my ugc talent casting" environment
+              Allow talents to apply using talent portal
             </label>
             <Select
               value={form.watch('allow_talent_portal').toString()}
