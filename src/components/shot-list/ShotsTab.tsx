@@ -30,7 +30,10 @@ export function ShotsTab({ shotListId }: { shotListId: string }) {
         .from("shots")
         .select(`
           *,
-          location:locations(name)
+          location:locations (
+            id,
+            name
+          )
         `)
         .eq("shot_list_id", shotListId)
         .order("sequence_order", { ascending: true });
@@ -40,10 +43,7 @@ export function ShotsTab({ shotListId }: { shotListId: string }) {
         throw error;
       }
 
-      return shots.map(shot => ({
-        ...shot,
-        location: shot.location as { name: string | null } | null
-      })) as Shot[];
+      return shots as Shot[];
     },
   });
 

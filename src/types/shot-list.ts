@@ -5,19 +5,15 @@ export interface Location {
 
 export interface Shot {
   id: string;
+  shot_list_id: string;
   shot_number: number;
-  description: string;
-  frame_type: string;
+  location_id: string | null;
+  description: string | null;
+  frame_type: string | null;
   status: 'Pending' | 'In Progress' | 'Completed';
-  notes?: string;
-  location?: Location | null;
+  notes: string | null;
   sequence_order: number;
-}
-
-export interface ShotFormData {
-  shot_number: number;
-  description: string;
-  frame_type: string;
-  notes?: string;
-  location_id?: string;
+  created_at: string | null;
+  updated_at: string | null;
+  location: Location | null;
 }
