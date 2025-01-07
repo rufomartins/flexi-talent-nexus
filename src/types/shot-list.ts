@@ -24,3 +24,14 @@ export interface Shot {
   updated_at: string | null;
   location: Location | null;
 }
+
+export interface TalentNote {
+  id: string;
+  shot_list_id: string | null;
+  shot_reference: string | null;
+  instructions: string | null;
+  required_props: string | null;
+  additional_notes: string | null;
+  created_at?: string | null;
+  updated_at?: string | null;
+}
