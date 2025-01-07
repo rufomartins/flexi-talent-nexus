@@ -75,8 +75,8 @@ export default function CalendarPage() {
   if (!user) return null;
 
   return (
-    <div className="container mx-auto p-6">
-      <div className="flex justify-between items-center mb-6">
+    <div className="h-full flex flex-col">
+      <div className="flex justify-between items-center mb-6 px-6 pt-6">
         <div className="flex items-center gap-2">
           <CalendarIcon className="h-6 w-6" />
           <h1 className="text-2xl font-bold">Calendar</h1>
@@ -95,12 +95,12 @@ export default function CalendarPage() {
         </div>
       </div>
 
-      <div className="bg-white rounded-lg shadow">
+      <div className="flex-1 bg-white rounded-lg shadow mx-6 mb-6">
         <div className="grid grid-cols-7 gap-px border-b">
           {['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'].map((day) => (
             <div
               key={day}
-              className="px-4 py-3 text-sm font-semibold text-gray-900 text-center"
+              className="px-4 py-3 text-sm font-semibold text-gray-900 text-center bg-white"
             >
               {day}
             </div>
@@ -111,14 +111,14 @@ export default function CalendarPage() {
           mode="single"
           selected={date}
           onSelect={(date) => date && setDate(date)}
-          className="w-full border-none"
+          className="w-full border-none rounded-none"
           components={{
             IconLeft: () => <ChevronLeft className="h-4 w-4" />,
             IconRight: () => <ChevronRight className="h-4 w-4" />,
           }}
         />
 
-        <div className="p-4 border-t">
+        <div className="p-6 border-t">
           {isLoading ? (
             <div className="flex items-center justify-center h-24">
               <Loader2 className="h-8 w-8 animate-spin" />
