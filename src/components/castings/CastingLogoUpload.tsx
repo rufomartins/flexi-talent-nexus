@@ -1,5 +1,6 @@
 import { FormControl, FormField, FormItem, FormLabel } from "@/components/ui/form";
 import { Button } from "@/components/ui/button";
+import { ImageIcon } from "lucide-react";
 import { UseFormReturn } from "react-hook-form";
 import { CastingFormData } from "./CastingFormSchema";
 
@@ -18,12 +19,21 @@ export function CastingLogoUpload({ form, onUploadClick }: CastingLogoUploadProp
           <FormLabel>Casting Logo</FormLabel>
           <FormControl>
             <div className="flex items-center gap-4">
-              {field.value && (
+              {field.value ? (
                 <img 
                   src={field.value} 
                   alt="Logo" 
-                  className="w-20 h-20 object-cover rounded-lg"
+                  className="w-32 h-32 object-cover rounded-lg"
                 />
+              ) : (
+                <div 
+                  className="w-32 h-32 border-2 border-dashed border-gray-300 rounded-lg flex items-center justify-center"
+                  onClick={onUploadClick}
+                  role="button"
+                  tabIndex={0}
+                >
+                  <ImageIcon className="w-8 h-8 text-gray-400" />
+                </div>
               )}
               <Button
                 type="button"
