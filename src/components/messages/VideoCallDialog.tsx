@@ -1,9 +1,8 @@
-import { useState, useEffect } from "react";
-import AgoraRTC, { IAgoraRTCClient, ICameraVideoTrack, IMicrophoneAudioTrack } from "agora-rtc-sdk-ng";
+import { useEffect } from "react";
 import { Dialog, DialogContent } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Loader2, Mic, MicOff, Video, VideoOff } from "lucide-react";
-import { useToast } from "@/hooks/use-toast";
+import { useAgoraClient } from "@/hooks/useAgoraClient";
 
 interface VideoCallDialogProps {
   open: boolean;
@@ -12,14 +11,21 @@ interface VideoCallDialogProps {
   talentName: string;
 }
 
-export function VideoCallDialog({ open, onOpenChange, channelName, talentName }: VideoCallDialogProps) {
-  const [client, setClient] = useState<IAgoraRTCClient | null>(null);
-  const [localVideoTrack, setLocalVideoTrack] = useState<ICameraVideoTrack | null>(null);
-  const [localAudioTrack, setLocalAudioTrack] = useState<IMicrophoneAudioTrack | null>(null);
-  const [isVideoEnabled, setIsVideoEnabled] = useState(true);
-  const [isAudioEnabled, setIsAudioEnabled] = useState(true);
-  const [isLoading, setIsLoading] = useState(true);
-  const { toast } = useToast();
+export function VideoCallDialog({ 
+  open, 
+  onOpenChange, 
+  channelName, 
+  talentName 
+}: VideoCallDialogProps) {
+  const {
+    isLoading,
+    isVideoEnabled,
+    isAudioEnabled,
+    initializeAgora,
+    toggleVideo,
+    toggleAudio,
+    leaveChannel
+  } = useAgoraClient(channelName);
 
   useEffect(() => {
     if (open) {
@@ -28,77 +34,6 @@ export function VideoCallDialog({ open, onOpenChange, channelName, talentName }:
       leaveChannel();
     }
   }, [open]);
-
-  const initializeAgora = async () => {
-    try {
-      setIsLoading(true);
-      const agoraClient = AgoraRTC.createClient({ mode: "rtc", codec: "vp8" });
-      setClient(agoraClient);
-
-      // Initialize tracks
-      const [audioTrack, videoTrack] = await Promise.all([
-        AgoraRTC.createMicrophoneAudioTrack(),
-        AgoraRTC.createCameraVideoTrack()
-      ]);
-
-      setLocalAudioTrack(audioTrack);
-      setLocalVideoTrack(videoTrack);
-
-      // Join channel
-      await agoraClient.join(
-        process.env.AGORA_APP_ID || "", // We'll need to set this up
-        channelName,
-        null,
-        null
-      );
-
-      // Publish tracks
-      await agoraClient.publish([audioTrack, videoTrack]);
-
-      setIsLoading(false);
-    } catch (error) {
-      console.error("Error initializing Agora:", error);
-      toast({
-        title: "Error",
-        description: "Failed to initialize video call",
-        variant: "destructive",
-      });
-      onOpenChange(false);
-    }
-  };
-
-  const leaveChannel = async () => {
-    if (client) {
-      localAudioTrack?.close();
-      localVideoTrack?.close();
-      await client.leave();
-      setClient(null);
-      setLocalAudioTrack(null);
-      setLocalVideoTrack(null);
-    }
-  };
-
-  const toggleVideo = async () => {
-    if (localVideoTrack) {
-      if (isVideoEnabled) {
-        await localVideoTrack.setEnabled(false);
-      } else {
-        await localVideoTrack.setEnabled(true);
-      }
-      setIsVideoEnabled(!isVideoEnabled);
-    }
-  };
-
-  const toggleAudio = async () => {
-    if (localAudioTrack) {
-      if (isAudioEnabled) {
-        await localAudioTrack.setEnabled(false);
-      } else {
-        await localAudioTrack.setEnabled(true);
-      }
-      setIsAudioEnabled(!isAudioEnabled);
-    }
-  };
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
