@@ -7,6 +7,7 @@ import { STORAGE_CONFIG } from "@/lib/storage-config";
 import { useToast } from "@/components/ui/use-toast";
 import { MediaToolbar } from "./media/MediaToolbar";
 import { MediaGrid } from "./media/MediaGrid";
+import { MediaCategory, MediaItem } from "@/types/media";
 
 interface MediaTabProps {
   talent: TalentProfileData;
@@ -16,7 +17,7 @@ export const MediaTab = ({ talent }: MediaTabProps) => {
   const [selectedItems, setSelectedItems] = useState<string[]>([]);
   const [isUploadOpen, setIsUploadOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
-  const [mediaType, setMediaType] = useState<"all" | "photo" | "video" | "audio">("all");
+  const [mediaType, setMediaType] = useState<"all" | MediaCategory>("all");
   const { toast } = useToast();
 
   const { data: media, isLoading } = useQuery({
@@ -29,7 +30,12 @@ export const MediaTab = ({ talent }: MediaTabProps) => {
         .order("position", { ascending: true });
 
       if (error) throw error;
-      return data;
+      
+      // Ensure the category is of type MediaCategory
+      return (data || []).map(item => ({
+        ...item,
+        category: item.category as MediaCategory
+      })) as MediaItem[];
     },
   });
 
@@ -125,7 +131,7 @@ export const MediaTab = ({ talent }: MediaTabProps) => {
         searchQuery={searchQuery}
         onSearchChange={setSearchQuery}
         mediaType={mediaType}
-        onMediaTypeChange={(value: string) => setMediaType(value as "all" | "photo" | "video" | "audio")}
+        onMediaTypeChange={(value: string) => setMediaType(value as "all" | MediaCategory)}
         canUploadMedia={canUploadMedia}
       />
 
