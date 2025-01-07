@@ -758,10 +758,15 @@ export type Database = {
           description: string | null
           end_date: string | null
           id: string
+          internal_notes: string | null
+          is_platform_project: boolean | null
           job_title: string
+          performance_rating: number | null
+          project_id: string | null
           start_date: string | null
           talent_id: string | null
           updated_at: string | null
+          verified: boolean | null
         }
         Insert: {
           company?: string | null
@@ -769,10 +774,15 @@ export type Database = {
           description?: string | null
           end_date?: string | null
           id?: string
+          internal_notes?: string | null
+          is_platform_project?: boolean | null
           job_title: string
+          performance_rating?: number | null
+          project_id?: string | null
           start_date?: string | null
           talent_id?: string | null
           updated_at?: string | null
+          verified?: boolean | null
         }
         Update: {
           company?: string | null
@@ -780,12 +790,24 @@ export type Database = {
           description?: string | null
           end_date?: string | null
           id?: string
+          internal_notes?: string | null
+          is_platform_project?: boolean | null
           job_title?: string
+          performance_rating?: number | null
+          project_id?: string | null
           start_date?: string | null
           talent_id?: string | null
           updated_at?: string | null
+          verified?: boolean | null
         }
         Relationships: [
+          {
+            foreignKeyName: "talent_jobs_project_id_fkey"
+            columns: ["project_id"]
+            isOneToOne: false
+            referencedRelation: "projects"
+            referencedColumns: ["id"]
+          },
           {
             foreignKeyName: "talent_jobs_talent_id_fkey"
             columns: ["talent_id"]
@@ -867,6 +889,64 @@ export type Database = {
           },
           {
             foreignKeyName: "talent_media_talent_id_fkey"
+            columns: ["talent_id"]
+            isOneToOne: false
+            referencedRelation: "users"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      talent_metrics: {
+        Row: {
+          created_at: string | null
+          id: string
+          metric_type: string
+          metric_value: number
+          notes: string | null
+          project_id: string | null
+          recorded_at: string | null
+          talent_id: string | null
+          updated_at: string | null
+        }
+        Insert: {
+          created_at?: string | null
+          id?: string
+          metric_type: string
+          metric_value: number
+          notes?: string | null
+          project_id?: string | null
+          recorded_at?: string | null
+          talent_id?: string | null
+          updated_at?: string | null
+        }
+        Update: {
+          created_at?: string | null
+          id?: string
+          metric_type?: string
+          metric_value?: number
+          notes?: string | null
+          project_id?: string | null
+          recorded_at?: string | null
+          talent_id?: string | null
+          updated_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "talent_metrics_project_id_fkey"
+            columns: ["project_id"]
+            isOneToOne: false
+            referencedRelation: "projects"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "talent_metrics_talent_id_fkey"
+            columns: ["talent_id"]
+            isOneToOne: false
+            referencedRelation: "user_profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "talent_metrics_talent_id_fkey"
             columns: ["talent_id"]
             isOneToOne: false
             referencedRelation: "users"
