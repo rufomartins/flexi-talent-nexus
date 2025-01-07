@@ -4,6 +4,9 @@ import { ProjectHeader } from "@/components/projects/ProjectHeader";
 import { ProjectStats } from "@/components/projects/ProjectStats";
 import { ProjectSearch } from "@/components/projects/ProjectSearch";
 import { ProjectTree } from "@/components/projects/ProjectTree";
+import { useState } from "react";
+import { supabase } from "@/integrations/supabase/client";
+import type { ProjectFilters } from "@/components/projects/ProjectFilterPanel";
 
 const statsCards = [
   { title: "Active Tasks", value: 12 },
@@ -41,85 +44,77 @@ const statusColors = {
   },
 };
 
-// Dummy data for preview
-const dummyProjects = [
-  {
-    id: 1,
-    name: "Global Marketing Campaign 2024",
-    countries: [
-      {
-        id: 1,
-        name: "United States",
-        languages: [
-          {
-            id: 1,
-            name: "English",
-            tasks: [
-              {
-                id: 1,
-                name: "Product Launch Video",
-                script_status: "Approved",
-                translation_status: "In Progress",
-                review_status: "Internal Review",
-                talent_status: "Booked",
-                delivery_status: "Pending",
-              },
-              {
-                id: 2,
-                name: "Brand Story",
-                script_status: "In Progress",
-                translation_status: "Pending",
-                review_status: "Internal Review",
-                talent_status: "Booked",
-                delivery_status: "Pending",
-              },
-            ],
-          },
-        ],
-      },
-      {
-        id: 2,
-        name: "Germany",
-        languages: [
-          {
-            id: 2,
-            name: "German",
-            tasks: [
-              {
-                id: 3,
-                name: "Product Launch Video",
-                script_status: "Pending",
-                translation_status: "Pending",
-                review_status: "Internal Review",
-                talent_status: "Booked",
-                delivery_status: "Pending",
-              },
-            ],
-          },
-        ],
-      },
-    ],
-  },
-];
-
 export default function Projects() {
+  const [searchQuery, setSearchQuery] = useState("");
+  const [filters, setFilters] = useState<ProjectFilters>({});
+
   const { data: projects, isLoading } = useQuery({
-    queryKey: ['projects'],
+    queryKey: ['projects', searchQuery, filters],
     queryFn: async () => {
-      // For preview, return dummy data
-      return dummyProjects;
+      let query = supabase
+        .from('projects')
+        .select(`
+          id,
+          name,
+          countries:project_countries (
+            id,
+            country_name,
+            languages:project_languages (
+              id,
+              language_name,
+              tasks:project_tasks (
+                id,
+                name,
+                script_status,
+                translation_status,
+                review_status,
+                talent_status,
+                delivery_status
+              )
+            )
+          )
+        `);
+
+      // Apply search filter
+      if (searchQuery) {
+        query = query.or(`
+          name.ilike.%${searchQuery}%,
+          project_countries.country_name.ilike.%${searchQuery}%,
+          project_countries.project_languages.language_name.ilike.%${searchQuery}%,
+          project_countries.project_languages.project_tasks.name.ilike.%${searchQuery}%
+        `);
+      }
+
+      // Apply other filters
+      if (filters.projectManager) {
+        query = query.eq('project_manager_id', filters.projectManager);
+      }
+      if (filters.country) {
+        query = query.eq('project_countries.country_name', filters.country);
+      }
+      if (filters.language) {
+        query = query.eq('project_countries.project_languages.language_name', filters.language);
+      }
+      if (filters.scriptStatus) {
+        query = query.eq('project_countries.project_languages.project_tasks.script_status', filters.scriptStatus);
+      }
+      if (filters.reviewStatus) {
+        query = query.eq('project_countries.project_languages.project_tasks.review_status', filters.reviewStatus);
+      }
+      if (filters.talentStatus) {
+        query = query.eq('project_countries.project_languages.project_tasks.talent_status', filters.talentStatus);
+      }
+      if (filters.startDate && filters.endDate) {
+        query = query.gte('created_at', filters.startDate.toISOString())
+                    .lte('created_at', filters.endDate.toISOString());
+      }
+
+      const { data, error } = await query;
+      
+      if (error) throw error;
+      return data || [];
     },
   });
-
-  const handleSearch = (query: string) => {
-    // TODO: Implement search functionality
-    console.log('Search query:', query);
-  };
-
-  const handleFilterClick = () => {
-    // TODO: Implement filter panel
-    console.log('Filter clicked');
-  };
 
   if (isLoading) {
     return (
@@ -133,7 +128,10 @@ export default function Projects() {
     <div className="container max-w-6xl mx-auto p-6">
       <ProjectHeader />
       <ProjectStats stats={statsCards} />
-      <ProjectSearch onSearch={handleSearch} onFilterClick={handleFilterClick} />
+      <ProjectSearch 
+        onSearch={setSearchQuery} 
+        onFilter={setFilters}
+      />
       <ProjectTree projects={projects || []} statusColors={statusColors} />
     </div>
   );
