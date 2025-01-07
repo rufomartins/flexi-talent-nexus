@@ -1,3 +1,6 @@
+export type CastingStatus = 'open' | 'closed';
+export type CastingType = 'internal' | 'external';
+
 export interface Client {
   id: string;
   name: string;
@@ -18,8 +21,8 @@ export interface CastingFormData {
   show_briefing: boolean;
   allow_talent_portal: boolean;
   description: string;
-  status: 'open' | 'closed';
-  casting_type: 'internal' | 'external';
+  status: CastingStatus;
+  casting_type: CastingType;
 }
 
 export interface ValidationErrors {
@@ -50,6 +53,3 @@ export const FILE_CONFIG: Record<string, UploadConfig> = {
     path: 'banners'
   }
 };
-
-// Re-export existing types for backward compatibility
-export type { CastingStatus, CastingType } from './types';
