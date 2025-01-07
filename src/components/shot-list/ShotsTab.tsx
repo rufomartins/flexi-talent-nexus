@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { Plus, Pencil, Trash2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -29,6 +29,18 @@ const statusColors = {
   Completed: "bg-green-100 text-green-800",
 };
 
+interface Shot {
+  id: string;
+  shot_number: number;
+  description: string;
+  frame_type: string;
+  status: keyof typeof statusColors;
+  notes?: string;
+  location?: {
+    name: string | null;
+  } | null;
+}
+
 export function ShotsTab({ shotListId }: { shotListId: string }) {
   const [isAddDialogOpen, setIsAddDialogOpen] = useState(false);
   const queryClient = useQueryClient();
@@ -53,7 +65,7 @@ export function ShotsTab({ shotListId }: { shotListId: string }) {
         throw error;
       }
 
-      return shots;
+      return shots as Shot[];
     },
   });
 
@@ -74,6 +86,11 @@ export function ShotsTab({ shotListId }: { shotListId: string }) {
       queryClient.invalidateQueries({ queryKey: ["shots"] });
     }
     stopLoading("delete");
+  };
+
+  const handleEdit = (shotId: string) => {
+    // TODO: Implement edit functionality
+    console.log("Edit shot:", shotId);
   };
 
   // Set up real-time subscription
