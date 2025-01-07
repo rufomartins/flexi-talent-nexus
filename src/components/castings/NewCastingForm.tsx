@@ -178,7 +178,8 @@ export function NewCastingForm({ type, onSuccess }: NewCastingFormProps) {
       <MediaUploadDialog
         open={logoUploadOpen}
         onOpenChange={setLogoUploadOpen}
-        onUploadComplete={(url) => form.setValue("logo_url", url)}
+        talentId=""
+        talentRole="user"
       />
     </Form>
   );

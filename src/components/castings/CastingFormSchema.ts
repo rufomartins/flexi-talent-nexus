@@ -17,9 +17,10 @@ export const castingFormSchema = z.object({
 
 export type CastingFormData = z.infer<typeof castingFormSchema>;
 
-export const defaultValues = (type: CastingType): Partial<CastingFormData> => ({
+export const defaultValues = (type: CastingType): CastingFormData => ({
+  name: "",
   type,
-  status: 'open',
+  status: "open",
   show_briefing_on_signup: false,
   allow_talent_portal_apply: true,
 });
