@@ -1,7 +1,7 @@
 import { Button } from "@/components/ui/button";
 import { TableCell, TableRow } from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
-import { Pencil, Trash2 } from "lucide-react";
+import { Pencil, Trash2, GripVertical } from "lucide-react";
 import { Shot } from "@/types/shot-list";
 
 interface ShotTableRowProps {
@@ -27,7 +27,10 @@ export function ShotTableRow({ shot, onEdit, onDelete, isDeleting }: ShotTableRo
   };
 
   return (
-    <TableRow key={shot.id}>
+    <TableRow key={shot.id} className="group">
+      <TableCell className="w-4">
+        <GripVertical className="h-4 w-4 text-gray-400 opacity-0 group-hover:opacity-100 cursor-move" />
+      </TableCell>
       <TableCell>{shot.shot_number}</TableCell>
       <TableCell>{shot.location?.name || "—"}</TableCell>
       <TableCell>{shot.description || "—"}</TableCell>

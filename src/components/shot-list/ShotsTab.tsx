@@ -13,13 +13,16 @@ import {
 import { supabase } from "@/integrations/supabase/client";
 import { notify } from "@/utils/notifications";
 import { AddShotForm } from "./AddShotForm";
+import { EditShotForm } from "./EditShotForm";
 import { useLoadingState } from "@/hooks/useLoadingState";
 import { Shot } from "@/types/shot-list";
 import { ShotTableHeader } from "./components/ShotTableHeader";
 import { ShotTableRow } from "./components/ShotTableRow";
+import { DragDropContext, Droppable, Draggable } from "@hello-pangea/dnd";
 
 export function ShotsTab({ shotListId }: { shotListId: string }) {
   const [isAddDialogOpen, setIsAddDialogOpen] = useState(false);
+  const [editingShot, setEditingShot] = useState<Shot | null>(null);
   const queryClient = useQueryClient();
   const { loadingStates, startLoading, stopLoading } = useLoadingState();
 
@@ -73,8 +76,40 @@ export function ShotsTab({ shotListId }: { shotListId: string }) {
   };
 
   const handleEdit = (shotId: string) => {
-    // TODO: Implement edit functionality
-    console.log("Edit shot:", shotId);
+    const shot = shots?.find(s => s.id === shotId);
+    if (shot) {
+      setEditingShot(shot);
+    }
+  };
+
+  const handleDragEnd = async (result: any) => {
+    if (!result.destination || !shots) return;
+
+    const items = Array.from(shots);
+    const [reorderedItem] = items.splice(result.source.index, 1);
+    items.splice(result.destination.index, 0, reorderedItem);
+
+    // Update sequence_order for affected shots
+    const updates = items.map((shot, index) => ({
+      id: shot.id,
+      sequence_order: index + 1,
+    }));
+
+    try {
+      const { error } = await supabase
+        .from("shots")
+        .upsert(updates, { onConflict: "id" });
+
+      if (error) {
+        notify.error("Failed to update shot order");
+        return;
+      }
+
+      queryClient.invalidateQueries({ queryKey: ["shots"] });
+    } catch (error) {
+      console.error("Error updating shot order:", error);
+      notify.error("An error occurred while updating shot order");
+    }
   };
 
   // Set up real-time subscription
@@ -131,27 +166,64 @@ export function ShotsTab({ shotListId }: { shotListId: string }) {
         </Dialog>
       </div>
 
+      <Dialog open={!!editingShot} onOpenChange={(open) => !open && setEditingShot(null)}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Edit Shot</DialogTitle>
+          </DialogHeader>
+          {editingShot && (
+            <EditShotForm
+              shot={editingShot}
+              onSuccess={() => setEditingShot(null)}
+            />
+          )}
+        </DialogContent>
+      </Dialog>
+
       <div className="border rounded-md">
         <Table>
           <ShotTableHeader />
-          <TableBody>
-            {shots?.map((shot) => (
-              <ShotTableRow
-                key={shot.id}
-                shot={shot}
-                onEdit={handleEdit}
-                onDelete={handleDelete}
-                isDeleting={loadingStates["delete"] || false}
-              />
-            ))}
-            {!shots?.length && (
-              <tr>
-                <td colSpan={7} className="text-center text-muted-foreground p-4">
-                  No shots added yet
-                </td>
-              </tr>
-            )}
-          </TableBody>
+          <DragDropContext onDragEnd={handleDragEnd}>
+            <Droppable droppableId="shots">
+              {(provided) => (
+                <TableBody
+                  {...provided.droppableProps}
+                  ref={provided.innerRef}
+                >
+                  {shots?.map((shot, index) => (
+                    <Draggable
+                      key={shot.id}
+                      draggableId={shot.id}
+                      index={index}
+                    >
+                      {(provided) => (
+                        <div
+                          ref={provided.innerRef}
+                          {...provided.draggableProps}
+                          {...provided.dragHandleProps}
+                        >
+                          <ShotTableRow
+                            shot={shot}
+                            onEdit={handleEdit}
+                            onDelete={handleDelete}
+                            isDeleting={loadingStates["delete"] || false}
+                          />
+                        </div>
+                      )}
+                    </Draggable>
+                  ))}
+                  {provided.placeholder}
+                  {!shots?.length && (
+                    <tr>
+                      <td colSpan={7} className="text-center text-muted-foreground p-4">
+                        No shots added yet
+                      </td>
+                    </tr>
+                  )}
+                </TableBody>
+              )}
+            </Droppable>
+          </DragDropContext>
         </Table>
       </div>
     </div>
