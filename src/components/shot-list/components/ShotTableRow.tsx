@@ -7,7 +7,7 @@ import { Shot } from "@/types/shot-list";
 interface ShotTableRowProps {
   shot: Shot;
   onEdit: (id: string) => void;
-  onDelete: (id: string) => void;
+  onDelete: (id: string) => Promise<void>;
   isDeleting: boolean;
 }
 
@@ -16,6 +16,14 @@ export function ShotTableRow({ shot, onEdit, onDelete, isDeleting }: ShotTableRo
     Pending: "bg-yellow-100 text-yellow-800",
     "In Progress": "bg-blue-100 text-blue-800",
     Completed: "bg-green-100 text-green-800",
+  };
+
+  const handleDelete = async () => {
+    try {
+      await onDelete(shot.id);
+    } catch (error) {
+      console.error("Error deleting shot:", error);
+    }
   };
 
   return (
@@ -42,7 +50,7 @@ export function ShotTableRow({ shot, onEdit, onDelete, isDeleting }: ShotTableRo
           <Button
             variant="ghost"
             size="icon"
-            onClick={() => onDelete(shot.id)}
+            onClick={handleDelete}
             disabled={isDeleting}
           >
             <Trash2 className="h-4 w-4 text-destructive" />
