@@ -50,14 +50,15 @@ export function NewCastingForm({ type }: NewCastingFormProps) {
     fetchProjectManagers();
   }, []);
 
-  const onSubmit = async (data: CastingFormData) => {
+  const onSubmit = async (formData: CastingFormData) => {
     setIsSubmitting(true);
     try {
+      const user = await supabase.auth.getUser();
       const { error } = await supabase
         .from('castings')
         .insert({
-          ...data,
-          created_by: (await supabase.auth.getUser()).data.user?.id
+          ...formData,
+          created_by: user.data.user?.id
         });
 
       if (error) throw error;

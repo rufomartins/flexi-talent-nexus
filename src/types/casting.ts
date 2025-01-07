@@ -23,6 +23,15 @@ export interface CastingFormData {
   description: string;
   status: CastingStatus;
   casting_type: CastingType;
+  logo_url?: string;
+  type: CastingType;
+  scout_id?: string;
+  briefing?: string;
+  show_briefing_on_signup: boolean;
+  allow_talent_portal_apply: boolean;
+  created_by?: string;
+  created_at?: string;
+  updated_at?: string;
 }
 
 export interface ValidationErrors {
