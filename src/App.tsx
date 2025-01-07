@@ -7,6 +7,7 @@ import { MainLayout } from "@/components/layout/MainLayout";
 import Login from "@/pages/Login";
 import Dashboard from "@/pages/Dashboard";
 import Calendar from "@/pages/Calendar";
+import Bookings from "@/pages/Bookings";
 
 const queryClient = new QueryClient();
 
@@ -30,6 +31,7 @@ function App() {
               <Route index element={<Navigate to="/dashboard" replace />} />
               <Route path="dashboard" element={<Dashboard />} />
               <Route path="calendar" element={<Calendar />} />
+              <Route path="bookings" element={<Bookings />} />
             </Route>
           </Routes>
           <Toaster />

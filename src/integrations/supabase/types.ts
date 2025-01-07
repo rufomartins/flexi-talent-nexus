@@ -59,6 +59,114 @@ export type Database = {
           },
         ]
       }
+      booking_contracts: {
+        Row: {
+          booking_id: string | null
+          contract_type: string
+          contract_url: string | null
+          created_at: string | null
+          id: string
+          signed_at: string | null
+          signed_url: string | null
+          updated_at: string | null
+        }
+        Insert: {
+          booking_id?: string | null
+          contract_type: string
+          contract_url?: string | null
+          created_at?: string | null
+          id?: string
+          signed_at?: string | null
+          signed_url?: string | null
+          updated_at?: string | null
+        }
+        Update: {
+          booking_id?: string | null
+          contract_type?: string
+          contract_url?: string | null
+          created_at?: string | null
+          id?: string
+          signed_at?: string | null
+          signed_url?: string | null
+          updated_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "booking_contracts_booking_id_fkey"
+            columns: ["booking_id"]
+            isOneToOne: false
+            referencedRelation: "bookings"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      bookings: {
+        Row: {
+          casting_id: string | null
+          created_at: string | null
+          end_date: string
+          final_fee: number | null
+          id: string
+          payment_status: string | null
+          project_id: string | null
+          start_date: string
+          status: Database["public"]["Enums"]["booking_status"] | null
+          talent_fee: number | null
+          talent_id: string | null
+          updated_at: string | null
+        }
+        Insert: {
+          casting_id?: string | null
+          created_at?: string | null
+          end_date: string
+          final_fee?: number | null
+          id?: string
+          payment_status?: string | null
+          project_id?: string | null
+          start_date: string
+          status?: Database["public"]["Enums"]["booking_status"] | null
+          talent_fee?: number | null
+          talent_id?: string | null
+          updated_at?: string | null
+        }
+        Update: {
+          casting_id?: string | null
+          created_at?: string | null
+          end_date?: string
+          final_fee?: number | null
+          id?: string
+          payment_status?: string | null
+          project_id?: string | null
+          start_date?: string
+          status?: Database["public"]["Enums"]["booking_status"] | null
+          talent_fee?: number | null
+          talent_id?: string | null
+          updated_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "bookings_casting_id_fkey"
+            columns: ["casting_id"]
+            isOneToOne: false
+            referencedRelation: "castings"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "bookings_project_id_fkey"
+            columns: ["project_id"]
+            isOneToOne: false
+            referencedRelation: "projects"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "bookings_talent_id_fkey"
+            columns: ["talent_id"]
+            isOneToOne: false
+            referencedRelation: "talent_profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       casting_dates: {
         Row: {
           casting_id: string | null
@@ -1353,6 +1461,7 @@ export type Database = {
       [_ in never]: never
     }
     Enums: {
+      booking_status: "pending" | "confirmed" | "cancelled" | "completed"
       casting_status: "open" | "closed"
       casting_type: "internal" | "external"
       field_type:
