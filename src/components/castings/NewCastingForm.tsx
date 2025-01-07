@@ -1,45 +1,32 @@
 import React, { useState, useEffect } from 'react';
-import { Loader } from 'lucide-react';
-import { useFormValidation } from '@/hooks/useFormValidation';
-import { useLoadingState } from '@/hooks/useLoadingState';
-import { useFileUpload } from '@/hooks/useFileUpload';
-import { validateCastingForm } from '@/utils/validation';
-import { notify } from '@/utils/notifications';
+import { useForm } from 'react-hook-form';
+import { zodResolver } from '@hookform/resolvers/zod';
 import { supabase } from '@/integrations/supabase/client';
-import { CastingFormData, ValidationErrors, CastingType, FILE_CONFIG } from '@/types/casting';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { CastingFormContext } from './form/CastingFormContext';
+import { ProjectManagerSelect } from './form/ProjectManagerSelect';
+import { CastingFormActions } from './form/CastingFormActions';
+import { CastingLogoUpload } from './CastingLogoUpload';
+import { castingFormSchema, defaultValues, CastingFormData } from './CastingFormSchema';
+import { notify } from '@/utils/notifications';
 import { RichTextEditor } from '@/components/ui/rich-text-editor';
-import { Button } from '@/components/ui/button';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 
 interface NewCastingFormProps {
-  type: CastingType;
+  type: 'internal' | 'external';
 }
 
-export const NewCastingForm: React.FC<NewCastingFormProps> = ({ type }) => {
-  const { errors, validateField, markTouched, clearErrors } = useFormValidation();
-  const { loadingStates, startLoading, stopLoading } = useLoadingState({
-    form: false,
-    fileUpload: false
-  });
-  const { files, uploadProgress, handleFileSelect, uploadFile } = useFileUpload(FILE_CONFIG);
-
-  const [formData, setFormData] = useState<CastingFormData>({
-    name: '',
-    client_id: null,
-    project_manager_id: null,
-    talent_briefing: '',
-    show_briefing: false,
-    allow_talent_portal: false,
-    description: '',
-    status: 'open',
-    casting_type: type,
-    logo_url: null
-  });
-
-  const [errors, setErrors] = useState<ValidationErrors>({});
+export function NewCastingForm({ type }: NewCastingFormProps) {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [projectManagers, setProjectManagers] = useState([]);
   const [isLoadingPMs, setIsLoadingPMs] = useState(false);
+
+  const form = useForm<CastingFormData>({
+    resolver: zodResolver(castingFormSchema),
+    defaultValues: {
+      ...defaultValues,
+      type
+    }
+  });
 
   useEffect(() => {
     const fetchProjectManagers = async () => {
@@ -51,9 +38,10 @@ export const NewCastingForm: React.FC<NewCastingFormProps> = ({ type }) => {
           .eq('role', 'project_manager');
 
         if (error) throw error;
-        setProjectManagers(data);
+        setProjectManagers(data || []);
       } catch (error) {
         console.error('Error fetching project managers:', error);
+        notify.error('Failed to load project managers');
       } finally {
         setIsLoadingPMs(false);
       }
@@ -62,175 +50,104 @@ export const NewCastingForm: React.FC<NewCastingFormProps> = ({ type }) => {
     fetchProjectManagers();
   }, []);
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    startLoading('form');
-    clearErrors();
-
+  const onSubmit = async (data: CastingFormData) => {
+    setIsSubmitting(true);
     try {
-      const validationErrors = validateCastingForm(formData);
-      if (Object.keys(validationErrors).length > 0) {
-        setErrors(validationErrors);
-        return;
-      }
-
-      // Handle file uploads if needed
-      if (files.logo?.file) {
-        const logoUrl = await uploadFile('logo', files.logo.file);
-        formData.logo_url = logoUrl;
-      }
-
-      // Submit form data
-      const { data, error } = await supabase
+      const { error } = await supabase
         .from('castings')
-        .insert([formData])
-        .select()
-        .single();
+        .insert(data);
 
       if (error) throw error;
 
       notify.success('Casting created successfully');
-      // Handle successful submission (e.g., redirect)
+      window.history.back();
     } catch (error) {
       console.error('Error submitting form:', error);
       notify.error('Failed to create casting');
     } finally {
-      stopLoading('form');
+      setIsSubmitting(false);
     }
   };
 
   return (
-    <form onSubmit={handleSubmit} className="max-w-4xl mx-auto p-6">
-      <div className="space-y-6">
-        {/* Project Manager Selection */}
-        <div>
-          <label className="block text-sm font-medium mb-2">Project Manager</label>
-          <Select
-            value={formData.project_manager_id || ''}
-            onValueChange={(value) => 
-              setFormData(prev => ({ ...prev, project_manager_id: value }))
-            }
-          >
-            <SelectTrigger className={`w-full ${errors.project_manager_id ? 'border-red-500' : ''}`}>
-              <SelectValue placeholder="Select a project manager" />
-            </SelectTrigger>
-            <SelectContent>
-              {isLoadingPMs ? (
-                <div className="p-2 flex items-center justify-center">
-                  <Loader className="w-4 h-4 animate-spin" />
-                </div>
-              ) : (
-                projectManagers.map((pm) => (
-                  <SelectItem key={pm.id} value={pm.id}>
-                    {pm.full_name}
-                  </SelectItem>
-                ))
-              )}
-            </SelectContent>
-          </Select>
-          {errors.project_manager_id && (
-            <p className="mt-1 text-sm text-red-600">{errors.project_manager_id}</p>
-          )}
-        </div>
+    <CastingFormContext.Provider value={{ form, isSubmitting, onSubmit }}>
+      <form onSubmit={form.handleSubmit(onSubmit)} className="max-w-4xl mx-auto p-6">
+        <div className="space-y-6">
+          <CastingLogoUpload 
+            form={form} 
+            onUploadClick={() => {
+              // Implement file upload logic here
+              console.log('Upload clicked');
+            }} 
+          />
+          
+          <ProjectManagerSelect 
+            projectManagers={projectManagers}
+            isLoading={isLoadingPMs}
+          />
 
-        {/* Talent Briefing */}
-        <RichTextEditor
-          label="Talent briefing (will be sent to talents in availability mails)"
-          value={formData.talent_briefing}
-          onChange={(e) => setFormData(prev => ({ ...prev, talent_briefing: e.target.value }))}
-          error={errors.talent_briefing}
-        />
+          <RichTextEditor
+            label="Talent briefing (will be sent to talents in availability mails)"
+            value={form.watch('talent_briefing') || ''}
+            onChange={(value) => form.setValue('talent_briefing', value)}
+            error={form.formState.errors.talent_briefing?.message}
+          />
 
-        {/* Show Briefing Toggle */}
-        <div>
-          <label className="block text-sm font-medium mb-2">
-            Show this briefing on the sign-up form of this casting
-          </label>
-          <Select
-            value={formData.show_briefing.toString()}
-            onValueChange={(value) => 
-              setFormData(prev => ({ ...prev, show_briefing: value === 'true' }))
-            }
-          >
-            <SelectTrigger className="w-full">
-              <SelectValue />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="true">Yes</SelectItem>
-              <SelectItem value="false">No</SelectItem>
-            </SelectContent>
-          </Select>
-        </div>
+          <div>
+            <label className="block text-sm font-medium mb-2">
+              Show this briefing on the sign-up form of this casting
+            </label>
+            <Select
+              value={form.watch('show_briefing').toString()}
+              onValueChange={(value) => form.setValue('show_briefing', value === 'true')}
+            >
+              <SelectTrigger className="w-full">
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="true">Yes</SelectItem>
+                <SelectItem value="false">No</SelectItem>
+              </SelectContent>
+            </Select>
+          </div>
 
-        {/* Allow Talent Portal Toggle */}
-        <div>
-          <label className="block text-sm font-medium mb-2">
-            Allow talents to apply to this casting using their "my ugc talent casting" environment
-          </label>
-          <Select
-            value={formData.allow_talent_portal.toString()}
-            onValueChange={(value) => 
-              setFormData(prev => ({ ...prev, allow_talent_portal: value === 'true' }))
-            }
-          >
-            <SelectTrigger className="w-full">
-              <SelectValue />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="true">Yes</SelectItem>
-              <SelectItem value="false">No</SelectItem>
-            </SelectContent>
-          </Select>
-        </div>
+          <div>
+            <label className="block text-sm font-medium mb-2">
+              Allow talents to apply to this casting using their "my ugc talent casting" environment
+            </label>
+            <Select
+              value={form.watch('allow_talent_portal').toString()}
+              onValueChange={(value) => form.setValue('allow_talent_portal', value === 'true')}
+            >
+              <SelectTrigger className="w-full">
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="true">Yes</SelectItem>
+                <SelectItem value="false">No</SelectItem>
+              </SelectContent>
+            </Select>
+          </div>
 
-        {/* Status Selection */}
-        <div>
-          <label className="block text-sm font-medium mb-2">Status</label>
-          <Select
-            value={formData.status}
-            onValueChange={(value) => 
-              setFormData(prev => ({ ...prev, status: value as 'open' | 'closed' }))
-            }
-          >
-            <SelectTrigger className="w-full">
-              <SelectValue />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="open">Open</SelectItem>
-              <SelectItem value="closed">Closed</SelectItem>
-            </SelectContent>
-          </Select>
-        </div>
+          <div>
+            <label className="block text-sm font-medium mb-2">Status</label>
+            <Select
+              value={form.watch('status')}
+              onValueChange={(value) => form.setValue('status', value as 'open' | 'closed')}
+            >
+              <SelectTrigger className="w-full">
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="open">Open</SelectItem>
+                <SelectItem value="closed">Closed</SelectItem>
+              </SelectContent>
+            </Select>
+          </div>
 
-        {/* Action Buttons */}
-        <div className="flex justify-end space-x-4 pt-6">
-          <button
-            type="button"
-            className="px-4 py-2 text-gray-600 bg-gray-100 rounded-lg hover:bg-gray-200"
-            onClick={() => window.history.back()}
-          >
-            Cancel
-          </button>
-          <button
-            type="submit"
-            disabled={isSubmitting}
-            className="px-4 py-2 text-white bg-blue-500 rounded-lg hover:bg-blue-600 flex items-center disabled:opacity-50"
-          >
-            {isSubmitting ? (
-              <>
-                <Loader className="w-4 h-4 mr-2 animate-spin" />
-                Creating...
-              </>
-            ) : (
-              <span className="flex items-center">
-                <span className="mr-1">+</span> Save
-              </span>
-            )}
-          </button>
+          <CastingFormActions />
         </div>
-      </div>
-    </form>
+      </form>
+    </CastingFormContext.Provider>
   );
-};
-
-export default NewCastingForm;
+}

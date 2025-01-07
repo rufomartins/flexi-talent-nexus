@@ -39,22 +39,20 @@ export const useFileUpload = (config: Record<string, UploadConfig>) => {
     const filePath = `${config[type].path}/${fileName}`;
 
     try {
-      const { error: uploadError, data } = await supabase.storage
+      const { error: uploadError } = await supabase.storage
         .from('castings')
-        .upload(filePath, file, {
-          onUploadProgress: (progress) => {
-            setUploadProgress(prev => ({
-              ...prev,
-              [type]: (progress.loaded / progress.total) * 100
-            }));
-          }
-        });
+        .upload(filePath, file);
 
       if (uploadError) throw uploadError;
 
       const { data: { publicUrl } } = supabase.storage
         .from('castings')
         .getPublicUrl(filePath);
+
+      setUploadProgress(prev => ({
+        ...prev,
+        [type]: 100
+      }));
 
       return publicUrl;
     } catch (error) {
