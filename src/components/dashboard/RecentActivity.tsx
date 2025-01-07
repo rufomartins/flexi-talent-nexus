@@ -90,14 +90,14 @@ export const RecentActivity = () => {
         <h2 className="text-xl font-semibold">Recent Activity</h2>
         <div className="flex gap-2">
           <Select
-            value={activityType || ""}
-            onValueChange={(value) => setActivityType(value || null)}
+            value={activityType || "all"}
+            onValueChange={(value) => setActivityType(value === "all" ? null : value)}
           >
             <SelectTrigger className="w-[180px]">
               <SelectValue placeholder="Filter by type" />
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value="">All types</SelectItem>
+              <SelectItem value="all">All types</SelectItem>
               {activityTypes.map((type) => (
                 <SelectItem key={type} value={type}>
                   {type.replace('_', ' ').charAt(0).toUpperCase() + type.slice(1)}
