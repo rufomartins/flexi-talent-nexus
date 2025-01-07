@@ -24,6 +24,13 @@ type ActivityLog = {
   user_id?: string;
 };
 
+interface ActivityPageData {
+  activities: ActivityLog[];
+  totalCount: number;
+  hasMore: boolean;
+  nextPage: number | undefined;
+}
+
 export const RecentActivity = () => {
   const [activityType, setActivityType] = useState<string | null>(null);
   const [dateRange, setDateRange] = useState<Date | undefined>();
@@ -38,7 +45,7 @@ export const RecentActivity = () => {
     delay: 100,
   });
 
-  const buildQuery = useCallback((pageParam = 0) => {
+  const buildQuery = useCallback((pageParam: number) => {
     const from = pageParam * itemsPerPage;
     const to = from + itemsPerPage - 1;
 
@@ -82,10 +89,10 @@ export const RecentActivity = () => {
     fetchNextPage,
     hasNextPage,
     isFetchingNextPage
-  } = useInfiniteQuery({
+  } = useInfiniteQuery<ActivityPageData, Error>({
     queryKey: ['recent-activities', activityType, dateRange, sortField, sortOrder],
     queryFn: async ({ pageParam = 0 }) => {
-      const query = buildQuery(pageParam);
+      const query = buildQuery(pageParam as number);
       const { data: activities, error, count } = await query;
 
       if (error) {
@@ -97,9 +104,10 @@ export const RecentActivity = () => {
         activities: activities as ActivityLog[],
         totalCount: count || 0,
         hasMore: activities?.length === itemsPerPage,
-        nextPage: activities?.length === itemsPerPage ? pageParam + 1 : undefined
+        nextPage: activities?.length === itemsPerPage ? (pageParam as number) + 1 : undefined
       };
     },
+    initialPageParam: 0,
     getNextPageParam: (lastPage) => lastPage.nextPage,
     staleTime: 30000, // Cache data for 30 seconds
     retry: 2,
