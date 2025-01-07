@@ -1,11 +1,11 @@
-import { Button } from "@/components/ui/button"
 import { useState } from "react"
-import { AddTalentModal } from "@/components/talents/AddTalentModal"
 import { useQuery } from "@tanstack/react-query"
 import { supabase } from "@/integrations/supabase/client"
-import { UserPlus, Users, FolderGit, Briefcase, DollarSign, Wallet } from "lucide-react"
 import { useAuth } from "@/contexts/auth"
-import { StatCard } from "@/components/dashboard/StatCard"
+import { AddTalentModal } from "@/components/talents/AddTalentModal"
+import { DashboardHeader } from "@/components/dashboard/DashboardHeader"
+import { StatsGrid } from "@/components/dashboard/StatsGrid"
+import { RecentActivity } from "@/components/dashboard/RecentActivity"
 
 export default function Dashboard() {
   const [addTalentOpen, setAddTalentOpen] = useState(false)
@@ -119,7 +119,6 @@ export default function Dashboard() {
       if (!user || (userDetails?.role !== 'super_admin' && userDetails?.role !== 'admin')) return 0;
       
       // For now, we'll return a mock value since the financial module is not yet implemented
-      // This should be updated once the financial tables are created
       return 10000;
     },
     enabled: !!user && (userDetails?.role === 'super_admin' || userDetails?.role === 'admin')
@@ -129,84 +128,31 @@ export default function Dashboard() {
     return null;
   }
 
-  const isAdminOrSuperAdmin = userDetails?.role === 'admin' || userDetails?.role === 'super_admin';
-
   return (
     <div className="container mx-auto p-6">
-      <div className="flex justify-between items-center mb-6">
-        <h1 className="text-2xl font-bold">Dashboard</h1>
-        <Button onClick={() => setAddTalentOpen(true)}>
-          Add new talent
-        </Button>
-      </div>
+      <DashboardHeader onAddTalent={() => setAddTalentOpen(true)} />
 
       <AddTalentModal 
         open={addTalentOpen}
         onOpenChange={setAddTalentOpen}
       />
       
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-        <StatCard
-          title="New Registrations"
-          subtitle="Last 30 days"
-          value={newRegistrations}
-          icon={UserPlus}
-          isLoading={registrationsLoading}
-        />
-        
-        <StatCard
-          title="Total Talents"
-          subtitle="Available"
-          value={talentsCount}
-          icon={Users}
-          isLoading={talentsLoading}
-        />
-        
-        <StatCard
-          title="Active Projects"
-          subtitle="In progress"
-          value={projectsCount}
-          icon={FolderGit}
-          isLoading={projectsLoading}
-        />
+      <StatsGrid
+        newRegistrations={newRegistrations}
+        talentsCount={talentsCount}
+        projectsCount={projectsCount}
+        activeCastingsCount={activeCastingsCount}
+        pendingPayments={pendingPayments}
+        availableFunds={availableFunds}
+        isLoadingRegistrations={registrationsLoading}
+        isLoadingTalents={talentsLoading}
+        isLoadingProjects={projectsLoading}
+        isLoadingCastings={castingsLoading}
+        isLoadingPayments={paymentsLoading}
+        isLoadingFunds={fundsLoading}
+      />
 
-        <StatCard
-          title="Active Castings"
-          subtitle="Open castings"
-          value={activeCastingsCount}
-          icon={Briefcase}
-          isLoading={castingsLoading}
-        />
-
-        {userDetails?.role === 'super_admin' && (
-          <StatCard
-            title="Pending Payments"
-            subtitle="To talents"
-            value={pendingPayments}
-            icon={DollarSign}
-            isLoading={paymentsLoading}
-          />
-        )}
-
-        {isAdminOrSuperAdmin && (
-          <StatCard
-            title="Available Funds"
-            subtitle="Current balance"
-            value={availableFunds}
-            icon={Wallet}
-            isLoading={fundsLoading}
-          />
-        )}
-      </div>
-
-      <div className="mt-8">
-        <h2 className="text-xl font-semibold mb-4">Recent Activity</h2>
-        <div className="bg-card rounded-lg shadow p-6">
-          <p className="text-muted-foreground text-center py-8">
-            No recent activity to display
-          </p>
-        </div>
-      </div>
+      <RecentActivity />
     </div>
   )
 }
