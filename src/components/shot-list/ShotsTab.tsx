@@ -22,6 +22,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { notify } from "@/utils/notifications";
 import { AddShotForm } from "./AddShotForm";
 import { useLoadingState } from "@/hooks/useLoadingState";
+import { Shot } from "@/types/shot-list";
 
 const statusColors = {
   Pending: "bg-yellow-100 text-yellow-800",
@@ -29,24 +30,10 @@ const statusColors = {
   Completed: "bg-green-100 text-green-800",
 };
 
-interface Shot {
-  id: string;
-  shot_number: number;
-  description: string;
-  frame_type: string;
-  status: keyof typeof statusColors;
-  notes?: string;
-  location?: {
-    name: string | null;
-  } | null;
-}
-
 export function ShotsTab({ shotListId }: { shotListId: string }) {
   const [isAddDialogOpen, setIsAddDialogOpen] = useState(false);
   const queryClient = useQueryClient();
-  const { isLoading, startLoading, stopLoading } = useLoadingState({
-    delete: false,
-  });
+  const { isLoading, startLoading, stopLoading } = useLoadingState();
 
   const { data: shots, isLoading: isFetchingShots } = useQuery({
     queryKey: ["shots", shotListId],
@@ -65,7 +52,16 @@ export function ShotsTab({ shotListId }: { shotListId: string }) {
         throw error;
       }
 
-      return shots as Shot[];
+      // Transform the data to match our Shot interface
+      return (shots || []).map(shot => ({
+        id: shot.id,
+        shot_number: shot.shot_number,
+        description: shot.description || "",
+        frame_type: shot.frame_type || "",
+        status: shot.status as keyof typeof statusColors,
+        notes: shot.notes,
+        location: shot.location as { name: string | null } | null
+      })) as Shot[];
     },
   });
 
@@ -169,7 +165,7 @@ export function ShotsTab({ shotListId }: { shotListId: string }) {
                 <TableCell>{shot.frame_type || "—"}</TableCell>
                 <TableCell>
                   <Badge
-                    className={statusColors[shot.status as keyof typeof statusColors]}
+                    className={statusColors[shot.status]}
                   >
                     {shot.status}
                   </Badge>

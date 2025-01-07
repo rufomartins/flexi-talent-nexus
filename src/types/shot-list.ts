@@ -1,16 +1,13 @@
 export interface Shot {
   id: string;
-  shot_list_id: string;
   shot_number: number;
-  location_id: string | null;
   description: string;
   frame_type: string;
   status: 'Pending' | 'In Progress' | 'Completed';
-  notes: string | null;
-  sequence_order: number;
+  notes?: string;
   location?: {
-    name: string;
-  };
+    name: string | null;
+  } | null;
 }
 
 export interface ShotFormData {
