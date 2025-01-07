@@ -12,6 +12,8 @@ serve(async (req) => {
   }
 
   try {
+    console.log('Retrieving Agora credentials')
+    
     // Return the Agora App ID
     return new Response(
       JSON.stringify({
@@ -22,6 +24,7 @@ serve(async (req) => {
       }
     )
   } catch (error) {
+    console.error('Error:', error.message)
     return new Response(
       JSON.stringify({ error: error.message }),
       { 
