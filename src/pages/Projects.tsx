@@ -1,36 +1,36 @@
-import { useQuery } from "@tanstack/react-query"
-import { supabase } from "@/integrations/supabase/client"
-import { Loader2 } from "lucide-react"
-import { useAuth } from "@/contexts/auth"
+import { useQuery } from "@tanstack/react-query";
+import { supabase } from "@/integrations/supabase/client";
+import { Loader2 } from "lucide-react";
+import { useAuth } from "@/contexts/auth";
 
 export default function Projects() {
-  const { user } = useAuth()
+  const { user } = useAuth();
 
   const { data: projects, isLoading } = useQuery({
     queryKey: ['projects'],
     queryFn: async () => {
-      if (!user) return []
+      if (!user) return [];
       
       const { data, error } = await supabase
         .from('projects')
         .select('*, clients(name)')
       
       if (error) {
-        console.error('Error fetching projects:', error)
-        return []
+        console.error('Error fetching projects:', error);
+        return [];
       }
 
-      return data || []
+      return data || [];
     },
     enabled: !!user
-  })
+  });
 
   if (isLoading) {
     return (
       <div className="h-full w-full flex items-center justify-center">
         <Loader2 className="h-8 w-8 animate-spin" />
       </div>
-    )
+    );
   }
 
   return (
@@ -62,5 +62,5 @@ export default function Projects() {
         </div>
       )}
     </div>
-  )
+  );
 }
