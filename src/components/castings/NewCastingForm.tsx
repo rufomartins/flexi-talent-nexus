@@ -12,8 +12,8 @@ import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
 import { CastingType } from "@/types/casting";
 import { MediaUploadDialog } from "@/components/talents/MediaUploadDialog";
-import { castingFormSchema, CastingFormData, defaultValues } from "./CastingFormSchema";
 import { CastingLogoUpload } from "./CastingLogoUpload";
+import { castingFormSchema, CastingFormData, defaultValues } from "./CastingFormSchema";
 
 interface NewCastingFormProps {
   type: CastingType;
