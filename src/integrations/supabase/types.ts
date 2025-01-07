@@ -277,6 +277,7 @@ export type Database = {
       }
       talent_media: {
         Row: {
+          category: string | null
           created_at: string | null
           file_name: string
           file_path: string
@@ -285,11 +286,13 @@ export type Database = {
           id: string
           is_profile: boolean | null
           is_shared: boolean | null
+          mime_type: string | null
           position: number | null
           talent_id: string | null
           updated_at: string | null
         }
         Insert: {
+          category?: string | null
           created_at?: string | null
           file_name: string
           file_path: string
@@ -298,11 +301,13 @@ export type Database = {
           id?: string
           is_profile?: boolean | null
           is_shared?: boolean | null
+          mime_type?: string | null
           position?: number | null
           talent_id?: string | null
           updated_at?: string | null
         }
         Update: {
+          category?: string | null
           created_at?: string | null
           file_name?: string
           file_path?: string
@@ -311,6 +316,7 @@ export type Database = {
           id?: string
           is_profile?: boolean | null
           is_shared?: boolean | null
+          mime_type?: string | null
           position?: number | null
           talent_id?: string | null
           updated_at?: string | null
