@@ -1,4 +1,4 @@
-import { CalendarIcon } from "lucide-react";
+import { CalendarIcon, ArrowUpDown } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Calendar } from "@/components/ui/calendar";
 import {
@@ -16,11 +16,18 @@ import {
 import { cn } from "@/lib/utils";
 import { format } from "date-fns";
 
+type SortOrder = 'desc' | 'asc';
+type SortField = 'created_at' | 'action_type';
+
 interface ActivityFiltersProps {
   activityType: string | null;
   setActivityType: (type: string | null) => void;
   dateRange: Date | undefined;
   setDateRange: (date: Date | undefined) => void;
+  sortField: SortField;
+  setSortField: (field: SortField) => void;
+  sortOrder: SortOrder;
+  setSortOrder: (order: SortOrder) => void;
 }
 
 export const ActivityFilters = ({
@@ -28,6 +35,10 @@ export const ActivityFilters = ({
   setActivityType,
   dateRange,
   setDateRange,
+  sortField,
+  setSortField,
+  sortOrder,
+  setSortOrder,
 }: ActivityFiltersProps) => {
   return (
     <div className="flex items-center gap-4">
@@ -72,12 +83,36 @@ export const ActivityFilters = ({
         </PopoverContent>
       </Popover>
 
-      {(dateRange || activityType) && (
+      <Select
+        value={sortField}
+        onValueChange={(value) => setSortField(value as SortField)}
+      >
+        <SelectTrigger className="w-[160px]">
+          <SelectValue placeholder="Sort by" />
+        </SelectTrigger>
+        <SelectContent>
+          <SelectItem value="created_at">Date</SelectItem>
+          <SelectItem value="action_type">Activity Type</SelectItem>
+        </SelectContent>
+      </Select>
+
+      <Button
+        variant="outline"
+        size="icon"
+        onClick={() => setSortOrder(sortOrder === 'asc' ? 'desc' : 'asc')}
+        className="h-9 w-9"
+      >
+        <ArrowUpDown className="h-4 w-4" />
+      </Button>
+
+      {(dateRange || activityType || sortField !== 'created_at' || sortOrder !== 'desc') && (
         <Button
           variant="ghost"
           onClick={() => {
             setDateRange(undefined);
             setActivityType(null);
+            setSortField('created_at');
+            setSortOrder('desc');
           }}
           className="h-8 px-2 lg:px-3"
         >

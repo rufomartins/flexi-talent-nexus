@@ -6,14 +6,19 @@ import { ActivityList } from "./activity/ActivityList";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { AlertCircle } from "lucide-react";
 
+type SortOrder = 'desc' | 'asc';
+type SortField = 'created_at' | 'action_type';
+
 export const RecentActivity = () => {
   const [currentPage, setCurrentPage] = useState(1);
   const [activityType, setActivityType] = useState<string | null>(null);
   const [dateRange, setDateRange] = useState<Date | undefined>();
+  const [sortField, setSortField] = useState<SortField>('created_at');
+  const [sortOrder, setSortOrder] = useState<SortOrder>('desc');
   const itemsPerPage = 10;
 
   const { data, isLoading, error } = useQuery({
-    queryKey: ['recent-activities', currentPage, activityType, dateRange],
+    queryKey: ['recent-activities', currentPage, activityType, dateRange, sortField, sortOrder],
     queryFn: async () => {
       const from = (currentPage - 1) * itemsPerPage;
       const to = from + itemsPerPage - 1;
@@ -21,7 +26,7 @@ export const RecentActivity = () => {
       let query = supabase
         .from('user_activity_logs')
         .select('*', { count: 'exact' })
-        .order('created_at', { ascending: false })
+        .order(sortField, { ascending: sortOrder === 'asc' })
         .range(from, to);
 
       if (activityType) {
@@ -63,12 +68,18 @@ export const RecentActivity = () => {
     <div className="mt-8">
       <div className="flex justify-between items-center mb-4">
         <h2 className="text-xl font-semibold">Recent Activity</h2>
-        <ActivityFilters
-          activityType={activityType}
-          setActivityType={setActivityType}
-          dateRange={dateRange}
-          setDateRange={setDateRange}
-        />
+        <div className="flex items-center gap-4">
+          <ActivityFilters
+            activityType={activityType}
+            setActivityType={setActivityType}
+            dateRange={dateRange}
+            setDateRange={setDateRange}
+            sortField={sortField}
+            setSortField={setSortField}
+            sortOrder={sortOrder}
+            setSortOrder={setSortOrder}
+          />
+        </div>
       </div>
 
       <div className="bg-card rounded-lg shadow p-6">
