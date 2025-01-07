@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { useQuery } from "@tanstack/react-query";
-import { CalendarIcon, Loader2 } from "lucide-react";
+import { CalendarIcon, Loader2, ChevronLeft, ChevronRight } from "lucide-react";
 import { format } from "date-fns";
 import { supabase } from "@/integrations/supabase/client";
 import { Calendar } from "@/components/ui/calendar";
@@ -81,22 +81,46 @@ export default function CalendarPage() {
           <CalendarIcon className="h-6 w-6" />
           <h1 className="text-2xl font-bold">Calendar</h1>
         </div>
-        <Button onClick={() => setShowAddEvent(true)}>Add Event</Button>
+        <div className="flex items-center gap-2">
+          <Button 
+            variant="outline" 
+            size="sm"
+            onClick={() => setDate(new Date())}
+          >
+            Today
+          </Button>
+          <Button onClick={() => setShowAddEvent(true)}>
+            Add Event
+          </Button>
+        </div>
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-        <div className="md:col-span-1">
-          <Calendar
-            mode="single"
-            selected={date}
-            onSelect={(date) => date && setDate(date)}
-            className="rounded-md border shadow"
-          />
+      <div className="bg-white rounded-lg shadow">
+        <div className="grid grid-cols-7 gap-px border-b">
+          {['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'].map((day) => (
+            <div
+              key={day}
+              className="px-4 py-3 text-sm font-semibold text-gray-900 text-center"
+            >
+              {day}
+            </div>
+          ))}
         </div>
+        
+        <Calendar
+          mode="single"
+          selected={date}
+          onSelect={(date) => date && setDate(date)}
+          className="w-full border-none"
+          components={{
+            IconLeft: () => <ChevronLeft className="h-4 w-4" />,
+            IconRight: () => <ChevronRight className="h-4 w-4" />,
+          }}
+        />
 
-        <div className="md:col-span-2">
+        <div className="p-4 border-t">
           {isLoading ? (
-            <div className="flex items-center justify-center h-64">
+            <div className="flex items-center justify-center h-24">
               <Loader2 className="h-8 w-8 animate-spin" />
             </div>
           ) : (
@@ -106,7 +130,7 @@ export default function CalendarPage() {
               </h2>
               <CalendarEventsList 
                 events={events || []} 
-                selectedDate={date} 
+                selectedDate={date}
               />
             </>
           )}
