@@ -1,4 +1,5 @@
 import { Loader2 } from "lucide-react";
+import { useNavigate } from "react-router-dom";
 import {
   Pagination,
   PaginationContent,
@@ -31,6 +32,8 @@ export const ActivityList = ({
   totalPages,
   onPageChange,
 }: ActivityListProps) => {
+  const navigate = useNavigate();
+
   const formatActivityText = (activity: Activity) => {
     const { action_type, details } = activity;
     
@@ -45,6 +48,20 @@ export const ActivityList = ({
     }
     
     return action_type;
+  };
+
+  const handleActivityClick = (activity: Activity) => {
+    const { action_type, details } = activity;
+    
+    if (action_type === 'registration') {
+      const status = (details as { status?: string })?.status || 'under_evaluation';
+      navigate(`/talents?filter=${status}`);
+    }
+    
+    if (action_type === 'project') {
+      const status = (details as { status?: string })?.status || 'new';
+      navigate(`/projects?status=${status}`);
+    }
   };
 
   if (isLoading) {
@@ -67,7 +84,11 @@ export const ActivityList = ({
     <>
       <ul className="space-y-4">
         {activities.map((activity) => (
-          <li key={activity.id} className="flex items-center space-x-4">
+          <li 
+            key={activity.id} 
+            className="flex items-center space-x-4 p-3 rounded-md hover:bg-muted/50 cursor-pointer transition-colors"
+            onClick={() => handleActivityClick(activity)}
+          >
             <div className="flex-1">
               <p className="text-sm text-muted-foreground">
                 {formatActivityText(activity)}
