@@ -13,7 +13,7 @@ interface LocationFormProps {
 }
 
 export function LocationForm({ location, onSubmit, isLoading }: LocationFormProps) {
-  const { register, handleSubmit, formState: { errors } } = useForm<Partial<Location>>({
+  const { register, handleSubmit, setValue, formState: { errors } } = useForm<Location>({
     defaultValues: location || {
       name: '',
       address: '',
@@ -68,7 +68,7 @@ export function LocationForm({ location, onSubmit, isLoading }: LocationFormProp
         <Label htmlFor="status">Status</Label>
         <Select
           defaultValue={location?.status || 'Pending'}
-          onValueChange={(value) => register('status').onChange({ target: { value } })}
+          onValueChange={(value) => setValue('status', value as Location['status'])}
         >
           <SelectTrigger>
             <SelectValue placeholder="Select status" />

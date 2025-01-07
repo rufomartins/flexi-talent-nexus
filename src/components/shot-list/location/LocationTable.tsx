@@ -18,7 +18,7 @@ interface LocationTableProps {
 }
 
 export function LocationTable({ locations, onEdit, onDelete, isDeleting }: LocationTableProps) {
-  const getStatusColor = (status: string) => {
+  const getStatusColor = (status: string | undefined) => {
     switch (status) {
       case 'Confirmed':
         return 'bg-green-100 text-green-800';
@@ -57,7 +57,7 @@ export function LocationTable({ locations, onEdit, onDelete, isDeleting }: Locat
                 <TableCell>{location.time_of_day || '-'}</TableCell>
                 <TableCell>{location.special_requirements || '-'}</TableCell>
                 <TableCell>
-                  <span className={`px-2 py-1 rounded-full text-xs font-medium ${getStatusColor(location.status || 'Pending')}`}>
+                  <span className={`px-2 py-1 rounded-full text-xs font-medium ${getStatusColor(location.status)}`}>
                     {location.status || 'Pending'}
                   </span>
                 </TableCell>
