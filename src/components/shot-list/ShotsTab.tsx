@@ -1,15 +1,8 @@
 import { useState, useEffect } from "react";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
-import { Plus, Pencil, Trash2 } from "lucide-react";
+import { Plus } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from "@/components/ui/table";
+import { Table, TableBody } from "@/components/ui/table";
 import {
   Dialog,
   DialogContent,
@@ -17,18 +10,13 @@ import {
   DialogTitle,
   DialogTrigger,
 } from "@/components/ui/dialog";
-import { Badge } from "@/components/ui/badge";
 import { supabase } from "@/integrations/supabase/client";
 import { notify } from "@/utils/notifications";
 import { AddShotForm } from "./AddShotForm";
 import { useLoadingState } from "@/hooks/useLoadingState";
 import { Shot } from "@/types/shot-list";
-
-const statusColors = {
-  Pending: "bg-yellow-100 text-yellow-800",
-  "In Progress": "bg-blue-100 text-blue-800",
-  Completed: "bg-green-100 text-green-800",
-};
+import { ShotTableHeader } from "./components/ShotTableHeader";
+import { ShotTableRow } from "./components/ShotTableRow";
 
 export function ShotsTab({ shotListId }: { shotListId: string }) {
   const [isAddDialogOpen, setIsAddDialogOpen] = useState(false);
@@ -52,14 +40,8 @@ export function ShotsTab({ shotListId }: { shotListId: string }) {
         throw error;
       }
 
-      // Transform the data to match our Shot interface
-      return (shots || []).map(shot => ({
-        id: shot.id,
-        shot_number: shot.shot_number,
-        description: shot.description || "",
-        frame_type: shot.frame_type || "",
-        status: shot.status as keyof typeof statusColors,
-        notes: shot.notes,
+      return shots.map(shot => ({
+        ...shot,
         location: shot.location as { name: string | null } | null
       })) as Shot[];
     },
@@ -145,59 +127,23 @@ export function ShotsTab({ shotListId }: { shotListId: string }) {
 
       <div className="border rounded-md">
         <Table>
-          <TableHeader>
-            <TableRow>
-              <TableHead className="w-[100px]">Shot #</TableHead>
-              <TableHead>Location</TableHead>
-              <TableHead>Description</TableHead>
-              <TableHead>Frame Type</TableHead>
-              <TableHead>Status</TableHead>
-              <TableHead>Notes</TableHead>
-              <TableHead className="w-[100px]">Actions</TableHead>
-            </TableRow>
-          </TableHeader>
+          <ShotTableHeader />
           <TableBody>
             {shots?.map((shot) => (
-              <TableRow key={shot.id}>
-                <TableCell>{shot.shot_number}</TableCell>
-                <TableCell>{shot.location?.name || "—"}</TableCell>
-                <TableCell>{shot.description || "—"}</TableCell>
-                <TableCell>{shot.frame_type || "—"}</TableCell>
-                <TableCell>
-                  <Badge
-                    className={statusColors[shot.status]}
-                  >
-                    {shot.status}
-                  </Badge>
-                </TableCell>
-                <TableCell>{shot.notes || "—"}</TableCell>
-                <TableCell>
-                  <div className="flex space-x-2">
-                    <Button
-                      variant="ghost"
-                      size="icon"
-                      onClick={() => handleEdit(shot.id)}
-                    >
-                      <Pencil className="h-4 w-4" />
-                    </Button>
-                    <Button
-                      variant="ghost"
-                      size="icon"
-                      onClick={() => handleDelete(shot.id)}
-                      disabled={isLoading.delete}
-                    >
-                      <Trash2 className="h-4 w-4 text-destructive" />
-                    </Button>
-                  </div>
-                </TableCell>
-              </TableRow>
+              <ShotTableRow
+                key={shot.id}
+                shot={shot}
+                onEdit={handleEdit}
+                onDelete={handleDelete}
+                isDeleting={isLoading.delete}
+              />
             ))}
             {!shots?.length && (
-              <TableRow>
-                <TableCell colSpan={7} className="text-center text-muted-foreground">
+              <tr>
+                <td colSpan={7} className="text-center text-muted-foreground p-4">
                   No shots added yet
-                </TableCell>
-              </TableRow>
+                </td>
+              </tr>
             )}
           </TableBody>
         </Table>

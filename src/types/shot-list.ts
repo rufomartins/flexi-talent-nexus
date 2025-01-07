@@ -1,3 +1,8 @@
+export interface Location {
+  id: string;
+  name: string | null;
+}
+
 export interface Shot {
   id: string;
   shot_number: number;
@@ -5,9 +10,8 @@ export interface Shot {
   frame_type: string;
   status: 'Pending' | 'In Progress' | 'Completed';
   notes?: string;
-  location?: {
-    name: string | null;
-  } | null;
+  location?: Location | null;
+  sequence_order: number;
 }
 
 export interface ShotFormData {

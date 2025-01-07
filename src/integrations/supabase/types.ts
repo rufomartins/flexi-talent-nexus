@@ -1226,6 +1226,13 @@ export type Database = {
         }
         Relationships: [
           {
+            foreignKeyName: "fk_location"
+            columns: ["location_id"]
+            isOneToOne: false
+            referencedRelation: "locations"
+            referencedColumns: ["id"]
+          },
+          {
             foreignKeyName: "shots_shot_list_id_fkey"
             columns: ["shot_list_id"]
             isOneToOne: false
