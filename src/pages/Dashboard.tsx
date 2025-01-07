@@ -3,7 +3,7 @@ import { useState } from "react"
 import { AddTalentModal } from "@/components/talents/AddTalentModal"
 import { useQuery } from "@tanstack/react-query"
 import { supabase } from "@/integrations/supabase/client"
-import { UserPlus, Users, FolderGit, Briefcase, DollarSign } from "lucide-react"
+import { UserPlus, Users, FolderGit, Briefcase, DollarSign, Wallet } from "lucide-react"
 import { useAuth } from "@/contexts/auth"
 import { StatCard } from "@/components/dashboard/StatCard"
 
@@ -113,9 +113,23 @@ export default function Dashboard() {
     enabled: !!user && userDetails?.role === 'super_admin'
   })
 
+  const { data: availableFunds, isLoading: fundsLoading } = useQuery({
+    queryKey: ['available-funds'],
+    queryFn: async () => {
+      if (!user || (userDetails?.role !== 'super_admin' && userDetails?.role !== 'admin')) return 0;
+      
+      // For now, we'll return a mock value since the financial module is not yet implemented
+      // This should be updated once the financial tables are created
+      return 10000;
+    },
+    enabled: !!user && (userDetails?.role === 'super_admin' || userDetails?.role === 'admin')
+  })
+
   if (!user) {
     return null;
   }
+
+  const isAdminOrSuperAdmin = userDetails?.role === 'admin' || userDetails?.role === 'super_admin';
 
   return (
     <div className="container mx-auto p-6">
@@ -171,6 +185,16 @@ export default function Dashboard() {
             value={pendingPayments}
             icon={DollarSign}
             isLoading={paymentsLoading}
+          />
+        )}
+
+        {isAdminOrSuperAdmin && (
+          <StatCard
+            title="Available Funds"
+            subtitle="Current balance"
+            value={availableFunds}
+            icon={Wallet}
+            isLoading={fundsLoading}
           />
         )}
       </div>
