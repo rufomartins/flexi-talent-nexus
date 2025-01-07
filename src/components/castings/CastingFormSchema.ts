@@ -12,7 +12,6 @@ export const castingFormSchema = z.object({
   show_briefing_on_signup: z.boolean(),
   allow_talent_portal_apply: z.boolean(),
   description: z.string().optional(),
-  talent_briefing: z.string().optional(),
   show_briefing: z.boolean(),
   allow_talent_portal: z.boolean(),
   casting_type: z.string().optional(),

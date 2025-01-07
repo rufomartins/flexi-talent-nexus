@@ -54,14 +54,17 @@ export function NewCastingForm({ type }: NewCastingFormProps) {
     setIsSubmitting(true);
     try {
       const user = await supabase.auth.getUser();
+      const submissionData = {
+        ...formData,
+        created_by: user.data.user?.id,
+        created_at: new Date().toISOString(),
+        updated_at: new Date().toISOString(),
+        name: formData.name.trim()
+      };
+
       const { error } = await supabase
         .from('castings')
-        .insert({
-          ...formData,
-          created_by: user.data.user?.id,
-          created_at: new Date().toISOString(),
-          updated_at: new Date().toISOString()
-        });
+        .insert(submissionData);
 
       if (error) throw error;
 
