@@ -3,6 +3,7 @@ import { ConversationsSearch } from "./ConversationsSearch";
 import { ConversationItem } from "./ConversationItem";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { supabase } from "@/integrations/supabase/client";
+import { useMessages } from "@/contexts/MessagesContext";
 
 interface Message {
   id: string;
@@ -37,8 +38,8 @@ interface Conversation {
 
 export function ConversationsList() {
   const [conversations, setConversations] = useState<Conversation[]>([]);
-  const [selectedId, setSelectedId] = useState<string | null>(null);
   const [searchQuery, setSearchQuery] = useState("");
+  const { selectedConversation, setSelectedConversation } = useMessages();
 
   useEffect(() => {
     const fetchConversations = async () => {
@@ -69,7 +70,6 @@ export function ConversationsList() {
         return;
       }
 
-      // Transform data to match our interface
       const transformedData = (data as ConversationResponse[]).map(conv => ({
         id: conv.id,
         title: conv.title || 'Untitled Conversation',
@@ -84,7 +84,6 @@ export function ConversationsList() {
 
     fetchConversations();
 
-    // Set up real-time subscription
     const channel = supabase
       .channel('conversations-changes')
       .on(
@@ -94,8 +93,7 @@ export function ConversationsList() {
           schema: 'public',
           table: 'messages'
         },
-        (payload) => {
-          // Update conversations when new messages arrive
+        () => {
           fetchConversations();
         }
       )
@@ -120,8 +118,8 @@ export function ConversationsList() {
             <ConversationItem
               key={conversation.id}
               conversation={conversation}
-              isSelected={selectedId === conversation.id}
-              onClick={() => setSelectedId(conversation.id)}
+              isSelected={selectedConversation?.id === conversation.id}
+              onClick={() => setSelectedConversation(conversation)}
             />
           ))}
         </div>

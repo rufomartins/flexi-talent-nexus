@@ -1,66 +1,36 @@
-import { useState, useEffect } from "react";
+import { useEffect } from "react";
 import { useToast } from "@/hooks/use-toast";
 import { useAgoraClient } from "@/hooks/useAgoraClient";
 import { supabase } from "@/integrations/supabase/client";
 import { ChatHeader } from "./ChatHeader";
 import { MessagesDisplay } from "./MessagesDisplay";
 import { MessageInput } from "./MessageInput";
-
-interface Message {
-  id: string;
-  content: string;
-  sender_id: string;
-  created_at: string;
-  content_type: string;
-}
+import { useMessages } from "@/contexts/MessagesContext";
 
 interface ChatWindowProps {
-  conversationId: string;
   participantName: string;
 }
 
-export function ChatWindow({ conversationId, participantName }: ChatWindowProps) {
-  const [messages, setMessages] = useState<Message[]>([]);
+export function ChatWindow({ participantName }: ChatWindowProps) {
+  const { selectedConversation, messages } = useMessages();
   const { toast } = useToast();
-  const { initializeAgora, toggleVideo, isVideoEnabled } = useAgoraClient(conversationId);
+  const { initializeAgora, toggleVideo, isVideoEnabled } = useAgoraClient(selectedConversation?.id || "");
 
   useEffect(() => {
-    if (!conversationId) return;
+    if (!selectedConversation?.id) return;
 
-    const fetchMessages = async () => {
-      const { data, error } = await supabase
-        .from("messages")
-        .select("*")
-        .eq("conversation_id", conversationId)
-        .order("created_at", { ascending: true });
-
-      if (error) {
-        toast({
-          title: "Error",
-          description: "Failed to load messages",
-          variant: "destructive",
-        });
-        return;
-      }
-
-      setMessages(data || []);
-    };
-
-    fetchMessages();
-
-    // Subscribe to new messages
     const channel = supabase
-      .channel(`messages:${conversationId}`)
+      .channel(`messages:${selectedConversation.id}`)
       .on(
         "postgres_changes",
         {
           event: "INSERT",
           schema: "public",
           table: "messages",
-          filter: `conversation_id=eq.${conversationId}`,
+          filter: `conversation_id=eq.${selectedConversation.id}`,
         },
         (payload) => {
-          setMessages((prev) => [...prev, payload.new as Message]);
+          // New messages will be handled by the MessagesContext
         }
       )
       .subscribe();
@@ -68,16 +38,16 @@ export function ChatWindow({ conversationId, participantName }: ChatWindowProps)
     return () => {
       supabase.removeChannel(channel);
     };
-  }, [conversationId, toast]);
+  }, [selectedConversation?.id]);
 
   const handleSendMessage = async (message: string) => {
-    if (!message.trim()) return;
+    if (!message.trim() || !selectedConversation) return;
 
     const { data: { user } } = await supabase.auth.getUser();
     if (!user) return;
 
     const { error } = await supabase.from("messages").insert({
-      conversation_id: conversationId,
+      conversation_id: selectedConversation.id,
       content: message,
       sender_id: user.id,
       content_type: "text",
@@ -92,6 +62,14 @@ export function ChatWindow({ conversationId, participantName }: ChatWindowProps)
       return;
     }
   };
+
+  if (!selectedConversation) {
+    return (
+      <div className="flex h-full items-center justify-center">
+        <p className="text-muted-foreground">Select a conversation to start messaging</p>
+      </div>
+    );
+  }
 
   return (
     <div className="flex h-full flex-col">
