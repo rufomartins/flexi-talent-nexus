@@ -32,13 +32,7 @@ export default function CalendarPage() {
     queryFn: async () => {
       const { data, error } = await supabase
         .from('talent_calendar')
-        .select(`
-          id,
-          date,
-          description,
-          casting_id,
-          castings:castings(name)
-        `)
+        .select('id, date, description, casting_id')
         .eq('talent_id', user?.id);
 
       if (error) {
@@ -51,13 +45,29 @@ export default function CalendarPage() {
         return [];
       }
 
-      return (data || []).map(event => ({
-        id: event.id,
-        date: event.date,
-        description: event.description,
-        casting_id: event.casting_id,
-        castings: event.castings
-      })) as CalendarEvent[];
+      // If we need casting info, fetch it separately for valid casting_ids
+      const eventsWithCastings = await Promise.all(
+        data.map(async (event) => {
+          if (event.casting_id) {
+            const { data: castingData } = await supabase
+              .from('castings')
+              .select('name')
+              .eq('id', event.casting_id)
+              .single();
+            
+            return {
+              ...event,
+              castings: castingData || null
+            };
+          }
+          return {
+            ...event,
+            castings: null
+          };
+        })
+      );
+
+      return eventsWithCastings as CalendarEvent[];
     },
     enabled: !!user,
   });
