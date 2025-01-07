@@ -7,6 +7,7 @@ import { Label } from "@/components/ui/label"
 import { Checkbox } from "@/components/ui/checkbox"
 import { useToast } from "@/hooks/use-toast"
 import { supabase } from "@/integrations/supabase/client"
+import { Upload } from "lucide-react"
 
 interface BookingConfirmationDialogProps {
   open: boolean
@@ -15,6 +16,7 @@ interface BookingConfirmationDialogProps {
   castingId: string
   projectId: string
   onConfirm: () => void
+  talentCount?: number
 }
 
 export function BookingConfirmationDialog({
@@ -23,9 +25,10 @@ export function BookingConfirmationDialog({
   talentId,
   castingId,
   projectId,
-  onConfirm
+  onConfirm,
+  talentCount = 1
 }: BookingConfirmationDialogProps) {
-  const [subject, setSubject] = useState("")
+  const [subject, setSubject] = useState("New confirmation")
   const [message, setMessage] = useState("")
   const [requireConfirmation, setRequireConfirmation] = useState(true)
   const [isSubmitting, setIsSubmitting] = useState(false)
@@ -35,7 +38,6 @@ export function BookingConfirmationDialog({
     try {
       setIsSubmitting(true)
 
-      // Create booking record with required start_date and end_date
       const { error: bookingError } = await supabase
         .from('bookings')
         .insert({
@@ -43,15 +45,15 @@ export function BookingConfirmationDialog({
           casting_id: castingId,
           project_id: projectId,
           status: 'pending',
-          start_date: new Date().toISOString(), // Default to current date, you might want to add date pickers
-          end_date: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString(), // Default to 30 days from now
+          start_date: new Date().toISOString(),
+          end_date: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString(),
         })
 
       if (bookingError) throw bookingError
 
       toast({
-        title: "Booking confirmation sent",
-        description: "The talent will be notified about the booking.",
+        title: "Successfully started sending booking",
+        description: `Successfully started sending booking to ${talentCount} talent${talentCount > 1 ? 's' : ''}`,
       })
 
       onConfirm()
@@ -70,28 +72,62 @@ export function BookingConfirmationDialog({
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="sm:max-w-[425px]">
+      <DialogContent className="sm:max-w-[600px]">
         <DialogHeader>
-          <DialogTitle>Send Booking Confirmation</DialogTitle>
+          <DialogTitle>Booking confirmation</DialogTitle>
+          <p className="text-sm text-muted-foreground">
+            Sending to {talentCount} talent{talentCount > 1 ? 's' : ''}
+          </p>
         </DialogHeader>
         <div className="grid gap-4 py-4">
           <div className="grid gap-2">
-            <Label htmlFor="subject">Subject</Label>
-            <Input
-              id="subject"
-              value={subject}
-              onChange={(e) => setSubject(e.target.value)}
-              placeholder="Booking Confirmation for Project XYZ"
-            />
+            <Label htmlFor="subject">Subject (will be used in mail)</Label>
+            <div className="flex gap-2">
+              <Input
+                id="subject"
+                value={subject}
+                onChange={(e) => setSubject(e.target.value)}
+                className="flex-1"
+              />
+              <select 
+                className="border rounded-md px-3 py-2 bg-background"
+                value={subject}
+                onChange={(e) => setSubject(e.target.value)}
+              >
+                <option value="New confirmation">New confirmation</option>
+              </select>
+            </div>
           </div>
           <div className="grid gap-2">
-            <Label htmlFor="message">Message</Label>
-            <Textarea
-              id="message"
-              value={message}
-              onChange={(e) => setMessage(e.target.value)}
-              placeholder="Enter booking details and instructions..."
-            />
+            <Label htmlFor="message">Text (will be used in mail)</Label>
+            <div className="relative">
+              <Textarea
+                id="message"
+                value={message}
+                onChange={(e) => setMessage(e.target.value)}
+                className="min-h-[200px]"
+              />
+              <div className="absolute top-2 right-2 space-x-2">
+                <Button 
+                  variant="ghost" 
+                  size="sm"
+                  onClick={() => setMessage(msg => msg + "{First Name}")}
+                >
+                  {"{First Name}"}
+                </Button>
+                <Button 
+                  variant="ghost" 
+                  size="sm"
+                  onClick={() => setMessage(msg => msg + "{Last Name}")}
+                >
+                  {"{Last Name}"}
+                </Button>
+              </div>
+            </div>
+          </div>
+          <div className="border rounded-md p-4 flex items-center justify-center cursor-pointer hover:bg-accent">
+            <Upload className="mr-2 h-4 w-4" />
+            <span>Add file</span>
           </div>
           <div className="flex items-center space-x-2">
             <Checkbox
@@ -104,19 +140,20 @@ export function BookingConfirmationDialog({
             </Label>
           </div>
         </div>
-        <div className="flex justify-end space-x-2">
+        <div className="flex justify-start space-x-4">
+          <Button
+            onClick={handleSubmit}
+            disabled={isSubmitting || !subject || !message}
+            className="bg-blue-500 hover:bg-blue-600"
+          >
+            Send booking confirmation
+          </Button>
           <Button
             variant="outline"
             onClick={() => onOpenChange(false)}
             disabled={isSubmitting}
           >
             Cancel
-          </Button>
-          <Button
-            onClick={handleSubmit}
-            disabled={isSubmitting || !subject || !message}
-          >
-            {isSubmitting ? "Sending..." : "Send Booking Confirmation"}
           </Button>
         </div>
       </DialogContent>

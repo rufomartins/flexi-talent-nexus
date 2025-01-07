@@ -14,9 +14,12 @@ export function BookingsList() {
         .select(`
           *,
           talent_profiles (
+            id,
             user_id,
             users (
-              full_name
+              id,
+              full_name,
+              email
             )
           ),
           projects (
