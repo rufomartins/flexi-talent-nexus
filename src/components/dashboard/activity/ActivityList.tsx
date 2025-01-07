@@ -1,7 +1,9 @@
-import { Loader2 } from "lucide-react";
+import { Loader2, AlertCircle } from "lucide-react";
 import { Json } from "@/integrations/supabase/types";
 import { ActivityListItem } from "./ActivityListItem";
 import { ActivityPagination } from "./ActivityPagination";
+import { Alert, AlertDescription } from "@/components/ui/alert";
+import { Skeleton } from "@/components/ui/skeleton";
 
 interface Activity {
   id: string;
@@ -16,6 +18,7 @@ interface ActivityListProps {
   currentPage: number;
   totalPages: number;
   onPageChange: (page: number) => void;
+  error?: Error | null;
 }
 
 export const ActivityList = ({
@@ -24,12 +27,28 @@ export const ActivityList = ({
   currentPage,
   totalPages,
   onPageChange,
+  error
 }: ActivityListProps) => {
   if (isLoading) {
     return (
-      <div className="flex justify-center py-8">
-        <Loader2 className="h-6 w-6 animate-spin" />
+      <div className="space-y-4">
+        {[...Array(3)].map((_, i) => (
+          <div key={i} className="flex items-center space-x-4 p-3">
+            <Skeleton className="h-12 w-full" />
+          </div>
+        ))}
       </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <Alert variant="destructive">
+        <AlertCircle className="h-4 w-4" />
+        <AlertDescription>
+          {error.message || 'An error occurred while loading activities'}
+        </AlertDescription>
+      </Alert>
     );
   }
 

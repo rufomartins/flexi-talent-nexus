@@ -3,6 +3,8 @@ import { useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { ActivityFilters } from "./activity/ActivityFilters";
 import { ActivityList } from "./activity/ActivityList";
+import { Alert, AlertDescription } from "@/components/ui/alert";
+import { AlertCircle } from "lucide-react";
 
 export const RecentActivity = () => {
   const [currentPage, setCurrentPage] = useState(1);
@@ -10,7 +12,7 @@ export const RecentActivity = () => {
   const [dateRange, setDateRange] = useState<Date | undefined>();
   const itemsPerPage = 10;
 
-  const { data, isLoading } = useQuery({
+  const { data, isLoading, error } = useQuery({
     queryKey: ['recent-activities', currentPage, activityType, dateRange],
     queryFn: async () => {
       const from = (currentPage - 1) * itemsPerPage;
@@ -23,7 +25,6 @@ export const RecentActivity = () => {
         .range(from, to);
 
       if (activityType) {
-        // Handle different activity types based on the new filter structure
         if (activityType.startsWith('new_registration_')) {
           query = query.eq('action_type', 'registration')
             .eq('details->status', activityType.replace('new_registration_', ''));
@@ -46,8 +47,7 @@ export const RecentActivity = () => {
       const { data: activities, error, count } = await query;
 
       if (error) {
-        console.error('Error fetching recent activities:', error);
-        return { activities: [], totalCount: 0 };
+        throw new Error(error.message);
       }
 
       return { 
@@ -72,12 +72,22 @@ export const RecentActivity = () => {
       </div>
 
       <div className="bg-card rounded-lg shadow p-6">
+        {error && (
+          <Alert variant="destructive" className="mb-4">
+            <AlertCircle className="h-4 w-4" />
+            <AlertDescription>
+              Failed to load activities. Please try again later.
+            </AlertDescription>
+          </Alert>
+        )}
+        
         <ActivityList
           activities={data?.activities || []}
           isLoading={isLoading}
           currentPage={currentPage}
           totalPages={totalPages}
           onPageChange={setCurrentPage}
+          error={error}
         />
       </div>
     </div>
