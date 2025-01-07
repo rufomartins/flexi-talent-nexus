@@ -2,7 +2,11 @@ import { Header } from "@/components/layout/Header"
 import { AppSidebar } from "@/components/layout/AppSidebar"
 import { SidebarProvider } from "@/components/ui/sidebar"
 
-export const MainLayout = ({ children }: { children: React.ReactNode }) => {
+interface MainLayoutProps {
+  children: React.ReactNode;
+}
+
+export const MainLayout = ({ children }: MainLayoutProps) => {
   return (
     <SidebarProvider>
       <div className="flex flex-col min-h-screen bg-white">

@@ -13,15 +13,17 @@ const queryClient = new QueryClient();
 function App() {
   return (
     <QueryClientProvider client={queryClient}>
-      <AuthProvider>
-        <Router>
+      <Router>
+        <AuthProvider>
           <Routes>
             <Route path="/login" element={<Login />} />
             <Route
               path="/"
               element={
                 <ProtectedRoute>
-                  <MainLayout />
+                  <MainLayout>
+                    <Outlet />
+                  </MainLayout>
                 </ProtectedRoute>
               }
             >
@@ -30,9 +32,9 @@ function App() {
               <Route path="calendar" element={<Calendar />} />
             </Route>
           </Routes>
-        </Router>
-        <Toaster />
-      </AuthProvider>
+          <Toaster />
+        </AuthProvider>
+      </Router>
     </QueryClientProvider>
   );
 }

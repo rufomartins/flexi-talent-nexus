@@ -24,7 +24,7 @@ interface CalendarEvent {
 export default function CalendarPage() {
   const [date, setDate] = useState<Date>(new Date());
   const [showAddEvent, setShowAddEvent] = useState(false);
-  const { user, userDetails } = useAuth();
+  const { user } = useAuth();
   const { toast } = useToast();
 
   const { data: events, isLoading } = useQuery({
@@ -32,7 +32,13 @@ export default function CalendarPage() {
     queryFn: async () => {
       const { data, error } = await supabase
         .from('talent_calendar')
-        .select('*, castings(name)')
+        .select(`
+          id,
+          date,
+          description,
+          casting_id,
+          castings:castings(name)
+        `)
         .eq('talent_id', user?.id);
 
       if (error) {
@@ -45,7 +51,6 @@ export default function CalendarPage() {
         return [];
       }
 
-      // Transform the data to match CalendarEvent type
       return (data || []).map(event => ({
         id: event.id,
         date: event.date,
