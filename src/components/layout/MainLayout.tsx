@@ -1,12 +1,9 @@
-import { Header } from "@/components/layout/Header"
-import { AppSidebar } from "@/components/layout/AppSidebar"
-import { SidebarProvider } from "@/components/ui/sidebar"
+import { Outlet } from "react-router-dom";
+import { Header } from "@/components/layout/Header";
+import { AppSidebar } from "@/components/layout/AppSidebar";
+import { SidebarProvider } from "@/components/ui/sidebar";
 
-interface MainLayoutProps {
-  children: React.ReactNode;
-}
-
-export const MainLayout = ({ children }: MainLayoutProps) => {
+export const MainLayout = () => {
   return (
     <SidebarProvider>
       <div className="flex flex-col min-h-screen bg-white">
@@ -24,10 +21,10 @@ export const MainLayout = ({ children }: MainLayoutProps) => {
 
           {/* Main content - removed margin, adjusted padding */}
           <main className="flex-1 pl-64 pt-16 bg-muted/50">
-            {children}
+            <Outlet />
           </main>
         </div>
       </div>
     </SidebarProvider>
-  )
-}
+  );
+};

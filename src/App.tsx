@@ -1,5 +1,5 @@
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { BrowserRouter as Router, Routes, Route, Navigate } from "react-router-dom";
+import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
 import { AuthProvider } from "@/contexts/auth";
 import { Toaster } from "@/components/ui/toaster";
 import { MainLayout } from "@/components/layout/MainLayout";
@@ -16,18 +16,12 @@ function App() {
       <Router>
         <AuthProvider>
           <Routes>
-            <Route path="/" element={
-              <ProtectedRoute>
-                <MainLayout>
-                  <Routes>
-                    <Route index element={<Navigate to="/dashboard" replace />} />
-                    <Route path="dashboard" element={<Dashboard />} />
-                    <Route path="projects" element={<Projects />} />
-                    <Route path="financial" element={<Financial />} />
-                  </Routes>
-                </MainLayout>
-              </ProtectedRoute>
-            } />
+            <Route element={<ProtectedRoute><MainLayout /></ProtectedRoute>}>
+              <Route path="/" element={<Dashboard />} />
+              <Route path="/dashboard" element={<Dashboard />} />
+              <Route path="/projects" element={<Projects />} />
+              <Route path="/financial" element={<Financial />} />
+            </Route>
           </Routes>
           <Toaster />
         </AuthProvider>
