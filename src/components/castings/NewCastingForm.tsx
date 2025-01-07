@@ -24,6 +24,7 @@ export function NewCastingForm({ type }: NewCastingFormProps) {
     resolver: zodResolver(castingFormSchema),
     defaultValues: {
       ...defaultValues,
+      type,
       casting_type: type
     }
   });
@@ -57,6 +58,8 @@ export function NewCastingForm({ type }: NewCastingFormProps) {
       const submissionData = {
         ...formData,
         name: formData.name.trim(),
+        type: formData.type, // Ensure type is included
+        casting_type: formData.casting_type,
         created_by: user.data.user?.id,
         created_at: new Date().toISOString(),
         updated_at: new Date().toISOString(),

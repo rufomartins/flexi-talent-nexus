@@ -2,6 +2,7 @@ import * as z from "zod";
 
 export const castingFormSchema = z.object({
   name: z.string().min(1, "Casting name is required"),
+  type: z.enum(["internal", "external"]),
   casting_type: z.enum(["internal", "external"]),
   status: z.enum(["open", "closed"]),
   client_id: z.string().optional().nullable(),
@@ -21,6 +22,7 @@ export const castingFormSchema = z.object({
 export type CastingFormData = z.infer<typeof castingFormSchema>;
 
 export const defaultValues: Partial<CastingFormData> = {
+  type: "internal",
   casting_type: "internal",
   status: "open",
   show_briefing: false,
