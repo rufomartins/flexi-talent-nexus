@@ -6,6 +6,7 @@ import { Button } from "@/components/ui/button"
 import { TalentSearchDialog } from "@/components/talents/TalentSearchDialog"
 import { AddTalentModal } from "@/components/talents/AddTalentModal"
 import { useToast } from "@/hooks/use-toast"
+import { Link } from "react-router-dom"
 
 const TalentList = () => {
   const [searchOpen, setSearchOpen] = useState(false)
@@ -41,11 +42,6 @@ const TalentList = () => {
       return data
     },
   })
-
-  const handleSearch = async (searchValues: any) => {
-    console.log("Search values:", searchValues)
-    // Implement search logic here
-  }
 
   if (isLoading) {
     return (
@@ -92,7 +88,9 @@ const TalentList = () => {
             </div>
             <div>
               <h3 className="font-medium">
-                {talent.users?.first_name} {talent.users?.last_name}
+                <Link to={`/talents/${talent.id}`} className="hover:underline">
+                  {talent.users?.first_name} {talent.users?.last_name}
+                </Link>
               </h3>
               <p className="text-sm text-muted-foreground">
                 {talent.category || "No category"}
