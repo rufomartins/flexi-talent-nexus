@@ -8,6 +8,8 @@ import Login from "@/pages/Login";
 import Dashboard from "@/pages/Dashboard";
 import Calendar from "@/pages/Calendar";
 import Bookings from "@/pages/Bookings";
+import TalentList from "@/pages/talents/TalentList";
+import TalentProfile from "@/pages/TalentProfile";
 
 const queryClient = new QueryClient();
 
@@ -32,6 +34,12 @@ function App() {
               <Route path="dashboard" element={<Dashboard />} />
               <Route path="calendar" element={<Calendar />} />
               <Route path="bookings" element={<Bookings />} />
+              
+              {/* Talent routes */}
+              <Route path="talents">
+                <Route index element={<TalentList />} />
+                <Route path=":id" element={<TalentProfile />} />
+              </Route>
             </Route>
           </Routes>
           <Toaster />
