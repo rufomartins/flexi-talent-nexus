@@ -510,6 +510,90 @@ export type Database = {
           },
         ]
       }
+      project_videos: {
+        Row: {
+          client_approval_status: string | null
+          concept: string | null
+          created_at: string | null
+          editing_status: string | null
+          footage_eta: string | null
+          footage_link: string | null
+          footage_qa_status: string | null
+          id: string
+          language: string | null
+          project_id: string | null
+          region: string | null
+          review_status: string | null
+          script_status: string | null
+          status: string | null
+          talent_id: string | null
+          title: string | null
+          translation_status: string | null
+          type: string | null
+          updated_at: string | null
+          video_number: string | null
+        }
+        Insert: {
+          client_approval_status?: string | null
+          concept?: string | null
+          created_at?: string | null
+          editing_status?: string | null
+          footage_eta?: string | null
+          footage_link?: string | null
+          footage_qa_status?: string | null
+          id?: string
+          language?: string | null
+          project_id?: string | null
+          region?: string | null
+          review_status?: string | null
+          script_status?: string | null
+          status?: string | null
+          talent_id?: string | null
+          title?: string | null
+          translation_status?: string | null
+          type?: string | null
+          updated_at?: string | null
+          video_number?: string | null
+        }
+        Update: {
+          client_approval_status?: string | null
+          concept?: string | null
+          created_at?: string | null
+          editing_status?: string | null
+          footage_eta?: string | null
+          footage_link?: string | null
+          footage_qa_status?: string | null
+          id?: string
+          language?: string | null
+          project_id?: string | null
+          region?: string | null
+          review_status?: string | null
+          script_status?: string | null
+          status?: string | null
+          talent_id?: string | null
+          title?: string | null
+          translation_status?: string | null
+          type?: string | null
+          updated_at?: string | null
+          video_number?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "project_videos_project_id_fkey"
+            columns: ["project_id"]
+            isOneToOne: false
+            referencedRelation: "projects"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "project_videos_talent_id_fkey"
+            columns: ["talent_id"]
+            isOneToOne: false
+            referencedRelation: "talent_profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       projects: {
         Row: {
           client_id: string | null
@@ -1004,6 +1088,64 @@ export type Database = {
             columns: ["company_id"]
             isOneToOne: false
             referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      video_tasks: {
+        Row: {
+          assignee_id: string | null
+          completed_at: string | null
+          created_at: string | null
+          due_date: string | null
+          id: string
+          status: string | null
+          task_type: string | null
+          updated_at: string | null
+          video_id: string | null
+        }
+        Insert: {
+          assignee_id?: string | null
+          completed_at?: string | null
+          created_at?: string | null
+          due_date?: string | null
+          id?: string
+          status?: string | null
+          task_type?: string | null
+          updated_at?: string | null
+          video_id?: string | null
+        }
+        Update: {
+          assignee_id?: string | null
+          completed_at?: string | null
+          created_at?: string | null
+          due_date?: string | null
+          id?: string
+          status?: string | null
+          task_type?: string | null
+          updated_at?: string | null
+          video_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "video_tasks_assignee_id_fkey"
+            columns: ["assignee_id"]
+            isOneToOne: false
+            referencedRelation: "user_profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "video_tasks_assignee_id_fkey"
+            columns: ["assignee_id"]
+            isOneToOne: false
+            referencedRelation: "users"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "video_tasks_video_id_fkey"
+            columns: ["video_id"]
+            isOneToOne: false
+            referencedRelation: "project_videos"
             referencedColumns: ["id"]
           },
         ]
