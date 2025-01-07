@@ -3,12 +3,35 @@ import { useState } from "react"
 import { AddTalentModal } from "@/components/talents/AddTalentModal"
 import { useQuery } from "@tanstack/react-query"
 import { supabase } from "@/integrations/supabase/client"
-import { Loader2 } from "lucide-react"
+import { Loader2, UserPlus, Users, FolderGit, ClipboardCheck } from "lucide-react"
 import { useAuth } from "@/contexts/auth"
 
 export default function Dashboard() {
   const [addTalentOpen, setAddTalentOpen] = useState(false)
   const { user } = useAuth()
+
+  const { data: newRegistrations, isLoading: registrationsLoading } = useQuery({
+    queryKey: ['new-registrations'],
+    queryFn: async () => {
+      if (!user) return 0;
+      
+      const thirtyDaysAgo = new Date();
+      thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
+      
+      const { count, error } = await supabase
+        .from('talent_profiles')
+        .select('*', { count: 'exact', head: true })
+        .gte('created_at', thirtyDaysAgo.toISOString())
+
+      if (error) {
+        console.error('Error fetching new registrations:', error)
+        return 0
+      }
+
+      return count || 0
+    },
+    enabled: !!user
+  })
 
   const { data: talentsCount, isLoading: talentsLoading } = useQuery({
     queryKey: ['talents-count'],
@@ -32,7 +55,19 @@ export default function Dashboard() {
   const { data: projectsCount, isLoading: projectsLoading } = useQuery({
     queryKey: ['projects-count'],
     queryFn: async () => {
-      return 0 // For now, returning 0 as there's no projects table yet
+      if (!user) return 0;
+      
+      const { count, error } = await supabase
+        .from('projects')
+        .select('*', { count: 'exact', head: true })
+        .eq('status', 'active')
+
+      if (error) {
+        console.error('Error fetching projects count:', error)
+        return 0
+      }
+
+      return count || 0
     },
     enabled: !!user
   })
@@ -57,9 +92,8 @@ export default function Dashboard() {
     enabled: !!user
   })
 
-  // Show loading state only for initial load
   if (!user) {
-    return null; // Let the ProtectedRoute handle the redirect
+    return null;
   }
 
   return (
@@ -76,10 +110,33 @@ export default function Dashboard() {
         onOpenChange={setAddTalentOpen}
       />
       
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
         <div className="bg-card rounded-lg shadow p-6">
-          <h2 className="text-lg font-semibold mb-2">Total Talents</h2>
-          <p className="text-3xl font-bold">
+          <div className="flex items-center justify-between">
+            <div>
+              <h2 className="text-lg font-semibold mb-2">New Registrations</h2>
+              <p className="text-sm text-muted-foreground">Last 30 days</p>
+            </div>
+            <UserPlus className="h-8 w-8 text-muted-foreground" />
+          </div>
+          <p className="text-3xl font-bold mt-4">
+            {registrationsLoading ? (
+              <Loader2 className="h-6 w-6 animate-spin" />
+            ) : (
+              newRegistrations
+            )}
+          </p>
+        </div>
+        
+        <div className="bg-card rounded-lg shadow p-6">
+          <div className="flex items-center justify-between">
+            <div>
+              <h2 className="text-lg font-semibold mb-2">Total Talents</h2>
+              <p className="text-sm text-muted-foreground">Available</p>
+            </div>
+            <Users className="h-8 w-8 text-muted-foreground" />
+          </div>
+          <p className="text-3xl font-bold mt-4">
             {talentsLoading ? (
               <Loader2 className="h-6 w-6 animate-spin" />
             ) : (
@@ -89,8 +146,14 @@ export default function Dashboard() {
         </div>
         
         <div className="bg-card rounded-lg shadow p-6">
-          <h2 className="text-lg font-semibold mb-2">Active Projects</h2>
-          <p className="text-3xl font-bold">
+          <div className="flex items-center justify-between">
+            <div>
+              <h2 className="text-lg font-semibold mb-2">Active Projects</h2>
+              <p className="text-sm text-muted-foreground">In progress</p>
+            </div>
+            <FolderGit className="h-8 w-8 text-muted-foreground" />
+          </div>
+          <p className="text-3xl font-bold mt-4">
             {projectsLoading ? (
               <Loader2 className="h-6 w-6 animate-spin" />
             ) : (
@@ -98,10 +161,16 @@ export default function Dashboard() {
             )}
           </p>
         </div>
-        
+
         <div className="bg-card rounded-lg shadow p-6">
-          <h2 className="text-lg font-semibold mb-2">Pending Reviews</h2>
-          <p className="text-3xl font-bold">
+          <div className="flex items-center justify-between">
+            <div>
+              <h2 className="text-lg font-semibold mb-2">Pending Reviews</h2>
+              <p className="text-sm text-muted-foreground">Awaiting evaluation</p>
+            </div>
+            <ClipboardCheck className="h-8 w-8 text-muted-foreground" />
+          </div>
+          <p className="text-3xl font-bold mt-4">
             {reviewsLoading ? (
               <Loader2 className="h-6 w-6 animate-spin" />
             ) : (
