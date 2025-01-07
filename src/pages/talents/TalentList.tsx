@@ -7,15 +7,18 @@ import { TalentSearchDialog } from "@/components/talents/TalentSearchDialog"
 import { AddTalentModal } from "@/components/talents/AddTalentModal"
 import { useToast } from "@/hooks/use-toast"
 import { Link } from "react-router-dom"
+import { Badge } from "@/components/ui/badge"
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 
 const TalentList = () => {
   const [searchOpen, setSearchOpen] = useState(false)
   const [addTalentOpen, setAddTalentOpen] = useState(false)
   const { toast } = useToast()
 
-  const { data: talents, isLoading } = useQuery({
+  const { data: talents, isLoading, error } = useQuery({
     queryKey: ["talents"],
     queryFn: async () => {
+      console.log("Fetching talents...")
       const { data, error } = await supabase
         .from("talent_profiles")
         .select(`
@@ -23,7 +26,8 @@ const TalentList = () => {
           user_id,
           category,
           evaluation_status,
-          users:user_id (
+          users!inner (
+            id,
             first_name,
             last_name,
             avatar_url
@@ -32,6 +36,7 @@ const TalentList = () => {
         .order("created_at", { ascending: false })
 
       if (error) {
+        console.error("Error fetching talents:", error)
         toast({
           title: "Error loading talents",
           description: error.message,
@@ -39,6 +44,8 @@ const TalentList = () => {
         })
         throw error
       }
+
+      console.log("Fetched talents:", data)
       return data
     },
   })
@@ -48,9 +55,19 @@ const TalentList = () => {
     // Implement search logic here
   }
 
+  if (error) {
+    return (
+      <div className="container py-6">
+        <div className="text-center text-red-600">
+          Error loading talents. Please try again later.
+        </div>
+      </div>
+    )
+  }
+
   if (isLoading) {
     return (
-      <div className="flex items-center justify-center h-screen">
+      <div className="flex items-center justify-center h-[calc(100vh-4rem)]">
         <Loader2 className="h-8 w-8 animate-spin" />
       </div>
     )
@@ -73,41 +90,49 @@ const TalentList = () => {
       </div>
 
       <div className="grid gap-4">
-        {talents?.map((talent) => (
-          <div
-            key={talent.id}
-            className="p-4 bg-white rounded-lg shadow flex items-center gap-4"
-          >
-            <div className="h-12 w-12 rounded-full bg-muted flex items-center justify-center">
-              {talent.users?.avatar_url ? (
-                <img
-                  src={talent.users.avatar_url}
-                  alt={`${talent.users.first_name} ${talent.users.last_name}`}
-                  className="h-12 w-12 rounded-full object-cover"
-                />
-              ) : (
-                <span className="text-lg font-medium text-muted-foreground">
-                  {talent.users?.first_name?.[0]}
-                </span>
-              )}
+        {talents && talents.length > 0 ? (
+          talents.map((talent) => (
+            <div
+              key={talent.id}
+              className="p-4 bg-white rounded-lg shadow flex items-center gap-4"
+            >
+              <Avatar className="h-12 w-12">
+                {talent.users?.avatar_url ? (
+                  <AvatarImage
+                    src={talent.users.avatar_url}
+                    alt={`${talent.users.first_name} ${talent.users.last_name}`}
+                  />
+                ) : (
+                  <AvatarFallback>
+                    {talent.users?.first_name?.[0]}
+                  </AvatarFallback>
+                )}
+              </Avatar>
+              <div>
+                <h3 className="font-medium">
+                  <Link 
+                    to={`/talents/${talent.id}`} 
+                    className="hover:underline"
+                  >
+                    {talent.users?.first_name} {talent.users?.last_name}
+                  </Link>
+                </h3>
+                <p className="text-sm text-muted-foreground">
+                  {talent.category || "No category"}
+                </p>
+              </div>
+              <div className="ml-auto">
+                <Badge variant="secondary" className="capitalize">
+                  {talent.evaluation_status}
+                </Badge>
+              </div>
             </div>
-            <div>
-              <h3 className="font-medium">
-                <Link to={`/talents/${talent.id}`} className="hover:underline">
-                  {talent.users?.first_name} {talent.users?.last_name}
-                </Link>
-              </h3>
-              <p className="text-sm text-muted-foreground">
-                {talent.category || "No category"}
-              </p>
-            </div>
-            <div className="ml-auto">
-              <span className="text-sm bg-muted px-2 py-1 rounded">
-                {talent.evaluation_status}
-              </span>
-            </div>
+          ))
+        ) : (
+          <div className="text-center text-muted-foreground py-8">
+            No talents found. Add your first talent to get started.
           </div>
-        ))}
+        )}
       </div>
 
       <TalentSearchDialog 
