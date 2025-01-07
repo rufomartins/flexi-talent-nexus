@@ -58,7 +58,9 @@ export function NewCastingForm({ type }: NewCastingFormProps) {
         .from('castings')
         .insert({
           ...formData,
-          created_by: user.data.user?.id
+          created_by: user.data.user?.id,
+          created_at: new Date().toISOString(),
+          updated_at: new Date().toISOString()
         });
 
       if (error) throw error;
