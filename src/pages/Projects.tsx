@@ -44,13 +44,97 @@ const statusColors = {
   },
 };
 
+// Dummy data for development
+const dummyProjects: Project[] = [
+  {
+    id: "1",
+    name: "Global Marketing Campaign 2024",
+    countries: [
+      {
+        id: "c1",
+        country_name: "United States",
+        languages: [
+          {
+            id: "l1",
+            language_name: "English",
+            tasks: [
+              {
+                id: "t1",
+                name: "Product Launch Video",
+                script_status: "In Progress",
+                translation_status: "Pending",
+                review_status: "Internal Review",
+                talent_status: "Booked",
+                delivery_status: "Pending"
+              }
+            ]
+          }
+        ]
+      },
+      {
+        id: "c2",
+        country_name: "Spain",
+        languages: [
+          {
+            id: "l2",
+            language_name: "Spanish",
+            tasks: [
+              {
+                id: "t2",
+                name: "Brand Story",
+                script_status: "Approved",
+                translation_status: "In Progress",
+                review_status: "Client Review",
+                talent_status: "Shooting",
+                delivery_status: "Pending"
+              }
+            ]
+          }
+        ]
+      }
+    ]
+  },
+  {
+    id: "2",
+    name: "Q1 Social Media Content",
+    countries: [
+      {
+        id: "c3",
+        country_name: "Germany",
+        languages: [
+          {
+            id: "l3",
+            language_name: "German",
+            tasks: [
+              {
+                id: "t3",
+                name: "Instagram Stories",
+                script_status: "Pending",
+                translation_status: "Pending",
+                review_status: "Internal Review",
+                talent_status: "Booked",
+                delivery_status: "Pending"
+              }
+            ]
+          }
+        ]
+      }
+    ]
+  }
+];
+
 export default function Projects() {
   const [searchQuery, setSearchQuery] = useState("");
   const [filters, setFilters] = useState<ProjectFilters>({});
 
-  const { data: projects, isLoading } = useQuery<Project[]>({
+  const { data: projects, isLoading } = useQuery({
     queryKey: ['projects', searchQuery, filters],
     queryFn: async () => {
+      // For development, return dummy data instead of making the API call
+      return dummyProjects;
+
+      // Uncomment this when ready to use real data
+      /*
       let query = supabase
         .from('projects')
         .select(`
@@ -84,6 +168,7 @@ export default function Projects() {
         `);
       }
 
+      // Add filter conditions
       if (filters.projectManager) {
         query = query.eq('project_manager_id', filters.projectManager);
       }
@@ -110,7 +195,8 @@ export default function Projects() {
       const { data, error } = await query;
       
       if (error) throw error;
-      return data as Project[] || [];
+      return data as Project[];
+      */
     },
   });
 
