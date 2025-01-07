@@ -1,17 +1,13 @@
-import { useState, Suspense } from "react";
-import { cn } from "@/lib/utils";
-import { useIsMobile } from "@/hooks/use-mobile";
-import { ChevronLeft, ChevronRight } from "lucide-react";
-import { Button } from "@/components/ui/button";
-import { MessagesErrorBoundary } from "./MessagesErrorBoundary";
-import { Skeleton } from "@/components/ui/skeleton";
-import { MessagesProvider } from "@/contexts/MessagesContext";
-import { ConversationsList } from "./ConversationsList";
-import { ChatWindow } from "./ChatWindow";
-
-interface MessagesLayoutProps {
-  children?: React.ReactNode;
-}
+import { useState, Suspense } from "react"
+import { cn } from "@/lib/utils"
+import { useIsMobile } from "@/hooks/use-mobile"
+import { ChevronLeft, ChevronRight } from "lucide-react"
+import { Button } from "@/components/ui/button"
+import { MessagesErrorBoundary } from "./MessagesErrorBoundary"
+import { Skeleton } from "@/components/ui/skeleton"
+import { MessagesProvider } from "@/contexts/MessagesContext"
+import { ConversationsList } from "./ConversationsList"
+import { ChatWindow } from "./ChatWindow"
 
 function LoadingState() {
   return (
@@ -22,22 +18,22 @@ function LoadingState() {
         <Skeleton className="h-4 w-[80%]" />
       </div>
     </div>
-  );
+  )
 }
 
-export function MessagesLayout({ children }: MessagesLayoutProps) {
-  const isMobile = useIsMobile();
-  const [showLeftSidebar, setShowLeftSidebar] = useState(!isMobile);
-  const [showRightSidebar, setShowRightSidebar] = useState(!isMobile);
+export function MessagesLayout() {
+  const isMobile = useIsMobile()
+  const [showLeftSidebar, setShowLeftSidebar] = useState(!isMobile)
+  const [showRightSidebar, setShowRightSidebar] = useState(!isMobile)
 
   return (
     <MessagesErrorBoundary>
       <MessagesProvider>
-        <div className="flex h-screen bg-white">
+        <div className="flex h-[calc(100vh-4rem)] bg-white">
           {/* Left Sidebar - Conversations List */}
           <div
             className={cn(
-              "fixed left-0 top-16 bottom-0 w-[280px] border-r border-chat-input-border bg-white transition-transform duration-300 ease-in-out z-20",
+              "w-[280px] border-r border-chat-input-border bg-white transition-transform duration-300 ease-in-out z-20",
               !showLeftSidebar && "-translate-x-full"
             )}
           >
@@ -76,7 +72,7 @@ export function MessagesLayout({ children }: MessagesLayoutProps) {
           {/* Right Sidebar - Info Panel */}
           <div
             className={cn(
-              "fixed right-0 top-16 bottom-0 w-[280px] border-l border-chat-input-border bg-white transition-transform duration-300 ease-in-out z-20",
+              "w-[280px] border-l border-chat-input-border bg-white transition-transform duration-300 ease-in-out z-20",
               !showRightSidebar && "translate-x-full"
             )}
           >
@@ -106,5 +102,5 @@ export function MessagesLayout({ children }: MessagesLayoutProps) {
         </div>
       </MessagesProvider>
     </MessagesErrorBoundary>
-  );
+  )
 }
