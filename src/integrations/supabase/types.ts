@@ -627,6 +627,47 @@ export type Database = {
           },
         ]
       }
+      equipment: {
+        Row: {
+          created_at: string | null
+          equipment_type: string
+          id: string
+          notes: string | null
+          required_shots: string[] | null
+          shot_list_id: string | null
+          specifications: string | null
+          updated_at: string | null
+        }
+        Insert: {
+          created_at?: string | null
+          equipment_type: string
+          id?: string
+          notes?: string | null
+          required_shots?: string[] | null
+          shot_list_id?: string | null
+          specifications?: string | null
+          updated_at?: string | null
+        }
+        Update: {
+          created_at?: string | null
+          equipment_type?: string
+          id?: string
+          notes?: string | null
+          required_shots?: string[] | null
+          shot_list_id?: string | null
+          specifications?: string | null
+          updated_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "equipment_shot_list_id_fkey"
+            columns: ["shot_list_id"]
+            isOneToOne: false
+            referencedRelation: "shot_lists"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       guest_selections: {
         Row: {
           casting_id: string | null
@@ -678,6 +719,50 @@ export type Database = {
             columns: ["talent_id"]
             isOneToOne: false
             referencedRelation: "talent_profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      locations: {
+        Row: {
+          address: string | null
+          created_at: string | null
+          id: string
+          name: string
+          shot_list_id: string | null
+          special_requirements: string | null
+          status: Database["public"]["Enums"]["location_status"] | null
+          time_of_day: string | null
+          updated_at: string | null
+        }
+        Insert: {
+          address?: string | null
+          created_at?: string | null
+          id?: string
+          name: string
+          shot_list_id?: string | null
+          special_requirements?: string | null
+          status?: Database["public"]["Enums"]["location_status"] | null
+          time_of_day?: string | null
+          updated_at?: string | null
+        }
+        Update: {
+          address?: string | null
+          created_at?: string | null
+          id?: string
+          name?: string
+          shot_list_id?: string | null
+          special_requirements?: string | null
+          status?: Database["public"]["Enums"]["location_status"] | null
+          time_of_day?: string | null
+          updated_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "locations_shot_list_id_fkey"
+            columns: ["shot_list_id"]
+            isOneToOne: false
+            referencedRelation: "shot_lists"
             referencedColumns: ["id"]
           },
         ]
@@ -1070,6 +1155,85 @@ export type Database = {
           },
         ]
       }
+      shot_lists: {
+        Row: {
+          created_at: string | null
+          id: string
+          task_id: string | null
+          updated_at: string | null
+        }
+        Insert: {
+          created_at?: string | null
+          id?: string
+          task_id?: string | null
+          updated_at?: string | null
+        }
+        Update: {
+          created_at?: string | null
+          id?: string
+          task_id?: string | null
+          updated_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "shot_lists_task_id_fkey"
+            columns: ["task_id"]
+            isOneToOne: false
+            referencedRelation: "project_tasks"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      shots: {
+        Row: {
+          created_at: string | null
+          description: string | null
+          frame_type: string | null
+          id: string
+          location_id: string | null
+          notes: string | null
+          sequence_order: number
+          shot_list_id: string | null
+          shot_number: number
+          status: Database["public"]["Enums"]["shot_status"] | null
+          updated_at: string | null
+        }
+        Insert: {
+          created_at?: string | null
+          description?: string | null
+          frame_type?: string | null
+          id?: string
+          location_id?: string | null
+          notes?: string | null
+          sequence_order: number
+          shot_list_id?: string | null
+          shot_number: number
+          status?: Database["public"]["Enums"]["shot_status"] | null
+          updated_at?: string | null
+        }
+        Update: {
+          created_at?: string | null
+          description?: string | null
+          frame_type?: string | null
+          id?: string
+          location_id?: string | null
+          notes?: string | null
+          sequence_order?: number
+          shot_list_id?: string | null
+          shot_number?: number
+          status?: Database["public"]["Enums"]["shot_status"] | null
+          updated_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "shots_shot_list_id_fkey"
+            columns: ["shot_list_id"]
+            isOneToOne: false
+            referencedRelation: "shot_lists"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       talent_calendar: {
         Row: {
           casting_id: string | null
@@ -1365,6 +1529,47 @@ export type Database = {
             columns: ["talent_id"]
             isOneToOne: false
             referencedRelation: "users"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      talent_notes: {
+        Row: {
+          additional_notes: string | null
+          created_at: string | null
+          id: string
+          instructions: string | null
+          required_props: string | null
+          shot_list_id: string | null
+          shot_reference: string | null
+          updated_at: string | null
+        }
+        Insert: {
+          additional_notes?: string | null
+          created_at?: string | null
+          id?: string
+          instructions?: string | null
+          required_props?: string | null
+          shot_list_id?: string | null
+          shot_reference?: string | null
+          updated_at?: string | null
+        }
+        Update: {
+          additional_notes?: string | null
+          created_at?: string | null
+          id?: string
+          instructions?: string | null
+          required_props?: string | null
+          shot_list_id?: string | null
+          shot_reference?: string | null
+          updated_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "talent_notes_shot_list_id_fkey"
+            columns: ["shot_list_id"]
+            isOneToOne: false
+            referencedRelation: "shot_lists"
             referencedColumns: ["id"]
           },
         ]
@@ -1783,6 +1988,7 @@ export type Database = {
         | "blank_space"
         | "custom_dropdown"
         | "fixed_dropdown"
+      location_status: "Pending" | "Confirmed" | "Unavailable"
       media_category: "photo" | "video" | "audio" | "document" | "other"
       project_delivery_status: "Pending" | "Delivered" | "R Pending"
       project_review_status: "Internal Review" | "Client Review" | "Approved"
@@ -1794,6 +2000,7 @@ export type Database = {
         | "Reshoot"
         | "Approved"
       project_translation_status: "Pending" | "In Progress" | "Approved"
+      shot_status: "Pending" | "In Progress" | "Completed"
       user_role:
         | "super_admin"
         | "admin"
