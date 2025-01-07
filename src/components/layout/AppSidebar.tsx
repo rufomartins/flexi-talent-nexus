@@ -2,7 +2,7 @@ import { Link } from "react-router-dom"
 import { LayoutDashboard, Users, Search, UserPlus, FileSpreadsheet, Briefcase, MessageSquare, Calendar, DollarSign } from "lucide-react"
 import { cn } from "@/lib/utils"
 import { buttonVariants } from "@/components/ui/button"
-import { Sidebar, SidebarContent, SidebarGroup, SidebarGroupContent } from "@/components/ui/sidebar"
+import { Sidebar, SidebarContent, SidebarGroup, SidebarGroupContent, SidebarMenu, SidebarMenuItem, SidebarMenuButton, SidebarMenuSub } from "@/components/ui/sidebar"
 
 export function AppSidebar() {
   return (
@@ -22,41 +22,43 @@ export function AppSidebar() {
               Dashboard
             </Link>
 
-            {/* Talents Link */}
-            <Link
-              to="/talents"
-              className={cn(
-                buttonVariants({ variant: "ghost" }),
-                "justify-start gap-2 px-2"
-              )}
-            >
-              <Users className="h-4 w-4" />
-              Talents
-            </Link>
-
-            {/* Search Link */}
-            <Link
-              to="/search"
-              className={cn(
-                buttonVariants({ variant: "ghost" }),
-                "justify-start gap-2 px-2"
-              )}
-            >
-              <Search className="h-4 w-4" />
-              Search
-            </Link>
-
-            {/* Add New Talent Link */}
-            <Link
-              to="/talents/new"
-              className={cn(
-                buttonVariants({ variant: "ghost" }),
-                "justify-start gap-2 px-2"
-              )}
-            >
-              <UserPlus className="h-4 w-4" />
-              Add New Talent
-            </Link>
+            {/* Talents Section with Submenus */}
+            <div className="flex flex-col">
+              <Link
+                to="/talents"
+                className={cn(
+                  buttonVariants({ variant: "ghost" }),
+                  "justify-start gap-2 px-2"
+                )}
+              >
+                <Users className="h-4 w-4" />
+                Talents
+              </Link>
+              
+              {/* Talents Submenu */}
+              <SidebarMenuSub>
+                <Link
+                  to="/search"
+                  className={cn(
+                    buttonVariants({ variant: "ghost" }),
+                    "justify-start gap-2 px-2"
+                  )}
+                >
+                  <Search className="h-4 w-4" />
+                  Search
+                </Link>
+                <Link
+                  to="/talents/new"
+                  className={cn(
+                    buttonVariants({ variant: "ghost" }),
+                    "justify-start gap-2 px-2"
+                  )}
+                >
+                  <UserPlus className="h-4 w-4" />
+                  Add New Talent
+                </Link>
+              </SidebarMenuSub>
+            </div>
 
             {/* Castings Link */}
             <Link
