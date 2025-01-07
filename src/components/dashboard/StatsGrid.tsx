@@ -42,6 +42,7 @@ export const StatsGrid = ({
         value={newRegistrations}
         icon={UserPlus}
         isLoading={isLoadingRegistrations}
+        navigateTo="/talents?filter=new"
       />
       
       <StatCard
@@ -50,6 +51,7 @@ export const StatsGrid = ({
         value={talentsCount}
         icon={Users}
         isLoading={isLoadingTalents}
+        navigateTo="/talents"
       />
       
       <StatCard
@@ -58,6 +60,7 @@ export const StatsGrid = ({
         value={projectsCount}
         icon={FolderGit}
         isLoading={isLoadingProjects}
+        navigateTo="/projects"
       />
 
       <StatCard
@@ -66,6 +69,7 @@ export const StatsGrid = ({
         value={activeCastingsCount}
         icon={Briefcase}
         isLoading={isLoadingCastings}
+        navigateTo="/castings"
       />
 
       {userDetails?.role === 'super_admin' && (
@@ -75,6 +79,7 @@ export const StatsGrid = ({
           value={pendingPayments}
           icon={DollarSign}
           isLoading={isLoadingPayments}
+          navigateTo="/financial/payments"
         />
       )}
 
@@ -85,6 +90,7 @@ export const StatsGrid = ({
           value={availableFunds}
           icon={Wallet}
           isLoading={isLoadingFunds}
+          navigateTo="/financial"
         />
       )}
     </div>
