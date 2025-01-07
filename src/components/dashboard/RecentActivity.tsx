@@ -1,4 +1,4 @@
-import { useQuery } from "@tanstack/react-query";
+import { useInfiniteQuery } from "@tanstack/react-query";
 import { useState, useEffect, useCallback } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { ActivityFilters } from "./activity/ActivityFilters";
@@ -25,7 +25,6 @@ type ActivityLog = {
 };
 
 export const RecentActivity = () => {
-  const [currentPage, setCurrentPage] = useState(1);
   const [activityType, setActivityType] = useState<string | null>(null);
   const [dateRange, setDateRange] = useState<Date | undefined>();
   const [sortField, setSortField] = useState<SortField>('created_at');
@@ -39,8 +38,8 @@ export const RecentActivity = () => {
     delay: 100,
   });
 
-  const buildQuery = useCallback(() => {
-    const from = (currentPage - 1) * itemsPerPage;
+  const buildQuery = useCallback((pageParam = 0) => {
+    const from = pageParam * itemsPerPage;
     const to = from + itemsPerPage - 1;
 
     let query = supabase
@@ -73,12 +72,20 @@ export const RecentActivity = () => {
     }
 
     return query;
-  }, [activityType, dateRange, sortField, sortOrder, currentPage, itemsPerPage]);
+  }, [activityType, dateRange, sortField, sortOrder, itemsPerPage]);
 
-  const { data, isLoading, error, refetch, hasNextPage, fetchNextPage, isFetchingNextPage } = useQuery({
-    queryKey: ['recent-activities', currentPage, activityType, dateRange, sortField, sortOrder],
-    queryFn: async () => {
-      const query = buildQuery();
+  const { 
+    data, 
+    isLoading, 
+    error, 
+    refetch,
+    fetchNextPage,
+    hasNextPage,
+    isFetchingNextPage
+  } = useInfiniteQuery({
+    queryKey: ['recent-activities', activityType, dateRange, sortField, sortOrder],
+    queryFn: async ({ pageParam = 0 }) => {
+      const query = buildQuery(pageParam);
       const { data: activities, error, count } = await query;
 
       if (error) {
@@ -89,20 +96,21 @@ export const RecentActivity = () => {
       return {
         activities: activities as ActivityLog[],
         totalCount: count || 0,
-        hasMore: activities?.length === itemsPerPage
+        hasMore: activities?.length === itemsPerPage,
+        nextPage: activities?.length === itemsPerPage ? pageParam + 1 : undefined
       };
     },
-    keepPreviousData: true,
+    getNextPageParam: (lastPage) => lastPage.nextPage,
     staleTime: 30000, // Cache data for 30 seconds
     retry: 2,
   });
 
   // Handle infinite scroll
   useEffect(() => {
-    if (inView && data?.hasMore && !isLoading && !isFetchingNextPage) {
-      setCurrentPage(prev => prev + 1);
+    if (inView && hasNextPage && !isLoading && !isFetchingNextPage) {
+      fetchNextPage();
     }
-  }, [inView, data?.hasMore, isLoading, isFetchingNextPage]);
+  }, [inView, hasNextPage, isLoading, isFetchingNextPage, fetchNextPage]);
 
   // Real-time updates with debounced toast notifications
   useEffect(() => {
@@ -138,7 +146,9 @@ export const RecentActivity = () => {
     };
   }, [refetch, toast]);
 
-  const totalPages = data?.totalCount ? Math.ceil(data.totalCount / itemsPerPage) : 0;
+  const allActivities = data?.pages.flatMap(page => page.activities) || [];
+  const totalCount = data?.pages[0]?.totalCount || 0;
+  const totalPages = Math.ceil(totalCount / itemsPerPage);
 
   return (
     <div className="mt-8 animate-fade-in">
@@ -177,11 +187,11 @@ export const RecentActivity = () => {
         ) : (
           <>
             <ActivityList
-              activities={data?.activities || []}
+              activities={allActivities}
               isLoading={isLoading}
-              currentPage={currentPage}
+              currentPage={1}
               totalPages={totalPages}
-              onPageChange={setCurrentPage}
+              onPageChange={() => {}} // No longer needed with infinite scroll
               error={error}
             />
             
