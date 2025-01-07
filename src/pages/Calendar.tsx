@@ -1,0 +1,92 @@
+import { useEffect, useState } from "react";
+import { useQuery } from "@tanstack/react-query";
+import { Calendar as CalendarIcon, Loader2 } from "lucide-react";
+import { format } from "date-fns";
+import { supabase } from "@/integrations/supabase/client";
+import { Calendar } from "@/components/ui/calendar";
+import { Button } from "@/components/ui/button";
+import { useToast } from "@/components/ui/use-toast";
+import { useAuth } from "@/contexts/auth";
+import { AddEventDialog } from "@/components/calendar/AddEventDialog";
+import { CalendarEventsList } from "@/components/calendar/CalendarEventsList";
+import { CalendarConflictAlert } from "@/components/calendar/CalendarConflictAlert";
+
+export default function CalendarPage() {
+  const [date, setDate] = useState<Date>(new Date());
+  const [showAddEvent, setShowAddEvent] = useState(false);
+  const { user, userDetails } = useAuth();
+  const { toast } = useToast();
+
+  const { data: events, isLoading } = useQuery({
+    queryKey: ['calendar-events', user?.id],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from('talent_calendar')
+        .select('*, castings(name)')
+        .eq('talent_id', user?.id);
+
+      if (error) {
+        console.error('Error fetching calendar events:', error);
+        toast({
+          title: "Error",
+          description: "Could not load calendar events",
+          variant: "destructive",
+        });
+        return [];
+      }
+
+      return data;
+    },
+    enabled: !!user,
+  });
+
+  if (!user) return null;
+
+  return (
+    <div className="container mx-auto p-6">
+      <div className="flex justify-between items-center mb-6">
+        <div className="flex items-center gap-2">
+          <CalendarIcon className="h-6 w-6" />
+          <h1 className="text-2xl font-bold">Calendar</h1>
+        </div>
+        <Button onClick={() => setShowAddEvent(true)}>Add Event</Button>
+      </div>
+
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+        <div className="md:col-span-1">
+          <Calendar
+            mode="single"
+            selected={date}
+            onSelect={(date) => date && setDate(date)}
+            className="rounded-md border shadow"
+          />
+        </div>
+
+        <div className="md:col-span-2">
+          {isLoading ? (
+            <div className="flex items-center justify-center h-64">
+              <Loader2 className="h-8 w-8 animate-spin" />
+            </div>
+          ) : (
+            <>
+              <h2 className="text-lg font-semibold mb-4">
+                Events for {format(date, 'MMMM d, yyyy')}
+              </h2>
+              <CalendarEventsList 
+                events={events || []} 
+                selectedDate={date} 
+              />
+            </>
+          )}
+        </div>
+      </div>
+
+      <AddEventDialog 
+        open={showAddEvent} 
+        onOpenChange={setShowAddEvent}
+      />
+
+      <CalendarConflictAlert />
+    </div>
+  );
+}
