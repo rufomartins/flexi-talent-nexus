@@ -1,14 +1,18 @@
 import React, { useState, useEffect } from 'react';
 import { Loader } from 'lucide-react';
 import { useDebounce } from '@/hooks/useDebounce';
-import { validateCastingForm, validateFile } from '@/utils/validation';
+import { validateCastingForm } from '@/utils/validation';
 import { supabase } from '@/integrations/supabase/client';
-import { CastingFormData, ValidationErrors } from '@/types/casting';
+import { CastingFormData, ValidationErrors, CastingType } from '@/types/casting';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { RichTextEditor } from '@/components/ui/rich-text-editor';
 
-export const NewCastingForm = () => {
+interface NewCastingFormProps {
+  type: CastingType;
+}
+
+export const NewCastingForm: React.FC<NewCastingFormProps> = ({ type }) => {
   const [formData, setFormData] = useState<CastingFormData>({
     name: '',
     client_id: null,
@@ -18,7 +22,7 @@ export const NewCastingForm = () => {
     allow_talent_portal: false,
     description: '',
     status: 'open',
-    casting_type: 'internal'
+    casting_type: type
   });
 
   const [errors, setErrors] = useState<ValidationErrors>({});
