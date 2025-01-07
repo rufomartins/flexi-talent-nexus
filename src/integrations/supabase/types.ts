@@ -510,6 +510,67 @@ export type Database = {
           },
         ]
       }
+      projects: {
+        Row: {
+          client_id: string | null
+          created_at: string | null
+          end_date: string | null
+          id: string
+          name: string
+          project_manager_id: string | null
+          start_date: string | null
+          status: string | null
+          type: string | null
+          updated_at: string | null
+        }
+        Insert: {
+          client_id?: string | null
+          created_at?: string | null
+          end_date?: string | null
+          id?: string
+          name: string
+          project_manager_id?: string | null
+          start_date?: string | null
+          status?: string | null
+          type?: string | null
+          updated_at?: string | null
+        }
+        Update: {
+          client_id?: string | null
+          created_at?: string | null
+          end_date?: string | null
+          id?: string
+          name?: string
+          project_manager_id?: string | null
+          start_date?: string | null
+          status?: string | null
+          type?: string | null
+          updated_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "projects_client_id_fkey"
+            columns: ["client_id"]
+            isOneToOne: false
+            referencedRelation: "clients"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "projects_project_manager_id_fkey"
+            columns: ["project_manager_id"]
+            isOneToOne: false
+            referencedRelation: "user_profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "projects_project_manager_id_fkey"
+            columns: ["project_manager_id"]
+            isOneToOne: false
+            referencedRelation: "users"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       talent_calendar: {
         Row: {
           casting_id: string | null
