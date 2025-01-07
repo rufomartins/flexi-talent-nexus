@@ -5,9 +5,23 @@ import { ScrollArea } from "@/components/ui/scroll-area";
 import { supabase } from "@/integrations/supabase/client";
 
 interface Message {
+  id: string;
+  conversation_id: string;
+  sender_id: string;
   content: string;
   created_at: string;
-  sender_id: string;
+}
+
+interface ConversationParticipant {
+  user_id: string;
+}
+
+interface ConversationResponse {
+  id: string;
+  title: string;
+  project_id: string;
+  conversation_participants: ConversationParticipant[];
+  messages: Message[];
 }
 
 interface Conversation {
@@ -21,23 +35,12 @@ interface Conversation {
   userRole?: string;
 }
 
-interface ConversationResponse {
-  id: string;
-  title: string;
-  project_id: string;
-  messages: Message[];
-  conversation_participants: {
-    user_id: string;
-  }[];
-}
-
 export function ConversationsList() {
   const [conversations, setConversations] = useState<Conversation[]>([]);
   const [selectedId, setSelectedId] = useState<string | null>(null);
   const [searchQuery, setSearchQuery] = useState("");
 
   useEffect(() => {
-    // Initial fetch of conversations
     const fetchConversations = async () => {
       const { data: { user } } = await supabase.auth.getUser();
       if (!user) return;
@@ -48,11 +51,14 @@ export function ConversationsList() {
           id,
           title,
           project_id,
-          conversation_participants!inner(user_id),
-          messages!inner(
+          conversation_participants (
+            user_id
+          ),
+          messages (
+            id,
+            sender_id,
             content,
-            created_at,
-            sender_id
+            created_at
           )
         `)
         .eq('conversation_participants.user_id', user.id)
@@ -67,10 +73,10 @@ export function ConversationsList() {
       const transformedData = (data as ConversationResponse[]).map(conv => ({
         id: conv.id,
         title: conv.title || 'Untitled Conversation',
-        lastMessage: conv.messages[0]?.content,
-        timestamp: new Date(conv.messages[0]?.created_at).toLocaleTimeString(),
+        lastMessage: conv.messages[0]?.content || '',
+        timestamp: conv.messages[0]?.created_at ? 
+          new Date(conv.messages[0].created_at).toLocaleTimeString() : '',
         userInitials: conv.title?.slice(0, 2) || 'UC',
-        // Add more transformations as needed
       }));
 
       setConversations(transformedData);
