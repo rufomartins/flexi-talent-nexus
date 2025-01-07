@@ -12,6 +12,7 @@ import Dashboard from "./pages/Dashboard"
 import Users from "./pages/Users"
 import TalentProfile from "./pages/TalentProfile"
 import Projects from "./pages/Projects"
+import Castings from "./pages/Castings"
 
 const queryClient = new QueryClient()
 
@@ -59,6 +60,16 @@ const App = () => (
                   <ProtectedRoute>
                     <MainLayout>
                       <Projects />
+                    </MainLayout>
+                  </ProtectedRoute>
+                }
+              />
+              <Route
+                path="/castings"
+                element={
+                  <ProtectedRoute>
+                    <MainLayout>
+                      <Castings />
                     </MainLayout>
                   </ProtectedRoute>
                 }
