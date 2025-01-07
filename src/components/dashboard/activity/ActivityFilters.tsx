@@ -1,8 +1,11 @@
-import { Filter } from "lucide-react";
-import { format } from "date-fns";
-import { cn } from "@/lib/utils";
+import { CalendarIcon } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Calendar } from "@/components/ui/calendar";
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from "@/components/ui/popover";
 import {
   Select,
   SelectContent,
@@ -10,15 +13,12 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import {
-  Popover,
-  PopoverContent,
-  PopoverTrigger,
-} from "@/components/ui/popover";
+import { cn } from "@/lib/utils";
+import { format } from "date-fns";
 
 interface ActivityFiltersProps {
   activityType: string | null;
-  setActivityType: (value: string | null) => void;
+  setActivityType: (type: string | null) => void;
   dateRange: Date | undefined;
   setDateRange: (date: Date | undefined) => void;
 }
@@ -29,31 +29,23 @@ export const ActivityFilters = ({
   dateRange,
   setDateRange,
 }: ActivityFiltersProps) => {
-  const activityTypes = [
-    { value: "new_registration_approved", label: "New Registrations - Approved" },
-    { value: "new_registration_evaluation", label: "New Registrations - Under Evaluation" },
-    { value: "new_registration_rejected", label: "New Registrations - Rejected" },
-    { value: "project_new", label: "Projects - New" },
-    { value: "project_approved", label: "Projects - Approved" },
-    { value: "project_revision", label: "Projects - Under Revision" }
-  ];
-
   return (
-    <div className="flex gap-2">
+    <div className="flex items-center gap-4">
       <Select
-        value={activityType || "all"}
-        onValueChange={(value) => setActivityType(value === "all" ? null : value)}
+        value={activityType || ""}
+        onValueChange={(value) => setActivityType(value || null)}
       >
-        <SelectTrigger className="w-[280px]">
+        <SelectTrigger className="w-[200px]">
           <SelectValue placeholder="Filter by type" />
         </SelectTrigger>
         <SelectContent>
-          <SelectItem value="all">All types</SelectItem>
-          {activityTypes.map((type) => (
-            <SelectItem key={type.value} value={type.value}>
-              {type.label}
-            </SelectItem>
-          ))}
+          <SelectItem value="">All Activities</SelectItem>
+          <SelectItem value="new_registration_approved">New Registration - Approved</SelectItem>
+          <SelectItem value="new_registration_under_evaluation">New Registration - Under Evaluation</SelectItem>
+          <SelectItem value="new_registration_rejected">New Registration - Rejected</SelectItem>
+          <SelectItem value="project_new">Project - New</SelectItem>
+          <SelectItem value="project_approved">Project - Approved</SelectItem>
+          <SelectItem value="project_under_revision">Project - Under Revision</SelectItem>
         </SelectContent>
       </Select>
 
@@ -62,15 +54,15 @@ export const ActivityFilters = ({
           <Button
             variant="outline"
             className={cn(
-              "justify-start text-left font-normal",
+              "w-[200px] justify-start text-left font-normal",
               !dateRange && "text-muted-foreground"
             )}
           >
-            <Filter className="mr-2 h-4 w-4" />
+            <CalendarIcon className="mr-2 h-4 w-4" />
             {dateRange ? format(dateRange, "PPP") : "Pick a date"}
           </Button>
         </PopoverTrigger>
-        <PopoverContent className="w-auto p-0" align="end">
+        <PopoverContent className="w-auto p-0" align="start">
           <Calendar
             mode="single"
             selected={dateRange}
@@ -81,14 +73,15 @@ export const ActivityFilters = ({
       </Popover>
 
       {(dateRange || activityType) && (
-        <Button 
+        <Button
           variant="ghost"
           onClick={() => {
             setDateRange(undefined);
             setActivityType(null);
           }}
+          className="h-8 px-2 lg:px-3"
         >
-          Clear filters
+          Reset filters
         </Button>
       )}
     </div>
