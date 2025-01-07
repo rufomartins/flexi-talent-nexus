@@ -85,111 +85,113 @@ export default function CalendarPage() {
   };
 
   return (
-    <div className="h-full">
-      <div className="flex justify-between items-center mb-4">
-        <div className="flex items-center gap-2">
-          <CalendarIcon className="h-6 w-6" />
-          <h1 className="text-2xl font-bold">Calendar</h1>
-        </div>
-        <div className="flex items-center gap-4">
-          <div className="flex items-center bg-white rounded-lg shadow-sm border">
-            <Button 
-              variant="ghost" 
-              size="sm"
-              className="hover:bg-gray-50"
-              onClick={() => navigateMonth('prev')}
-            >
-              <ChevronLeft className="h-4 w-4" />
-            </Button>
-            <div className="px-4 py-2 font-medium">
-              {format(date, 'MMMM yyyy')}
+    <div className="h-full px-8">
+      <div className="max-w-5xl mx-auto">
+        <div className="flex justify-between items-center mb-4">
+          <div className="flex items-center gap-2">
+            <CalendarIcon className="h-6 w-6" />
+            <h1 className="text-2xl font-bold">Calendar</h1>
+          </div>
+          <div className="flex items-center gap-4">
+            <div className="flex items-center bg-white rounded-lg shadow-sm border">
+              <Button 
+                variant="ghost" 
+                size="sm"
+                className="hover:bg-gray-50"
+                onClick={() => navigateMonth('prev')}
+              >
+                <ChevronLeft className="h-4 w-4" />
+              </Button>
+              <div className="px-4 py-2 font-medium">
+                {format(date, 'MMMM yyyy')}
+              </div>
+              <Button 
+                variant="ghost" 
+                size="sm"
+                className="hover:bg-gray-50"
+                onClick={() => navigateMonth('next')}
+              >
+                <ChevronRight className="h-4 w-4" />
+              </Button>
+            </div>
+            <div className="flex items-center rounded-lg border shadow-sm overflow-hidden">
+              <Button 
+                variant="ghost"
+                size="sm"
+                className={`px-4 ${view === 'month' ? 'bg-primary text-white' : 'hover:bg-gray-50'}`}
+                onClick={() => setView('month')}
+              >
+                Month
+              </Button>
+              <Button 
+                variant="ghost"
+                size="sm"
+                className={`px-4 ${view === 'week' ? 'bg-primary text-white' : 'hover:bg-gray-50'}`}
+                onClick={() => setView('week')}
+              >
+                Week
+              </Button>
             </div>
             <Button 
-              variant="ghost" 
+              variant="outline" 
               size="sm"
-              className="hover:bg-gray-50"
-              onClick={() => navigateMonth('next')}
+              onClick={() => setDate(new Date())}
             >
-              <ChevronRight className="h-4 w-4" />
+              Today
+            </Button>
+            <Button onClick={() => setShowAddEvent(true)}>
+              Add Event
             </Button>
           </div>
-          <div className="flex items-center rounded-lg border shadow-sm overflow-hidden">
-            <Button 
-              variant="ghost"
-              size="sm"
-              className={`px-4 ${view === 'month' ? 'bg-primary text-white' : 'hover:bg-gray-50'}`}
-              onClick={() => setView('month')}
-            >
-              Month
-            </Button>
-            <Button 
-              variant="ghost"
-              size="sm"
-              className={`px-4 ${view === 'week' ? 'bg-primary text-white' : 'hover:bg-gray-50'}`}
-              onClick={() => setView('week')}
-            >
-              Week
-            </Button>
-          </div>
-          <Button 
-            variant="outline" 
-            size="sm"
-            onClick={() => setDate(new Date())}
-          >
-            Today
-          </Button>
-          <Button onClick={() => setShowAddEvent(true)}>
-            Add Event
-          </Button>
         </div>
-      </div>
 
-      <div className="bg-white rounded-lg shadow">
-        <div className="grid grid-cols-7 gap-px border-b">
-          {['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'].map((day) => (
-            <div
-              key={day}
-              className="px-4 py-3 text-sm font-semibold text-gray-900 text-center bg-white"
-            >
-              {day}
+        <div className="bg-white rounded-lg shadow">
+          <div className="grid grid-cols-7 gap-px border-b">
+            {['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'].map((day) => (
+              <div
+                key={day}
+                className="px-4 py-3 text-sm font-semibold text-gray-900 text-center bg-white"
+              >
+                {day}
+              </div>
+            ))}
+          </div>
+          
+          <Calendar
+            mode="single"
+            selected={date}
+            onSelect={(date) => date && setDate(date)}
+            className="w-full border-none rounded-none"
+            components={{
+              IconLeft: () => <ChevronLeft className="h-4 w-4" />,
+              IconRight: () => <ChevronRight className="h-4 w-4" />,
+            }}
+          />
+
+          {isLoading ? (
+            <div className="flex items-center justify-center h-16">
+              <Loader2 className="h-6 w-6 animate-spin" />
             </div>
-          ))}
+          ) : (
+            <div className="p-4 border-t">
+              <h2 className="text-lg font-semibold mb-4">
+                Events for {format(date, 'MMMM d, yyyy')}
+              </h2>
+              <CalendarEventsList 
+                events={events || []} 
+                selectedDate={date}
+              />
+            </div>
+          )}
         </div>
-        
-        <Calendar
-          mode="single"
-          selected={date}
-          onSelect={(date) => date && setDate(date)}
-          className="w-full border-none rounded-none"
-          components={{
-            IconLeft: () => <ChevronLeft className="h-4 w-4" />,
-            IconRight: () => <ChevronRight className="h-4 w-4" />,
-          }}
+
+        <AddEventDialog 
+          open={showAddEvent} 
+          onOpenChange={setShowAddEvent}
         />
 
-        {isLoading ? (
-          <div className="flex items-center justify-center h-16">
-            <Loader2 className="h-6 w-6 animate-spin" />
-          </div>
-        ) : (
-          <div className="p-4 border-t">
-            <h2 className="text-lg font-semibold mb-4">
-              Events for {format(date, 'MMMM d, yyyy')}
-            </h2>
-            <CalendarEventsList 
-              events={events || []} 
-              selectedDate={date}
-            />
-          </div>
-        )}
+        <CalendarConflictAlert />
       </div>
-
-      <AddEventDialog 
-        open={showAddEvent} 
-        onOpenChange={setShowAddEvent}
-      />
-
-      <CalendarConflictAlert />
     </div>
   );
 }
