@@ -7,13 +7,12 @@ import {
   PaginationNext,
   PaginationPrevious,
 } from "@/components/ui/pagination";
+import { Json } from "@/integrations/supabase/types";
 
 interface Activity {
   id: string;
   action_type: string;
-  details: {
-    status?: string;
-  };
+  details: Json;
   created_at: string;
 }
 
@@ -36,12 +35,12 @@ export const ActivityList = ({
     const { action_type, details } = activity;
     
     if (action_type === 'registration') {
-      const status = details?.status || 'under_evaluation';
+      const status = (details as { status?: string })?.status || 'under_evaluation';
       return `New registration - ${status.replace('_', ' ')}`;
     }
     
     if (action_type === 'project') {
-      const status = details?.status || 'new';
+      const status = (details as { status?: string })?.status || 'new';
       return `Project - ${status.replace('_', ' ')}`;
     }
     
