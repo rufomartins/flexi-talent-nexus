@@ -865,6 +865,86 @@ export type Database = {
           },
         ]
       }
+      talent_profile_field_options: {
+        Row: {
+          created_at: string | null
+          field_id: string | null
+          id: string
+          label: string
+          position: number
+          value: string
+        }
+        Insert: {
+          created_at?: string | null
+          field_id?: string | null
+          id?: string
+          label: string
+          position?: number
+          value: string
+        }
+        Update: {
+          created_at?: string | null
+          field_id?: string | null
+          id?: string
+          label?: string
+          position?: number
+          value?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "talent_profile_field_options_field_id_fkey"
+            columns: ["field_id"]
+            isOneToOne: false
+            referencedRelation: "talent_profile_fields"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      talent_profile_fields: {
+        Row: {
+          advanced_rules: Json | null
+          created_at: string | null
+          field_type: Database["public"]["Enums"]["field_type"]
+          guest_access: boolean | null
+          id: string
+          is_active: boolean | null
+          is_required: boolean | null
+          label: string
+          position: number
+          show_on_signup: boolean | null
+          tab: string
+          updated_at: string | null
+        }
+        Insert: {
+          advanced_rules?: Json | null
+          created_at?: string | null
+          field_type: Database["public"]["Enums"]["field_type"]
+          guest_access?: boolean | null
+          id?: string
+          is_active?: boolean | null
+          is_required?: boolean | null
+          label: string
+          position?: number
+          show_on_signup?: boolean | null
+          tab?: string
+          updated_at?: string | null
+        }
+        Update: {
+          advanced_rules?: Json | null
+          created_at?: string | null
+          field_type?: Database["public"]["Enums"]["field_type"]
+          guest_access?: boolean | null
+          id?: string
+          is_active?: boolean | null
+          is_required?: boolean | null
+          label?: string
+          position?: number
+          show_on_signup?: boolean | null
+          tab?: string
+          updated_at?: string | null
+        }
+        Relationships: []
+      }
       talent_profiles: {
         Row: {
           category: string | null
@@ -1186,6 +1266,18 @@ export type Database = {
     Enums: {
       casting_status: "open" | "closed"
       casting_type: "internal" | "external"
+      field_type:
+        | "text"
+        | "long_text"
+        | "email"
+        | "date"
+        | "single_select"
+        | "multi_select"
+        | "number"
+        | "phone"
+        | "blank_space"
+        | "custom_dropdown"
+        | "fixed_dropdown"
       user_role:
         | "super_admin"
         | "admin"
