@@ -43,14 +43,14 @@ export const ActivityFilters = ({
   return (
     <div className="flex items-center gap-4">
       <Select
-        value={activityType || ""}
-        onValueChange={(value) => setActivityType(value || null)}
+        value={activityType || "all"}
+        onValueChange={(value) => setActivityType(value === "all" ? null : value)}
       >
         <SelectTrigger className="w-[200px]">
           <SelectValue placeholder="Filter by type" />
         </SelectTrigger>
         <SelectContent>
-          <SelectItem value="">All Activities</SelectItem>
+          <SelectItem value="all">All Activities</SelectItem>
           <SelectItem value="new_registration_approved">New Registration - Approved</SelectItem>
           <SelectItem value="new_registration_under_evaluation">New Registration - Under Evaluation</SelectItem>
           <SelectItem value="new_registration_rejected">New Registration - Rejected</SelectItem>
