@@ -726,6 +726,193 @@ export type Database = {
           },
         ]
       }
+      project_countries: {
+        Row: {
+          country_name: string
+          created_at: string | null
+          id: string
+          project_id: string | null
+          updated_at: string | null
+        }
+        Insert: {
+          country_name: string
+          created_at?: string | null
+          id?: string
+          project_id?: string | null
+          updated_at?: string | null
+        }
+        Update: {
+          country_name?: string
+          created_at?: string | null
+          id?: string
+          project_id?: string | null
+          updated_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "project_countries_project_id_fkey"
+            columns: ["project_id"]
+            isOneToOne: false
+            referencedRelation: "projects"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      project_languages: {
+        Row: {
+          country_id: string | null
+          created_at: string | null
+          id: string
+          language_name: string
+          updated_at: string | null
+        }
+        Insert: {
+          country_id?: string | null
+          created_at?: string | null
+          id?: string
+          language_name: string
+          updated_at?: string | null
+        }
+        Update: {
+          country_id?: string | null
+          created_at?: string | null
+          id?: string
+          language_name?: string
+          updated_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "project_languages_country_id_fkey"
+            columns: ["country_id"]
+            isOneToOne: false
+            referencedRelation: "project_countries"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      project_managers: {
+        Row: {
+          created_at: string | null
+          id: string
+          project_id: string | null
+          updated_at: string | null
+          user_id: string | null
+        }
+        Insert: {
+          created_at?: string | null
+          id?: string
+          project_id?: string | null
+          updated_at?: string | null
+          user_id?: string | null
+        }
+        Update: {
+          created_at?: string | null
+          id?: string
+          project_id?: string | null
+          updated_at?: string | null
+          user_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "project_managers_project_id_fkey"
+            columns: ["project_id"]
+            isOneToOne: false
+            referencedRelation: "projects"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "project_managers_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "user_profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "project_managers_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "users"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      project_tasks: {
+        Row: {
+          created_at: string | null
+          delivery_status:
+            | Database["public"]["Enums"]["project_delivery_status"]
+            | null
+          id: string
+          language_id: string | null
+          name: string
+          review_status:
+            | Database["public"]["Enums"]["project_review_status"]
+            | null
+          script_status:
+            | Database["public"]["Enums"]["project_script_status"]
+            | null
+          talent_status:
+            | Database["public"]["Enums"]["project_talent_status"]
+            | null
+          translation_status:
+            | Database["public"]["Enums"]["project_translation_status"]
+            | null
+          updated_at: string | null
+        }
+        Insert: {
+          created_at?: string | null
+          delivery_status?:
+            | Database["public"]["Enums"]["project_delivery_status"]
+            | null
+          id?: string
+          language_id?: string | null
+          name: string
+          review_status?:
+            | Database["public"]["Enums"]["project_review_status"]
+            | null
+          script_status?:
+            | Database["public"]["Enums"]["project_script_status"]
+            | null
+          talent_status?:
+            | Database["public"]["Enums"]["project_talent_status"]
+            | null
+          translation_status?:
+            | Database["public"]["Enums"]["project_translation_status"]
+            | null
+          updated_at?: string | null
+        }
+        Update: {
+          created_at?: string | null
+          delivery_status?:
+            | Database["public"]["Enums"]["project_delivery_status"]
+            | null
+          id?: string
+          language_id?: string | null
+          name?: string
+          review_status?:
+            | Database["public"]["Enums"]["project_review_status"]
+            | null
+          script_status?:
+            | Database["public"]["Enums"]["project_script_status"]
+            | null
+          talent_status?:
+            | Database["public"]["Enums"]["project_talent_status"]
+            | null
+          translation_status?:
+            | Database["public"]["Enums"]["project_translation_status"]
+            | null
+          updated_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "project_tasks_language_id_fkey"
+            columns: ["language_id"]
+            isOneToOne: false
+            referencedRelation: "project_languages"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       project_videos: {
         Row: {
           client_approval_status: string | null
@@ -812,8 +999,11 @@ export type Database = {
       }
       projects: {
         Row: {
+          active_tasks_count: number | null
           client_id: string | null
+          completion_percentage: number | null
           created_at: string | null
+          description: string | null
           end_date: string | null
           id: string
           name: string
@@ -821,11 +1011,15 @@ export type Database = {
           start_date: string | null
           status: string | null
           type: string | null
+          upcoming_deadlines_count: number | null
           updated_at: string | null
         }
         Insert: {
+          active_tasks_count?: number | null
           client_id?: string | null
+          completion_percentage?: number | null
           created_at?: string | null
+          description?: string | null
           end_date?: string | null
           id?: string
           name: string
@@ -833,11 +1027,15 @@ export type Database = {
           start_date?: string | null
           status?: string | null
           type?: string | null
+          upcoming_deadlines_count?: number | null
           updated_at?: string | null
         }
         Update: {
+          active_tasks_count?: number | null
           client_id?: string | null
+          completion_percentage?: number | null
           created_at?: string | null
+          description?: string | null
           end_date?: string | null
           id?: string
           name?: string
@@ -845,6 +1043,7 @@ export type Database = {
           start_date?: string | null
           status?: string | null
           type?: string | null
+          upcoming_deadlines_count?: number | null
           updated_at?: string | null
         }
         Relationships: [
@@ -1585,6 +1784,16 @@ export type Database = {
         | "custom_dropdown"
         | "fixed_dropdown"
       media_category: "photo" | "video" | "audio" | "document" | "other"
+      project_delivery_status: "Pending" | "Delivered" | "R Pending"
+      project_review_status: "Internal Review" | "Client Review" | "Approved"
+      project_script_status: "Pending" | "In Progress" | "Approved"
+      project_talent_status:
+        | "Booked"
+        | "Shooting"
+        | "Delivered"
+        | "Reshoot"
+        | "Approved"
+      project_translation_status: "Pending" | "In Progress" | "Approved"
       user_role:
         | "super_admin"
         | "admin"
