@@ -804,47 +804,56 @@ export type Database = {
       }
       talent_media: {
         Row: {
-          category: string | null
+          category: Database["public"]["Enums"]["media_category"] | null
           created_at: string | null
+          description: string | null
           file_name: string
           file_path: string
           file_size: number
           file_type: string
+          folder: string | null
           id: string
           is_profile: boolean | null
           is_shared: boolean | null
           mime_type: string | null
           position: number | null
+          tags: string[] | null
           talent_id: string | null
           updated_at: string | null
         }
         Insert: {
-          category?: string | null
+          category?: Database["public"]["Enums"]["media_category"] | null
           created_at?: string | null
+          description?: string | null
           file_name: string
           file_path: string
           file_size: number
           file_type: string
+          folder?: string | null
           id?: string
           is_profile?: boolean | null
           is_shared?: boolean | null
           mime_type?: string | null
           position?: number | null
+          tags?: string[] | null
           talent_id?: string | null
           updated_at?: string | null
         }
         Update: {
-          category?: string | null
+          category?: Database["public"]["Enums"]["media_category"] | null
           created_at?: string | null
+          description?: string | null
           file_name?: string
           file_path?: string
           file_size?: number
           file_type?: string
+          folder?: string | null
           id?: string
           is_profile?: boolean | null
           is_shared?: boolean | null
           mime_type?: string | null
           position?: number | null
+          tags?: string[] | null
           talent_id?: string | null
           updated_at?: string | null
         }
@@ -1278,6 +1287,7 @@ export type Database = {
         | "blank_space"
         | "custom_dropdown"
         | "fixed_dropdown"
+      media_category: "photo" | "video" | "audio" | "document" | "other"
       user_role:
         | "super_admin"
         | "admin"

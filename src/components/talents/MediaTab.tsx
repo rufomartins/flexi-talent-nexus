@@ -8,6 +8,10 @@ import { useToast } from "@/components/ui/use-toast";
 import { MediaToolbar } from "./media/MediaToolbar";
 import { MediaGrid } from "./media/MediaGrid";
 import { MediaCategory, MediaItem } from "@/types/media";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
 
 interface MediaTabProps {
   talent: TalentProfileData;
@@ -16,8 +20,14 @@ interface MediaTabProps {
 export const MediaTab = ({ talent }: MediaTabProps) => {
   const [selectedItems, setSelectedItems] = useState<string[]>([]);
   const [isUploadOpen, setIsUploadOpen] = useState(false);
+  const [isMoveDialogOpen, setIsMoveDialogOpen] = useState(false);
+  const [isTagDialogOpen, setIsTagDialogOpen] = useState(false);
+  const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
   const [mediaType, setMediaType] = useState<"all" | MediaCategory>("all");
+  const [newFolder, setNewFolder] = useState("");
+  const [newTags, setNewTags] = useState("");
+  const [newDescription, setNewDescription] = useState("");
   const { toast } = useToast();
 
   const { data: media, isLoading } = useQuery({
@@ -31,7 +41,6 @@ export const MediaTab = ({ talent }: MediaTabProps) => {
 
       if (error) throw error;
       
-      // Ensure the category is of type MediaCategory
       return (data || []).map(item => ({
         ...item,
         category: item.category as MediaCategory
@@ -115,6 +124,88 @@ export const MediaTab = ({ talent }: MediaTabProps) => {
     }
   };
 
+  const handleMoveSelection = async () => {
+    if (!selectedItems.length || !newFolder) return;
+
+    try {
+      const { error } = await supabase
+        .from("talent_media")
+        .update({ folder: newFolder })
+        .in("id", selectedItems);
+
+      if (error) throw error;
+
+      setSelectedItems([]);
+      setIsMoveDialogOpen(false);
+      setNewFolder("");
+      toast({
+        title: "Success",
+        description: "Files moved successfully",
+      });
+    } catch (error) {
+      toast({
+        title: "Error",
+        description: "Failed to move files",
+        variant: "destructive",
+      });
+    }
+  };
+
+  const handleTagSelection = async () => {
+    if (!selectedItems.length || !newTags) return;
+
+    try {
+      const tags = newTags.split(",").map(tag => tag.trim());
+      const { error } = await supabase
+        .from("talent_media")
+        .update({ tags })
+        .in("id", selectedItems);
+
+      if (error) throw error;
+
+      setSelectedItems([]);
+      setIsTagDialogOpen(false);
+      setNewTags("");
+      toast({
+        title: "Success",
+        description: "Tags updated successfully",
+      });
+    } catch (error) {
+      toast({
+        title: "Error",
+        description: "Failed to update tags",
+        variant: "destructive",
+      });
+    }
+  };
+
+  const handleBulkEdit = async () => {
+    if (!selectedItems.length || !newDescription) return;
+
+    try {
+      const { error } = await supabase
+        .from("talent_media")
+        .update({ description: newDescription })
+        .in("id", selectedItems);
+
+      if (error) throw error;
+
+      setSelectedItems([]);
+      setIsEditDialogOpen(false);
+      setNewDescription("");
+      toast({
+        title: "Success",
+        description: "Description updated successfully",
+      });
+    } catch (error) {
+      toast({
+        title: "Error",
+        description: "Failed to update description",
+        variant: "destructive",
+      });
+    }
+  };
+
   const filteredMedia = media?.filter(item => {
     const matchesSearch = item.file_name.toLowerCase().includes(searchQuery.toLowerCase());
     const matchesType = mediaType === "all" || item.category === mediaType;
@@ -127,6 +218,9 @@ export const MediaTab = ({ talent }: MediaTabProps) => {
         selectedItems={selectedItems}
         onDownloadSelection={handleDownloadSelection}
         onDeleteSelection={handleDeleteSelection}
+        onMoveSelection={() => setIsMoveDialogOpen(true)}
+        onTagSelection={() => setIsTagDialogOpen(true)}
+        onBulkEdit={() => setIsEditDialogOpen(true)}
         onUploadClick={() => setIsUploadOpen(true)}
         searchQuery={searchQuery}
         onSearchChange={setSearchQuery}
@@ -161,6 +255,81 @@ export const MediaTab = ({ talent }: MediaTabProps) => {
         talentId={talent.user.id}
         talentRole={talent.user.role}
       />
+
+      <Dialog open={isMoveDialogOpen} onOpenChange={setIsMoveDialogOpen}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Move Files</DialogTitle>
+          </DialogHeader>
+          <div className="space-y-4">
+            <div className="space-y-2">
+              <Label htmlFor="folder">New Folder</Label>
+              <Input
+                id="folder"
+                value={newFolder}
+                onChange={(e) => setNewFolder(e.target.value)}
+                placeholder="Enter folder name"
+              />
+            </div>
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setIsMoveDialogOpen(false)}>
+              Cancel
+            </Button>
+            <Button onClick={handleMoveSelection}>Move Files</Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      <Dialog open={isTagDialogOpen} onOpenChange={setIsTagDialogOpen}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Add Tags</DialogTitle>
+          </DialogHeader>
+          <div className="space-y-4">
+            <div className="space-y-2">
+              <Label htmlFor="tags">Tags (comma-separated)</Label>
+              <Input
+                id="tags"
+                value={newTags}
+                onChange={(e) => setNewTags(e.target.value)}
+                placeholder="tag1, tag2, tag3"
+              />
+            </div>
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setIsTagDialogOpen(false)}>
+              Cancel
+            </Button>
+            <Button onClick={handleTagSelection}>Update Tags</Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      <Dialog open={isEditDialogOpen} onOpenChange={setIsEditDialogOpen}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Edit Description</DialogTitle>
+          </DialogHeader>
+          <div className="space-y-4">
+            <div className="space-y-2">
+              <Label htmlFor="description">Description</Label>
+              <Input
+                id="description"
+                value={newDescription}
+                onChange={(e) => setNewDescription(e.target.value)}
+                placeholder="Enter description"
+              />
+            </div>
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setIsEditDialogOpen(false)}>
+              Cancel
+            </Button>
+            <Button onClick={handleBulkEdit}>Update Description</Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 };
