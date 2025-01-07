@@ -1,5 +1,5 @@
 import { Link } from "react-router-dom"
-import { LayoutDashboard, Users, Search, UserPlus, FileSpreadsheet, Briefcase, MessageSquare, Calendar } from "lucide-react"
+import { LayoutDashboard, Users, Search, UserPlus, FileSpreadsheet, Briefcase, MessageSquare, Calendar, DollarSign } from "lucide-react"
 import { cn } from "@/lib/utils"
 import { buttonVariants } from "@/components/ui/button"
 import { Sidebar, SidebarContent, SidebarGroup, SidebarGroupContent } from "@/components/ui/sidebar"
@@ -10,7 +10,7 @@ export function AppSidebar() {
       <SidebarContent>
         <SidebarGroup>
           <SidebarGroupContent className="flex flex-col gap-1">
-            {/* Dashboard Link - Added above Talents */}
+            {/* Dashboard Link */}
             <Link
               to="/dashboard"
               className={cn(
@@ -92,6 +92,18 @@ export function AppSidebar() {
             >
               <MessageSquare className="h-4 w-4" />
               Messages
+            </Link>
+
+            {/* Financial Link */}
+            <Link
+              to="/financial"
+              className={cn(
+                buttonVariants({ variant: "ghost" }),
+                "justify-start gap-2 px-2"
+              )}
+            >
+              <DollarSign className="h-4 w-4" />
+              Financial
             </Link>
 
             {/* Calendar Link */}
