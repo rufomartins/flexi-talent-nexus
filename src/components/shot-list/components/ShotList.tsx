@@ -7,7 +7,7 @@ interface ShotListProps {
   shots: Shot[];
   onDragEnd: (result: any) => void;
   onEdit: (id: string) => void;
-  onDelete: (id: string) => void;
+  onDelete: (id: string) => Promise<void>;
   isDeleting: boolean;
 }
 

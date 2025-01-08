@@ -1,12 +1,14 @@
 import { useEffect } from "react";
 import { useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
+import { notify } from "@/utils/notifications";
+import { RealtimeChannel } from "@supabase/supabase-js";
 
 export const useRealTimeShots = (shotListId: string) => {
   const queryClient = useQueryClient();
 
   useEffect(() => {
-    const channel = supabase
+    const channel: RealtimeChannel = supabase
       .channel(`shots-${shotListId}`)
       .on(
         "postgres_changes",
