@@ -1,11 +1,10 @@
 import { useForm } from "react-hook-form";
 import { useQuery } from "@tanstack/react-query";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Textarea } from "@/components/ui/textarea";
-import { Label } from "@/components/ui/label";
-import { ShotSelectionGroup } from "./ShotSelectionGroup";
 import { supabase } from "@/integrations/supabase/client";
+import { EquipmentDetailsSection } from './sections/EquipmentDetailsSection';
+import { ShotSelectionSection } from './sections/ShotSelectionSection';
+import { NotesSection } from './sections/NotesSection';
 import type { Equipment, EquipmentFormData } from "@/types/equipment";
 import type { Shot } from "@/types/shot-list";
 
@@ -60,41 +59,18 @@ export function EquipmentForm({
 
   return (
     <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
-      <div className="space-y-2">
-        <Label htmlFor="equipment_type">Equipment Type *</Label>
-        <Input
-          id="equipment_type"
-          {...register("equipment_type", { required: "Equipment type is required" })}
-        />
-        {errors.equipment_type && (
-          <p className="text-sm text-red-500">{errors.equipment_type.message}</p>
-        )}
-      </div>
+      <EquipmentDetailsSection 
+        register={register}
+        errors={errors}
+      />
 
-      <div className="space-y-2">
-        <Label htmlFor="specifications">Specifications</Label>
-        <Input
-          id="specifications"
-          {...register("specifications")}
-        />
-      </div>
+      <ShotSelectionSection
+        shots={shots}
+        selectedShots={selectedShots}
+        onSelectionChange={handleShotSelectionChange}
+      />
 
-      <div className="space-y-2">
-        <Label>Required Shots</Label>
-        <ShotSelectionGroup
-          shots={shots}
-          selectedShots={selectedShots}
-          onSelectionChange={handleShotSelectionChange}
-        />
-      </div>
-
-      <div className="space-y-2">
-        <Label htmlFor="notes">Notes</Label>
-        <Textarea
-          id="notes"
-          {...register("notes")}
-        />
-      </div>
+      <NotesSection register={register} />
 
       <div className="flex justify-end gap-2">
         <Button type="button" variant="outline" onClick={onCancel}>
