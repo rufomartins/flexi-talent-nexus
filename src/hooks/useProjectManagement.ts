@@ -18,9 +18,9 @@ interface Activity {
 
 interface TaskFilters {
   languageId?: string;
-  translationStatus?: string;
-  reviewStatus?: string;
-  talentStatus?: string;
+  translationStatus?: ProjectTranslationStatus;
+  reviewStatus?: ProjectReviewStatus;
+  talentStatus?: ProjectTalentStatus;
   dateRange?: { from: Date; to: Date };
 }
 
@@ -173,15 +173,15 @@ export const useProjectManagement = (projectId: string) => {
     }
 
     if (filters.translationStatus) {
-      query = query.eq("translation_status", filters.translationStatus as ProjectTranslationStatus);
+      query = query.eq("translation_status", filters.translationStatus);
     }
 
     if (filters.reviewStatus) {
-      query = query.eq("review_status", filters.reviewStatus as ProjectReviewStatus);
+      query = query.eq("review_status", filters.reviewStatus);
     }
 
     if (filters.talentStatus) {
-      query = query.eq("talent_status", filters.talentStatus as ProjectTalentStatus);
+      query = query.eq("talent_status", filters.talentStatus);
     }
 
     if (filters.dateRange?.from && filters.dateRange?.to) {
