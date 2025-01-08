@@ -1,8 +1,7 @@
-import { useState, useEffect } from "react";
-import { useQuery, useQueryClient } from "@tanstack/react-query";
+import { useState } from "react";
 import { Plus } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { Table, TableBody } from "@/components/ui/table";
+import { Table } from "@/components/ui/table";
 import {
   Dialog,
   DialogContent,
@@ -17,38 +16,19 @@ import { EditShotForm } from "./EditShotForm";
 import { useLoadingState } from "@/hooks/useLoadingState";
 import { Shot } from "@/types/shot-list";
 import { ShotTableHeader } from "./components/ShotTableHeader";
-import { ShotTableRow } from "./components/ShotTableRow";
-import { DragDropContext, Droppable, Draggable } from "@hello-pangea/dnd";
+import { ShotList } from "./components/ShotList";
+import { useShots } from "./hooks/useShots";
+import { useReorderShots } from "./hooks/useReorderShots";
+import { useRealTimeShots } from "./hooks/useRealTimeShots";
 
 export function ShotsTab({ shotListId }: { shotListId: string }) {
   const [isAddDialogOpen, setIsAddDialogOpen] = useState(false);
   const [editingShot, setEditingShot] = useState<Shot | null>(null);
-  const queryClient = useQueryClient();
   const { loadingStates, startLoading, stopLoading } = useLoadingState();
-
-  const { data: shots, isLoading: isFetchingShots } = useQuery({
-    queryKey: ["shots", shotListId],
-    queryFn: async () => {
-      const { data: shots, error } = await supabase
-        .from("shots")
-        .select(`
-          *,
-          location:locations (
-            id,
-            name
-          )
-        `)
-        .eq("shot_list_id", shotListId)
-        .order("sequence_order", { ascending: true });
-
-      if (error) {
-        notify.error("Failed to load shots");
-        throw error;
-      }
-
-      return shots as Shot[];
-    },
-  });
+  
+  const { shots, isLoading: isFetchingShots } = useShots(shotListId);
+  const { reorderShots } = useReorderShots();
+  useRealTimeShots(shotListId);
 
   const handleDelete = async (shotId: string) => {
     if (!confirm("Are you sure you want to delete this shot?")) return;
@@ -65,7 +45,6 @@ export function ShotsTab({ shotListId }: { shotListId: string }) {
         console.error("Error deleting shot:", error);
       } else {
         notify.success("Shot deleted successfully");
-        queryClient.invalidateQueries({ queryKey: ["shots"] });
       }
     } catch (error) {
       notify.error("An unexpected error occurred");
@@ -84,63 +63,13 @@ export function ShotsTab({ shotListId }: { shotListId: string }) {
 
   const handleDragEnd = async (result: any) => {
     if (!result.destination || !shots) return;
-
-    const items = Array.from(shots);
-    const [reorderedItem] = items.splice(result.source.index, 1);
-    items.splice(result.destination.index, 0, reorderedItem);
-
-    // Update sequence_order for affected shots
-    const updates = items.map((shot, index) => ({
-      id: shot.id,
-      shot_number: shot.shot_number,
-      shot_list_id: shot.shot_list_id,
-      sequence_order: index + 1,
-      location_id: shot.location_id,
-      description: shot.description,
-      frame_type: shot.frame_type,
-      status: shot.status,
-      notes: shot.notes
-    }));
-
-    try {
-      const { error } = await supabase
-        .from("shots")
-        .upsert(updates, { onConflict: "id" });
-
-      if (error) {
-        notify.error("Failed to update shot order");
-        return;
-      }
-
-      queryClient.invalidateQueries({ queryKey: ["shots"] });
-    } catch (error) {
-      console.error("Error updating shot order:", error);
-      notify.error("An error occurred while updating shot order");
-    }
+    
+    await reorderShots(
+      shots,
+      result.source.index,
+      result.destination.index
+    );
   };
-
-  // Set up real-time subscription
-  useEffect(() => {
-    const channel = supabase
-      .channel("shots-changes")
-      .on(
-        "postgres_changes",
-        {
-          event: "*",
-          schema: "public",
-          table: "shots",
-          filter: `shot_list_id=eq.${shotListId}`,
-        },
-        () => {
-          queryClient.invalidateQueries({ queryKey: ["shots"] });
-        }
-      )
-      .subscribe();
-
-    return () => {
-      supabase.removeChannel(channel);
-    };
-  }, [shotListId, queryClient]);
 
   if (isFetchingShots) {
     return (
@@ -190,47 +119,13 @@ export function ShotsTab({ shotListId }: { shotListId: string }) {
       <div className="border rounded-md">
         <Table>
           <ShotTableHeader />
-          <DragDropContext onDragEnd={handleDragEnd}>
-            <Droppable droppableId="shots">
-              {(provided) => (
-                <TableBody
-                  {...provided.droppableProps}
-                  ref={provided.innerRef}
-                >
-                  {shots?.map((shot, index) => (
-                    <Draggable
-                      key={shot.id}
-                      draggableId={shot.id}
-                      index={index}
-                    >
-                      {(provided) => (
-                        <div
-                          ref={provided.innerRef}
-                          {...provided.draggableProps}
-                          {...provided.dragHandleProps}
-                        >
-                          <ShotTableRow
-                            shot={shot}
-                            onEdit={handleEdit}
-                            onDelete={handleDelete}
-                            isDeleting={loadingStates["delete"] || false}
-                          />
-                        </div>
-                      )}
-                    </Draggable>
-                  ))}
-                  {provided.placeholder}
-                  {!shots?.length && (
-                    <tr>
-                      <td colSpan={7} className="text-center text-muted-foreground p-4">
-                        No shots added yet
-                      </td>
-                    </tr>
-                  )}
-                </TableBody>
-              )}
-            </Droppable>
-          </DragDropContext>
+          <ShotList
+            shots={shots || []}
+            onDragEnd={handleDragEnd}
+            onEdit={handleEdit}
+            onDelete={handleDelete}
+            isDeleting={loadingStates["delete"] || false}
+          />
         </Table>
       </div>
     </div>
