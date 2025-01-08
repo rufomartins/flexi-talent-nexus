@@ -26,7 +26,7 @@ export function ShotsTab({ shotListId }: { shotListId: string }) {
   const [editingShot, setEditingShot] = useState<Shot | null>(null);
   const { loadingStates, startLoading, stopLoading } = useLoadingState();
   
-  const { shots, isLoading: isFetchingShots } = useShots(shotListId);
+  const { data: shots, isLoading: isFetchingShots } = useShots(shotListId);
   const { reorderShots } = useReorderShots();
   useRealTimeShots(shotListId);
 
