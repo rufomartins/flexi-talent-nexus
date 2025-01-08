@@ -4,6 +4,7 @@ import { useQuery } from '@tanstack/react-query';
 import { Button } from '@/components/ui/button';
 import { RichTextEditor } from '@/components/ui/rich-text-editor';
 import { supabase } from '@/integrations/supabase/client';
+import { useShots } from '../hooks/useShots';
 import type { Shot, TalentNote } from '@/types/shot-list';
 
 interface TalentNoteFormProps {
@@ -23,19 +24,8 @@ export function TalentNoteForm({ note, onSubmit, onCancel, isLoading }: TalentNo
     }
   });
 
-  // Fetch available shots for reference
-  const { data: shots } = useQuery({
-    queryKey: ['shots', note?.shot_list_id],
-    queryFn: async () => {
-      const { data, error } = await supabase
-        .from('shots')
-        .select('*')
-        .eq('shot_list_id', note?.shot_list_id);
-      
-      if (error) throw error;
-      return data as Shot[];
-    }
-  });
+  // Fetch available shots for reference using the updated hook
+  const { data: shots, isLoading: isFetchingShots } = useShots(note?.shot_list_id!);
 
   // Watch form values for rich text editor
   const instructions = watch('instructions');
@@ -48,6 +38,7 @@ export function TalentNoteForm({ note, onSubmit, onCancel, isLoading }: TalentNo
           <select
             {...register('shot_reference')}
             className="w-full p-2 border rounded-md"
+            disabled={isFetchingShots}
           >
             <option value="">Select a shot</option>
             {shots?.map((shot) => (
@@ -56,6 +47,11 @@ export function TalentNoteForm({ note, onSubmit, onCancel, isLoading }: TalentNo
               </option>
             ))}
           </select>
+          {isFetchingShots && (
+            <div className="text-sm text-muted-foreground">
+              Loading shots...
+            </div>
+          )}
         </div>
 
         <div className="space-y-2">
