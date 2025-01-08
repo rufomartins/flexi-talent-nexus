@@ -16,6 +16,10 @@ import {
 import { format } from "date-fns";
 import { CalendarIcon } from "lucide-react";
 import { cn } from "@/lib/utils";
+import type { Database } from "@/integrations/supabase/types";
+
+type ProjectTranslationStatus = Database["public"]["Enums"]["project_translation_status"];
+type ProjectReviewStatus = Database["public"]["Enums"]["project_review_status"];
 
 interface FilterFormProps {
   filters: FilterState;
@@ -48,15 +52,19 @@ export function FilterForm({ filters, onUpdateFilters, onReset, onClose }: Filte
         <label className="text-sm font-medium">Translation Status</label>
         <Select
           value={filters.translationStatus || ""}
-          onValueChange={(value) => onUpdateFilters({ translationStatus: value || null })}
+          onValueChange={(value) => 
+            onUpdateFilters({ 
+              translationStatus: (value as ProjectTranslationStatus) || null 
+            })
+          }
         >
           <SelectTrigger>
             <SelectValue placeholder="Select status" />
           </SelectTrigger>
           <SelectContent>
-            <SelectItem value="pending">Pending</SelectItem>
-            <SelectItem value="in_progress">In Progress</SelectItem>
-            <SelectItem value="completed">Completed</SelectItem>
+            <SelectItem value="Pending">Pending</SelectItem>
+            <SelectItem value="In Progress">In Progress</SelectItem>
+            <SelectItem value="Approved">Approved</SelectItem>
           </SelectContent>
         </Select>
       </div>
@@ -65,16 +73,19 @@ export function FilterForm({ filters, onUpdateFilters, onReset, onClose }: Filte
         <label className="text-sm font-medium">Review Status</label>
         <Select
           value={filters.reviewStatus || ""}
-          onValueChange={(value) => onUpdateFilters({ reviewStatus: value || null })}
+          onValueChange={(value) => 
+            onUpdateFilters({ 
+              reviewStatus: (value as ProjectReviewStatus) || null 
+            })
+          }
         >
           <SelectTrigger>
             <SelectValue placeholder="Select status" />
           </SelectTrigger>
           <SelectContent>
-            <SelectItem value="pending">Pending</SelectItem>
-            <SelectItem value="in_progress">In Progress</SelectItem>
-            <SelectItem value="client_review">Client Review</SelectItem>
-            <SelectItem value="approved">Approved</SelectItem>
+            <SelectItem value="Internal Review">Internal Review</SelectItem>
+            <SelectItem value="Client Review">Client Review</SelectItem>
+            <SelectItem value="Approved">Approved</SelectItem>
           </SelectContent>
         </Select>
       </div>
