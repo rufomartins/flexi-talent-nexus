@@ -11,7 +11,7 @@ export function useLocations(shotListId: string) {
   const checkLocationUsage = async (locationId: string): Promise<Shot[]> => {
     const { data, error } = await supabase
       .from('shots')
-      .select('id, shot_number, description')
+      .select('id, shot_number, description, shot_list_id, status, sequence_order')
       .eq('location_id', locationId);
 
     if (error) {

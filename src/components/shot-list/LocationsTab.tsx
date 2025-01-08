@@ -9,6 +9,7 @@ import { useLocations } from '@/hooks/useLocations';
 import { LocationForm } from './location/LocationForm';
 import { LocationTable } from './location/LocationTable';
 import { LocationDeleteDialog } from './location/LocationDeleteDialog';
+import { supabase } from '@/integrations/supabase/client';
 
 export function LocationsTab({ shotListId }: { shotListId: string }) {
   const [isAddDialogOpen, setIsAddDialogOpen] = useState(false);
