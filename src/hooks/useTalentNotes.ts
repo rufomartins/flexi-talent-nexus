@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { notify } from '@/utils/notifications';
+import { useRealtimeSubscription } from '@/hooks/useRealtimeSubscription';
 import type { TalentNote } from '@/types/shot-list';
 
 export function useTalentNotes(shotListId: string) {
@@ -10,6 +11,9 @@ export function useTalentNotes(shotListId: string) {
     edit: false,
     delete: false
   });
+
+  // Set up realtime subscription
+  useRealtimeSubscription("talent_notes", shotListId, ["talent-notes", shotListId]);
 
   const { data: notes, isLoading: isLoadingNotes } = useQuery({
     queryKey: ['talent-notes', shotListId],

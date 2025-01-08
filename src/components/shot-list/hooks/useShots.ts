@@ -1,23 +1,19 @@
-import { useQuery, useQueryClient } from "@tanstack/react-query";
+import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { notify } from "@/utils/notifications";
-import { Shot } from "@/types/shot-list";
+import { useRealtimeSubscription } from "@/hooks/useRealtimeSubscription";
+import type { Shot } from "@/types/shot-list";
 
-export const useShots = (shotListId: string) => {
-  const queryClient = useQueryClient();
+export function useShots(shotListId: string) {
+  // Set up realtime subscription
+  useRealtimeSubscription("shots", shotListId, ["shots", shotListId]);
 
-  const { data: shots, isLoading } = useQuery({
+  return useQuery({
     queryKey: ["shots", shotListId],
     queryFn: async () => {
-      const { data: shots, error } = await supabase
+      const { data, error } = await supabase
         .from("shots")
-        .select(`
-          *,
-          location:locations (
-            id,
-            name
-          )
-        `)
+        .select("*")
         .eq("shot_list_id", shotListId)
         .order("sequence_order", { ascending: true });
 
@@ -26,9 +22,7 @@ export const useShots = (shotListId: string) => {
         throw error;
       }
 
-      return shots as Shot[];
+      return data as Shot[];
     },
   });
-
-  return { shots, isLoading };
-};
+}

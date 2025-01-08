@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { notify } from '@/utils/notifications';
+import { useRealtimeSubscription } from '@/hooks/useRealtimeSubscription';
 import type { Equipment, EquipmentFormData } from '@/types/equipment';
 
 export function useEquipment(shotListId: string) {
@@ -10,6 +11,9 @@ export function useEquipment(shotListId: string) {
     edit: false,
     delete: false
   });
+
+  // Set up realtime subscription
+  useRealtimeSubscription("equipment", shotListId, ["equipment", shotListId]);
 
   const { data: equipment, isLoading } = useQuery({
     queryKey: ['equipment', shotListId],
