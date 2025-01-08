@@ -30,7 +30,7 @@ export function useTalentNotes(shotListId: string) {
   });
 
   const addNote = async (formData: Partial<TalentNote>) => {
-    if (!shotListId) return;
+    if (!shotListId) return false;
 
     try {
       setIsLoading(prev => ({ ...prev, add: true }));
@@ -70,7 +70,7 @@ export function useTalentNotes(shotListId: string) {
     }
   };
 
-  const deleteNote = async (noteId: string) => {
+  const deleteNote = async (noteId: string): Promise<void> => {
     try {
       setIsLoading(prev => ({ ...prev, delete: true }));
       const { error } = await supabase
@@ -80,11 +80,9 @@ export function useTalentNotes(shotListId: string) {
 
       if (error) throw error;
       notify.success('Note deleted successfully');
-      return true;
     } catch (error) {
       console.error('Error deleting note:', error);
       notify.error('Failed to delete note');
-      return false;
     } finally {
       setIsLoading(prev => ({ ...prev, delete: false }));
     }

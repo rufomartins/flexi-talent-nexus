@@ -31,6 +31,10 @@ export function TalentNotesTab() {
     if (success) setEditingNote(null);
   };
 
+  const handleDelete = async (id: string) => {
+    await deleteNote(id);
+  };
+
   if (isLoading) {
     return (
       <div className="flex items-center justify-center p-8">
@@ -63,7 +67,7 @@ export function TalentNotesTab() {
       <TalentNotesTable
         notes={notes || []}
         onEdit={setEditingNote}
-        onDelete={deleteNote}
+        onDelete={handleDelete}
         isDeleting={loadingStates.delete}
       />
     </div>
