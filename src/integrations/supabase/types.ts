@@ -930,6 +930,7 @@ export type Database = {
           id: string
           language_id: string | null
           name: string
+          priority: string | null
           review_status:
             | Database["public"]["Enums"]["project_review_status"]
             | null
@@ -952,6 +953,7 @@ export type Database = {
           id?: string
           language_id?: string | null
           name: string
+          priority?: string | null
           review_status?:
             | Database["public"]["Enums"]["project_review_status"]
             | null
@@ -974,6 +976,7 @@ export type Database = {
           id?: string
           language_id?: string | null
           name?: string
+          priority?: string | null
           review_status?:
             | Database["public"]["Enums"]["project_review_status"]
             | null
