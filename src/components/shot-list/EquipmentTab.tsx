@@ -75,6 +75,7 @@ export function EquipmentTab({ shotListId }: EquipmentTabProps) {
             </DialogTitle>
           </DialogHeader>
           <EquipmentForm
+            shotListId={shotListId}
             equipment={editingEquipment || undefined}
             onSubmit={handleSubmit}
             onCancel={handleCancel}
