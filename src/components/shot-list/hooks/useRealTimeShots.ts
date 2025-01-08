@@ -2,7 +2,7 @@ import { useEffect } from "react";
 import { useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { notify } from "@/utils/notifications";
-import { RealtimeChannel, REALTIME_SUBSCRIBE_STATES } from "@supabase/supabase-js";
+import { RealtimeChannel } from "@supabase/supabase-js";
 
 export const useRealTimeShots = (shotListId: string) => {
   const queryClient = useQueryClient();
@@ -23,7 +23,7 @@ export const useRealTimeShots = (shotListId: string) => {
         }
       )
       .subscribe((status) => {
-        if (status === REALTIME_SUBSCRIBE_STATES.SUBSCRIPTION_ERROR) {
+        if (status === "SUBSCRIPTION_ERROR") {
           console.error("Error subscribing to shots changes");
           notify.error("Failed to subscribe to real-time updates");
         }
