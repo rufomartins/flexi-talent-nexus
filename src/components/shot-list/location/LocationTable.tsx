@@ -13,7 +13,7 @@ import {
 interface LocationTableProps {
   locations: Location[];
   onEdit: (location: Location) => void;
-  onDelete: (id: string) => Promise<void>;
+  onDelete: (location: Location) => Promise<void>;
   isDeleting: boolean;
 }
 
@@ -73,7 +73,7 @@ export function LocationTable({ locations, onEdit, onDelete, isDeleting }: Locat
                     <Button
                       variant="ghost"
                       size="icon"
-                      onClick={() => onDelete(location.id)}
+                      onClick={() => onDelete(location)}
                       disabled={isDeleting}
                     >
                       <Trash2 className="h-4 w-4 text-red-500" />
