@@ -23,12 +23,12 @@ import { Button } from "@/components/ui/button";
 import { Calendar as CalendarIcon } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { DateRange } from "react-day-picker";
-import type { ProjectLanguage } from "@/types/project";
+import type { Language } from "../types";
 
 interface FilterDialogProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
-  languages: ProjectLanguage[];
+  languages: Language[];
   onApplyFilters: (filters: TaskFilters) => void;
   initialFilters?: TaskFilters;
 }

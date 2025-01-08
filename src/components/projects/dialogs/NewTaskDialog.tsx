@@ -36,7 +36,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Calendar as CalendarIcon } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useToast } from "@/hooks/use-toast";
-import type { ProjectLanguage } from "@/types/project";
+import type { Language } from "../types";
 
 const formSchema = z.object({
   name: z.string().min(1, "Task name is required"),
@@ -51,7 +51,7 @@ type FormData = z.infer<typeof formSchema>;
 interface NewTaskDialogProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
-  languages: ProjectLanguage[];
+  languages: Language[];
   onSubmit: (data: FormData) => Promise<void>;
 }
 
