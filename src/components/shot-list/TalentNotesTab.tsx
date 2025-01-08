@@ -1,107 +1,53 @@
 import { useState } from 'react';
 import { useParams } from 'react-router-dom';
-import { Plus } from 'lucide-react';
-import { Button } from '@/components/ui/button';
-import { useLoadingState } from '@/hooks/useLoadingState';
-import { supabase } from '@/integrations/supabase/client';
-import { notify } from '@/utils/notifications';
+import { useTalentNotes } from '@/hooks/useTalentNotes';
 import { TalentNoteForm } from './talent-notes/TalentNoteForm';
-import { TalentNoteTable } from './talent-notes/TalentNoteTable';
+import { TalentNotesHeader } from './talent-notes/TalentNotesHeader';
+import { TalentNotesTable } from './talent-notes/TalentNotesTable';
 import type { TalentNote } from '@/types/shot-list';
 
 export function TalentNotesTab() {
   const { shotListId } = useParams<{ shotListId: string }>();
   const [isAddingNote, setIsAddingNote] = useState(false);
   const [editingNote, setEditingNote] = useState<TalentNote | null>(null);
-  const { startLoading, stopLoading, isLoading } = useLoadingState({
-    add: false,
-    edit: false,
-    delete: false,
-  });
+  
+  const { 
+    notes, 
+    isLoading, 
+    loadingStates, 
+    addNote, 
+    updateNote, 
+    deleteNote 
+  } = useTalentNotes(shotListId!);
 
-  // Add new note
   const handleAdd = async (formData: Partial<TalentNote>) => {
-    if (!shotListId) return;
-
-    try {
-      startLoading('add');
-      const { error } = await supabase
-        .from('talent_notes')
-        .insert([{ ...formData, shot_list_id: shotListId }]);
-
-      if (error) throw error;
-      
-      notify.success('Note added successfully');
-      setIsAddingNote(false);
-    } catch (error) {
-      console.error('Error adding note:', error);
-      notify.error('Failed to add note');
-    } finally {
-      stopLoading('add');
-    }
+    const success = await addNote(formData);
+    if (success) setIsAddingNote(false);
   };
 
-  // Update note
   const handleEdit = async (formData: Partial<TalentNote>) => {
     if (!editingNote) return;
-
-    try {
-      startLoading('edit');
-      const { error } = await supabase
-        .from('talent_notes')
-        .update(formData)
-        .eq('id', editingNote.id);
-
-      if (error) throw error;
-      
-      notify.success('Note updated successfully');
-      setEditingNote(null);
-    } catch (error) {
-      console.error('Error updating note:', error);
-      notify.error('Failed to update note');
-    } finally {
-      stopLoading('edit');
-    }
+    const success = await updateNote(editingNote.id, formData);
+    if (success) setEditingNote(null);
   };
 
-  // Delete note
-  const handleDelete = async (noteId: string) => {
-    try {
-      startLoading('delete');
-      const { error } = await supabase
-        .from('talent_notes')
-        .delete()
-        .eq('id', noteId);
-
-      if (error) throw error;
-      
-      notify.success('Note deleted successfully');
-    } catch (error) {
-      console.error('Error deleting note:', error);
-      notify.error('Failed to delete note');
-    } finally {
-      stopLoading('delete');
-    }
-  };
+  if (isLoading) {
+    return (
+      <div className="flex items-center justify-center p-8">
+        <div className="animate-spin h-8 w-8 border-4 border-primary border-t-transparent rounded-full" />
+      </div>
+    );
+  }
 
   return (
     <div className="space-y-4">
-      <div className="flex justify-between items-center">
-        <h2 className="text-lg font-semibold">Talent Notes</h2>
-        <Button 
-          onClick={() => setIsAddingNote(true)}
-          disabled={isLoading('add')}
-        >
-          <Plus className="w-4 h-4 mr-2" />
-          Add Note
-        </Button>
-      </div>
+      <TalentNotesHeader onAddClick={() => setIsAddingNote(true)} />
 
       {isAddingNote && (
         <TalentNoteForm
           onSubmit={handleAdd}
           onCancel={() => setIsAddingNote(false)}
-          isLoading={isLoading('add')}
+          isLoading={loadingStates.add}
         />
       )}
 
@@ -110,15 +56,15 @@ export function TalentNotesTab() {
           note={editingNote}
           onSubmit={handleEdit}
           onCancel={() => setEditingNote(null)}
-          isLoading={isLoading('edit')}
+          isLoading={loadingStates.edit}
         />
       )}
 
-      <TalentNoteTable
-        shotListId={shotListId!}
+      <TalentNotesTable
+        notes={notes || []}
         onEdit={setEditingNote}
-        onDelete={handleDelete}
-        isDeleting={isLoading('delete')}
+        onDelete={deleteNote}
+        isDeleting={loadingStates.delete}
       />
     </div>
   );
