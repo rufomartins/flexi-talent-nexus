@@ -5,7 +5,6 @@ import { ProjectStats } from "@/components/projects/ProjectStats";
 import { ProjectSearch } from "@/components/projects/ProjectSearch";
 import { ProjectTree } from "@/components/projects/ProjectTree";
 import { useState } from "react";
-import { supabase } from "@/integrations/supabase/client";
 import type { Project, ProjectFilters } from "@/components/projects/types";
 
 const statsCards = [
@@ -44,6 +43,85 @@ const statusColors = {
   },
 };
 
+// Dummy data for preview
+const dummyProjects: Project[] = [
+  {
+    id: "1",
+    name: "Wolt Campaign 2024",
+    countries: [
+      {
+        id: "c1",
+        country_name: "Finland",
+        languages: [
+          {
+            id: "l1",
+            language_name: "Finnish",
+            tasks: [
+              {
+                id: "t1",
+                name: "Restaurant Promo",
+                script_status: "Approved",
+                translation_status: "In Progress",
+                review_status: "Internal Review",
+                talent_status: "Booked",
+                delivery_status: "Pending",
+              },
+            ],
+          },
+        ],
+      },
+      {
+        id: "c2",
+        country_name: "Sweden",
+        languages: [
+          {
+            id: "l2",
+            language_name: "Swedish",
+            tasks: [
+              {
+                id: "t2",
+                name: "Delivery Showcase",
+                script_status: "In Progress",
+                translation_status: "Pending",
+                review_status: "Client Review",
+                talent_status: "Shooting",
+                delivery_status: "R Pending",
+              },
+            ],
+          },
+        ],
+      },
+    ],
+  },
+  {
+    id: "2",
+    name: "Royal Match Global",
+    countries: [
+      {
+        id: "c3",
+        country_name: "Germany",
+        languages: [
+          {
+            id: "l3",
+            language_name: "German",
+            tasks: [
+              {
+                id: "t3",
+                name: "Game Tutorial",
+                script_status: "Approved",
+                translation_status: "Approved",
+                review_status: "Approved",
+                talent_status: "Delivered",
+                delivery_status: "Delivered",
+              },
+            ],
+          },
+        ],
+      },
+    ],
+  },
+];
+
 export default function Projects() {
   const [searchQuery, setSearchQuery] = useState("");
   const [filters, setFilters] = useState<ProjectFilters>({});
@@ -51,51 +129,8 @@ export default function Projects() {
   const { data: projects, isLoading } = useQuery({
     queryKey: ['projects', searchQuery, filters],
     queryFn: async () => {
-      const { data, error } = await supabase
-        .from('projects')
-        .select(`
-          id,
-          name,
-          project_countries (
-            id,
-            country_name,
-            project_languages (
-              id,
-              language_name,
-              project_tasks (
-                id,
-                name,
-                script_status,
-                translation_status,
-                review_status,
-                talent_status,
-                delivery_status
-              )
-            )
-          )
-        `);
-
-      if (error) {
-        console.error('Error fetching projects:', error);
-        throw error;
-      }
-
-      // Transform the data to match our Project type
-      const transformedData: Project[] = data.map(project => ({
-        id: project.id,
-        name: project.name,
-        countries: project.project_countries.map(country => ({
-          id: country.id,
-          country_name: country.country_name,
-          languages: country.project_languages.map(language => ({
-            id: language.id,
-            language_name: language.language_name,
-            tasks: language.project_tasks
-          }))
-        }))
-      }));
-
-      return transformedData;
+      // For preview, return dummy data
+      return dummyProjects;
     },
   });
 
