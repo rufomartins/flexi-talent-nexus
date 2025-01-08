@@ -31,7 +31,19 @@ export interface Country {
 export interface Project {
   id: string;
   name: string;
-  countries: Country[];
+  description?: string;
+  client_id?: string;
+  project_manager_id?: string;
+  start_date?: string;
+  end_date?: string;
+  status?: string;
+  type?: string;
+  completion_percentage?: number;
+  active_tasks_count?: number;
+  upcoming_deadlines_count?: number;
+  client?: { name: string };
+  project_manager?: { full_name: string };
+  countries?: Country[];
 }
 
 export interface ProjectFilters {

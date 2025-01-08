@@ -173,15 +173,15 @@ export const useProjectManagement = (projectId: string) => {
     }
 
     if (filters.translationStatus) {
-      query = query.eq("translation_status", filters.translationStatus);
+      query = query.eq("translation_status", filters.translationStatus as ProjectTranslationStatus);
     }
 
     if (filters.reviewStatus) {
-      query = query.eq("review_status", filters.reviewStatus);
+      query = query.eq("review_status", filters.reviewStatus as ProjectReviewStatus);
     }
 
     if (filters.talentStatus) {
-      query = query.eq("talent_status", filters.talentStatus);
+      query = query.eq("talent_status", filters.talentStatus as ProjectTalentStatus);
     }
 
     if (filters.dateRange?.from && filters.dateRange?.to) {
