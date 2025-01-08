@@ -1,36 +1,24 @@
 import { useState } from 'react';
-import { useQuery } from '@tanstack/react-query';
 import { MapPin, Plus } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { notify } from '@/utils/notifications';
-import { supabase } from '@/integrations/supabase/client';
-import { Location } from '@/types/shot-list';
+import { Location, Shot } from '@/types/shot-list';
 import { useLoadingState } from '@/hooks/useLoadingState';
+import { useLocations } from '@/hooks/useLocations';
 import { LocationForm } from './location/LocationForm';
 import { LocationTable } from './location/LocationTable';
+import { LocationDeleteDialog } from './location/LocationDeleteDialog';
 
 export function LocationsTab({ shotListId }: { shotListId: string }) {
   const [isAddDialogOpen, setIsAddDialogOpen] = useState(false);
   const [editingLocation, setEditingLocation] = useState<Location | null>(null);
+  const [deletingLocation, setDeletingLocation] = useState<Location | null>(null);
+  const [affectedShots, setAffectedShots] = useState<Shot[]>([]);
   const { loadingStates, startLoading, stopLoading } = useLoadingState();
 
-  // Fetch locations
-  const { data: locations = [], refetch } = useQuery({
-    queryKey: ['locations', shotListId],
-    queryFn: async () => {
-      const { data, error } = await supabase
-        .from('locations')
-        .select('*')
-        .eq('shot_list_id', shotListId)
-        .order('created_at', { ascending: true });
+  const { data: locations = [], refetch, checkLocationUsage, deleteLocation } = useLocations(shotListId);
 
-      if (error) throw error;
-      return data as Location[];
-    }
-  });
-
-  // Add new location
   const handleAdd = async (formData: Partial<Location>) => {
     if (!formData.name) {
       notify.error('Location name is required');
@@ -44,7 +32,7 @@ export function LocationsTab({ shotListId }: { shotListId: string }) {
         .insert([{ 
           ...formData, 
           shot_list_id: shotListId,
-          name: formData.name // Ensure name is included
+          name: formData.name
         }]);
 
       if (error) throw error;
@@ -60,7 +48,6 @@ export function LocationsTab({ shotListId }: { shotListId: string }) {
     }
   };
 
-  // Update location
   const handleEdit = async (formData: Partial<Location>) => {
     if (!editingLocation || !formData.name) {
       notify.error('Location name is required');
@@ -93,26 +80,28 @@ export function LocationsTab({ shotListId }: { shotListId: string }) {
     }
   };
 
-  // Delete location
-  const handleDelete = async (id: string) => {
+  const handleDeleteClick = async (location: Location) => {
+    try {
+      startLoading('checkUsage');
+      const shots = await checkLocationUsage(location.id);
+      setAffectedShots(shots);
+      setDeletingLocation(location);
+    } catch (error) {
+      notify.error('Failed to check location usage');
+      console.error('Error checking location usage:', error);
+    } finally {
+      stopLoading('checkUsage');
+    }
+  };
+
+  const handleDeleteConfirm = async () => {
+    if (!deletingLocation) return;
+
     try {
       startLoading('delete');
-      
-      // First, update any shots that reference this location
-      await supabase
-        .from('shots')
-        .update({ location_id: null })
-        .eq('location_id', id);
-
-      // Then delete the location
-      const { error } = await supabase
-        .from('locations')
-        .delete()
-        .eq('id', id);
-
-      if (error) throw error;
-      
-      notify.success('Location deleted successfully');
+      await deleteLocation(deletingLocation.id);
+      setDeletingLocation(null);
+      setAffectedShots([]);
       refetch();
     } catch (error) {
       notify.error('Failed to delete location');
@@ -138,7 +127,7 @@ export function LocationsTab({ shotListId }: { shotListId: string }) {
       <LocationTable 
         locations={locations}
         onEdit={setEditingLocation}
-        onDelete={handleDelete}
+        onDelete={handleDeleteClick}
         isDeleting={loadingStates['delete'] || false}
       />
 
@@ -170,6 +159,18 @@ export function LocationsTab({ shotListId }: { shotListId: string }) {
           )}
         </DialogContent>
       </Dialog>
+
+      {/* Delete Location Dialog */}
+      {deletingLocation && (
+        <LocationDeleteDialog
+          location={deletingLocation}
+          isOpen={!!deletingLocation}
+          onClose={() => setDeletingLocation(null)}
+          onConfirm={handleDeleteConfirm}
+          affectedShots={affectedShots}
+          isLoading={loadingStates['delete'] || false}
+        />
+      )}
     </div>
   );
 }
