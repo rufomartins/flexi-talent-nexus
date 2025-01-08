@@ -3,6 +3,11 @@ import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/components/ui/use-toast";
 import type { Project, Task } from "@/components/projects/types";
+import type { Database } from "@/integrations/supabase/types";
+
+type ProjectTranslationStatus = Database["public"]["Enums"]["project_translation_status"];
+type ProjectReviewStatus = Database["public"]["Enums"]["project_review_status"];
+type ProjectTalentStatus = Database["public"]["Enums"]["project_talent_status"];
 
 interface Activity {
   id: string;
