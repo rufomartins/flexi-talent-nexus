@@ -1,6 +1,5 @@
-import { supabase } from "@/integrations/supabase/client"
-import type { NotificationMetadata } from "@/types/notifications"
-import type { Task } from "@/components/projects/types"
+import type { NotificationMetadata } from "@/types/notifications";
+import { supabase } from "@/integrations/supabase/client";
 
 export const triggerTypes = {
   NEW_ASSIGNMENT: 'new_assignment',
@@ -10,17 +9,13 @@ export const triggerTypes = {
   ROLE_REASSIGNMENT: 'role_reassignment'
 } as const;
 
-type TriggerType = keyof typeof triggerTypes;
+export type TriggerType = keyof typeof triggerTypes;
 
 interface AssignmentData {
   taskId: string;
   roleType: 'translator' | 'reviewer' | 'ugc_talent';
   userId: string;
   status?: string;
-  deadlines?: {
-    start: string;
-    due: string;
-  };
 }
 
 function generateNotificationContent(
@@ -28,7 +23,7 @@ function generateNotificationContent(
   triggerType: TriggerType
 ): NotificationMetadata['content'] {
   const baseUrl = `/projects/tasks/${assignmentData.taskId}`;
-  
+
   switch (triggerType) {
     case 'NEW_ASSIGNMENT':
       return {
@@ -94,7 +89,7 @@ export async function handleAssignmentNotification(
       user_id: assignmentData.userId,
       type: triggerType,
       status: 'pending',
-      metadata: notification as Record<string, any>
+      metadata: notification
     });
 
   if (error) {

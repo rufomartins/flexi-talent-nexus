@@ -15,7 +15,11 @@ export class DeadlineService {
       return null;
     }
 
-    return data;
+    // Cast the notification_types to ensure type safety
+    return {
+      ...data,
+      notification_types: data.notification_types as ('email' | 'in_app')[]
+    };
   }
 
   async checkDeadlines(assignments: AssignmentTracking[]) {
@@ -86,7 +90,11 @@ export class DeadlineService {
       return null;
     }
 
-    return data;
+    // Cast the notification_types to ensure type safety
+    return {
+      ...data,
+      notification_types: data.notification_types as ('email' | 'in_app')[]
+    };
   }
 }
 
