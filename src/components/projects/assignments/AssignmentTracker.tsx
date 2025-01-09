@@ -50,7 +50,6 @@ export function AssignmentTracker({ taskId, roleType }: AssignmentTrackerProps) 
         return;
       }
 
-      // Trigger notification
       await handleAssignmentNotification({
         task_id: taskId,
         role_type: roleType,
