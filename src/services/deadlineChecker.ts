@@ -1,29 +1,5 @@
 import { supabase } from "@/integrations/supabase/client";
-import type { Json } from "@/types/notifications";
-import { NotificationType, type NotificationMetadata } from "@/types/notifications";
-import type { AssignmentTracking, DeadlinePreference } from "@/types/deadlines";
-
-export const createNotification = async (
-  metadata: NotificationMetadata, 
-  userId: string,
-  type: NotificationType
-) => {
-  const notificationData = {
-    type,
-    user_id: userId,
-    status: 'pending' as const,
-    metadata: JSON.parse(JSON.stringify(metadata)) as Json
-  };
-
-  const { data, error } = await supabase
-    .from('notification_queue')
-    .insert(notificationData)
-    .select()
-    .single();
-
-  if (error) throw error;
-  return data;
-};
+import type { DeadlinePreference, NotificationChannel, DeadlineStatus } from "@/types/notifications";
 
 export const getUserPreferences = async (userId: string): Promise<DeadlinePreference | null> => {
   const { data, error } = await supabase
@@ -39,6 +15,7 @@ export const getUserPreferences = async (userId: string): Promise<DeadlinePrefer
 
   return {
     ...data,
-    notification_types: data.notification_types as DeadlineStatus[]
+    notification_channels: data.notification_channels.map(c => c as NotificationChannel),
+    deadline_statuses: data.deadline_statuses.map(s => s as DeadlineStatus)
   };
 };

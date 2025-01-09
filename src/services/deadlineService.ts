@@ -1,9 +1,29 @@
 import { supabase } from "@/integrations/supabase/client";
-import type { DeadlinePreference, AssignmentTracking } from "@/types/deadlines";
-import { NotificationType, type NotificationMetadata } from "@/types/notifications";
-import { handleAssignmentNotification } from "./notificationTriggers";
+import type { DeadlinePreference, NotificationMetadata, NotificationType, NotificationChannel, DeadlineStatus, Json } from "@/types/notifications";
 
 export class DeadlineService {
+  async createNotification(
+    metadata: NotificationMetadata,
+    userId: string,
+    type: NotificationType
+  ) {
+    const notificationData = {
+      type,
+      user_id: userId,
+      status: 'pending' as const,
+      metadata: JSON.parse(JSON.stringify(metadata)) as Json
+    };
+
+    const { data, error } = await supabase
+      .from('notification_queue')
+      .insert(notificationData)
+      .select()
+      .single();
+
+    if (error) throw error;
+    return data;
+  }
+
   async getUserPreferences(userId: string): Promise<DeadlinePreference | null> {
     const { data, error } = await supabase
       .from('deadline_preferences')
@@ -16,60 +36,10 @@ export class DeadlineService {
       return null;
     }
 
-    return data;
-  }
-
-  async checkDeadlines(assignments: AssignmentTracking[]) {
-    for (const assignment of assignments) {
-      const prefs = await this.getUserPreferences(assignment.userId);
-      if (!prefs) continue;
-
-      await this.processDeadline(assignment, prefs);
-    }
-  }
-
-  private async processDeadline(
-    assignment: AssignmentTracking,
-    prefs: DeadlinePreference
-  ) {
-    const daysRemaining = this.calculateDaysRemaining(assignment.deadlines.due);
-    
-    if (this.shouldSendWarning(daysRemaining, prefs.warning_days)) {
-      await this.sendWarningNotification(assignment);
-    }
-    
-    if (daysRemaining < 0) {
-      await this.sendOverdueNotification(assignment);
-    }
-  }
-
-  private calculateDaysRemaining(deadline: string): number {
-    const deadlineDate = new Date(deadline);
-    const now = new Date();
-    return Math.ceil((deadlineDate.getTime() - now.getTime()) / (1000 * 3600 * 24));
-  }
-
-  private shouldSendWarning(daysRemaining: number, warningDays: number[]): boolean {
-    return daysRemaining > 0 && warningDays.includes(daysRemaining);
-  }
-
-  private async sendWarningNotification(assignment: AssignmentTracking) {
-    await handleAssignmentNotification({
-      task_id: assignment.taskId,
-      role_type: assignment.roleType,
-      user_id: assignment.userId,
-      status: 'DEADLINE_WARNING'
-    }, NotificationType.DEADLINE_WARNING);
-  }
-
-  private async sendOverdueNotification(assignment: AssignmentTracking) {
-    await handleAssignmentNotification({
-      task_id: assignment.taskId,
-      role_type: assignment.roleType,
-      user_id: assignment.userId,
-      status: 'DEADLINE_OVERDUE'
-    }, NotificationType.DEADLINE_OVERDUE);
+    return {
+      ...data,
+      notification_channels: data.notification_channels.map(c => c as NotificationChannel),
+      deadline_statuses: data.deadline_statuses.map(s => s as DeadlineStatus)
+    };
   }
 }
-
-export const deadlineService = new DeadlineService();

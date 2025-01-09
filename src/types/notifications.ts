@@ -35,12 +35,19 @@ export interface NotificationMetadata {
   content: NotificationContent;
 }
 
-export interface Notification {
-  id: string;
-  type: NotificationType;
+export interface AssignmentData {
+  task_id: string;
+  role_type: 'translator' | 'reviewer' | 'ugc_talent';
   user_id: string;
-  status: 'pending' | 'sent' | 'read';
-  metadata: NotificationMetadata;
+  status?: string;
+}
+
+export interface DeadlinePreference {
+  id: string;
+  user_id: string;
+  warning_days: number[];
+  notification_channels: NotificationChannel[];
+  deadline_statuses: DeadlineStatus[];
   created_at: string;
-  processed_at?: string;
+  updated_at: string;
 }

@@ -1,12 +1,32 @@
 import { supabase } from "@/integrations/supabase/client";
-import { NotificationType, type NotificationMetadata } from "@/types/notifications";
+import type { NotificationType, NotificationMetadata, AssignmentData, Json } from "@/types/notifications";
 
-interface AssignmentData {
-  task_id: string;
-  role_type: 'translator' | 'reviewer' | 'ugc_talent';
-  user_id: string;
-  status?: string;
-}
+export const handleAssignmentNotification = async (
+  assignmentData: AssignmentData,
+  type: NotificationType
+) => {
+  const metadata: NotificationMetadata = {
+    task_id: assignmentData.task_id,
+    role_type: assignmentData.role_type,
+    content: generateNotificationContent(assignmentData, type)
+  };
+
+  const notificationData = {
+    type,
+    user_id: assignmentData.user_id,
+    status: 'pending' as const,
+    metadata: JSON.parse(JSON.stringify(metadata)) as Json
+  };
+
+  const { error } = await supabase
+    .from('notification_queue')
+    .insert(notificationData);
+
+  if (error) {
+    console.error('Failed to create notification:', error);
+    throw error;
+  }
+};
 
 function generateNotificationContent(
   assignmentData: AssignmentData,
@@ -62,30 +82,3 @@ function generateNotificationContent(
       };
   }
 }
-
-export const handleAssignmentNotification = async (
-  assignmentData: AssignmentData,
-  type: NotificationType
-) => {
-  const metadata: NotificationMetadata = {
-    task_id: assignmentData.task_id,
-    role_type: assignmentData.role_type,
-    content: generateNotificationContent(assignmentData, type)
-  };
-
-  const notificationData = {
-    type,
-    user_id: assignmentData.user_id,
-    status: 'pending' as const,
-    metadata: metadata
-  };
-
-  const { error } = await supabase
-    .from('notification_queue')
-    .insert(notificationData);
-
-  if (error) {
-    console.error('Failed to create notification:', error);
-    throw error;
-  }
-};
