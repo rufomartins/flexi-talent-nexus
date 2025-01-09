@@ -20,3 +20,10 @@ export interface Notification {
   processed_at: string | null;
   metadata: NotificationMetadata;
 }
+
+export interface NotificationInsert {
+  type: string;
+  user_id: string;
+  status: 'pending' | 'sent' | 'read';
+  metadata: Record<string, any>; // This maps to Supabase's Json type
+}
