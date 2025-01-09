@@ -51,9 +51,9 @@ export function AssignmentTracker({ taskId, roleType }: AssignmentTrackerProps) 
 
       // Trigger notification
       await handleAssignmentNotification({
-        taskId,
-        roleType,
-        userId: assignment.user_id,
+        task_id: taskId,
+        role_type: roleType,
+        user_id: assignment.user_id,
         status: newStatus
       }, 'STATUS_CHANGE');
 

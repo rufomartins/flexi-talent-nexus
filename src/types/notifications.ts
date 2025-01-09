@@ -10,12 +10,12 @@ export enum NotificationType {
   ROLE_REASSIGNMENT = 'ROLE_REASSIGNMENT'
 }
 
-export const enum DeadlineStatus {
+export enum DeadlineStatus {
   APPROACHING = 'approaching',
   OVERDUE = 'overdue'
 }
 
-export const enum NotificationChannel {
+export enum NotificationChannel {
   EMAIL = 'email',
   IN_APP = 'in_app'
 }
@@ -33,6 +33,16 @@ export interface NotificationMetadata {
   task_id: string;
   role_type: 'translator' | 'reviewer' | 'ugc_talent';
   content: NotificationContent;
+}
+
+export interface Notification {
+  id: string;
+  type: NotificationType;
+  user_id: string;
+  status: 'pending' | 'sent' | 'read';
+  metadata: NotificationMetadata;
+  created_at: string;
+  processed_at?: string;
 }
 
 export interface AssignmentData {
