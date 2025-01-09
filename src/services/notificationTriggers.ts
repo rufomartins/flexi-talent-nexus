@@ -94,7 +94,7 @@ export async function handleAssignmentNotification(
       user_id: assignmentData.userId,
       type: triggerType,
       status: 'pending',
-      metadata: notification
+      metadata: notification as Record<string, any>
     });
 
   if (error) {
