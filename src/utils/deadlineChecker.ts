@@ -1,35 +1,37 @@
-import { differenceInDays } from "date-fns"
-import { handleAssignmentNotification } from "@/services/notificationTriggers"
+import { createNotification } from "@/services/deadlineChecker";
+import { NotificationType } from "@/types/notifications";
+import type { AssignmentTracking } from "@/types/deadlines";
 
-interface Assignment {
-  taskId: string;
-  roleType: 'translator' | 'reviewer' | 'ugc_talent';
-  userId: string;
-  deadlines: {
-    start: string;
-    due: string;
-  };
-}
-
-export function checkDeadlines(assignments: Assignment[]) {
-  const now = new Date();
-  
-  assignments.forEach(assignment => {
-    if (!assignment.deadlines?.due) return;
-    
-    const deadline = new Date(assignment.deadlines.due);
-    const daysDiff = differenceInDays(deadline, now);
-    
-    if (daysDiff <= 2 && daysDiff > 0) {
-      handleAssignmentNotification(
-        assignment,
-        'DEADLINE_APPROACHING'
-      );
-    } else if (daysDiff < 0) {
-      handleAssignmentNotification(
-        assignment,
-        'DEADLINE_MISSED'
-      );
+const createMetadata = (assignment: AssignmentTracking) => ({
+  task_id: assignment.taskId,
+  role_type: assignment.roleType,
+  content: {
+    title: 'Deadline Update',
+    message: `Task deadline update for ${assignment.roleType}`,
+    action: {
+      type: 'link',
+      url: `/projects/tasks/${assignment.taskId}`
     }
-  });
-}
+  }
+});
+
+export const handleDeadline = async (assignment: AssignmentTracking) => {
+  const dueDate = new Date(assignment.deadlines.due);
+  const now = new Date();
+  const daysRemaining = Math.ceil((dueDate.getTime() - now.getTime()) / (1000 * 3600 * 24));
+  const warningThreshold = 3; // Can be configurable
+
+  if (daysRemaining <= warningThreshold && daysRemaining > 0) {
+    await createNotification(
+      createMetadata(assignment),
+      assignment.userId,
+      NotificationType.DEADLINE_WARNING
+    );
+  } else if (daysRemaining < 0) {
+    await createNotification(
+      createMetadata(assignment),
+      assignment.userId,
+      NotificationType.DEADLINE_OVERDUE
+    );
+  }
+};

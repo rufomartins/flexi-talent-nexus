@@ -1,17 +1,12 @@
+export type DeadlineStatus = 'approaching' | 'overdue';
+
 export interface DeadlinePreference {
   id: string;
   user_id: string;
   warning_days: number[];
-  notification_types: ('email' | 'in_app')[];
+  notification_types: DeadlineStatus[];
   created_at: string;
   updated_at: string;
-}
-
-export interface DeadlineCheck {
-  taskId: string;
-  roleType: 'translator' | 'reviewer' | 'ugc_talent';
-  deadline: string;
-  userId: string;
 }
 
 export interface AssignmentTracking {
