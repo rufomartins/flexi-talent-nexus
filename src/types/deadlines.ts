@@ -1,5 +1,4 @@
-export type DeadlineStatus = 'approaching' | 'overdue';
-export type NotificationChannel = 'email' | 'in_app';
+import { DeadlineStatus, NotificationChannel } from './notifications';
 
 export interface DeadlinePreference {
   id: string;

@@ -10,6 +10,16 @@ export enum NotificationType {
   ROLE_REASSIGNMENT = 'ROLE_REASSIGNMENT'
 }
 
+export const enum DeadlineStatus {
+  APPROACHING = 'approaching',
+  OVERDUE = 'overdue'
+}
+
+export const enum NotificationChannel {
+  EMAIL = 'email',
+  IN_APP = 'in_app'
+}
+
 export interface NotificationContent {
   title: string;
   message: string;
