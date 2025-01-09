@@ -1,14 +1,18 @@
+import { Json } from '@supabase/supabase-js';
+
+export interface NotificationContent {
+  title: string;
+  message: string;
+  action?: {
+    type: string;
+    url: string;
+  };
+}
+
 export interface NotificationMetadata {
   task_id: string;
   role_type: 'translator' | 'reviewer' | 'ugc_talent';
-  content: {
-    title: string;
-    message: string;
-    action?: {
-      type: string;
-      url: string;
-    };
-  };
+  content: NotificationContent;
 }
 
 export interface Notification {
