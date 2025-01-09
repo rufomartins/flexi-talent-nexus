@@ -1905,42 +1905,86 @@ export type Database = {
       }
       talent_profiles: {
         Row: {
+          agent_id: string | null
           category: string | null
           country: string | null
           created_at: string | null
+          created_by: string | null
           evaluation_status: string | null
           id: string
           internal_remarks: string | null
           phone_number: string | null
+          talent_category: Database["public"]["Enums"]["talent_category"] | null
+          talent_type: Database["public"]["Enums"]["talent_type"] | null
           updated_at: string | null
           user_id: string | null
           whatsapp_number: string | null
         }
         Insert: {
+          agent_id?: string | null
           category?: string | null
           country?: string | null
           created_at?: string | null
+          created_by?: string | null
           evaluation_status?: string | null
           id?: string
           internal_remarks?: string | null
           phone_number?: string | null
+          talent_category?:
+            | Database["public"]["Enums"]["talent_category"]
+            | null
+          talent_type?: Database["public"]["Enums"]["talent_type"] | null
           updated_at?: string | null
           user_id?: string | null
           whatsapp_number?: string | null
         }
         Update: {
+          agent_id?: string | null
           category?: string | null
           country?: string | null
           created_at?: string | null
+          created_by?: string | null
           evaluation_status?: string | null
           id?: string
           internal_remarks?: string | null
           phone_number?: string | null
+          talent_category?:
+            | Database["public"]["Enums"]["talent_category"]
+            | null
+          talent_type?: Database["public"]["Enums"]["talent_type"] | null
           updated_at?: string | null
           user_id?: string | null
           whatsapp_number?: string | null
         }
         Relationships: [
+          {
+            foreignKeyName: "talent_profiles_agent_id_fkey"
+            columns: ["agent_id"]
+            isOneToOne: false
+            referencedRelation: "user_profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "talent_profiles_agent_id_fkey"
+            columns: ["agent_id"]
+            isOneToOne: false
+            referencedRelation: "users"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "talent_profiles_created_by_fkey"
+            columns: ["created_by"]
+            isOneToOne: false
+            referencedRelation: "user_profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "talent_profiles_created_by_fkey"
+            columns: ["created_by"]
+            isOneToOne: false
+            referencedRelation: "users"
+            referencedColumns: ["id"]
+          },
           {
             foreignKeyName: "talent_profiles_user_id_fkey"
             columns: ["user_id"]
@@ -2250,6 +2294,8 @@ export type Database = {
         | "Approved"
       project_translation_status: "Pending" | "In Progress" | "Approved"
       shot_status: "Pending" | "In Progress" | "Completed"
+      talent_category: "UGC" | "TRANSLATOR" | "REVIEWER" | "VOICE_OVER"
+      talent_type: "individual" | "duo" | "agent"
       user_role:
         | "super_admin"
         | "admin"
