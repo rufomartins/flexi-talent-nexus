@@ -1,4 +1,4 @@
-import { createNotification } from "@/services/deadlineChecker";
+import { handleAssignmentNotification } from "@/services/notificationTriggers";
 import { NotificationType } from "@/types/notifications";
 import type { AssignmentTracking } from "@/types/deadlines";
 
@@ -22,13 +22,13 @@ export const handleDeadline = async (assignment: AssignmentTracking) => {
   const warningThreshold = 3; // Can be configurable
 
   if (daysRemaining <= warningThreshold && daysRemaining > 0) {
-    await createNotification(
+    await handleAssignmentNotification(
       createMetadata(assignment),
       assignment.userId,
       NotificationType.DEADLINE_WARNING
     );
   } else if (daysRemaining < 0) {
-    await createNotification(
+    await handleAssignmentNotification(
       createMetadata(assignment),
       assignment.userId,
       NotificationType.DEADLINE_OVERDUE

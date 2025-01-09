@@ -1,5 +1,5 @@
 import { supabase } from "@/integrations/supabase/client";
-import type { NotificationType, NotificationMetadata, AssignmentData, Json } from "@/types/notifications";
+import { NotificationType, NotificationMetadata, AssignmentData } from "@/types/notifications";
 
 export const handleAssignmentNotification = async (
   assignmentData: AssignmentData,
@@ -15,7 +15,7 @@ export const handleAssignmentNotification = async (
     type,
     user_id: assignmentData.user_id,
     status: 'pending' as const,
-    metadata: JSON.parse(JSON.stringify(metadata)) as Json
+    metadata: JSON.parse(JSON.stringify(metadata))
   };
 
   const { error } = await supabase

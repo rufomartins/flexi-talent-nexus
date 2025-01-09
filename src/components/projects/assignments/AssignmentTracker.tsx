@@ -8,6 +8,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { notify } from "@/utils/notifications";
 import { handleAssignmentNotification } from "@/services/notificationTriggers";
+import { NotificationType } from "@/types/notifications";
 
 interface AssignmentTrackerProps {
   taskId: string;
@@ -55,7 +56,7 @@ export function AssignmentTracker({ taskId, roleType }: AssignmentTrackerProps) 
         role_type: roleType,
         user_id: assignment.user_id,
         status: newStatus
-      }, 'STATUS_CHANGE');
+      }, NotificationType.STATUS_CHANGE);
 
       notify.success('Status updated successfully');
     } catch (error) {
