@@ -59,6 +59,89 @@ export type Database = {
           },
         ]
       }
+      assignment_history: {
+        Row: {
+          assignment_id: string | null
+          changed_by: string | null
+          created_at: string | null
+          id: string
+          new_status: string | null
+          new_user_id: string | null
+          previous_status: string | null
+          previous_user_id: string | null
+        }
+        Insert: {
+          assignment_id?: string | null
+          changed_by?: string | null
+          created_at?: string | null
+          id?: string
+          new_status?: string | null
+          new_user_id?: string | null
+          previous_status?: string | null
+          previous_user_id?: string | null
+        }
+        Update: {
+          assignment_id?: string | null
+          changed_by?: string | null
+          created_at?: string | null
+          id?: string
+          new_status?: string | null
+          new_user_id?: string | null
+          previous_status?: string | null
+          previous_user_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "assignment_history_assignment_id_fkey"
+            columns: ["assignment_id"]
+            isOneToOne: false
+            referencedRelation: "role_assignments"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "assignment_history_changed_by_fkey"
+            columns: ["changed_by"]
+            isOneToOne: false
+            referencedRelation: "user_profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "assignment_history_changed_by_fkey"
+            columns: ["changed_by"]
+            isOneToOne: false
+            referencedRelation: "users"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "assignment_history_new_user_id_fkey"
+            columns: ["new_user_id"]
+            isOneToOne: false
+            referencedRelation: "user_profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "assignment_history_new_user_id_fkey"
+            columns: ["new_user_id"]
+            isOneToOne: false
+            referencedRelation: "users"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "assignment_history_previous_user_id_fkey"
+            columns: ["previous_user_id"]
+            isOneToOne: false
+            referencedRelation: "user_profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "assignment_history_previous_user_id_fkey"
+            columns: ["previous_user_id"]
+            isOneToOne: false
+            referencedRelation: "users"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       booking_contracts: {
         Row: {
           booking_id: string | null
@@ -811,6 +894,51 @@ export type Database = {
           },
         ]
       }
+      notification_queue: {
+        Row: {
+          created_at: string | null
+          id: string
+          metadata: Json | null
+          processed_at: string | null
+          status: string | null
+          type: string
+          user_id: string | null
+        }
+        Insert: {
+          created_at?: string | null
+          id?: string
+          metadata?: Json | null
+          processed_at?: string | null
+          status?: string | null
+          type: string
+          user_id?: string | null
+        }
+        Update: {
+          created_at?: string | null
+          id?: string
+          metadata?: Json | null
+          processed_at?: string | null
+          status?: string | null
+          type?: string
+          user_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "notification_queue_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "user_profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "notification_queue_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "users"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       project_countries: {
         Row: {
           country_name: string
@@ -1152,6 +1280,87 @@ export type Database = {
           {
             foreignKeyName: "projects_project_manager_id_fkey"
             columns: ["project_manager_id"]
+            isOneToOne: false
+            referencedRelation: "users"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      role_assignments: {
+        Row: {
+          assigned_at: string | null
+          created_at: string | null
+          created_by: string | null
+          due_date: string | null
+          id: string
+          last_updated: string | null
+          role_type: string
+          start_date: string | null
+          status: string
+          task_id: string | null
+          updated_at: string | null
+          user_id: string | null
+        }
+        Insert: {
+          assigned_at?: string | null
+          created_at?: string | null
+          created_by?: string | null
+          due_date?: string | null
+          id?: string
+          last_updated?: string | null
+          role_type: string
+          start_date?: string | null
+          status: string
+          task_id?: string | null
+          updated_at?: string | null
+          user_id?: string | null
+        }
+        Update: {
+          assigned_at?: string | null
+          created_at?: string | null
+          created_by?: string | null
+          due_date?: string | null
+          id?: string
+          last_updated?: string | null
+          role_type?: string
+          start_date?: string | null
+          status?: string
+          task_id?: string | null
+          updated_at?: string | null
+          user_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "role_assignments_created_by_fkey"
+            columns: ["created_by"]
+            isOneToOne: false
+            referencedRelation: "user_profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "role_assignments_created_by_fkey"
+            columns: ["created_by"]
+            isOneToOne: false
+            referencedRelation: "users"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "role_assignments_task_id_fkey"
+            columns: ["task_id"]
+            isOneToOne: false
+            referencedRelation: "project_tasks"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "role_assignments_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "user_profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "role_assignments_user_id_fkey"
+            columns: ["user_id"]
             isOneToOne: false
             referencedRelation: "users"
             referencedColumns: ["id"]
