@@ -3,7 +3,7 @@ import { ScrollArea } from "@/components/ui/scroll-area"
 import { supabase } from "@/integrations/supabase/client"
 import { formatDistanceToNow } from "date-fns"
 import { Bell, CheckCircle, Clock, AlertTriangle } from "lucide-react"
-import type { Notification, NotificationType } from "@/types/notifications"
+import { NotificationType, type Notification } from "@/types/notifications"
 
 const formatNotification = (rawNotification: any): Notification => {
   return {
@@ -53,7 +53,7 @@ export function NotificationList() {
   return (
     <ScrollArea className="h-[400px]">
       <div className="space-y-2 p-4">
-        {notifications.map((notification) => (
+        {notifications?.map((notification) => (
           <div
             key={notification.id}
             className="flex items-start space-x-4 rounded-lg border p-4 hover:bg-accent"

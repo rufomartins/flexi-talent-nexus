@@ -1,6 +1,6 @@
 import { supabase } from "@/integrations/supabase/client";
 import type { DeadlinePreference, AssignmentTracking } from "@/types/deadlines";
-import type { NotificationMetadata, NotificationType } from "@/types/notifications";
+import { NotificationType, type NotificationMetadata } from "@/types/notifications";
 import { handleAssignmentNotification } from "./notificationTriggers";
 
 export class DeadlineService {
@@ -16,11 +16,7 @@ export class DeadlineService {
       return null;
     }
 
-    return {
-      ...data,
-      notification_channels: data.notification_channels,
-      deadline_statuses: data.deadline_statuses
-    };
+    return data;
   }
 
   async checkDeadlines(assignments: AssignmentTracking[]) {
@@ -39,7 +35,7 @@ export class DeadlineService {
     const daysRemaining = this.calculateDaysRemaining(assignment.deadlines.due);
     
     if (this.shouldSendWarning(daysRemaining, prefs.warning_days)) {
-      await this.sendWarningNotification(assignment, daysRemaining);
+      await this.sendWarningNotification(assignment);
     }
     
     if (daysRemaining < 0) {
@@ -57,24 +53,23 @@ export class DeadlineService {
     return daysRemaining > 0 && warningDays.includes(daysRemaining);
   }
 
-  private async sendWarningNotification(assignment: AssignmentTracking, daysRemaining: number) {
+  private async sendWarningNotification(assignment: AssignmentTracking) {
     await handleAssignmentNotification({
-      taskId: assignment.taskId,
-      roleType: assignment.roleType,
-      userId: assignment.userId,
+      task_id: assignment.taskId,
+      role_type: assignment.roleType,
+      user_id: assignment.userId,
       status: 'DEADLINE_WARNING'
     }, NotificationType.DEADLINE_WARNING);
   }
 
   private async sendOverdueNotification(assignment: AssignmentTracking) {
     await handleAssignmentNotification({
-      taskId: assignment.taskId,
-      roleType: assignment.roleType,
-      userId: assignment.userId,
+      task_id: assignment.taskId,
+      role_type: assignment.roleType,
+      user_id: assignment.userId,
       status: 'DEADLINE_OVERDUE'
     }, NotificationType.DEADLINE_OVERDUE);
   }
 }
 
-// Create a singleton instance
 export const deadlineService = new DeadlineService();
