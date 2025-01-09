@@ -665,6 +665,33 @@ export type Database = {
           },
         ]
       }
+      deadline_preferences: {
+        Row: {
+          created_at: string | null
+          id: string
+          notification_types: string[] | null
+          updated_at: string | null
+          user_id: string
+          warning_days: number[] | null
+        }
+        Insert: {
+          created_at?: string | null
+          id?: string
+          notification_types?: string[] | null
+          updated_at?: string | null
+          user_id: string
+          warning_days?: number[] | null
+        }
+        Update: {
+          created_at?: string | null
+          id?: string
+          notification_types?: string[] | null
+          updated_at?: string | null
+          user_id?: string
+          warning_days?: number[] | null
+        }
+        Relationships: []
+      }
       email_templates: {
         Row: {
           content: string

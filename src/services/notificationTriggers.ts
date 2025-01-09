@@ -5,8 +5,8 @@ import type { Task } from "@/components/projects/types"
 export const triggerTypes = {
   NEW_ASSIGNMENT: 'new_assignment',
   STATUS_CHANGE: 'status_change',
-  DEADLINE_APPROACHING: 'deadline_approaching',
-  DEADLINE_MISSED: 'deadline_missed',
+  DEADLINE_WARNING: 'deadline_warning',
+  DEADLINE_OVERDUE: 'deadline_overdue',
   ROLE_REASSIGNMENT: 'role_reassignment'
 } as const;
 
@@ -48,16 +48,16 @@ function generateNotificationContent(
           url: baseUrl
         }
       };
-    case 'DEADLINE_APPROACHING':
+    case 'DEADLINE_WARNING':
       return {
         title: 'Deadline Approaching',
-        message: 'Task deadline is approaching in 2 days',
+        message: 'Task deadline is approaching',
         action: {
           type: 'link',
           url: baseUrl
         }
       };
-    case 'DEADLINE_MISSED':
+    case 'DEADLINE_OVERDUE':
       return {
         title: 'Deadline Missed',
         message: 'Task deadline has passed',
