@@ -24,3 +24,13 @@ export interface NotificationMetadata {
   role_type: 'translator' | 'reviewer' | 'ugc_talent';
   content: NotificationContent;
 }
+
+export interface Notification {
+  id: string;
+  type: NotificationType;
+  user_id: string;
+  status: 'pending' | 'sent' | 'read';
+  metadata: NotificationMetadata;
+  created_at: string;
+  processed_at?: string;
+}

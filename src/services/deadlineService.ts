@@ -1,5 +1,6 @@
 import { supabase } from "@/integrations/supabase/client";
-import { DeadlinePreference, AssignmentTracking } from "@/types/deadlines";
+import type { DeadlinePreference, AssignmentTracking } from "@/types/deadlines";
+import type { NotificationMetadata, NotificationType, Json } from "@/types/notifications";
 import { handleAssignmentNotification } from "./notificationTriggers";
 
 export class DeadlineService {
@@ -15,10 +16,9 @@ export class DeadlineService {
       return null;
     }
 
-    // Cast the notification_types to ensure type safety
     return {
       ...data,
-      notification_types: data.notification_types as ('email' | 'in_app')[]
+      notification_types: data.notification_types as DeadlineStatus[]
     };
   }
 
@@ -72,29 +72,6 @@ export class DeadlineService {
       userId: assignment.userId,
       status: 'DEADLINE_OVERDUE'
     }, 'DEADLINE_OVERDUE');
-  }
-
-  async updatePreferences(
-    userId: string,
-    preferences: Partial<DeadlinePreference>
-  ): Promise<DeadlinePreference | null> {
-    const { data, error } = await supabase
-      .from('deadline_preferences')
-      .update(preferences)
-      .eq('user_id', userId)
-      .select()
-      .single();
-
-    if (error) {
-      console.error('Error updating deadline preferences:', error);
-      return null;
-    }
-
-    // Cast the notification_types to ensure type safety
-    return {
-      ...data,
-      notification_types: data.notification_types as ('email' | 'in_app')[]
-    };
   }
 }
 
