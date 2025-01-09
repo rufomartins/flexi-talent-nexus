@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { AssignmentHistory } from "./AssignmentHistory";
@@ -7,6 +7,7 @@ import { AssignmentDeadlines } from "./AssignmentDeadlines";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { notify } from "@/utils/notifications";
+import { handleAssignmentNotification } from "@/services/notificationTriggers";
 
 interface AssignmentTrackerProps {
   taskId: string;
@@ -34,17 +35,33 @@ export function AssignmentTracker({ taskId, roleType }: AssignmentTrackerProps) 
   });
 
   const handleStatusUpdate = async (newStatus: string) => {
-    const { error } = await supabase
-      .from('role_assignments')
-      .update({ status: newStatus, last_updated: new Date().toISOString() })
-      .eq('id', assignment?.id);
+    try {
+      const { error } = await supabase
+        .from('role_assignments')
+        .update({ 
+          status: newStatus, 
+          last_updated: new Date().toISOString() 
+        })
+        .eq('id', assignment?.id);
 
-    if (error) {
+      if (error) {
+        notify.error('Failed to update status');
+        return;
+      }
+
+      // Trigger notification
+      await handleAssignmentNotification({
+        taskId,
+        roleType,
+        userId: assignment.user_id,
+        status: newStatus
+      }, 'STATUS_CHANGE');
+
+      notify.success('Status updated successfully');
+    } catch (error) {
+      console.error('Error updating status:', error);
       notify.error('Failed to update status');
-      return;
     }
-
-    notify.success('Status updated successfully');
   };
 
   if (isLoading) {
