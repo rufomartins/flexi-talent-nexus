@@ -3,25 +3,14 @@ import { ScrollArea } from "@/components/ui/scroll-area"
 import { supabase } from "@/integrations/supabase/client"
 import { formatDistanceToNow } from "date-fns"
 import { Bell, CheckCircle, Clock, AlertTriangle } from "lucide-react"
+import type { Notification } from "@/types/notifications"
 
-interface Notification {
-  id: string
-  type: 'assignment' | 'status_change' | 'deadline_reminder' | 'overdue'
-  status: 'pending' | 'sent' | 'failed'
-  metadata: {
-    task_id: string
-    role_type: string
-    content: {
-      title: string
-      message: string
-      action?: {
-        type: string
-        url: string
-      }
-    }
-  }
-  created_at: string
-}
+const formatNotification = (rawNotification: any): Notification => {
+  return {
+    ...rawNotification,
+    metadata: rawNotification.metadata as Notification['metadata']
+  };
+};
 
 export function NotificationList() {
   const { data: notifications, isLoading } = useQuery({
@@ -34,7 +23,7 @@ export function NotificationList() {
         .limit(50)
 
       if (error) throw error
-      return data as Notification[]
+      return (data as any[]).map(formatNotification) as Notification[]
     }
   })
 
