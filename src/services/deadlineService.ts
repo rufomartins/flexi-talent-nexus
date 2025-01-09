@@ -1,6 +1,6 @@
 import { supabase } from "@/integrations/supabase/client";
 import type { DeadlinePreference, AssignmentTracking } from "@/types/deadlines";
-import type { NotificationMetadata, NotificationType, Json } from "@/types/notifications";
+import type { NotificationMetadata, NotificationType } from "@/types/notifications";
 import { handleAssignmentNotification } from "./notificationTriggers";
 
 export class DeadlineService {
@@ -18,7 +18,8 @@ export class DeadlineService {
 
     return {
       ...data,
-      notification_types: data.notification_types as DeadlineStatus[]
+      notification_channels: data.notification_channels,
+      deadline_statuses: data.deadline_statuses
     };
   }
 
@@ -62,7 +63,7 @@ export class DeadlineService {
       roleType: assignment.roleType,
       userId: assignment.userId,
       status: 'DEADLINE_WARNING'
-    }, 'DEADLINE_WARNING');
+    }, NotificationType.DEADLINE_WARNING);
   }
 
   private async sendOverdueNotification(assignment: AssignmentTracking) {
@@ -71,7 +72,7 @@ export class DeadlineService {
       roleType: assignment.roleType,
       userId: assignment.userId,
       status: 'DEADLINE_OVERDUE'
-    }, 'DEADLINE_OVERDUE');
+    }, NotificationType.DEADLINE_OVERDUE);
   }
 }
 

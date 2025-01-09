@@ -1,12 +1,13 @@
 import type { NotificationMetadata } from "@/types/notifications";
 import { supabase } from "@/integrations/supabase/client";
+import { NotificationType } from "@/types/notifications";
 
 export const triggerTypes = {
-  NEW_ASSIGNMENT: 'new_assignment',
-  STATUS_CHANGE: 'status_change',
-  DEADLINE_WARNING: 'deadline_warning',
-  DEADLINE_OVERDUE: 'deadline_overdue',
-  ROLE_REASSIGNMENT: 'role_reassignment'
+  NEW_ASSIGNMENT: NotificationType.NEW_ASSIGNMENT,
+  STATUS_CHANGE: NotificationType.STATUS_CHANGE,
+  DEADLINE_WARNING: NotificationType.DEADLINE_WARNING,
+  DEADLINE_OVERDUE: NotificationType.DEADLINE_OVERDUE,
+  ROLE_REASSIGNMENT: NotificationType.ROLE_REASSIGNMENT
 } as const;
 
 export type TriggerType = keyof typeof triggerTypes;
@@ -20,12 +21,12 @@ interface AssignmentData {
 
 function generateNotificationContent(
   assignmentData: AssignmentData,
-  triggerType: TriggerType
+  triggerType: NotificationType
 ): NotificationMetadata['content'] {
   const baseUrl = `/projects/tasks/${assignmentData.taskId}`;
 
   switch (triggerType) {
-    case 'NEW_ASSIGNMENT':
+    case NotificationType.NEW_ASSIGNMENT:
       return {
         title: 'New Assignment',
         message: `You have been assigned a new ${assignmentData.roleType} task`,
@@ -34,7 +35,7 @@ function generateNotificationContent(
           url: baseUrl
         }
       };
-    case 'STATUS_CHANGE':
+    case NotificationType.STATUS_CHANGE:
       return {
         title: 'Status Updated',
         message: `Task status has been updated to ${assignmentData.status}`,
@@ -43,7 +44,7 @@ function generateNotificationContent(
           url: baseUrl
         }
       };
-    case 'DEADLINE_WARNING':
+    case NotificationType.DEADLINE_WARNING:
       return {
         title: 'Deadline Approaching',
         message: 'Task deadline is approaching',
@@ -52,7 +53,7 @@ function generateNotificationContent(
           url: baseUrl
         }
       };
-    case 'DEADLINE_OVERDUE':
+    case NotificationType.DEADLINE_OVERDUE:
       return {
         title: 'Deadline Missed',
         message: 'Task deadline has passed',
@@ -61,10 +62,19 @@ function generateNotificationContent(
           url: baseUrl
         }
       };
-    case 'ROLE_REASSIGNMENT':
+    case NotificationType.ROLE_REASSIGNMENT:
       return {
         title: 'Role Reassigned',
         message: `You have been assigned as the new ${assignmentData.roleType}`,
+        action: {
+          type: 'link',
+          url: baseUrl
+        }
+      };
+    default:
+      return {
+        title: 'Notification',
+        message: 'You have a new notification',
         action: {
           type: 'link',
           url: baseUrl
@@ -75,7 +85,7 @@ function generateNotificationContent(
 
 export async function handleAssignmentNotification(
   assignmentData: AssignmentData,
-  triggerType: TriggerType
+  triggerType: NotificationType
 ) {
   const notification: NotificationMetadata = {
     task_id: assignmentData.taskId,
@@ -89,7 +99,7 @@ export async function handleAssignmentNotification(
       user_id: assignmentData.userId,
       type: triggerType,
       status: 'pending',
-      metadata: notification
+      metadata: notification as unknown as Json
     });
 
   if (error) {
