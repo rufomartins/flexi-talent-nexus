@@ -6,11 +6,11 @@ import { NotificationType } from "@/types/notifications";
 import { supabase } from "@/integrations/supabase/client";
 
 interface NotificationPreviewProps {
-  types: NotificationType[];
-  roles: ('translator' | 'reviewer' | 'ugc_talent')[];
+  types: readonly NotificationType[];
+  roles: readonly ('translator' | 'reviewer' | 'ugc_talent')[];
   deadlines: {
-    approaching: number[];
-    overdue: number[];
+    approaching: readonly number[];
+    overdue: readonly number[];
   };
 }
 
@@ -195,10 +195,10 @@ export function NotificationPreview({ types, roles, deadlines }: NotificationPre
       <div className="mt-4 text-sm text-muted-foreground">
         <p>Preview system for testing notifications with:</p>
         <ul className="list-disc list-inside mt-2">
-          <li>Different notification types: {types.join(', ')}</li>
-          <li>Role combinations: {roles.join(', ')}</li>
-          <li>Approaching deadlines: {deadlines.approaching.join(', ')} days before</li>
-          <li>Overdue deadlines: {deadlines.overdue.join(', ')} days after</li>
+          <li>Different notification types: {Array.from(types).join(', ')}</li>
+          <li>Role combinations: {Array.from(roles).join(', ')}</li>
+          <li>Approaching deadlines: {Array.from(deadlines.approaching).join(', ')} days before</li>
+          <li>Overdue deadlines: {Array.from(deadlines.overdue).join(', ')} days after</li>
         </ul>
       </div>
     </Card>

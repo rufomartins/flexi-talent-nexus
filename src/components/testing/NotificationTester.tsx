@@ -8,11 +8,11 @@ export function NotificationTester() {
       NotificationType.DEADLINE_OVERDUE,
       NotificationType.STATUS_CHANGE,
       NotificationType.NEW_ASSIGNMENT,
-    ],
+    ] as const,
     roles: ['translator', 'reviewer', 'ugc_talent'] as const,
     deadlines: {
-      approaching: [1, 3, 7], // Days before deadline
-      overdue: [1, 2, 5],    // Days after deadline
+      approaching: [1, 3, 7] as const,    // Days before deadline
+      overdue: [1, 2, 5] as const,       // Days after deadline
     }
   };
 
