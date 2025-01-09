@@ -1,4 +1,5 @@
-import { Json } from '@supabase/supabase-js';
+// Define our own Json type since Supabase's isn't available
+export type Json = string | number | boolean | null | { [key: string]: Json } | Json[];
 
 export interface NotificationContent {
   title: string;
