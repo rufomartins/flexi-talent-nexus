@@ -8,25 +8,43 @@ import { useAuth } from "@/contexts/auth";
 import { canManageTalents } from "@/utils/permissions";
 import { TalentCategory } from "@/types/talent-management";
 import { supabase } from "@/integrations/supabase/client";
+import { Database } from "@/integrations/supabase/types";
+
+type TalentProfile = Database['public']['Tables']['talent_profiles']['Row'] & {
+  users: {
+    id: string;
+    first_name: string | null;
+    last_name: string | null;
+    email: string | null;
+  } | null;
+};
 
 export function TalentManagement() {
   const { user } = useAuth();
   const [activeCategory, setActiveCategory] = useState<TalentCategory>(TalentCategory.UGC);
 
   const { data: stats, isLoading: isLoadingStats } = useQuery({
-    queryKey: ['talent-stats'],
+    queryKey: ['talent-stats', activeCategory],
     queryFn: async () => {
       const { data, error } = await supabase
         .from('talent_profiles')
-        .select('status', { count: 'exact' })
+        .select(`
+          *,
+          users (
+            id,
+            first_name,
+            last_name,
+            email
+          )
+        `)
         .eq('talent_category', activeCategory);
 
       if (error) throw error;
 
       const total = data.length;
-      const approved = data.filter(t => t.status === 'APPROVED').length;
-      const pending = data.filter(t => t.status === 'PENDING').length;
-      const rejected = data.filter(t => t.status === 'REJECTED').length;
+      const approved = data.filter(t => t.evaluation_status === 'APPROVED').length;
+      const pending = data.filter(t => t.evaluation_status === 'PENDING').length;
+      const rejected = data.filter(t => t.evaluation_status === 'REJECTED').length;
 
       return { total, approved, pending, rejected };
     }

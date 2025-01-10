@@ -31,7 +31,8 @@ export const useProfileCompletion = (userId: string) => {
           whatsapp_number,
           phone_number,
           country,
-          user:users (
+          users!inner (
+            id,
             first_name,
             last_name,
             mobile_phone,
@@ -51,12 +52,12 @@ export const useProfileCompletion = (userId: string) => {
       let basicProfileScore = 0;
       if (profile) {
         const fields = [
-          profile.user?.first_name,
-          profile.user?.last_name,
-          profile.user?.mobile_phone || profile.whatsapp_number || profile.phone_number,
+          profile.users?.first_name,
+          profile.users?.last_name,
+          profile.users?.mobile_phone || profile.whatsapp_number || profile.phone_number,
           profile.country,
-          profile.user?.nationality,
-          profile.user?.gender
+          profile.users?.nationality,
+          profile.users?.gender
         ];
         
         basicProfileScore = Math.round((fields.filter(Boolean).length / fields.length) * 25);
