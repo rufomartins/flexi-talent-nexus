@@ -13,6 +13,16 @@ interface AgentManagementProps {
   currentUser: DatabaseUser;
 }
 
+interface AgentWithRelationships extends DatabaseUser {
+  agent_talent_relationships?: Array<{
+    talent_id: string;
+    talent: {
+      first_name: string;
+      last_name: string;
+    };
+  }>;
+}
+
 export const AgentManagement: React.FC<AgentManagementProps> = ({ currentUser }) => {
   const isVisible = canViewAgents(currentUser);
   const canManage = canManageAgents(currentUser);
@@ -32,7 +42,7 @@ export const AgentManagement: React.FC<AgentManagementProps> = ({ currentUser })
           created_at,
           agent_talent_relationships (
             talent_id,
-            talent:talent_id (
+            talent:users!talent_id (
               first_name,
               last_name
             )
@@ -45,7 +55,7 @@ export const AgentManagement: React.FC<AgentManagementProps> = ({ currentUser })
         throw error;
       }
 
-      return data;
+      return data as AgentWithRelationships[];
     },
     enabled: isVisible
   });

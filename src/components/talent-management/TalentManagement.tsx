@@ -8,11 +8,13 @@ import { useAuth } from "@/contexts/auth"
 import { canManageTalents } from "@/utils/permissions"
 import { TalentCategory } from "@/types/talent-management"
 import { supabase } from "@/integrations/supabase/client"
-import type { User } from "@/types/user"
+import { Database } from "@/integrations/supabase/types"
+
+type DatabaseUser = Database["public"]["Tables"]["users"]["Row"];
 
 export function TalentManagement() {
   const { user } = useAuth()
-  const currentUser = user as User
+  const currentUser = user as DatabaseUser
   const [activeCategory, setActiveCategory] = useState<TalentCategory>(TalentCategory.UGC)
 
   const { data: stats, isLoading: isLoadingStats } = useQuery({
