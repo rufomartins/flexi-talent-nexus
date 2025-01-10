@@ -14,6 +14,7 @@ import { Loader2 } from "lucide-react"
 import { notify } from "@/utils/notifications"
 import { DuoPartnerSearch } from "./DuoPartnerSearch"
 import { SelectedPartner } from "./SelectedPartner"
+import { DuoPartner } from "@/types/talent"
 
 const formSchema = z.object({
   firstName: z.string().min(2, "First name must be at least 2 characters"),

@@ -42,7 +42,7 @@ export const TalentTableRow: React.FC<TalentTableRowProps> = ({
           <div className="flex flex-col">
             <span className="font-medium">{talent.duo_name}</span>
             <span className="text-sm text-gray-500">
-              {`${talent.users?.first_name} & ${talent.partner?.first_name}`}
+              {`${talent.users?.first_name} & ${talent.partner?.users?.first_name}`}
             </span>
           </div>
         ) : (
