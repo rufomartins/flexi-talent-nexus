@@ -43,19 +43,19 @@ export function DuoPartnerSearch({
           )
         `)
         .eq("is_duo", false)
-        .neq("id", currentTalentId)
+        .neq("id", currentTalentId || '')
         .or(`users.first_name.ilike.%${query}%,users.last_name.ilike.%${query}%,users.email.ilike.%${query}%`)
         .limit(5);
 
       if (error) throw error;
 
-      const formattedResults = data.map(profile => ({
-        id: profile.id,
-        user_id: profile.user_id,
-        first_name: profile.users.first_name,
-        last_name: profile.users.last_name,
-        email: profile.users.email,
-        avatar_url: profile.users.avatar_url
+      const formattedResults = data.map(result => ({
+        id: result.id,
+        user_id: result.user_id,
+        first_name: result.users.first_name,
+        last_name: result.users.last_name,
+        email: result.users.email,
+        avatar_url: result.users.avatar_url
       }));
 
       setSearchResults(formattedResults);
