@@ -21,13 +21,22 @@ const ProtectedRoute = ({ children, allowedRoles }: ProtectedRouteProps) => {
       return;
     }
 
+    // Check role access if allowedRoles is specified
+    if (!loading && user && allowedRoles && userDetails) {
+      if (!allowedRoles.includes(userDetails.role)) {
+        console.log("User does not have required role, redirecting to dashboard");
+        navigate("/dashboard");
+        return;
+      }
+    }
+
     // For development/preview purposes: show content after 2 seconds
     const timer = setTimeout(() => {
       setShowContent(true);
     }, 2000);
 
     return () => clearTimeout(timer);
-  }, [user, loading, navigate]);
+  }, [user, loading, navigate, allowedRoles, userDetails]);
 
   // Show loading state only when necessary and not timed out
   if (!showContent && (loading || (allowedRoles && !userDetails))) {
