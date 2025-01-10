@@ -35,7 +35,7 @@ export function DuoPartnerSearch({
         .select(`
           id,
           user_id,
-          users!user_id(
+          users (
             first_name,
             last_name,
             email,
@@ -44,6 +44,7 @@ export function DuoPartnerSearch({
         `)
         .eq('is_duo', false)
         .neq('id', currentTalentId || '')
+        .ilike('users.first_name', `%${query}%`)
         .limit(5);
 
       if (error) throw error;
