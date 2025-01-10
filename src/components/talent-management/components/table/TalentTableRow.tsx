@@ -38,7 +38,16 @@ export const TalentTableRow: React.FC<TalentTableRowProps> = ({
   return (
     <tr className="border-t border-gray-200">
       <td className="px-4 py-4 text-sm text-gray-900">
-        {talent.user_id}
+        {talent.is_duo ? (
+          <div className="flex flex-col">
+            <span className="font-medium">{talent.duo_name}</span>
+            <span className="text-sm text-gray-500">
+              {`${talent.users?.first_name} & ${talent.partner?.first_name}`}
+            </span>
+          </div>
+        ) : (
+          `${talent.users?.first_name} ${talent.users?.last_name}`
+        )}
       </td>
       <td className="px-4 py-4 text-sm text-gray-500">
         {talent.talent_category}

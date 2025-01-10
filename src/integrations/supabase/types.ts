@@ -1910,9 +1910,12 @@ export type Database = {
           country: string | null
           created_at: string | null
           created_by: string | null
+          duo_name: string | null
           evaluation_status: string | null
           id: string
           internal_remarks: string | null
+          is_duo: boolean | null
+          partner_id: string | null
           phone_number: string | null
           talent_category: Database["public"]["Enums"]["talent_category"] | null
           talent_type: Database["public"]["Enums"]["talent_type"] | null
@@ -1926,9 +1929,12 @@ export type Database = {
           country?: string | null
           created_at?: string | null
           created_by?: string | null
+          duo_name?: string | null
           evaluation_status?: string | null
           id?: string
           internal_remarks?: string | null
+          is_duo?: boolean | null
+          partner_id?: string | null
           phone_number?: string | null
           talent_category?:
             | Database["public"]["Enums"]["talent_category"]
@@ -1944,9 +1950,12 @@ export type Database = {
           country?: string | null
           created_at?: string | null
           created_by?: string | null
+          duo_name?: string | null
           evaluation_status?: string | null
           id?: string
           internal_remarks?: string | null
+          is_duo?: boolean | null
+          partner_id?: string | null
           phone_number?: string | null
           talent_category?:
             | Database["public"]["Enums"]["talent_category"]
@@ -1983,6 +1992,13 @@ export type Database = {
             columns: ["created_by"]
             isOneToOne: false
             referencedRelation: "users"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "talent_profiles_partner_id_fkey"
+            columns: ["partner_id"]
+            isOneToOne: false
+            referencedRelation: "talent_profiles"
             referencedColumns: ["id"]
           },
           {

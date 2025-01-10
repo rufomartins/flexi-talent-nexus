@@ -2,6 +2,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/u
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form"
+import { Switch } from "@/components/ui/switch"
 import { useForm } from "react-hook-form"
 import { zodResolver } from "@hookform/resolvers/zod"
 import * as z from "zod"
@@ -10,11 +11,15 @@ import { useToast } from "@/hooks/use-toast"
 import { supabase } from "@/integrations/supabase/client"
 import { useNavigate } from "react-router-dom"
 import { Loader2 } from "lucide-react"
+import { notify } from "@/utils/notifications"
 
 const formSchema = z.object({
   firstName: z.string().min(2, "First name must be at least 2 characters"),
   lastName: z.string().min(2, "Last name must be at least 2 characters"),
-  email: z.string().email("Invalid email address")
+  email: z.string().email("Invalid email address"),
+  isDuo: z.boolean().default(false),
+  duoName: z.string().optional(),
+  partnerId: z.string().optional()
 })
 
 type AddTalentFormValues = z.infer<typeof formSchema>
@@ -35,42 +40,30 @@ export function AddTalentModal({ open, onOpenChange }: AddTalentModalProps) {
     defaultValues: {
       firstName: "",
       lastName: "",
-      email: ""
+      email: "",
+      isDuo: false,
+      duoName: "",
+      partnerId: undefined
     }
   })
 
-  const checkExistingEmail = async (email: string) => {
-    const { data: existingUser } = await supabase
-      .from("users")
-      .select("id, full_name")
-      .eq("email", email)
-      .single()
-
-    if (existingUser) {
-      setDuplicateUser(existingUser)
-      return true
-    }
-    setDuplicateUser(null)
-    return false
-  }
-
-  const onSubmit = async (values: AddTalentFormValues) => {
+  const handleSaveDuo = async (data: AddTalentFormValues) => {
     try {
       setIsLoading(true)
+      const { isDuo, partnerId, duoName, ...talentData } = data;
 
-      // Check for existing email
-      const isDuplicate = await checkExistingEmail(values.email)
-      if (isDuplicate) {
-        return
+      if (isDuo && !partnerId) {
+        notify.error('Partner is required for duo talents');
+        return;
       }
 
       // Create new user
       const { data: newUser, error: userError } = await supabase.auth.signUp({
-        email: values.email,
-        password: Math.random().toString(36).slice(-8), // Generate random password
+        email: talentData.email,
+        password: Math.random().toString(36).slice(-8),
         options: {
           data: {
-            full_name: `${values.firstName} ${values.lastName}`,
+            full_name: `${talentData.firstName} ${talentData.lastName}`,
             role: "ugc_talent"
           }
         }
@@ -80,14 +73,36 @@ export function AddTalentModal({ open, onOpenChange }: AddTalentModalProps) {
 
       if (newUser.user) {
         // Create talent profile
-        const { error: profileError } = await supabase
+        const { data: talent, error: profileError } = await supabase
           .from("talent_profiles")
           .insert({
             user_id: newUser.user.id,
-            evaluation_status: "under_evaluation"
+            evaluation_status: "under_evaluation",
+            is_duo: isDuo,
+            partner_id: partnerId,
+            duo_name: isDuo ? duoName : null
           })
+          .select()
+          .single()
 
         if (profileError) throw profileError
+
+        // Update partner record if this is a duo
+        if (isDuo && partnerId) {
+          const { error: partnerError } = await supabase
+            .from('talent_profiles')
+            .update({
+              is_duo: true,
+              partner_id: talent.id,
+              duo_name: duoName
+            })
+            .eq('id', partnerId)
+
+          if (partnerError) {
+            notify.error('Failed to update partner record');
+            return;
+          }
+        }
 
         toast({
           title: "Success",
@@ -95,7 +110,7 @@ export function AddTalentModal({ open, onOpenChange }: AddTalentModalProps) {
         })
 
         onOpenChange(false)
-        navigate(`/talents/${newUser.user.id}`)
+        navigate(`/talents/${talent.id}`)
       }
     } catch (error: any) {
       console.error("Error adding talent:", error)
@@ -116,7 +131,7 @@ export function AddTalentModal({ open, onOpenChange }: AddTalentModalProps) {
           <DialogTitle>Add new talent</DialogTitle>
         </DialogHeader>
         <Form {...form}>
-          <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
+          <form onSubmit={form.handleSubmit(handleSaveDuo)} className="space-y-4">
             <FormField
               control={form.control}
               name="firstName"
@@ -156,6 +171,40 @@ export function AddTalentModal({ open, onOpenChange }: AddTalentModalProps) {
                 </FormItem>
               )}
             />
+            <FormField
+              control={form.control}
+              name="isDuo"
+              render={({ field }) => (
+                <FormItem className="flex items-center gap-2">
+                  <FormControl>
+                    <Switch
+                      checked={field.value}
+                      onCheckedChange={field.onChange}
+                      disabled={isLoading}
+                    />
+                  </FormControl>
+                  <FormLabel className="!mt-0">Is this a duo/couple?</FormLabel>
+                </FormItem>
+              )}
+            />
+            {form.watch("isDuo") && (
+              <>
+                <FormField
+                  control={form.control}
+                  name="duoName"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Duo Name</FormLabel>
+                      <FormControl>
+                        <Input {...field} disabled={isLoading} />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+                {/* Partner selection will be implemented in a separate component */}
+              </>
+            )}
             {duplicateUser && (
               <div className="text-sm text-blue-600">
                 <span>This email is already registered. </span>
@@ -185,5 +234,5 @@ export function AddTalentModal({ open, onOpenChange }: AddTalentModalProps) {
         </Form>
       </DialogContent>
     </Dialog>
-  )
+  );
 }
