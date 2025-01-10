@@ -12,6 +12,8 @@ import { supabase } from "@/integrations/supabase/client"
 import { useNavigate } from "react-router-dom"
 import { Loader2 } from "lucide-react"
 import { notify } from "@/utils/notifications"
+import { DuoPartnerSearch } from "./DuoPartnerSearch"
+import { SelectedPartner } from "./SelectedPartner"
 
 const formSchema = z.object({
   firstName: z.string().min(2, "First name must be at least 2 characters"),
@@ -19,21 +21,21 @@ const formSchema = z.object({
   email: z.string().email("Invalid email address"),
   isDuo: z.boolean().default(false),
   duoName: z.string().optional(),
-  partnerId: z.string().optional()
-})
+});
 
-type AddTalentFormValues = z.infer<typeof formSchema>
+type AddTalentFormValues = z.infer<typeof formSchema>;
 
 interface AddTalentModalProps {
-  open: boolean
-  onOpenChange: (open: boolean) => void
+  open: boolean;
+  onOpenChange: (open: boolean) => void;
 }
 
 export function AddTalentModal({ open, onOpenChange }: AddTalentModalProps) {
-  const [isLoading, setIsLoading] = useState(false)
-  const [duplicateUser, setDuplicateUser] = useState<{ id: string; full_name: string } | null>(null)
-  const { toast } = useToast()
-  const navigate = useNavigate()
+  const [isLoading, setIsLoading] = useState(false);
+  const [duplicateUser, setDuplicateUser] = useState<{ id: string; full_name: string } | null>(null);
+  const [selectedPartner, setSelectedPartner] = useState<DuoPartner | null>(null);
+  const { toast } = useToast();
+  const navigate = useNavigate();
 
   const form = useForm<AddTalentFormValues>({
     resolver: zodResolver(formSchema),
@@ -43,17 +45,20 @@ export function AddTalentModal({ open, onOpenChange }: AddTalentModalProps) {
       email: "",
       isDuo: false,
       duoName: "",
-      partnerId: undefined
     }
-  })
+  });
 
   const handleSaveDuo = async (data: AddTalentFormValues) => {
     try {
-      setIsLoading(true)
-      const { isDuo, partnerId, duoName, ...talentData } = data;
+      setIsLoading(true);
+      const { isDuo, duoName, ...talentData } = data;
 
-      if (isDuo && !partnerId) {
-        notify.error('Partner is required for duo talents');
+      if (isDuo && !selectedPartner) {
+        toast({
+          title: "Error",
+          description: "Partner is required for duo talents",
+          variant: "destructive"
+        });
         return;
       }
 
@@ -67,9 +72,9 @@ export function AddTalentModal({ open, onOpenChange }: AddTalentModalProps) {
             role: "ugc_talent"
           }
         }
-      })
+      });
 
-      if (userError) throw userError
+      if (userError) throw userError;
 
       if (newUser.user) {
         // Create talent profile
@@ -79,27 +84,31 @@ export function AddTalentModal({ open, onOpenChange }: AddTalentModalProps) {
             user_id: newUser.user.id,
             evaluation_status: "under_evaluation",
             is_duo: isDuo,
-            partner_id: partnerId,
+            partner_id: selectedPartner?.id,
             duo_name: isDuo ? duoName : null
           })
           .select()
-          .single()
+          .single();
 
-        if (profileError) throw profileError
+        if (profileError) throw profileError;
 
         // Update partner record if this is a duo
-        if (isDuo && partnerId) {
+        if (isDuo && selectedPartner) {
           const { error: partnerError } = await supabase
-            .from('talent_profiles')
+            .from("talent_profiles")
             .update({
               is_duo: true,
               partner_id: talent.id,
               duo_name: duoName
             })
-            .eq('id', partnerId)
+            .eq("id", selectedPartner.id);
 
           if (partnerError) {
-            notify.error('Failed to update partner record');
+            toast({
+              title: "Error",
+              description: "Failed to update partner record",
+              variant: "destructive"
+            });
             return;
           }
         }
@@ -107,22 +116,22 @@ export function AddTalentModal({ open, onOpenChange }: AddTalentModalProps) {
         toast({
           title: "Success",
           description: "New talent has been added successfully.",
-        })
+        });
 
-        onOpenChange(false)
-        navigate(`/talents/${talent.id}`)
+        onOpenChange(false);
+        navigate(`/talents/${talent.id}`);
       }
     } catch (error: any) {
-      console.error("Error adding talent:", error)
+      console.error("Error adding talent:", error);
       toast({
         title: "Error",
         description: "Failed to add new talent. Please try again.",
         variant: "destructive"
-      })
+      });
     } finally {
-      setIsLoading(false)
+      setIsLoading(false);
     }
-  }
+  };
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
@@ -187,39 +196,38 @@ export function AddTalentModal({ open, onOpenChange }: AddTalentModalProps) {
                 </FormItem>
               )}
             />
+
             {form.watch("isDuo") && (
-              <>
-                <FormField
-                  control={form.control}
-                  name="duoName"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Duo Name</FormLabel>
-                      <FormControl>
-                        <Input {...field} disabled={isLoading} />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-                {/* Partner selection will be implemented in a separate component */}
-              </>
-            )}
-            {duplicateUser && (
-              <div className="text-sm text-blue-600">
-                <span>This email is already registered. </span>
-                <Button
-                  variant="link"
-                  className="p-0 h-auto font-normal"
-                  onClick={() => navigate(`/talents/${duplicateUser.id}`)}
-                >
-                  View profile
-                </Button>
+              <div className="space-y-4">
+                {selectedPartner ? (
+                  <SelectedPartner
+                    partner={selectedPartner}
+                    onRemove={() => setSelectedPartner(null)}
+                  />
+                ) : (
+                  <DuoPartnerSearch
+                    onSelect={setSelectedPartner}
+                    currentTalentId={duplicateUser?.id}
+                  />
+                )}
+                {selectedPartner && (
+                  <FormField
+                    control={form.control}
+                    name="duoName"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Duo Name</FormLabel>
+                        <FormControl>
+                          <Input {...field} placeholder="Enter duo/couple name..." disabled={isLoading} />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                )}
               </div>
             )}
-            <div className="text-sm text-muted-foreground">
-              After saving, you'll be redirected to complete the full talent profile.
-            </div>
+
             <Button type="submit" className="w-full" disabled={isLoading}>
               {isLoading ? (
                 <>
