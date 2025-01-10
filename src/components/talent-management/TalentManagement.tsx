@@ -1,27 +1,19 @@
-import { useState } from "react";
-import { useQuery } from "@tanstack/react-query";
-import { Plus, Users, CheckCircle, AlertCircle, Clock } from "lucide-react";
-import { Button } from "@/components/ui/button";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { StatCard } from "./StatCard";
-import { useAuth } from "@/contexts/auth";
-import { canManageTalents } from "@/utils/permissions";
-import { TalentCategory } from "@/types/talent-management";
-import { supabase } from "@/integrations/supabase/client";
-import { Database } from "@/integrations/supabase/types";
-
-type TalentProfile = Database['public']['Tables']['talent_profiles']['Row'] & {
-  users: {
-    id: string;
-    first_name: string | null;
-    last_name: string | null;
-    email: string | null;
-  } | null;
-};
+import { useState } from "react"
+import { useQuery } from "@tanstack/react-query"
+import { Plus, Users, CheckCircle, AlertCircle, Clock } from "lucide-react"
+import { Button } from "@/components/ui/button"
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
+import { StatCard } from "./StatCard"
+import { useAuth } from "@/contexts/auth"
+import { canManageTalents } from "@/utils/permissions"
+import { TalentCategory } from "@/types/talent-management"
+import { supabase } from "@/integrations/supabase/client"
+import type { User } from "@/types/user"
 
 export function TalentManagement() {
-  const { user } = useAuth();
-  const [activeCategory, setActiveCategory] = useState<TalentCategory>(TalentCategory.UGC);
+  const { user } = useAuth()
+  const currentUser = user as User
+  const [activeCategory, setActiveCategory] = useState<TalentCategory>(TalentCategory.UGC)
 
   const { data: stats, isLoading: isLoadingStats } = useQuery({
     queryKey: ['talent-stats', activeCategory],
@@ -54,7 +46,7 @@ export function TalentManagement() {
     <div className="container py-6">
       <div className="flex justify-between items-center mb-6">
         <h1 className="text-2xl font-semibold">Talent Management</h1>
-        {canManageTalents(user) && (
+        {canManageTalents(currentUser) && (
           <Button>
             <Plus className="h-4 w-4 mr-2" />
             Add New Talent
@@ -100,7 +92,6 @@ export function TalentManagement() {
         {Object.values(TalentCategory).map((category) => (
           <TabsContent key={category} value={category}>
             <div className="rounded-md border">
-              {/* TalentTable will be implemented next */}
               <div className="p-4">Talent table for {category} category coming soon...</div>
             </div>
           </TabsContent>

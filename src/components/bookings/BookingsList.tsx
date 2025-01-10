@@ -14,12 +14,6 @@ export function BookingsList() {
         .from('bookings')
         .select(`
           *,
-          castings (
-            name
-          ),
-          projects (
-            name
-          ),
           talent_profiles!inner (
             id,
             user_id,
@@ -27,12 +21,18 @@ export function BookingsList() {
               id,
               full_name
             )
+          ),
+          projects (
+            name
+          ),
+          castings (
+            name
           )
         `)
         .order('created_at', { ascending: false })
 
       if (error) throw error
-      return data as Booking[]
+      return data as unknown as Booking[]
     }
   })
 
