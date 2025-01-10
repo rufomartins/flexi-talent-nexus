@@ -1,5 +1,3 @@
-import type { Database } from '@/integrations/supabase/types';
-
 export enum NotificationType {
   DEADLINE_APPROACHING = 'DEADLINE_APPROACHING',
   DEADLINE_OVERDUE = 'DEADLINE_OVERDUE',
@@ -10,17 +8,16 @@ export enum NotificationType {
   PROFILE_UPDATE = 'PROFILE_UPDATE',
   DUO_PARTNER_CHANGE = 'DUO_PARTNER_CHANGE',
   PROJECT_ASSIGNED = 'PROJECT_ASSIGNED',
-  BOOKING_UPDATE = 'BOOKING_UPDATE'
+  BOOKING_UPDATE = 'BOOKING_UPDATE',
+  PROJECT_MILESTONE = 'PROJECT_MILESTONE',
+  PAYMENT_STATUS = 'PAYMENT_STATUS',
+  CASTING_OPPORTUNITY = 'CASTING_OPPORTUNITY',
+  BOOKING_CONFIRMATION = 'BOOKING_CONFIRMATION',
+  REVIEW_FEEDBACK = 'REVIEW_FEEDBACK',
+  DOCUMENT_UPDATE = 'DOCUMENT_UPDATE'
 }
 
-export enum TalentNotificationType {
-  STATUS_CHANGE = 'STATUS_CHANGE',
-  ASSIGNMENT_UPDATE = 'ASSIGNMENT_UPDATE',
-  PROFILE_UPDATE = 'PROFILE_UPDATE',
-  DUO_PARTNER_CHANGE = 'DUO_PARTNER_CHANGE',
-  PROJECT_ASSIGNED = 'PROJECT_ASSIGNED',
-  BOOKING_UPDATE = 'BOOKING_UPDATE'
-}
+export type TalentNotificationType = keyof typeof NotificationType;
 
 export enum DeadlineStatus {
   APPROACHING = 'approaching',
@@ -67,28 +64,13 @@ export interface TalentNotification {
   action_url?: string;
 }
 
-export interface DeadlinePreference {
-  id: string;
-  user_id: string;
-  warning_days: number[];
-  notification_channels: NotificationChannel[];
-  deadline_statuses: DeadlineStatus[];
-  created_at: string;
-  updated_at: string;
-}
-
-export interface AssignmentData {
-  task_id: string;
-  role_type: string;
-  user_id: string;
-  status?: string;
-}
-
 export interface NotificationPreferences {
   talent_id: string;
   email_enabled: boolean;
   in_app_enabled: boolean;
   types: TalentNotificationType[];
+  email_frequency: 'realtime' | 'daily' | 'weekly';
+  reminder_days: number[];
   created_at?: string;
   updated_at?: string;
 }

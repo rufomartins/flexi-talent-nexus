@@ -1827,7 +1827,9 @@ export type Database = {
         Row: {
           created_at: string | null
           email_enabled: boolean | null
+          email_frequency: string | null
           in_app_enabled: boolean | null
+          reminder_days: number[] | null
           talent_id: string
           types: Database["public"]["Enums"]["notification_type"][] | null
           updated_at: string | null
@@ -1835,7 +1837,9 @@ export type Database = {
         Insert: {
           created_at?: string | null
           email_enabled?: boolean | null
+          email_frequency?: string | null
           in_app_enabled?: boolean | null
+          reminder_days?: number[] | null
           talent_id: string
           types?: Database["public"]["Enums"]["notification_type"][] | null
           updated_at?: string | null
@@ -1843,7 +1847,9 @@ export type Database = {
         Update: {
           created_at?: string | null
           email_enabled?: boolean | null
+          email_frequency?: string | null
           in_app_enabled?: boolean | null
+          reminder_days?: number[] | null
           talent_id?: string
           types?: Database["public"]["Enums"]["notification_type"][] | null
           updated_at?: string | null
@@ -2383,6 +2389,12 @@ export type Database = {
         | "ASSIGNMENT_UPDATE"
         | "PROFILE_UPDATE"
         | "DUO_PARTNER_CHANGE"
+        | "PROJECT_MILESTONE"
+        | "PAYMENT_STATUS"
+        | "CASTING_OPPORTUNITY"
+        | "BOOKING_CONFIRMATION"
+        | "REVIEW_FEEDBACK"
+        | "DOCUMENT_UPDATE"
       project_delivery_status: "Pending" | "Delivered" | "R Pending"
       project_review_status: "Internal Review" | "Client Review" | "Approved"
       project_script_status: "Pending" | "In Progress" | "Approved"
