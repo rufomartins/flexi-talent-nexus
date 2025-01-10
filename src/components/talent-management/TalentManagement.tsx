@@ -8,14 +8,29 @@ import { useAuth } from "@/contexts/auth"
 import { canManageTalents } from "@/utils/permissions"
 import { TalentCategory } from "@/types/talent-management"
 import { supabase } from "@/integrations/supabase/client"
-import { Database } from "@/integrations/supabase/types"
+import { DatabaseUser } from "@/types/user"
+import type { User as SupabaseUser } from '@supabase/supabase-js'
 
-type DatabaseUser = Database["public"]["Tables"]["users"]["Row"];
+interface TalentManagementProps {
+  user: SupabaseUser;
+}
 
-export function TalentManagement() {
-  const { user } = useAuth()
-  const currentUser = user as DatabaseUser
+export function TalentManagement({ user }: TalentManagementProps) {
   const [activeCategory, setActiveCategory] = useState<TalentCategory>(TalentCategory.UGC)
+
+  const { data: userData } = useQuery({
+    queryKey: ['user', user.id],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from('users')
+        .select('*')
+        .eq('id', user.id)
+        .single();
+      
+      if (error) throw error;
+      return data as DatabaseUser;
+    }
+  });
 
   const { data: stats, isLoading: isLoadingStats } = useQuery({
     queryKey: ['talent-stats', activeCategory],
@@ -44,11 +59,13 @@ export function TalentManagement() {
     }
   });
 
+  if (!userData) return null;
+
   return (
     <div className="container py-6">
       <div className="flex justify-between items-center mb-6">
         <h1 className="text-2xl font-semibold">Talent Management</h1>
-        {canManageTalents(currentUser) && (
+        {canManageTalents(userData) && (
           <Button>
             <Plus className="h-4 w-4 mr-2" />
             Add New Talent
