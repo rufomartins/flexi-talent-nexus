@@ -9,6 +9,16 @@ import { useToast } from "@/hooks/use-toast"
 import { Link } from "react-router-dom"
 import { Badge } from "@/components/ui/badge"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
+import { Database } from "@/integrations/supabase/types"
+
+type TalentProfile = Database['public']['Tables']['talent_profiles']['Row'] & {
+  users: {
+    id: string
+    first_name: string | null
+    last_name: string | null
+    avatar_url: string | null
+  } | null
+}
 
 const TalentList = () => {
   const [searchOpen, setSearchOpen] = useState(false)
@@ -22,10 +32,7 @@ const TalentList = () => {
       const { data, error } = await supabase
         .from("talent_profiles")
         .select(`
-          id,
-          user_id,
-          category,
-          evaluation_status,
+          *,
           users!inner (
             id,
             first_name,
@@ -46,7 +53,7 @@ const TalentList = () => {
       }
 
       console.log("Fetched talents:", data)
-      return data
+      return data as TalentProfile[]
     },
   })
 

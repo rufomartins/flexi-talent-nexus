@@ -31,10 +31,10 @@ export function BookingsList() {
         .from('bookings')
         .select(`
           *,
-          talent_profiles (
+          talent_profiles!inner (
             id,
             user_id,
-            users (
+            users!inner (
               id,
               full_name
             )
@@ -71,7 +71,7 @@ export function BookingsList() {
 
   return (
     <div className="grid gap-4">
-      {bookings.map((booking) => (
+      {bookings?.map((booking) => (
         <Card key={booking.id}>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
             <CardTitle className="text-sm font-medium">
