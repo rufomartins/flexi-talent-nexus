@@ -1,5 +1,3 @@
-export type Json = string | number | boolean | null | { [key: string]: Json } | Json[];
-
 export enum NotificationType {
   DEADLINE_APPROACHING = 'DEADLINE_APPROACHING',
   DEADLINE_OVERDUE = 'DEADLINE_OVERDUE',
