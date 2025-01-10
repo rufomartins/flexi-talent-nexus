@@ -1,5 +1,8 @@
 import { supabase } from "@/integrations/supabase/client";
-import type { DeadlinePreference, NotificationMetadata, NotificationType, NotificationChannel, DeadlineStatus, Json } from "@/types/notifications";
+import type { DeadlinePreference, NotificationMetadata, NotificationType, NotificationChannel, DeadlineStatus } from "@/types/notifications";
+import type { Database } from '@/integrations/supabase/types';
+
+type Json = Database['public']['Tables']['notification_queue']['Insert']['metadata'];
 
 export class DeadlineService {
   async createNotification(
