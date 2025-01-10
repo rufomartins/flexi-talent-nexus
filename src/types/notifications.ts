@@ -13,7 +13,14 @@ export enum NotificationType {
   BOOKING_UPDATE = 'BOOKING_UPDATE'
 }
 
-export type TalentNotificationType = Database['public']['Enums']['notification_type'];
+export enum TalentNotificationType {
+  STATUS_CHANGE = 'STATUS_CHANGE',
+  ASSIGNMENT_UPDATE = 'ASSIGNMENT_UPDATE',
+  PROFILE_UPDATE = 'PROFILE_UPDATE',
+  DUO_PARTNER_CHANGE = 'DUO_PARTNER_CHANGE',
+  PROJECT_ASSIGNED = 'PROJECT_ASSIGNED',
+  BOOKING_UPDATE = 'BOOKING_UPDATE'
+}
 
 export enum DeadlineStatus {
   APPROACHING = 'approaching',
