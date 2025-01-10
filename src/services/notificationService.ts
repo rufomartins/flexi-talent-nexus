@@ -1,5 +1,8 @@
 import { supabase } from '@/integrations/supabase/client';
 import type { TalentNotification, NotificationPreferences } from '@/types/notifications';
+import type { Database } from '@/integrations/supabase/types';
+
+type NotificationType = Database['public']['Enums']['notification_type'];
 
 export const notificationService = {
   async createNotification(notification: Omit<TalentNotification, 'id' | 'created_at' | 'read'>) {
@@ -7,7 +10,7 @@ export const notificationService = {
       .from('talent_notifications')
       .insert({
         talent_id: notification.talent_id,
-        type: notification.type,
+        type: notification.type as NotificationType,
         title: notification.title,
         message: notification.message,
         metadata: notification.metadata || {},
@@ -59,7 +62,7 @@ export const notificationService = {
         talent_id: preferences.talent_id,
         email_enabled: preferences.email_enabled,
         in_app_enabled: preferences.in_app_enabled,
-        types: preferences.types,
+        types: preferences.types as NotificationType[],
         updated_at: new Date().toISOString()
       })
       .select()
