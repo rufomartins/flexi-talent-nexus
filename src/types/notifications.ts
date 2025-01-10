@@ -19,6 +19,20 @@ export enum NotificationType {
 
 export type TalentNotificationType = keyof typeof NotificationType;
 
+export interface DeadlinePreference {
+  user_id: string;
+  notification_channels: NotificationChannel[];
+  deadline_statuses: DeadlineStatus[];
+  warning_days: number[];
+}
+
+export interface AssignmentData {
+  task_id: string;
+  role_type: string;
+  user_id: string;
+  status: string;
+}
+
 export enum DeadlineStatus {
   APPROACHING = 'approaching',
   OVERDUE = 'overdue'

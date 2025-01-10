@@ -4,7 +4,7 @@ import { Bell, CheckCircle, Clock } from "lucide-react";
 import { useTalentNotifications } from "@/hooks/useTalentNotifications";
 import { useNotificationSubscription } from "@/hooks/useNotificationSubscription";
 import { Button } from "@/components/ui/button";
-import { TalentNotificationType } from "@/types/notifications";
+import { NotificationType } from "@/types/notifications";
 import { Loader2 } from "lucide-react";
 
 interface TalentNotificationListProps {
@@ -17,11 +17,11 @@ export function TalentNotificationList({ talentId }: TalentNotificationListProps
   // Set up real-time subscription
   useNotificationSubscription(talentId);
 
-  const getIcon = (type: TalentNotificationType) => {
+  const getIcon = (type: keyof typeof NotificationType) => {
     switch (type) {
-      case TalentNotificationType.STATUS_CHANGE:
+      case "STATUS_CHANGE":
         return <CheckCircle className="h-4 w-4" />;
-      case TalentNotificationType.ASSIGNMENT_UPDATE:
+      case "ASSIGNMENT_UPDATE":
         return <Bell className="h-4 w-4" />;
       default:
         return <Clock className="h-4 w-4" />;
