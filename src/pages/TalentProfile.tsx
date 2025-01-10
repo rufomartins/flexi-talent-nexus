@@ -18,28 +18,24 @@ const TalentProfile = () => {
   const { data: talent, isLoading } = useQuery({
     queryKey: ["talent", id],
     queryFn: async () => {
-      const { data: user, error: userError } = await supabase
-        .from("user_profiles")
-        .select("*")
-        .eq("id", id)
-        .single();
-
-      if (userError) throw userError;
-
-      const { data: talentProfile, error: profileError } = await supabase
+      const { data: talentData, error } = await supabase
         .from("talent_profiles")
-        .select("*")
+        .select(`
+          *,
+          user:users!user_id (*)
+        `)
         .eq("user_id", id)
         .single();
 
-      if (profileError) throw profileError;
+      if (error) throw error;
 
       return {
-        user: {
-          ...user,
-          updated_at: user.created_at, // Fallback to created_at if updated_at is not available
-        },
-        talent_profile: talentProfile,
+        user: talentData.user,
+        talent_profile: {
+          category: talentData.category,
+          evaluation_status: talentData.evaluation_status,
+          internal_remarks: talentData.internal_remarks
+        }
       } as TalentProfileData;
     },
   });
