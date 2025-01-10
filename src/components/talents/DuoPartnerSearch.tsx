@@ -31,32 +31,40 @@ export function DuoPartnerSearch({
     setIsSearching(true);
     try {
       const { data: rawData, error } = await supabase
-        .from('talent_profiles')
+        .from('users')
         .select(`
           id,
-          user_id,
-          users (
-            first_name,
-            last_name,
-            email,
-            avatar_url
+          first_name,
+          last_name,
+          email,
+          avatar_url,
+          talent_profiles!inner (
+            id,
+            user_id
           )
         `)
-        .eq('is_duo', false)
-        .neq('id', currentTalentId || '')
-        .ilike('users.first_name', `%${query}%`)
+        .or(`first_name.ilike.%${query}%,last_name.ilike.%${query}%,email.ilike.%${query}%`)
         .limit(5);
 
-      if (error) throw error;
+      if (error) {
+        console.error('Search error:', error);
+        setSearchResults([]);
+        return;
+      }
 
-      // Transform to match DuoPartner interface
-      const partners: DuoPartner[] = rawData.map(record => ({
-        id: record.id,
-        user_id: record.user_id,
-        first_name: record.users?.first_name || '',
-        last_name: record.users?.last_name || '',
-        email: record.users?.email || '',
-        avatar_url: record.users?.avatar_url
+      if (!rawData) {
+        setSearchResults([]);
+        return;
+      }
+
+      // Transform the data to match DuoPartner interface
+      const partners: DuoPartner[] = rawData.map(user => ({
+        id: user.talent_profiles[0].id, // Get the talent profile ID
+        user_id: user.id,
+        first_name: user.first_name || '',
+        last_name: user.last_name || '',
+        email: user.email || '',
+        avatar_url: user.avatar_url
       }));
 
       setSearchResults(partners);
