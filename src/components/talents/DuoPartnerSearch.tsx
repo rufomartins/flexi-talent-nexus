@@ -13,6 +13,19 @@ interface DuoPartnerSearchProps {
   existingPartnerId?: string;
 }
 
+// Define the shape of our raw query result
+interface UserWithProfile {
+  id: string;
+  first_name: string | null;
+  last_name: string | null;
+  email: string | null;
+  avatar_url: string | null;
+  talent_profiles: {
+    id: string;
+    user_id: string;
+  }[];
+}
+
 export function DuoPartnerSearch({
   onSelect,
   currentTalentId,
@@ -30,9 +43,9 @@ export function DuoPartnerSearch({
 
     setIsSearching(true);
     try {
-      const { data: rawData, error } = await supabase
+      const { data, error } = await supabase
         .from('users')
-        .select(`
+        .select<string, UserWithProfile>(`
           id,
           first_name,
           last_name,
@@ -44,6 +57,7 @@ export function DuoPartnerSearch({
           )
         `)
         .or(`first_name.ilike.%${query}%,last_name.ilike.%${query}%,email.ilike.%${query}%`)
+        .not('talent_profiles.id', 'eq', currentTalentId)
         .limit(5);
 
       if (error) {
@@ -52,19 +66,19 @@ export function DuoPartnerSearch({
         return;
       }
 
-      if (!rawData) {
+      if (!data) {
         setSearchResults([]);
         return;
       }
 
       // Transform the data to match DuoPartner interface
-      const partners: DuoPartner[] = rawData.map(user => ({
-        id: user.talent_profiles[0].id, // Get the talent profile ID
+      const partners: DuoPartner[] = data.map(user => ({
+        id: user.talent_profiles[0].id,
         user_id: user.id,
         first_name: user.first_name || '',
         last_name: user.last_name || '',
         email: user.email || '',
-        avatar_url: user.avatar_url
+        avatar_url: user.avatar_url || undefined
       }));
 
       setSearchResults(partners);
