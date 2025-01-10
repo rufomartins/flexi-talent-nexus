@@ -1823,6 +1823,85 @@ export type Database = {
           },
         ]
       }
+      talent_notification_preferences: {
+        Row: {
+          created_at: string | null
+          email_enabled: boolean | null
+          in_app_enabled: boolean | null
+          talent_id: string
+          types: Database["public"]["Enums"]["notification_type"][] | null
+          updated_at: string | null
+        }
+        Insert: {
+          created_at?: string | null
+          email_enabled?: boolean | null
+          in_app_enabled?: boolean | null
+          talent_id: string
+          types?: Database["public"]["Enums"]["notification_type"][] | null
+          updated_at?: string | null
+        }
+        Update: {
+          created_at?: string | null
+          email_enabled?: boolean | null
+          in_app_enabled?: boolean | null
+          talent_id?: string
+          types?: Database["public"]["Enums"]["notification_type"][] | null
+          updated_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "talent_notification_preferences_talent_id_fkey"
+            columns: ["talent_id"]
+            isOneToOne: true
+            referencedRelation: "talent_profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      talent_notifications: {
+        Row: {
+          action_url: string | null
+          created_at: string | null
+          id: string
+          message: string
+          metadata: Json | null
+          read: boolean | null
+          talent_id: string | null
+          title: string
+          type: Database["public"]["Enums"]["notification_type"]
+        }
+        Insert: {
+          action_url?: string | null
+          created_at?: string | null
+          id?: string
+          message: string
+          metadata?: Json | null
+          read?: boolean | null
+          talent_id?: string | null
+          title: string
+          type: Database["public"]["Enums"]["notification_type"]
+        }
+        Update: {
+          action_url?: string | null
+          created_at?: string | null
+          id?: string
+          message?: string
+          metadata?: Json | null
+          read?: boolean | null
+          talent_id?: string | null
+          title?: string
+          type?: Database["public"]["Enums"]["notification_type"]
+        }
+        Relationships: [
+          {
+            foreignKeyName: "talent_notifications_talent_id_fkey"
+            columns: ["talent_id"]
+            isOneToOne: false
+            referencedRelation: "talent_profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       talent_profile_field_options: {
         Row: {
           created_at: string | null
@@ -2299,6 +2378,11 @@ export type Database = {
         | "fixed_dropdown"
       location_status: "Pending" | "Confirmed" | "Unavailable"
       media_category: "photo" | "video" | "audio" | "document" | "other"
+      notification_type:
+        | "STATUS_CHANGE"
+        | "ASSIGNMENT_UPDATE"
+        | "PROFILE_UPDATE"
+        | "DUO_PARTNER_CHANGE"
       project_delivery_status: "Pending" | "Delivered" | "R Pending"
       project_review_status: "Internal Review" | "Client Review" | "Approved"
       project_script_status: "Pending" | "In Progress" | "Approved"
