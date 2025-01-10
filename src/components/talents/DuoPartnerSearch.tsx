@@ -35,7 +35,7 @@ export function DuoPartnerSearch({
         .select(`
           id,
           user_id,
-          users (
+          users!user_id (
             first_name,
             last_name,
             email,
