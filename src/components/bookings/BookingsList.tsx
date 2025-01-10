@@ -4,24 +4,7 @@ import { formatDate } from "@/lib/utils"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
 import { Loader2 } from "lucide-react"
-import { Database } from "@/integrations/supabase/types"
-
-type Booking = Database['public']['Tables']['bookings']['Row'] & {
-  talent_profiles: {
-    id: string
-    user_id: string
-    users: {
-      id: string
-      full_name: string | null
-    } | null
-  } | null
-  projects: {
-    name: string | null
-  } | null
-  castings: {
-    name: string | null
-  } | null
-}
+import type { Booking } from "@/types/booking"
 
 export function BookingsList() {
   const { data: bookings, isLoading } = useQuery({
@@ -31,6 +14,12 @@ export function BookingsList() {
         .from('bookings')
         .select(`
           *,
+          castings (
+            name
+          ),
+          projects (
+            name
+          ),
           talent_profiles!inner (
             id,
             user_id,
@@ -38,12 +27,6 @@ export function BookingsList() {
               id,
               full_name
             )
-          ),
-          projects (
-            name
-          ),
-          castings (
-            name
           )
         `)
         .order('created_at', { ascending: false })

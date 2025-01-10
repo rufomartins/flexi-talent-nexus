@@ -33,7 +33,7 @@ const TalentList = () => {
         .from("talent_profiles")
         .select(`
           *,
-          users!inner (
+          users!user_id (
             id,
             first_name,
             last_name,
