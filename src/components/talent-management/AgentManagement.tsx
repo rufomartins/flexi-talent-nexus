@@ -6,21 +6,12 @@ import { canViewAgents, canManageAgents } from "@/utils/permissions";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { toast } from "sonner";
+import { AgentWithRelationships } from "@/types/agent";
 
 type DatabaseUser = Database["public"]["Tables"]["users"]["Row"];
 
 interface AgentManagementProps {
   currentUser: DatabaseUser;
-}
-
-interface AgentWithRelationships extends DatabaseUser {
-  agent_talent_relationships?: Array<{
-    talent_id: string;
-    talent: {
-      first_name: string;
-      last_name: string;
-    };
-  }>;
 }
 
 export const AgentManagement: React.FC<AgentManagementProps> = ({ currentUser }) => {
@@ -55,7 +46,7 @@ export const AgentManagement: React.FC<AgentManagementProps> = ({ currentUser })
         throw error;
       }
 
-      return data as AgentWithRelationships[];
+      return data as unknown as AgentWithRelationships[];
     },
     enabled: isVisible
   });
