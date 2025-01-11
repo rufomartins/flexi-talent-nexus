@@ -34,6 +34,7 @@ export function NotificationList() {
       case NotificationType.STATUS_CHANGE:
         return <CheckCircle className="h-4 w-4" />
       case NotificationType.DEADLINE_WARNING:
+      case NotificationType.DEADLINE_APPROACHING:
         return <Clock className="h-4 w-4" />
       case NotificationType.DEADLINE_OVERDUE:
         return <AlertTriangle className="h-4 w-4" />
