@@ -1,29 +1,11 @@
 import { useState } from "react";
-import { Check, Loader2 } from "lucide-react";
 import { useMutation } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
-
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
-import {
-  AlertDialog,
-  AlertDialogAction,
-  AlertDialogCancel,
-  AlertDialogContent,
-  AlertDialogDescription,
-  AlertDialogFooter,
-  AlertDialogHeader,
-  AlertDialogTitle,
-} from "@/components/ui/alert-dialog";
-import { Button } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge";
-
-type BookingStatus = 'pending' | 'confirmed' | 'completed' | 'cancelled';
+import { StatusBadge } from "./status/StatusBadge";
+import { StatusTransitionButton } from "./status/StatusTransitionButton";
+import { StatusConfirmationDialog } from "./status/StatusConfirmationDialog";
+import type { BookingStatus } from "@/types/booking";
 
 interface BookingStatusManagerProps {
   bookingId: string;
@@ -36,13 +18,6 @@ const allowedTransitions: Record<BookingStatus, BookingStatus[]> = {
   'confirmed': ['completed', 'cancelled'],
   'completed': [],
   'cancelled': []
-};
-
-const statusColors: Record<BookingStatus, "default" | "secondary" | "destructive" | "outline"> = {
-  pending: "secondary",
-  confirmed: "default",
-  completed: "default",
-  cancelled: "destructive"
 };
 
 export function BookingStatusManager({ bookingId, currentStatus, lastUpdated }: BookingStatusManagerProps) {
@@ -84,19 +59,15 @@ export function BookingStatusManager({ bookingId, currentStatus, lastUpdated }: 
     setIsConfirmOpen(true);
   };
 
-  const handleConfirm = () => {
+  const handleConfirm = async () => {
     if (selectedStatus) {
-      updateStatus.mutate(selectedStatus);
+      await updateStatus.mutate(selectedStatus);
     }
   };
 
-  const availableTransitions = allowedTransitions[currentStatus] || [];
-
   return (
     <div className="flex items-center gap-2">
-      <Badge variant={statusColors[currentStatus]}>
-        {currentStatus}
-      </Badge>
+      <StatusBadge status={currentStatus} />
       
       {lastUpdated && (
         <span className="text-sm text-muted-foreground">
@@ -104,66 +75,21 @@ export function BookingStatusManager({ bookingId, currentStatus, lastUpdated }: 
         </span>
       )}
 
-      {availableTransitions.length > 0 && (
-        <DropdownMenu>
-          <DropdownMenuTrigger asChild>
-            <Button 
-              variant="outline" 
-              size="sm"
-              disabled={updateStatus.isPending}
-            >
-              {updateStatus.isPending ? (
-                <>
-                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                  Updating...
-                </>
-              ) : (
-                "Update Status"
-              )}
-            </Button>
-          </DropdownMenuTrigger>
-          <DropdownMenuContent align="end">
-            {availableTransitions.map((status) => (
-              <DropdownMenuItem
-                key={status}
-                onClick={() => handleStatusSelect(status)}
-              >
-                <Check
-                  className={`mr-2 h-4 w-4 ${
-                    currentStatus === status ? "opacity-100" : "opacity-0"
-                  }`}
-                />
-                {status}
-              </DropdownMenuItem>
-            ))}
-          </DropdownMenuContent>
-        </DropdownMenu>
-      )}
+      <StatusTransitionButton 
+        currentStatus={currentStatus}
+        onStatusChange={handleStatusSelect}
+        allowedTransitions={allowedTransitions[currentStatus]}
+        isLoading={updateStatus.isPending}
+      />
 
-      <AlertDialog open={isConfirmOpen} onOpenChange={setIsConfirmOpen}>
-        <AlertDialogContent>
-          <AlertDialogHeader>
-            <AlertDialogTitle>Update Booking Status</AlertDialogTitle>
-            <AlertDialogDescription>
-              Are you sure you want to change the status from "{currentStatus}" to "{selectedStatus}"?
-              This action cannot be undone.
-            </AlertDialogDescription>
-          </AlertDialogHeader>
-          <AlertDialogFooter>
-            <AlertDialogCancel>Cancel</AlertDialogCancel>
-            <AlertDialogAction onClick={handleConfirm}>
-              {updateStatus.isPending ? (
-                <>
-                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                  Updating...
-                </>
-              ) : (
-                "Update Status"
-              )}
-            </AlertDialogAction>
-          </AlertDialogFooter>
-        </AlertDialogContent>
-      </AlertDialog>
+      <StatusConfirmationDialog 
+        isOpen={isConfirmOpen}
+        onClose={() => setIsConfirmOpen(false)}
+        onConfirm={handleConfirm}
+        currentStatus={currentStatus}
+        newStatus={selectedStatus || currentStatus}
+        isLoading={updateStatus.isPending}
+      />
     </div>
   );
 }
