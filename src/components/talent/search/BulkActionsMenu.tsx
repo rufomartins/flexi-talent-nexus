@@ -43,7 +43,7 @@ export const BulkActionsMenu = ({
         .from('talent_profiles')
         .select(`
           *,
-          users:user_id (
+          users!talent_profiles_user_id_fkey (
             id,
             full_name,
             email,
@@ -85,7 +85,7 @@ export const BulkActionsMenu = ({
         .from('talent_profiles')
         .select(`
           *,
-          users (
+          users!talent_profiles_user_id_fkey (
             full_name,
             email
           )
