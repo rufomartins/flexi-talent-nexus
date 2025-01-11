@@ -40,9 +40,6 @@ export function SearchResults({ results, isLoading, onSelect }: SearchResultsPro
               <span className="font-medium">
                 {`${result.first_name} ${result.last_name}`}
               </span>
-              <span className="text-sm text-muted-foreground">
-                {result.email}
-              </span>
             </div>
           </div>
         </Button>

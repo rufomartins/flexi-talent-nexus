@@ -70,13 +70,35 @@ export function BulkEmailDialog({ selectedTalents, isOpen, onClose }: BulkEmailD
   const replaceVariables = (text: string, talent: TalentProfile) => {
     return text
       .replace(/{{talent_name}}/g, talent.users.full_name)
-      .replace(/{{talent_category}}/g, talent.talent_category);
+      .replace(/{{talent_category}}/g, talent.talent_category || '');
   };
 
   const onSubmit = async (values: z.infer<typeof emailSchema>) => {
     setIsLoading(true);
     try {
+      // First, get the email addresses for the selected talents
+      const { data: emailData, error: emailError } = await supabase
+        .from('user_profiles')
+        .select('id, email')
+        .in('id', selectedTalents.map(t => t.user_id))
+        .not('email', 'is', null);
+
+      if (emailError) throw emailError;
+
+      if (!emailData) {
+        throw new Error('No email data found for selected talents');
+      }
+
+      // Create a map of user_id to email
+      const emailMap = new Map(emailData.map(d => [d.id, d.email]));
+
       await Promise.all(selectedTalents.map(async (talent) => {
+        const email = emailMap.get(talent.user_id || '');
+        if (!email) {
+          console.warn(`No email found for talent ${talent.users.full_name}`);
+          return;
+        }
+
         const personalizedSubject = replaceVariables(values.subject, talent);
         const personalizedBody = replaceVariables(values.body, talent);
 
@@ -85,7 +107,7 @@ export function BulkEmailDialog({ selectedTalents, isOpen, onClose }: BulkEmailD
             emailData: {
               template_id: values.templateId,
               recipient: {
-                email: talent.users.email,
+                email,
                 name: talent.users.full_name,
               },
               subject: personalizedSubject,

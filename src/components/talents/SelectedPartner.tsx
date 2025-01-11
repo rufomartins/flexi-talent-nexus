@@ -20,7 +20,6 @@ export function SelectedPartner({ partner, onRemove }: SelectedPartnerProps) {
           <div className="font-medium">
             {`${partner.first_name} ${partner.last_name}`}
           </div>
-          <div className="text-sm text-muted-foreground">{partner.email}</div>
         </div>
       </div>
       <Button variant="ghost" size="icon" onClick={onRemove}>
