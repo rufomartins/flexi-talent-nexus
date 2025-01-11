@@ -21,7 +21,9 @@ import { BookingProjectDetails } from "./sections/BookingProjectDetails";
 import { BookingDateSelection } from "./sections/BookingDateSelection";
 import { BookingFeeSection } from "./sections/BookingFeeSection";
 import { BookingFileUpload } from "./sections/BookingFileUpload";
+import { AvailabilityWarning } from "./AvailabilityWarning";
 import { BookingFormData, BookingFile, bookingFormSchema } from "./types";
+import { TalentAvailability } from "@/utils/availability";
 
 interface BookingDialogProps {
   open: boolean;
@@ -31,6 +33,8 @@ interface BookingDialogProps {
 
 export function BookingDialog({ open, onOpenChange, talentId }: BookingDialogProps) {
   const [uploadedFiles, setUploadedFiles] = useState<BookingFile[]>([]);
+  const [availability, setAvailability] = useState<TalentAvailability | null>(null);
+  const [showWarning, setShowWarning] = useState(false);
   const { toast } = useToast();
 
   const form = useForm<BookingFormData>({
@@ -62,7 +66,6 @@ export function BookingDialog({ open, onOpenChange, talentId }: BookingDialogPro
 
       if (error) throw error;
 
-      // Handle file uploads if any
       if (uploadedFiles.length > 0) {
         for (const file of uploadedFiles) {
           const filePath = `bookings/${booking.id}/${file.file.name}`;
@@ -105,55 +108,82 @@ export function BookingDialog({ open, onOpenChange, talentId }: BookingDialogPro
     },
   });
 
+  const handleAvailabilityChange = (newAvailability: TalentAvailability) => {
+    setAvailability(newAvailability);
+  };
+
   const onSubmit = async (data: BookingFormData) => {
+    if (availability && !availability.is_available && !showWarning) {
+      setShowWarning(true);
+      return;
+    }
+    
     await createBooking.mutateAsync(data);
   };
 
   return (
-    <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-3xl h-[90vh] flex flex-col">
-        <DialogHeader>
-          <DialogTitle>Create New Booking</DialogTitle>
-        </DialogHeader>
+    <>
+      <Dialog open={open} onOpenChange={onOpenChange}>
+        <DialogContent className="max-w-3xl h-[90vh] flex flex-col">
+          <DialogHeader>
+            <DialogTitle>Create New Booking</DialogTitle>
+          </DialogHeader>
 
-        <Form {...form}>
-          <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6 flex-1 overflow-y-auto">
-            <BookingProjectDetails form={form} />
-            <Separator />
-            <BookingDateSelection form={form} />
-            <Separator />
-            <BookingFeeSection form={form} />
-            <Separator />
-            <BookingFileUpload
-              files={uploadedFiles}
-              onFilesChange={setUploadedFiles}
-            />
+          <Form {...form}>
+            <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6 flex-1 overflow-y-auto">
+              <BookingProjectDetails form={form} />
+              <Separator />
+              <BookingDateSelection 
+                form={form} 
+                talentId={talentId}
+                onAvailabilityChange={handleAvailabilityChange}
+              />
+              <Separator />
+              <BookingFeeSection form={form} />
+              <Separator />
+              <BookingFileUpload
+                files={uploadedFiles}
+                onFilesChange={setUploadedFiles}
+              />
 
-            <div className="flex justify-end space-x-2 sticky bottom-0 bg-white p-4 border-t">
-              <Button
-                type="button"
-                variant="outline"
-                onClick={() => onOpenChange(false)}
-              >
-                Cancel
-              </Button>
-              <Button
-                type="submit"
-                disabled={createBooking.isPending}
-              >
-                {createBooking.isPending ? (
-                  <>
-                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                    Creating...
-                  </>
-                ) : (
-                  "Create Booking"
-                )}
-              </Button>
-            </div>
-          </form>
-        </Form>
-      </DialogContent>
-    </Dialog>
+              <div className="flex justify-end space-x-2 sticky bottom-0 bg-white p-4 border-t">
+                <Button
+                  type="button"
+                  variant="outline"
+                  onClick={() => onOpenChange(false)}
+                >
+                  Cancel
+                </Button>
+                <Button
+                  type="submit"
+                  disabled={createBooking.isPending}
+                >
+                  {createBooking.isPending ? (
+                    <>
+                      <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                      Creating...
+                    </>
+                  ) : (
+                    "Create Booking"
+                  )}
+                </Button>
+              </div>
+            </form>
+          </Form>
+        </DialogContent>
+      </Dialog>
+
+      {availability && !availability.is_available && (
+        <AvailabilityWarning
+          conflicts={availability.conflicting_bookings || []}
+          onProceed={() => {
+            setShowWarning(false);
+            form.handleSubmit(onSubmit)();
+          }}
+          onCancel={() => setShowWarning(false)}
+          open={showWarning}
+        />
+      )}
+    </>
   );
 }
