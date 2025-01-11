@@ -27,7 +27,6 @@ export function DetailedInfoStep({ form }: DetailedInfoStepProps) {
               <RichTextEditor
                 value={field.value || ''}
                 onChange={field.onChange}
-                placeholder="Enter casting briefing..."
               />
             </FormControl>
             <FormMessage />

@@ -8,7 +8,7 @@ import { TypeSelectionStep } from './steps/TypeSelectionStep';
 import { DetailedInfoStep } from './steps/DetailedInfoStep';
 import { FormFieldsStep } from './steps/FormFieldsStep';
 import { ReviewStep } from './steps/ReviewStep';
-import { castingFormSchema, CastingFormData } from '../CastingFormSchema';
+import { castingFormSchema, CastingFormData, defaultValues } from '../CastingFormSchema';
 import { supabase } from '@/integrations/supabase/client';
 import { notify } from '@/utils/notifications';
 import { Loader } from 'lucide-react';
@@ -27,14 +27,7 @@ export function CastingCreationWizard() {
 
   const form = useForm<CastingFormData>({
     resolver: zodResolver(castingFormSchema),
-    defaultValues: {
-      type: 'internal',
-      casting_type: 'internal',
-      status: 'open',
-      show_briefing: false,
-      allow_talent_portal: false,
-      allow_talent_portal_apply: true,
-    },
+    defaultValues
   });
 
   const handleNext = async () => {
@@ -53,8 +46,7 @@ export function CastingCreationWizard() {
     try {
       const { error } = await supabase.from('castings').insert({
         ...data,
-        created_at: new Date().toISOString(),
-        updated_at: new Date().toISOString(),
+        created_by: supabase.auth.getUser()?.data?.user?.id
       });
 
       if (error) throw error;

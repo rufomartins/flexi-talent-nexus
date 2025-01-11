@@ -13,10 +13,7 @@ export const castingFormSchema = z.object({
   description: z.string().optional().nullable(),
   show_briefing: z.boolean().default(false),
   allow_talent_portal: z.boolean().default(false),
-  allow_talent_portal_apply: z.boolean().default(true),
-  created_by: z.string().optional(),
-  created_at: z.string().optional(),
-  updated_at: z.string().optional()
+  allow_talent_portal_apply: z.boolean().default(true)
 });
 
 export type CastingFormData = z.infer<typeof castingFormSchema>;
