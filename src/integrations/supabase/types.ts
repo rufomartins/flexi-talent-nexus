@@ -2223,15 +2223,19 @@ export type Database = {
       talent_profiles: {
         Row: {
           agent_id: string | null
+          availability: Json | null
           category: string | null
           country: string | null
           created_at: string | null
           created_by: string | null
           duo_name: string | null
           evaluation_status: string | null
+          experience_level: string | null
+          fee_range: Json | null
           id: string
           internal_remarks: string | null
           is_duo: boolean | null
+          native_language: string | null
           partner_id: string | null
           phone_number: string | null
           talent_category: Database["public"]["Enums"]["talent_category"] | null
@@ -2242,15 +2246,19 @@ export type Database = {
         }
         Insert: {
           agent_id?: string | null
+          availability?: Json | null
           category?: string | null
           country?: string | null
           created_at?: string | null
           created_by?: string | null
           duo_name?: string | null
           evaluation_status?: string | null
+          experience_level?: string | null
+          fee_range?: Json | null
           id?: string
           internal_remarks?: string | null
           is_duo?: boolean | null
+          native_language?: string | null
           partner_id?: string | null
           phone_number?: string | null
           talent_category?:
@@ -2263,15 +2271,19 @@ export type Database = {
         }
         Update: {
           agent_id?: string | null
+          availability?: Json | null
           category?: string | null
           country?: string | null
           created_at?: string | null
           created_by?: string | null
           duo_name?: string | null
           evaluation_status?: string | null
+          experience_level?: string | null
+          fee_range?: Json | null
           id?: string
           internal_remarks?: string | null
           is_duo?: boolean | null
+          native_language?: string | null
           partner_id?: string | null
           phone_number?: string | null
           talent_category?:
