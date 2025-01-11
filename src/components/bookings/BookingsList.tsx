@@ -2,8 +2,8 @@ import { useQuery } from "@tanstack/react-query"
 import { supabase } from "@/integrations/supabase/client"
 import { formatDate } from "@/lib/utils"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
-import { Badge } from "@/components/ui/badge"
 import { Loader2 } from "lucide-react"
+import { BookingStatusManager } from "./BookingStatusManager"
 import type { Booking } from "@/types/booking"
 
 export function BookingsList() {
@@ -60,9 +60,11 @@ export function BookingsList() {
             <CardTitle className="text-sm font-medium">
               {booking.projects?.name}
             </CardTitle>
-            <Badge variant={getStatusVariant(booking.status)}>
-              {booking.status}
-            </Badge>
+            <BookingStatusManager 
+              bookingId={booking.id}
+              currentStatus={booking.status}
+              lastUpdated={booking.updated_at}
+            />
           </CardHeader>
           <CardContent>
             <div className="grid gap-1">
@@ -81,17 +83,4 @@ export function BookingsList() {
       ))}
     </div>
   )
-}
-
-function getStatusVariant(status: string | null): "default" | "destructive" | "outline" | "secondary" {
-  switch (status) {
-    case 'confirmed':
-      return 'default'
-    case 'pending':
-      return 'secondary'
-    case 'cancelled':
-      return 'destructive'
-    default:
-      return 'outline'
-  }
 }
