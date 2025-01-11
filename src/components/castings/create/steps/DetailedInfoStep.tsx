@@ -25,6 +25,7 @@ export function DetailedInfoStep({ form }: DetailedInfoStepProps) {
             <FormLabel>Briefing</FormLabel>
             <FormControl>
               <RichTextEditor
+                label="Briefing"
                 value={field.value || ''}
                 onChange={field.onChange}
               />

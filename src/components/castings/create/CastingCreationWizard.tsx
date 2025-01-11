@@ -44,10 +44,16 @@ export function CastingCreationWizard() {
   const handleSubmit = async (data: CastingFormData) => {
     setIsSubmitting(true);
     try {
-      const { error } = await supabase.from('castings').insert({
+      const { user } = await supabase.auth.getUser();
+      
+      const castingData = {
         ...data,
-        created_by: supabase.auth.getUser()?.data?.user?.id
-      });
+        created_by: user?.id
+      };
+
+      const { error } = await supabase
+        .from('castings')
+        .insert(castingData);
 
       if (error) throw error;
 
