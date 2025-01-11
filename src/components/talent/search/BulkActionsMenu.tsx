@@ -43,10 +43,11 @@ export const BulkActionsMenu = ({
         .from('talent_profiles')
         .select(`
           *,
-          users!talent_profiles_user_id_fkey (
+          users (
             id,
+            first_name,
+            last_name,
             full_name,
-            email,
             avatar_url
           )
         `)
@@ -66,8 +67,7 @@ export const BulkActionsMenu = ({
         ...talent,
         users: {
           id: talent.users?.id,
-          full_name: talent.users?.full_name,
-          email: talent.users?.email,
+          full_name: talent.users?.full_name || `${talent.users?.first_name || ''} ${talent.users?.last_name || ''}`.trim(),
           avatar_url: talent.users?.avatar_url
         }
       })) as TalentProfile[];
