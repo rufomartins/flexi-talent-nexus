@@ -7,7 +7,8 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Label } from "@/components/ui/label";
 import { supabase } from "@/integrations/supabase/client";
 import { notify } from "@/utils/notifications";
-import { NotificationType, NotificationPreferences, EmailFrequency } from "@/types/notifications";
+import type { NotificationPreferences as NotificationPreferencesType } from "@/types/notifications";
+import { NotificationType, EmailFrequency } from "@/types/notifications";
 
 export function NotificationPreferences({ talentId }: { talentId: string }) {
   const queryClient = useQueryClient();
@@ -23,12 +24,12 @@ export function NotificationPreferences({ talentId }: { talentId: string }) {
         .single();
 
       if (error) throw error;
-      return data as NotificationPreferences;
+      return data as NotificationPreferencesType;
     },
   });
 
   const updatePreferences = useMutation({
-    mutationFn: async (newPreferences: Partial<NotificationPreferences>) => {
+    mutationFn: async (newPreferences: Partial<NotificationPreferencesType>) => {
       setIsSubmitting(true);
       
       const { error } = await supabase
