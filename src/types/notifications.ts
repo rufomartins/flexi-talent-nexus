@@ -15,7 +15,22 @@ export type DatabaseNotificationType =
   'DEADLINE_APPROACHING' |
   'DEADLINE_OVERDUE';
 
-export type EmailFrequency = 'realtime' | 'daily' | 'weekly';
+export enum NotificationType {
+  STATUS_CHANGE = 'STATUS_CHANGE',
+  PROFILE_UPDATE = 'PROFILE_UPDATE',
+  ASSIGNMENT_UPDATE = 'ASSIGNMENT_UPDATE',
+  DUO_PARTNER_CHANGE = 'DUO_PARTNER_CHANGE',
+  PROJECT_MILESTONE = 'PROJECT_MILESTONE',
+  PAYMENT_STATUS = 'PAYMENT_STATUS',
+  CASTING_OPPORTUNITY = 'CASTING_OPPORTUNITY',
+  BOOKING_CONFIRMATION = 'BOOKING_CONFIRMATION',
+  REVIEW_FEEDBACK = 'REVIEW_FEEDBACK',
+  DOCUMENT_UPDATE = 'DOCUMENT_UPDATE',
+  NEW_ASSIGNMENT = 'NEW_ASSIGNMENT',
+  DEADLINE_WARNING = 'DEADLINE_WARNING',
+  DEADLINE_APPROACHING = 'DEADLINE_APPROACHING',
+  DEADLINE_OVERDUE = 'DEADLINE_OVERDUE'
+}
 
 export interface NotificationMetadata {
   task_id?: string;
@@ -34,8 +49,12 @@ export interface NotificationMetadata {
 export interface AssignmentData {
   task_id: string;
   role_type: string;
-  user_id: string; // Changed from userId to match database
+  user_id: string; // Changed from userId to match database convention
   status?: string;
+  deadlines?: {
+    start: string;
+    due: string;
+  };
 }
 
 export interface NotificationPreferencesDB {
@@ -49,14 +68,9 @@ export interface NotificationPreferencesDB {
   updated_at?: string;
 }
 
-export interface Notification {
-  id: string;
-  type: DatabaseNotificationType;
-  metadata: NotificationMetadata;
-  created_at: string;
-}
+export type EmailFrequency = 'realtime' | 'daily' | 'weekly';
 
 // Helper function for type conversion
-export const convertToDbType = (type: DatabaseNotificationType): DatabaseNotificationType => {
-  return type;
+export const convertToDbType = (type: NotificationType): DatabaseNotificationType => {
+  return type as DatabaseNotificationType;
 };
