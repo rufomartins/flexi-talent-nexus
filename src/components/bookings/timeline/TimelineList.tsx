@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react';
 import { format } from 'date-fns';
 import { supabase } from '@/integrations/supabase/client';
-import { TimelineEvent } from '@/types/supabase/timeline';
+import { TimelineEvent } from '@/types/supabase/activity';
 import { TimelineEventItem } from './TimelineEventItem';
 import { Loader2 } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
@@ -39,7 +39,7 @@ export const TimelineList: React.FC<TimelineListProps> = ({ bookingId }) => {
         return;
       }
 
-      setEvents(data);
+      setEvents(data as TimelineEvent[]);
       setIsLoading(false);
     };
 
@@ -58,7 +58,7 @@ export const TimelineList: React.FC<TimelineListProps> = ({ bookingId }) => {
         },
         (payload) => {
           if (payload.eventType === 'INSERT') {
-            setEvents((prev) => [payload.new as TimelineEvent, ...prev]);
+            setEvents((prev) => [(payload.new as TimelineEvent), ...prev]);
           }
         }
       )
