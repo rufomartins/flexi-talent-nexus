@@ -9,26 +9,29 @@ export interface TalentProfile {
   partner_id?: string;
   created_at: string;
   updated_at: string;
+  agent_id: string | null;
+  availability: Record<string, any>;
+  category: string;
+  experience_level: string;
+  fee_range: Record<string, any>;
+  native_language: string;
   users: {
     id: string;
     full_name: string;
     avatar_url?: string;
-  };
-  partner?: {
-    id: string;
-    user_id: string;
-    users: {
-      full_name: string;
-      avatar_url?: string;
-    };
+    email: string;
   };
 }
 
-export interface DuoPartner {
+export interface EmailTemplate {
   id: string;
-  user_id: string;
-  first_name: string;
-  last_name: string;
-  email: string;
-  avatar_url?: string;
+  name: string;
+  subject: string;
+  body: string;
+  type: 'casting_availability' | 'booking_confirmation' | 'talent_application' | 'project_update' | 'talent_invitation';
+  variables: string[];
+  is_active: boolean;
+  created_at: string;
+  updated_at: string;
+  created_by: string;
 }

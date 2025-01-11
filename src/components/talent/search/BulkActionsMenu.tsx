@@ -54,7 +54,7 @@ export const BulkActionsMenu = ({
 
       if (error) throw error;
 
-      setSelectedTalents(data);
+      setSelectedTalents(data as TalentProfile[]);
       setIsEmailDialogOpen(true);
     } catch (error: any) {
       toast({

@@ -1,16 +1,16 @@
 import { useState } from "react";
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
-import { Button } from "@/components/ui/button";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
-import { Input } from "@/components/ui/input";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
+import { Input } from "@/components/ui/input";
+import { Button } from "@/components/ui/button";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { EmailEditor } from "@/components/email-templates/EmailEditor";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
-import { TalentProfile } from "@/types/talent";
+import { TalentProfile, EmailTemplate } from "@/types/talent";
 import { Badge } from "@/components/ui/badge";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Loader2 } from "lucide-react";
@@ -19,14 +19,6 @@ interface BulkEmailDialogProps {
   selectedTalents: TalentProfile[];
   isOpen: boolean;
   onClose: () => void;
-}
-
-interface EmailTemplate {
-  id: string;
-  name: string;
-  subject: string;
-  body: string;
-  variables: string[];
 }
 
 const emailSchema = z.object({
@@ -63,7 +55,7 @@ export function BulkEmailDialog({ selectedTalents, isOpen, onClose }: BulkEmailD
       return;
     }
 
-    setTemplates(data);
+    setTemplates(data as EmailTemplate[]);
   };
 
   const handleTemplateChange = async (templateId: string) => {
@@ -84,7 +76,6 @@ export function BulkEmailDialog({ selectedTalents, isOpen, onClose }: BulkEmailD
   const onSubmit = async (values: z.infer<typeof emailSchema>) => {
     setIsLoading(true);
     try {
-      // Send emails in parallel using Promise.all
       await Promise.all(selectedTalents.map(async (talent) => {
         const personalizedSubject = replaceVariables(values.subject, talent);
         const personalizedBody = replaceVariables(values.body, talent);
