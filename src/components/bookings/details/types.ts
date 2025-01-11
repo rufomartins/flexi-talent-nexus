@@ -1,6 +1,7 @@
-import type { Booking } from "@/types/booking";
+import type { Database } from "@/integrations/supabase/types";
+import type { BookingStatus } from "@/types/booking";
 
-export interface BookingDetailsData extends Booking {
+export interface BookingDetailsData extends Database['public']['Tables']['bookings']['Row'] {
   talent_profiles: {
     id: string;
     users: {
