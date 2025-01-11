@@ -10,7 +10,7 @@ import { useToast } from "@/hooks/use-toast";
 interface EmailTemplate {
   id: string;
   name: string;
-  type: string;
+  type: "casting_availability" | "booking_confirmation" | "talent_application" | "project_update" | "talent_invitation";
   subject: string;
   is_active: boolean;
   created_at: string;

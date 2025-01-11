@@ -1,42 +1,13 @@
 import { useState } from "react";
-import { useQuery } from "@tanstack/react-query";
 import { Plus, Search } from "lucide-react";
-import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { EmailTemplateList } from "@/components/email-templates/EmailTemplateList";
 import { CreateTemplateDialog } from "@/components/email-templates/CreateTemplateDialog";
-import { useToast } from "@/components/ui/use-toast";
 
 export default function EmailTemplates() {
   const [search, setSearch] = useState("");
   const [isCreateDialogOpen, setIsCreateDialogOpen] = useState(false);
-  const { toast } = useToast();
-
-  const { data: templates, isLoading } = useQuery({
-    queryKey: ["email-templates"],
-    queryFn: async () => {
-      const { data, error } = await supabase
-        .from("email_templates")
-        .select("*")
-        .order("created_at", { ascending: false });
-
-      if (error) {
-        toast({
-          title: "Error",
-          description: "Failed to load email templates",
-          variant: "destructive",
-        });
-        throw error;
-      }
-
-      return data;
-    },
-  });
-
-  const filteredTemplates = templates?.filter((template) =>
-    template.name.toLowerCase().includes(search.toLowerCase())
-  );
 
   return (
     <div className="container mx-auto py-6 space-y-6">
@@ -60,7 +31,7 @@ export default function EmailTemplates() {
         </div>
       </div>
 
-      <EmailTemplateList templates={filteredTemplates || []} isLoading={isLoading} />
+      <EmailTemplateList />
       
       <CreateTemplateDialog 
         open={isCreateDialogOpen} 
