@@ -1,18 +1,16 @@
-import { TalentProfile } from "./talent";
-
 export interface TalentSearchFilters {
-  categories: ('UGC' | 'Translator' | 'Reviewer' | 'VO')[];
+  categories: ('UGC' | 'TRANSLATOR' | 'REVIEWER' | 'VOICE_OVER')[];
   languages?: string[];
   countries?: string[];
   availability?: {
     start?: string;
     end?: string;
   };
-  status?: 'pending' | 'approved' | 'rejected';
+  status?: 'approved' | 'under_evaluation' | 'rejected';
   experience_level?: string[];
 }
 
 export interface TalentSearchSort {
-  field: 'name' | 'country' | 'native_language' | 'created_at' | 'status';
+  field: 'created_at' | 'country' | 'native_language' | 'evaluation_status';
   direction: 'asc' | 'desc';
 }

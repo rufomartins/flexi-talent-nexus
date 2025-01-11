@@ -4,6 +4,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { TalentSearchFilters, TalentSearchSort } from "@/types/talent-search";
 import { FilterPanel } from "./FilterPanel";
 import { SearchResults } from "./SearchResults";
+import { BulkActionsMenu } from "./BulkActionsMenu";
 import { Card } from "@/components/ui/card";
 import { useToast } from "@/hooks/use-toast";
 import { useDebounce } from "@/hooks/useDebounce";
@@ -17,6 +18,7 @@ export const TalentSearch = () => {
     field: 'created_at',
     direction: 'desc'
   });
+  const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
 
   const debouncedFilters = useDebounce(filters, 300);
 
@@ -76,6 +78,27 @@ export const TalentSearch = () => {
     window.location.href = `/talents/${talentId}`;
   };
 
+  const handleSelectionChange = (id: string) => {
+    const newSelectedIds = new Set(selectedIds);
+    if (newSelectedIds.has(id)) {
+      newSelectedIds.delete(id);
+    } else {
+      newSelectedIds.add(id);
+    }
+    setSelectedIds(newSelectedIds);
+  };
+
+  const handleSelectAll = () => {
+    if (results) {
+      const allIds = new Set(results.map(talent => talent.id));
+      setSelectedIds(allIds);
+    }
+  };
+
+  const handleClearSelection = () => {
+    setSelectedIds(new Set());
+  };
+
   return (
     <div className="container mx-auto py-6 space-y-6">
       <Card className="p-6">
@@ -85,10 +108,20 @@ export const TalentSearch = () => {
         />
       </Card>
 
+      {selectedIds.size > 0 && (
+        <BulkActionsMenu
+          selectedIds={Array.from(selectedIds)}
+          onClearSelection={handleClearSelection}
+          onSelectAll={handleSelectAll}
+        />
+      )}
+
       <SearchResults 
         results={results || []}
         isLoading={isLoading}
         onSelect={handleSelect}
+        selectedIds={selectedIds}
+        onSelectionChange={handleSelectionChange}
       />
     </div>
   );

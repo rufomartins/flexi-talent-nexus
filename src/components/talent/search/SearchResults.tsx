@@ -2,15 +2,24 @@ import { TalentProfile } from "@/types/talent";
 import { Card } from "@/components/ui/card";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
-import { Loader2 } from "lucide-react";
+import { Loader2, Check } from "lucide-react";
+import { Checkbox } from "@/components/ui/checkbox";
 
 interface SearchResultsProps {
   results: TalentProfile[];
   isLoading: boolean;
   onSelect: (talentId: string) => void;
+  selectedIds?: Set<string>;
+  onSelectionChange?: (id: string) => void;
 }
 
-export const SearchResults = ({ results, isLoading, onSelect }: SearchResultsProps) => {
+export const SearchResults = ({ 
+  results, 
+  isLoading, 
+  onSelect,
+  selectedIds = new Set(),
+  onSelectionChange
+}: SearchResultsProps) => {
   if (isLoading) {
     return (
       <div className="flex items-center justify-center h-48">
@@ -39,6 +48,14 @@ export const SearchResults = ({ results, isLoading, onSelect }: SearchResultsPro
           onClick={() => onSelect(talent.id)}
         >
           <div className="flex items-start space-x-4">
+            {onSelectionChange && (
+              <Checkbox
+                checked={selectedIds.has(talent.id)}
+                onCheckedChange={() => onSelectionChange(talent.id)}
+                onClick={(e) => e.stopPropagation()}
+                className="mt-1"
+              />
+            )}
             <Avatar className="h-12 w-12">
               <AvatarImage src={talent.users?.avatar_url || ''} />
               <AvatarFallback>
@@ -61,7 +78,7 @@ export const SearchResults = ({ results, isLoading, onSelect }: SearchResultsPro
                   <Badge 
                     variant={
                       talent.evaluation_status === 'approved' 
-                        ? 'success' 
+                        ? 'default' 
                         : talent.evaluation_status === 'rejected'
                         ? 'destructive'
                         : 'secondary'

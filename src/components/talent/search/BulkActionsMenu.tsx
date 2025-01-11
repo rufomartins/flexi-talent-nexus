@@ -1,0 +1,143 @@
+import { useState } from "react";
+import { Button } from "@/components/ui/button";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
+import { useToast } from "@/hooks/use-toast";
+import { Mail, UserPlus, Download, MoreHorizontal, Check, X } from "lucide-react";
+import { supabase } from "@/integrations/supabase/client";
+
+interface BulkActionsMenuProps {
+  selectedIds: string[];
+  onClearSelection: () => void;
+  onSelectAll: () => void;
+}
+
+export const BulkActionsMenu = ({
+  selectedIds,
+  onClearSelection,
+  onSelectAll,
+}: BulkActionsMenuProps) => {
+  const { toast } = useToast();
+  const [isLoading, setIsLoading] = useState(false);
+
+  const handleAddToCasting = async () => {
+    // Implementation for adding to casting
+    toast({
+      title: "Adding to casting",
+      description: "This feature is coming soon",
+    });
+  };
+
+  const handleBulkEmail = async () => {
+    // Implementation for bulk email
+    toast({
+      title: "Sending emails",
+      description: "This feature is coming soon",
+    });
+  };
+
+  const handleExport = async () => {
+    setIsLoading(true);
+    try {
+      const { data, error } = await supabase
+        .from('talent_profiles')
+        .select(`
+          *,
+          users (
+            first_name,
+            last_name,
+            email
+          )
+        `)
+        .in('id', selectedIds);
+
+      if (error) throw error;
+
+      // Convert to CSV or desired format
+      // Download logic here
+      
+      toast({
+        title: "Export successful",
+        description: `Exported ${selectedIds.length} talents`,
+      });
+    } catch (error) {
+      toast({
+        title: "Export failed",
+        description: "Could not export talent data",
+        variant: "destructive",
+      });
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  return (
+    <div className="flex items-center justify-between bg-muted p-2 rounded-lg">
+      <div className="flex items-center space-x-2">
+        <span className="text-sm font-medium">
+          {selectedIds.length} selected
+        </span>
+        <Button variant="outline" size="sm" onClick={onSelectAll}>
+          Select All
+        </Button>
+        <Button variant="outline" size="sm" onClick={onClearSelection}>
+          Clear
+        </Button>
+      </div>
+
+      <div className="flex items-center space-x-2">
+        <Button
+          variant="outline"
+          size="sm"
+          onClick={handleBulkEmail}
+          disabled={isLoading}
+        >
+          <Mail className="h-4 w-4 mr-2" />
+          Email
+        </Button>
+        
+        <Button
+          variant="outline"
+          size="sm"
+          onClick={handleAddToCasting}
+          disabled={isLoading}
+        >
+          <UserPlus className="h-4 w-4 mr-2" />
+          Add to Casting
+        </Button>
+
+        <Button
+          variant="outline"
+          size="sm"
+          onClick={handleExport}
+          disabled={isLoading}
+        >
+          <Download className="h-4 w-4 mr-2" />
+          Export
+        </Button>
+
+        <DropdownMenu>
+          <DropdownMenuTrigger asChild>
+            <Button variant="outline" size="sm" disabled={isLoading}>
+              <MoreHorizontal className="h-4 w-4" />
+            </Button>
+          </DropdownMenuTrigger>
+          <DropdownMenuContent align="end">
+            <DropdownMenuItem onClick={() => {
+              toast({
+                title: "Status update",
+                description: "This feature is coming soon",
+              });
+            }}>
+              Update Status
+            </DropdownMenuItem>
+          </DropdownMenuContent>
+        </DropdownMenu>
+      </div>
+    </div>
+  );
+};
