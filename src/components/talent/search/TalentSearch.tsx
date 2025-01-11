@@ -8,6 +8,7 @@ import { BulkActionsMenu } from "./BulkActionsMenu";
 import { Card } from "@/components/ui/card";
 import { useToast } from "@/hooks/use-toast";
 import { useDebounce } from "@/hooks/useDebounce";
+import { TalentProfile } from "@/types/talent";
 
 export const TalentSearch = () => {
   const { toast } = useToast();
@@ -61,13 +62,23 @@ export const TalentSearch = () => {
         throw error;
       }
 
-      // Transform the data to match TalentProfile interface
-      return data.map(talent => ({
-        ...talent,
-        evaluation_status: talent.evaluation_status || 'under_evaluation',
-        is_duo: talent.is_duo || false,
-        talent_category: talent.talent_category || 'UGC',
-      }));
+      // Transform and validate the data to match TalentProfile interface
+      return data.map(talent => {
+        // Validate evaluation_status
+        const validStatus = (status: string): "approved" | "under_evaluation" | "rejected" => {
+          if (status === "approved" || status === "under_evaluation" || status === "rejected") {
+            return status;
+          }
+          return "under_evaluation";
+        };
+
+        return {
+          ...talent,
+          evaluation_status: validStatus(talent.evaluation_status || 'under_evaluation'),
+          is_duo: Boolean(talent.is_duo),
+          talent_category: talent.talent_category || 'UGC',
+        } as TalentProfile;
+      });
     },
   });
 
