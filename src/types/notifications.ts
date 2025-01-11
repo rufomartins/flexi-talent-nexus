@@ -4,11 +4,11 @@ export type DatabaseNotificationType =
   'PROFILE_UPDATE' | 
   'ASSIGNMENT_UPDATE' | 
   'DUO_PARTNER_CHANGE' | 
-  'PROJECT_MILESTONE' | 
-  'PAYMENT_STATUS' | 
-  'CASTING_OPPORTUNITY' | 
-  'BOOKING_CONFIRMATION' | 
-  'REVIEW_FEEDBACK' | 
+  'PROJECT_MILESTONE' |
+  'PAYMENT_STATUS' |
+  'CASTING_OPPORTUNITY' |
+  'BOOKING_CONFIRMATION' |
+  'REVIEW_FEEDBACK' |
   'DOCUMENT_UPDATE' |
   'NEW_ASSIGNMENT' |
   'DEADLINE_WARNING' |
@@ -63,13 +63,13 @@ export interface AssignmentData {
   };
 }
 
-export interface NotificationPreferencesDB {
+export interface NotificationPreferences {
   talent_id: string;
   email_enabled?: boolean;
   in_app_enabled?: boolean;
   email_frequency?: EmailFrequency;
   reminder_days?: number[];
-  types?: DatabaseNotificationType[];
+  types?: NotificationType[];
   created_at?: string;
   updated_at?: string;
 }
