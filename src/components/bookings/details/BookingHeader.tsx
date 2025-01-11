@@ -1,7 +1,7 @@
 import { Button } from "@/components/ui/button";
 import { StatusBadge } from "../status/StatusBadge";
 import { Edit, Trash } from "lucide-react";
-import type { BookingStatus } from "@/types/booking";
+import type { BookingStatus } from "@/types/supabase";
 import type { BookingDetailsData } from "./types";
 import { format } from "date-fns";
 
