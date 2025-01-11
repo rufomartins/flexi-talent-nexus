@@ -30,7 +30,7 @@ export const TalentSearch = () => {
         .from('talent_profiles')
         .select(`
           *,
-          users!inner (
+          users!talent_profiles_user_id_fkey (
             id,
             first_name,
             last_name,
