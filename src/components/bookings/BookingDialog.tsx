@@ -57,11 +57,44 @@ export function BookingDialog({ open, onOpenChange, talentId }: BookingDialogPro
         created_by: (await supabase.auth.getUser()).data.user?.id,
       };
 
-      const { error } = await supabase
+      const { data: booking, error } = await supabase
         .from("bookings")
-        .insert([bookingData]);
+        .insert([bookingData])
+        .select()
+        .single();
 
       if (error) throw error;
+
+      // Send confirmation email
+      const { error: emailError } = await supabase.functions.invoke('handle-booking-email', {
+        body: {
+          emailData: {
+            template_id: data.email_template_id,
+            recipient: {
+              email: data.talent_email,
+              name: data.talent_name,
+            },
+            booking: {
+              projectName: data.project_name,
+              startDate: format(data.start_date, "yyyy-MM-dd"),
+              endDate: format(data.end_date, "yyyy-MM-dd"),
+              details: data.project_details,
+              fee: data.talent_fee,
+            },
+          },
+        },
+      });
+
+      if (emailError) {
+        console.error('Error sending email:', emailError);
+        toast({
+          title: "Warning",
+          description: "Booking created but email notification failed",
+          variant: "destructive",
+        });
+      }
+
+      return booking;
     },
     onSuccess: () => {
       toast({
