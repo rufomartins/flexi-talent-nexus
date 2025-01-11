@@ -41,7 +41,7 @@ export function BookingEmailPreview({ form }: BookingEmailPreviewProps) {
             <FormLabel>Email Template</FormLabel>
             <Select
               onValueChange={field.onChange}
-              defaultValue={field.value}
+              value={field.value}
             >
               <FormControl>
                 <SelectTrigger>
