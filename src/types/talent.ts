@@ -4,33 +4,33 @@ export interface DuoPartner {
   first_name: string;
   last_name: string;
   full_name: string;
-  email: string;
   avatar_url?: string;
 }
 
 export interface TalentProfile {
   id: string;
-  user_id: string;
-  talent_category: 'UGC' | 'TRANSLATOR' | 'REVIEWER' | 'VOICE_OVER';
-  country: string;
-  evaluation_status: 'approved' | 'under_evaluation' | 'rejected';
-  is_duo: boolean;
-  duo_name?: string;
-  partner_id?: string;
-  created_at: string;
-  updated_at: string;
+  user_id: string | null;
+  talent_category: 'UGC' | 'TRANSLATOR' | 'REVIEWER' | 'VOICE_OVER' | null;
+  country: string | null;
+  evaluation_status: string | null;
+  is_duo: boolean | null;
+  duo_name?: string | null;
+  partner_id?: string | null;
+  created_at: string | null;
+  updated_at: string | null;
   agent_id: string | null;
-  availability: Record<string, any>;
-  category: string;
-  experience_level: string;
-  fee_range: Record<string, any>;
-  native_language: string;
+  availability: Record<string, any> | null;
+  category: string | null;
+  experience_level: string | null;
+  fee_range: Record<string, any> | null;
+  native_language: string | null;
   partner?: DuoPartner;
   users: {
     id: string;
+    first_name: string;
+    last_name: string;
     full_name: string;
     avatar_url?: string;
-    email: string;
   };
 }
 

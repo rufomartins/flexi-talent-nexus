@@ -43,11 +43,10 @@ export const BulkActionsMenu = ({
         .from('talent_profiles')
         .select(`
           *,
-          users (
+          users!talent_profiles_user_id_fkey (
             id,
             first_name,
             last_name,
-            full_name,
             avatar_url
           )
         `)
@@ -62,12 +61,15 @@ export const BulkActionsMenu = ({
         throw new Error('No data returned from query');
       }
 
-      // Transform the data to match TalentProfile interface
       const transformedData = data.map(talent => ({
         ...talent,
         users: {
-          id: talent.users?.id,
-          full_name: talent.users?.full_name || `${talent.users?.first_name || ''} ${talent.users?.last_name || ''}`.trim(),
+          id: talent.users?.id || '',
+          first_name: talent.users?.first_name || '',
+          last_name: talent.users?.last_name || '',
+          full_name: talent.users?.first_name && talent.users?.last_name 
+            ? `${talent.users.first_name} ${talent.users.last_name}`.trim()
+            : '',
           avatar_url: talent.users?.avatar_url
         }
       })) as TalentProfile[];
