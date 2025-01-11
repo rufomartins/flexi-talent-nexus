@@ -34,6 +34,7 @@ export const TalentSearch = () => {
             id,
             first_name,
             last_name,
+            email,
             avatar_url
           )
         `)
@@ -72,12 +73,23 @@ export const TalentSearch = () => {
           return "under_evaluation";
         };
 
-        return {
+        // First cast to unknown to avoid direct type assertion errors
+        const transformedTalent = {
           ...talent,
           evaluation_status: validStatus(talent.evaluation_status || 'under_evaluation'),
           is_duo: Boolean(talent.is_duo),
           talent_category: talent.talent_category || 'UGC',
-        } as TalentProfile;
+          users: {
+            id: talent.users.id,
+            first_name: talent.users.first_name || '',
+            last_name: talent.users.last_name || '',
+            email: talent.users.email || '',
+            avatar_url: talent.users.avatar_url
+          }
+        } as unknown;
+
+        // Then cast to TalentProfile
+        return transformedTalent as TalentProfile;
       });
     },
   });
