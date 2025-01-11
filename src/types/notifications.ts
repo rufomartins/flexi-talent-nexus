@@ -80,11 +80,11 @@ export interface TalentNotification {
 
 export interface NotificationPreferences {
   talent_id: string;
-  email_enabled: boolean;
-  in_app_enabled: boolean;
-  types: TalentNotificationType[];
-  email_frequency: 'realtime' | 'daily' | 'weekly';
-  reminder_days: number[];
+  email_enabled?: boolean;
+  in_app_enabled?: boolean;
+  types?: TalentNotificationType[];
+  email_frequency?: 'realtime' | 'daily' | 'weekly';
+  reminder_days?: number[];
   created_at?: string;
   updated_at?: string;
 }

@@ -7,15 +7,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Label } from "@/components/ui/label";
 import { supabase } from "@/integrations/supabase/client";
 import { notify } from "@/utils/notifications";
-import type { TalentNotificationType } from "@/types/notifications";
-
-interface NotificationPreferences {
-  email_enabled: boolean;
-  in_app_enabled: boolean;
-  email_frequency: string;
-  reminder_days: number[];
-  types: TalentNotificationType[];
-}
+import type { NotificationType, NotificationPreferences as NotificationPreferencesType } from "@/types/notifications";
 
 export function NotificationPreferences({ talentId }: { talentId: string }) {
   const queryClient = useQueryClient();
@@ -31,12 +23,12 @@ export function NotificationPreferences({ talentId }: { talentId: string }) {
         .single();
 
       if (error) throw error;
-      return data as NotificationPreferences;
+      return data as NotificationPreferencesType;
     },
   });
 
   const updatePreferences = useMutation({
-    mutationFn: async (newPreferences: Partial<NotificationPreferences>) => {
+    mutationFn: async (newPreferences: Partial<NotificationPreferencesType>) => {
       setIsSubmitting(true);
       const { error } = await supabase
         .from("talent_notification_preferences")
@@ -131,10 +123,10 @@ export function NotificationPreferences({ talentId }: { talentId: string }) {
                   </Label>
                   <Switch
                     id={`notification-${type}`}
-                    checked={preferences?.types?.includes(type as TalentNotificationType)}
+                    checked={preferences?.types?.includes(type as keyof typeof NotificationType)}
                     onCheckedChange={(checked) => {
                       const newTypes = checked
-                        ? [...(preferences?.types || []), type as TalentNotificationType]
+                        ? [...(preferences?.types || []), type as keyof typeof NotificationType]
                         : preferences?.types?.filter((t) => t !== type) || [];
                       updatePreferences.mutate({ types: newTypes });
                     }}
