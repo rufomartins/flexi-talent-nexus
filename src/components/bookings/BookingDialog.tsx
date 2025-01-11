@@ -38,7 +38,7 @@ const bookingFormSchema = z.object({
   project_name: z.string().min(1, "Project name is required"),
   project_details: z.string().min(1, "Project details are required"),
   start_date: z.date(),
-  deadline_date: z.date(),
+  end_date: z.date(),
   talent_fee: z.number().min(0, "Fee must be a positive number"),
   final_fee: z.number().min(0, "Final fee must be a positive number"),
   email_template_id: z.string().min(1, "Email template is required"),
@@ -83,16 +83,20 @@ export function BookingDialog({ open, onOpenChange, talentId }: BookingDialogPro
 
   const createBooking = useMutation({
     mutationFn: async (data: BookingFormData) => {
-      const { error } = await supabase.from("bookings").insert({
-        talent_id: talentId,
-        status: "pending",
-        start_date: data.start_date,
-        end_date: data.deadline_date,
+      const bookingData = {
+        status: 'pending' as const,
+        start_date: format(data.start_date, "yyyy-MM-dd"),
+        end_date: format(data.end_date, "yyyy-MM-dd"),
         talent_fee: data.talent_fee,
         final_fee: data.final_fee,
         details: data.project_details,
         email_template_id: data.email_template_id,
-      });
+        created_by: (await supabase.auth.getUser()).data.user?.id,
+      };
+
+      const { error } = await supabase
+        .from("bookings")
+        .insert([bookingData]);
 
       if (error) throw error;
     },
@@ -222,7 +226,7 @@ export function BookingDialog({ open, onOpenChange, talentId }: BookingDialogPro
 
                 <FormField
                   control={form.control}
-                  name="deadline_date"
+                  name="end_date"
                   render={({ field }) => (
                     <FormItem>
                       <FormLabel>Deadline</FormLabel>
