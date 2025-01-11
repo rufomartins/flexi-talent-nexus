@@ -241,6 +241,58 @@ export type Database = {
           },
         ]
       }
+      booking_timeline_events: {
+        Row: {
+          booking_id: string
+          created_at: string | null
+          details: Json
+          event_type: Database["public"]["Enums"]["booking_event_type"]
+          id: string
+          updated_at: string | null
+          user_id: string
+        }
+        Insert: {
+          booking_id: string
+          created_at?: string | null
+          details?: Json
+          event_type: Database["public"]["Enums"]["booking_event_type"]
+          id?: string
+          updated_at?: string | null
+          user_id: string
+        }
+        Update: {
+          booking_id?: string
+          created_at?: string | null
+          details?: Json
+          event_type?: Database["public"]["Enums"]["booking_event_type"]
+          id?: string
+          updated_at?: string | null
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "booking_timeline_events_booking_id_fkey"
+            columns: ["booking_id"]
+            isOneToOne: false
+            referencedRelation: "bookings"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "booking_timeline_events_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "user_profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "booking_timeline_events_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "users"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       bookings: {
         Row: {
           casting_id: string | null
@@ -2562,6 +2614,13 @@ export type Database = {
       [_ in never]: never
     }
     Enums: {
+      booking_event_type:
+        | "status_change"
+        | "file_upload"
+        | "comment"
+        | "email_sent"
+        | "booking_created"
+        | "booking_updated"
       booking_status: "pending" | "confirmed" | "cancelled" | "completed"
       casting_status: "open" | "closed"
       casting_type: "internal" | "external"
