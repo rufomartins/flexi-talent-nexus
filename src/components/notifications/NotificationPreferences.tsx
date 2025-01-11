@@ -7,7 +7,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Label } from "@/components/ui/label";
 import { supabase } from "@/integrations/supabase/client";
 import { notify } from "@/utils/notifications";
-import { NotificationType, NotificationPreferences, EmailFrequency, DatabaseNotificationType, convertToDbType } from "@/types/notifications";
+import type { NotificationPreferencesDB, DatabaseNotificationType, EmailFrequency } from "@/types/notifications";
 
 export function NotificationPreferences({ talentId }: { talentId: string }) {
   const queryClient = useQueryClient();
@@ -23,21 +23,19 @@ export function NotificationPreferences({ talentId }: { talentId: string }) {
         .single();
 
       if (error) throw error;
-      return data as NotificationPreferences;
+      return data as NotificationPreferencesDB;
     },
   });
 
   const updatePreferences = useMutation({
-    mutationFn: async (newPreferences: Partial<NotificationPreferences>) => {
+    mutationFn: async (newPreferences: Partial<NotificationPreferencesDB>) => {
       setIsSubmitting(true);
-      const dbTypes = newPreferences.types?.map(convertToDbType);
       
       const { error } = await supabase
         .from("talent_notification_preferences")
         .upsert({ 
           talent_id: talentId,
           ...newPreferences,
-          types: dbTypes
         });
 
       if (error) throw error;
@@ -59,7 +57,7 @@ export function NotificationPreferences({ talentId }: { talentId: string }) {
   }
 
   // Use all notification types since they now match the database types
-  const notificationTypes = Object.values(NotificationType);
+  const notificationTypes = Object.values(DatabaseNotificationType);
 
   return (
     <Card>

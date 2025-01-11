@@ -3,7 +3,7 @@ import { ScrollArea } from "@/components/ui/scroll-area"
 import { supabase } from "@/integrations/supabase/client"
 import { formatDistanceToNow } from "date-fns"
 import { Bell, CheckCircle, Clock, AlertTriangle } from "lucide-react"
-import { NotificationType, type Notification } from "@/types/notifications"
+import type { DatabaseNotificationType, Notification } from "@/types/notifications"
 
 const formatNotification = (rawNotification: any): Notification => {
   return {
@@ -27,16 +27,16 @@ export function NotificationList() {
     }
   })
 
-  const getIcon = (type: NotificationType) => {
+  const getIcon = (type: DatabaseNotificationType) => {
     switch (type) {
-      case NotificationType.NEW_ASSIGNMENT:
+      case 'NEW_ASSIGNMENT':
         return <Bell className="h-4 w-4" />
-      case NotificationType.STATUS_CHANGE:
+      case 'STATUS_CHANGE':
         return <CheckCircle className="h-4 w-4" />
-      case NotificationType.DEADLINE_WARNING:
-      case NotificationType.DEADLINE_APPROACHING:
+      case 'DEADLINE_WARNING':
+      case 'DEADLINE_APPROACHING':
         return <Clock className="h-4 w-4" />
-      case NotificationType.DEADLINE_OVERDUE:
+      case 'DEADLINE_OVERDUE':
         return <AlertTriangle className="h-4 w-4" />
       default:
         return <Bell className="h-4 w-4" />
