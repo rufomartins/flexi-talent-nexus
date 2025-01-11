@@ -7,7 +7,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Label } from "@/components/ui/label";
 import { supabase } from "@/integrations/supabase/client";
 import { notify } from "@/utils/notifications";
-import { NotificationType, NotificationPreferences as NotificationPreferencesType, EmailFrequency } from "@/types/notifications";
+import { NotificationType, NotificationPreferencesData, EmailFrequency, DatabaseNotificationType } from "@/types/notifications";
 
 export function NotificationPreferences({ talentId }: { talentId: string }) {
   const queryClient = useQueryClient();
@@ -23,12 +23,12 @@ export function NotificationPreferences({ talentId }: { talentId: string }) {
         .single();
 
       if (error) throw error;
-      return data as NotificationPreferencesType;
+      return data as NotificationPreferencesData;
     },
   });
 
   const updatePreferences = useMutation({
-    mutationFn: async (newPreferences: Partial<NotificationPreferencesType>) => {
+    mutationFn: async (newPreferences: Partial<NotificationPreferencesData>) => {
       setIsSubmitting(true);
       const { error } = await supabase
         .from("talent_notification_preferences")
@@ -52,7 +52,12 @@ export function NotificationPreferences({ talentId }: { talentId: string }) {
     return <div>Loading preferences...</div>;
   }
 
-  const notificationTypes = Object.values(NotificationType);
+  // Filter notification types to only include those supported by the database
+  const notificationTypes = Object.values(NotificationType).filter((type): type is DatabaseNotificationType => 
+    ['STATUS_CHANGE', 'PROFILE_UPDATE', 'ASSIGNMENT_UPDATE', 'DUO_PARTNER_CHANGE', 
+     'PROJECT_MILESTONE', 'PAYMENT_STATUS', 'CASTING_OPPORTUNITY', 'BOOKING_CONFIRMATION', 
+     'REVIEW_FEEDBACK', 'DOCUMENT_UPDATE'].includes(type)
+  );
 
   return (
     <Card>
@@ -114,7 +119,7 @@ export function NotificationPreferences({ talentId }: { talentId: string }) {
               {notificationTypes.map((type) => (
                 <div key={type} className="flex items-center justify-between">
                   <Label htmlFor={`notification-${type}`} className="text-sm">
-                    {type.split("_").map(word => word.charAt(0) + word.slice(1).toLowerCase()).join(" ")}
+                    {type.split('_').map(word => word.charAt(0) + word.slice(1).toLowerCase()).join(" ")}
                   </Label>
                   <Switch
                     id={`notification-${type}`}

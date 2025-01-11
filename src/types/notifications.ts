@@ -1,28 +1,29 @@
+// Database types that match Supabase schema
+export type DatabaseNotificationType = 
+  | 'STATUS_CHANGE'
+  | 'PROFILE_UPDATE'
+  | 'ASSIGNMENT_UPDATE'
+  | 'DUO_PARTNER_CHANGE'
+  | 'PROJECT_MILESTONE'
+  | 'PAYMENT_STATUS'
+  | 'CASTING_OPPORTUNITY'
+  | 'BOOKING_CONFIRMATION'
+  | 'REVIEW_FEEDBACK'
+  | 'DOCUMENT_UPDATE';
+
+// Enum for internal use
 export enum NotificationType {
-  // Status notifications
   STATUS_CHANGE = 'STATUS_CHANGE',
   PROFILE_UPDATE = 'PROFILE_UPDATE',
-  
-  // Assignment notifications
   NEW_ASSIGNMENT = 'NEW_ASSIGNMENT',
   ASSIGNMENT_UPDATE = 'ASSIGNMENT_UPDATE',
-  
-  // Deadline notifications
   DEADLINE_WARNING = 'DEADLINE_WARNING',
   DEADLINE_APPROACHING = 'DEADLINE_APPROACHING',
   DEADLINE_OVERDUE = 'DEADLINE_OVERDUE',
-  
-  // Partner notifications
   DUO_PARTNER_CHANGE = 'DUO_PARTNER_CHANGE',
-  
-  // Project notifications
   PROJECT_ASSIGNED = 'PROJECT_ASSIGNED',
   PROJECT_MILESTONE = 'PROJECT_MILESTONE',
-  
-  // Payment notifications
   PAYMENT_STATUS = 'PAYMENT_STATUS',
-  
-  // Other notifications
   CASTING_OPPORTUNITY = 'CASTING_OPPORTUNITY',
   BOOKING_CONFIRMATION = 'BOOKING_CONFIRMATION',
   REVIEW_FEEDBACK = 'REVIEW_FEEDBACK',
@@ -55,14 +56,15 @@ export interface NotificationMetadata {
   };
 }
 
-export interface Notification {
-  id: string;
-  type: NotificationType;
-  user_id: string;
-  status: 'pending' | 'sent';
-  metadata: NotificationMetadata;
-  processed_at?: string;
-  created_at: string;
+export interface NotificationPreferencesData {
+  talent_id: string;
+  email_enabled?: boolean;
+  in_app_enabled?: boolean;
+  email_frequency?: string;
+  reminder_days?: number[];
+  types?: DatabaseNotificationType[];
+  created_at?: string;
+  updated_at?: string;
 }
 
 export interface TalentNotification {
@@ -86,17 +88,6 @@ export interface DeadlinePreference {
   deadline_statuses: DeadlineStatus[];
   created_at: string;
   updated_at: string;
-}
-
-export interface NotificationPreferences {
-  talent_id: string;
-  email_enabled?: boolean;
-  in_app_enabled?: boolean;
-  types?: NotificationType[];
-  email_frequency?: EmailFrequency;
-  reminder_days?: number[];
-  created_at?: string;
-  updated_at?: string;
 }
 
 export interface AssignmentData {
