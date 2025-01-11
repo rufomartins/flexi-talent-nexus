@@ -2,7 +2,7 @@ import { useState } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { format } from "date-fns";
-import { Loader2, Mail } from "lucide-react";
+import { Loader2 } from "lucide-react";
 import { useMutation } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
@@ -21,7 +21,6 @@ import { BookingProjectDetails } from "./sections/BookingProjectDetails";
 import { BookingDateSelection } from "./sections/BookingDateSelection";
 import { BookingFeeSection } from "./sections/BookingFeeSection";
 import { BookingFileUpload } from "./sections/BookingFileUpload";
-import { BookingEmailPreview } from "./sections/BookingEmailPreview";
 import { BookingFormData, BookingFile, bookingFormSchema } from "./types";
 
 interface BookingDialogProps {
@@ -31,14 +30,12 @@ interface BookingDialogProps {
 }
 
 export function BookingDialog({ open, onOpenChange, talentId }: BookingDialogProps) {
-  const [isPreviewMode, setIsPreviewMode] = useState(false);
   const [uploadedFiles, setUploadedFiles] = useState<BookingFile[]>([]);
   const { toast } = useToast();
 
   const form = useForm<BookingFormData>({
     resolver: zodResolver(bookingFormSchema),
     defaultValues: {
-      preview: false,
       talent_fee: 0,
       final_fee: 0,
     },
@@ -53,8 +50,8 @@ export function BookingDialog({ open, onOpenChange, talentId }: BookingDialogPro
         talent_fee: data.talent_fee,
         final_fee: data.final_fee,
         details: data.project_details,
-        email_template_id: data.email_template_id,
         created_by: (await supabase.auth.getUser()).data.user?.id,
+        talent_id: talentId,
       };
 
       const { data: booking, error } = await supabase
@@ -65,33 +62,28 @@ export function BookingDialog({ open, onOpenChange, talentId }: BookingDialogPro
 
       if (error) throw error;
 
-      // Send confirmation email
-      const { error: emailError } = await supabase.functions.invoke('handle-booking-email', {
-        body: {
-          emailData: {
-            template_id: data.email_template_id,
-            recipient: {
-              email: data.talent_email,
-              name: data.talent_name,
-            },
-            booking: {
-              projectName: data.project_name,
-              startDate: format(data.start_date, "yyyy-MM-dd"),
-              endDate: format(data.end_date, "yyyy-MM-dd"),
-              details: data.project_details,
-              fee: data.talent_fee,
-            },
-          },
-        },
-      });
+      // Handle file uploads if any
+      if (uploadedFiles.length > 0) {
+        for (const file of uploadedFiles) {
+          const filePath = `bookings/${booking.id}/${file.file.name}`;
+          const { error: uploadError } = await supabase.storage
+            .from("booking-files")
+            .upload(filePath, file.file);
 
-      if (emailError) {
-        console.error('Error sending email:', emailError);
-        toast({
-          title: "Warning",
-          description: "Booking created but email notification failed",
-          variant: "destructive",
-        });
+          if (uploadError) {
+            console.error("Error uploading file:", uploadError);
+            continue;
+          }
+
+          await supabase.from("booking_files").insert({
+            booking_id: booking.id,
+            file_path: filePath,
+            file_name: file.file.name,
+            file_type: file.file.type,
+            file_size: file.file.size,
+            uploaded_by: (await supabase.auth.getUser()).data.user?.id,
+          });
+        }
       }
 
       return booking;
@@ -114,11 +106,6 @@ export function BookingDialog({ open, onOpenChange, talentId }: BookingDialogPro
   });
 
   const onSubmit = async (data: BookingFormData) => {
-    if (isPreviewMode) {
-      setIsPreviewMode(false);
-      return;
-    }
-
     await createBooking.mutateAsync(data);
   };
 
@@ -141,8 +128,6 @@ export function BookingDialog({ open, onOpenChange, talentId }: BookingDialogPro
               files={uploadedFiles}
               onFilesChange={setUploadedFiles}
             />
-            <Separator />
-            <BookingEmailPreview form={form} />
 
             <div className="flex justify-end space-x-2 sticky bottom-0 bg-white p-4 border-t">
               <Button
@@ -151,15 +136,6 @@ export function BookingDialog({ open, onOpenChange, talentId }: BookingDialogPro
                 onClick={() => onOpenChange(false)}
               >
                 Cancel
-              </Button>
-              <Button
-                type="button"
-                variant="outline"
-                onClick={() => setIsPreviewMode(true)}
-                disabled={createBooking.isPending}
-              >
-                <Mail className="mr-2 h-4 w-4" />
-                Preview Email
               </Button>
               <Button
                 type="submit"
