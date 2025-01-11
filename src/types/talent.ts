@@ -4,11 +4,10 @@ export interface TalentProfile {
   talent_category: 'UGC' | 'TRANSLATOR' | 'REVIEWER' | 'VOICE_OVER';
   country: string;
   native_language: string;
-  status: 'PENDING' | 'APPROVED' | 'REJECTED';
+  evaluation_status: 'approved' | 'under_evaluation' | 'rejected';
   is_duo: boolean;
   partner_id?: string;
   duo_name?: string;
-  evaluation_status: 'approved' | 'under_evaluation' | 'rejected';
   created_at: string;
   updated_at: string;
   users: {

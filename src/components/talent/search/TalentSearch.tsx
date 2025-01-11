@@ -61,7 +61,13 @@ export const TalentSearch = () => {
         throw error;
       }
 
-      return data;
+      // Transform the data to match TalentProfile interface
+      return data.map(talent => ({
+        ...talent,
+        evaluation_status: talent.evaluation_status || 'under_evaluation',
+        is_duo: talent.is_duo || false,
+        talent_category: talent.talent_category || 'UGC',
+      }));
     },
   });
 
