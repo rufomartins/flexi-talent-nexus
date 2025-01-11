@@ -16,7 +16,10 @@ export const GuestLanding = () => {
         .from("castings")
         .select(`
           *,
-          client:clients(id, name)
+          client:users!castings_client_id_fkey (
+            id,
+            full_name
+          )
         `)
         .eq("id", castingId)
         .single();
@@ -85,7 +88,7 @@ export const GuestLanding = () => {
       <div className="mb-8">
         <h1 className="text-3xl font-bold mb-2">{casting.name}</h1>
         {casting.client && (
-          <p className="text-gray-600">Client: {casting.client.name}</p>
+          <p className="text-gray-600">Client: {casting.client.full_name}</p>
         )}
         {casting.briefing && (
           <div className="mt-4 prose max-w-none" dangerouslySetInnerHTML={{ __html: casting.briefing }} />
