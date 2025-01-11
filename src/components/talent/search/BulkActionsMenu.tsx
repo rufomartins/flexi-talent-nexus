@@ -52,16 +52,23 @@ export const BulkActionsMenu = ({
         `)
         .in('id', selectedIds);
 
-      if (error) throw error;
+      if (error) {
+        console.error('Error fetching talents:', error);
+        throw error;
+      }
+
+      if (!data) {
+        throw new Error('No data returned from query');
+      }
 
       // Transform the data to match TalentProfile interface
       const transformedData = data.map(talent => ({
         ...talent,
         users: {
-          id: talent.users.id,
-          full_name: talent.users.full_name,
-          email: talent.users.email,
-          avatar_url: talent.users.avatar_url
+          id: talent.users?.id,
+          full_name: talent.users?.full_name,
+          email: talent.users?.email,
+          avatar_url: talent.users?.avatar_url
         }
       })) as TalentProfile[];
 
