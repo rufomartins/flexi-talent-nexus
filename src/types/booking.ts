@@ -2,7 +2,11 @@ import type { Database } from "@/integrations/supabase/types";
 
 export type BookingStatus = 'pending' | 'confirmed' | 'completed' | 'cancelled';
 
-export interface Booking extends Database['public']['Tables']['bookings']['Row'] {
+// Base booking type from database
+type BookingRow = Database['public']['Tables']['bookings']['Row'];
+
+// Extended booking type with relationships
+export interface Booking extends BookingRow {
   talent_profiles?: {
     id: string;
     user_id: string;
