@@ -43,7 +43,7 @@ export const BulkActionsMenu = ({
         .from('talent_profiles')
         .select(`
           *,
-          users (
+          users:user_id (
             id,
             full_name,
             email,

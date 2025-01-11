@@ -59,6 +59,7 @@ export function useDuoPartnerSearch(query: string, currentTalentId?: string) {
           user_id: user.id,
           first_name: user.first_name || '',
           last_name: user.last_name || '',
+          full_name: `${user.first_name || ''} ${user.last_name || ''}`.trim(),
           email: user.email || '',
           avatar_url: user.avatar_url || undefined
         }));
