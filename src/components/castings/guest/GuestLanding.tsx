@@ -16,7 +16,7 @@ export const GuestLanding = () => {
         .from("castings")
         .select(`
           *,
-          client:clients(name)
+          client:clients(id, name)
         `)
         .eq("id", castingId)
         .single();
@@ -100,6 +100,7 @@ export const GuestLanding = () => {
             selection={selections?.find(s => s.talent_id === talentData.talent_id)}
             onSelect={(selection) => {
               // Handle selection
+              console.log('Selection:', selection);
             }}
           />
         ))}

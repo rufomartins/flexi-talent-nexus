@@ -41,14 +41,30 @@ export function CastingCreationWizard() {
     setCurrentStep((prev) => Math.max(prev - 1, 1));
   };
 
-  const handleSubmit = async (data: CastingFormData) => {
+  const handleSubmit = async (formData: CastingFormData) => {
     setIsSubmitting(true);
     try {
-      const { user } = await supabase.auth.getUser();
+      const { data: { user } } = await supabase.auth.getUser();
       
+      if (!formData.name) {
+        throw new Error('Casting name is required');
+      }
+
       const castingData = {
-        ...data,
-        created_by: user?.id
+        name: formData.name.trim(),
+        type: formData.type,
+        casting_type: formData.casting_type,
+        created_by: user?.id,
+        client_id: formData.client_id || null,
+        project_manager_id: formData.project_manager_id || null,
+        scout_id: formData.scout_id || null,
+        briefing: formData.briefing || null,
+        description: formData.description || null,
+        logo_url: formData.logo_url || null,
+        status: formData.status,
+        show_briefing: formData.show_briefing,
+        allow_talent_portal: formData.allow_talent_portal,
+        allow_talent_portal_apply: formData.allow_talent_portal_apply
       };
 
       const { error } = await supabase
@@ -60,7 +76,7 @@ export function CastingCreationWizard() {
       notify.success('Casting created successfully');
       window.history.back();
     } catch (error) {
-      console.error('Error creating casting:', error);
+      console.error('Error submitting form:', error);
       notify.error('Failed to create casting');
     } finally {
       setIsSubmitting(false);
