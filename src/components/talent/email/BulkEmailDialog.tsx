@@ -3,17 +3,15 @@ import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
-import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
-import { Input } from "@/components/ui/input";
+import { Form } from "@/components/ui/form";
 import { Button } from "@/components/ui/button";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { EmailEditor } from "@/components/email-templates/EmailEditor";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
-import { TalentProfile, EmailTemplate } from "@/types/talent";
-import { Badge } from "@/components/ui/badge";
-import { ScrollArea } from "@/components/ui/scroll-area";
+import { TalentProfile } from "@/types/talent";
 import { Loader2 } from "lucide-react";
+import { EmailRecipientList } from "./EmailRecipientList";
+import { EmailTemplateSelector } from "./EmailTemplateSelector";
+import { EmailComposer } from "./EmailComposer";
 
 interface BulkEmailDialogProps {
   selectedTalents: TalentProfile[];
@@ -28,7 +26,6 @@ const emailSchema = z.object({
 });
 
 export function BulkEmailDialog({ selectedTalents, isOpen, onClose }: BulkEmailDialogProps) {
-  const [templates, setTemplates] = useState<EmailTemplate[]>([]);
   const [isLoading, setIsLoading] = useState(false);
   const { toast } = useToast();
 
@@ -40,31 +37,32 @@ export function BulkEmailDialog({ selectedTalents, isOpen, onClose }: BulkEmailD
     },
   });
 
-  const loadTemplates = async () => {
-    const { data, error } = await supabase
-      .from('email_templates')
-      .select('*')
-      .eq('is_active', true);
-
-    if (error) {
-      toast({
-        title: "Error loading templates",
-        description: error.message,
-        variant: "destructive",
-      });
-      return;
-    }
-
-    setTemplates(data as EmailTemplate[]);
-  };
-
   const handleTemplateChange = async (templateId: string) => {
-    const template = templates.find(t => t.id === templateId);
+    const template = await loadTemplate(templateId);
     if (template) {
       form.setValue('subject', template.subject);
       form.setValue('body', template.body);
       form.setValue('templateId', templateId);
     }
+  };
+
+  const loadTemplate = async (templateId: string) => {
+    const { data, error } = await supabase
+      .from('email_templates')
+      .select('*')
+      .eq('id', templateId)
+      .single();
+
+    if (error) {
+      toast({
+        title: "Error loading template",
+        description: error.message,
+        variant: "destructive",
+      });
+      return null;
+    }
+
+    return data;
   };
 
   const replaceVariables = (text: string, talent: TalentProfile) => {
@@ -76,7 +74,6 @@ export function BulkEmailDialog({ selectedTalents, isOpen, onClose }: BulkEmailD
   const onSubmit = async (values: z.infer<typeof emailSchema>) => {
     setIsLoading(true);
     try {
-      // First, get the email addresses for the selected talents
       const { data: emailData, error: emailError } = await supabase
         .from('user_profiles')
         .select('id, email')
@@ -89,7 +86,6 @@ export function BulkEmailDialog({ selectedTalents, isOpen, onClose }: BulkEmailD
         throw new Error('No email data found for selected talents');
       }
 
-      // Create a map of user_id to email
       const emailMap = new Map(emailData.map(d => [d.id, d.email]));
 
       await Promise.all(selectedTalents.map(async (talent) => {
@@ -144,75 +140,16 @@ export function BulkEmailDialog({ selectedTalents, isOpen, onClose }: BulkEmailD
           <DialogTitle>Send Bulk Email</DialogTitle>
         </DialogHeader>
 
-        <div className="mb-4">
-          <h4 className="text-sm font-medium mb-2">Recipients ({selectedTalents.length})</h4>
-          <ScrollArea className="h-20">
-            <div className="flex flex-wrap gap-2">
-              {selectedTalents.map((talent) => (
-                <Badge key={talent.id} variant="secondary">
-                  {talent.users.full_name}
-                </Badge>
-              ))}
-            </div>
-          </ScrollArea>
-        </div>
+        <EmailRecipientList selectedTalents={selectedTalents} />
 
         <Form {...form}>
           <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
-            <FormField
-              control={form.control}
-              name="templateId"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Email Template (Optional)</FormLabel>
-                  <Select onValueChange={(value) => handleTemplateChange(value)} value={field.value}>
-                    <FormControl>
-                      <SelectTrigger>
-                        <SelectValue placeholder="Select a template" />
-                      </SelectTrigger>
-                    </FormControl>
-                    <SelectContent>
-                      {templates.map((template) => (
-                        <SelectItem key={template.id} value={template.id}>
-                          {template.name}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                </FormItem>
-              )}
+            <EmailTemplateSelector 
+              form={form} 
+              onTemplateChange={handleTemplateChange}
             />
 
-            <FormField
-              control={form.control}
-              name="subject"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Subject</FormLabel>
-                  <FormControl>
-                    <Input {...field} />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-
-            <FormField
-              control={form.control}
-              name="body"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Email Body</FormLabel>
-                  <FormControl>
-                    <EmailEditor 
-                      value={field.value} 
-                      onChange={field.onChange}
-                    />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
+            <EmailComposer form={form} />
 
             <div className="flex justify-end gap-2">
               <Button
