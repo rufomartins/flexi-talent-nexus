@@ -1,4 +1,4 @@
-// First, define base notification types that match Supabase exactly
+// Database notification types that match Supabase exactly
 export type DatabaseNotificationType = 
   'STATUS_CHANGE' | 
   'PROFILE_UPDATE' | 
@@ -32,6 +32,12 @@ export enum NotificationType {
   DEADLINE_OVERDUE = 'DEADLINE_OVERDUE'
 }
 
+export type EmailFrequency = 'realtime' | 'daily' | 'weekly';
+
+export type NotificationChannel = 'email' | 'in_app' | 'sms';
+
+export type DeadlineStatus = 'approaching' | 'overdue' | 'completed';
+
 export interface NotificationMetadata {
   task_id?: string;
   role_type?: string;
@@ -49,7 +55,7 @@ export interface NotificationMetadata {
 export interface AssignmentData {
   task_id: string;
   role_type: string;
-  user_id: string; // Changed from userId to match database convention
+  user_id: string;
   status?: string;
   deadlines?: {
     start: string;
@@ -68,7 +74,34 @@ export interface NotificationPreferencesDB {
   updated_at?: string;
 }
 
-export type EmailFrequency = 'realtime' | 'daily' | 'weekly';
+export interface Notification {
+  id: string;
+  type: DatabaseNotificationType;
+  metadata: NotificationMetadata;
+  created_at: string;
+}
+
+export interface TalentNotification {
+  id: string;
+  talent_id: string;
+  type: DatabaseNotificationType;
+  title: string;
+  message: string;
+  read: boolean;
+  created_at: string;
+  metadata?: Record<string, any>;
+  action_url?: string;
+}
+
+export interface DeadlinePreference {
+  id: string;
+  user_id: string;
+  warning_days: number[];
+  notification_channels: NotificationChannel[];
+  deadline_statuses: DeadlineStatus[];
+  created_at: string;
+  updated_at: string;
+}
 
 // Helper function for type conversion
 export const convertToDbType = (type: NotificationType): DatabaseNotificationType => {

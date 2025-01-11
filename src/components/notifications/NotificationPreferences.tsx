@@ -7,7 +7,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Label } from "@/components/ui/label";
 import { supabase } from "@/integrations/supabase/client";
 import { notify } from "@/utils/notifications";
-import type { NotificationPreferencesDB, DatabaseNotificationType, EmailFrequency } from "@/types/notifications";
+import type { NotificationPreferencesDB, DatabaseNotificationType, EmailFrequency, NotificationType } from "@/types/notifications";
 
 export function NotificationPreferences({ talentId }: { talentId: string }) {
   const queryClient = useQueryClient();
@@ -56,8 +56,8 @@ export function NotificationPreferences({ talentId }: { talentId: string }) {
     return <div>Loading preferences...</div>;
   }
 
-  // Use all notification types since they now match the database types
-  const notificationTypes = Object.values(DatabaseNotificationType);
+  // Use Object.values(NotificationType) since it's an enum now
+  const notificationTypes = Object.values(NotificationType);
 
   return (
     <Card>

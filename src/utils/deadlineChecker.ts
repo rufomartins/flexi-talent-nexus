@@ -1,6 +1,5 @@
 import { handleAssignmentNotification } from "@/services/notificationTriggers";
-import { DatabaseNotificationType } from "@/types/notifications";
-import type { AssignmentData } from "@/types/notifications";
+import { NotificationType, AssignmentData } from "@/types/notifications";
 
 export const handleDeadline = async (assignment: AssignmentData) => {
   const dueDate = new Date(assignment.deadlines.due);
@@ -18,12 +17,12 @@ export const handleDeadline = async (assignment: AssignmentData) => {
   if (daysRemaining <= warningThreshold && daysRemaining > 0) {
     await handleAssignmentNotification(
       assignmentData,
-      'DEADLINE_WARNING' as DatabaseNotificationType
+      NotificationType.DEADLINE_WARNING
     );
   } else if (daysRemaining < 0) {
     await handleAssignmentNotification(
       assignmentData,
-      'DEADLINE_OVERDUE' as DatabaseNotificationType
+      NotificationType.DEADLINE_OVERDUE
     );
   }
 };
