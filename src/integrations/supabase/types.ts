@@ -183,10 +183,71 @@ export type Database = {
           },
         ]
       }
+      booking_files: {
+        Row: {
+          booking_id: string | null
+          created_at: string | null
+          file_name: string
+          file_path: string
+          file_size: number
+          file_type: string
+          id: string
+          updated_at: string | null
+          uploaded_by: string | null
+        }
+        Insert: {
+          booking_id?: string | null
+          created_at?: string | null
+          file_name: string
+          file_path: string
+          file_size: number
+          file_type: string
+          id?: string
+          updated_at?: string | null
+          uploaded_by?: string | null
+        }
+        Update: {
+          booking_id?: string | null
+          created_at?: string | null
+          file_name?: string
+          file_path?: string
+          file_size?: number
+          file_type?: string
+          id?: string
+          updated_at?: string | null
+          uploaded_by?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "booking_files_booking_id_fkey"
+            columns: ["booking_id"]
+            isOneToOne: false
+            referencedRelation: "bookings"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "booking_files_uploaded_by_fkey"
+            columns: ["uploaded_by"]
+            isOneToOne: false
+            referencedRelation: "user_profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "booking_files_uploaded_by_fkey"
+            columns: ["uploaded_by"]
+            isOneToOne: false
+            referencedRelation: "users"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       bookings: {
         Row: {
           casting_id: string | null
           created_at: string | null
+          created_by: string | null
+          details: string | null
+          email_template_id: string | null
           end_date: string
           final_fee: number | null
           id: string
@@ -201,6 +262,9 @@ export type Database = {
         Insert: {
           casting_id?: string | null
           created_at?: string | null
+          created_by?: string | null
+          details?: string | null
+          email_template_id?: string | null
           end_date: string
           final_fee?: number | null
           id?: string
@@ -215,6 +279,9 @@ export type Database = {
         Update: {
           casting_id?: string | null
           created_at?: string | null
+          created_by?: string | null
+          details?: string | null
+          email_template_id?: string | null
           end_date?: string
           final_fee?: number | null
           id?: string
@@ -232,6 +299,27 @@ export type Database = {
             columns: ["casting_id"]
             isOneToOne: false
             referencedRelation: "castings"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "bookings_created_by_fkey"
+            columns: ["created_by"]
+            isOneToOne: false
+            referencedRelation: "user_profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "bookings_created_by_fkey"
+            columns: ["created_by"]
+            isOneToOne: false
+            referencedRelation: "users"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "bookings_email_template_id_fkey"
+            columns: ["email_template_id"]
+            isOneToOne: false
+            referencedRelation: "email_templates"
             referencedColumns: ["id"]
           },
           {
