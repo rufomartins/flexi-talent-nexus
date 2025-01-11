@@ -32,9 +32,7 @@ export const TalentSearch = () => {
           *,
           users!talent_profiles_user_id_fkey (
             id,
-            first_name,
-            last_name,
-            email,
+            full_name,
             avatar_url
           )
         `)
@@ -81,9 +79,7 @@ export const TalentSearch = () => {
           talent_category: talent.talent_category || 'UGC',
           users: {
             id: talent.users.id,
-            first_name: talent.users.first_name || '',
-            last_name: talent.users.last_name || '',
-            email: talent.users.email || '',
+            full_name: talent.users.full_name || '',
             avatar_url: talent.users.avatar_url
           }
         } as unknown;
