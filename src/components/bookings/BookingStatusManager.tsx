@@ -5,7 +5,7 @@ import { useToast } from "@/hooks/use-toast";
 import { StatusBadge } from "./status/StatusBadge";
 import { StatusTransitionButton } from "./status/StatusTransitionButton";
 import { StatusConfirmationDialog } from "./status/StatusConfirmationDialog";
-import type { BookingStatus } from "@/types/booking";
+import type { BookingStatus, validStatusTransitions } from "@/types/booking";
 
 interface BookingStatusManagerProps {
   bookingId: string;
