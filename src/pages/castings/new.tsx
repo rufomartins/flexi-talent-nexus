@@ -1,17 +1,11 @@
-import { useSearchParams } from "react-router-dom";
-import { NewCastingForm } from "@/components/castings/NewCastingForm";
-import { CastingType } from "@/types/casting";
+import React from 'react';
+import { CastingCreationWizard } from '@/components/castings/create/CastingCreationWizard';
 
 export default function NewCastingPage() {
-  const [searchParams] = useSearchParams();
-  const type = (searchParams.get("type") || "internal") as CastingType;
-
   return (
-    <div className="container max-w-4xl py-8">
-      <h1 className="text-2xl font-semibold mb-6">
-        Create New {type === 'internal' ? 'Internal' : 'External'} Casting
-      </h1>
-      <NewCastingForm type={type} />
+    <div className="container mx-auto py-8">
+      <h1 className="text-3xl font-bold mb-8">Create New Casting</h1>
+      <CastingCreationWizard />
     </div>
   );
 }
