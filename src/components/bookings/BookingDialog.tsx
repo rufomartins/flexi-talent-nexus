@@ -20,7 +20,7 @@ import { Separator } from "@/components/ui/separator";
 import { BookingProjectDetails } from "./sections/BookingProjectDetails";
 import { BookingDateSelection } from "./sections/BookingDateSelection";
 import { BookingFeeSection } from "./sections/BookingFeeSection";
-import { BookingFileUpload } from "./sections/BookingFileUpload";
+import { FileUploadSection } from "./sections/FileUploadSection";
 import { AvailabilityWarning } from "./AvailabilityWarning";
 import { BookingFormData, BookingFile, bookingFormSchema } from "./types";
 import { TalentAvailability } from "@/utils/availability";
@@ -141,7 +141,7 @@ export function BookingDialog({ open, onOpenChange, talentId }: BookingDialogPro
               <Separator />
               <BookingFeeSection form={form} />
               <Separator />
-              <BookingFileUpload
+              <FileUploadSection
                 files={uploadedFiles}
                 onFilesChange={setUploadedFiles}
               />
