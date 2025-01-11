@@ -1,8 +1,11 @@
+import { useQuery } from "@tanstack/react-query";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Switch } from "@/components/ui/switch";
 import { Edit, Trash } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { formatDate } from "@/lib/utils";
+import { supabase } from "@/integrations/supabase/client";
+import { useToast } from "@/hooks/use-toast";
 
 interface EmailTemplate {
   id: string;
@@ -14,12 +17,54 @@ interface EmailTemplate {
   updated_at: string;
 }
 
-interface EmailTemplateListProps {
-  templates: EmailTemplate[];
-  isLoading: boolean;
-}
+export function EmailTemplateList() {
+  const { toast } = useToast();
+  
+  const { data: templates, isLoading, refetch } = useQuery({
+    queryKey: ['email-templates'],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from('email_templates')
+        .select('*')
+        .order('created_at', { ascending: false });
 
-export function EmailTemplateList({ templates, isLoading }: EmailTemplateListProps) {
+      if (error) {
+        toast({
+          title: "Error",
+          description: "Failed to load email templates",
+          variant: "destructive",
+        });
+        throw error;
+      }
+
+      return data as EmailTemplate[];
+    },
+  });
+
+  const toggleTemplateStatus = async (templateId: string, currentStatus: boolean) => {
+    try {
+      const { error } = await supabase
+        .from('email_templates')
+        .update({ is_active: !currentStatus })
+        .eq('id', templateId);
+
+      if (error) throw error;
+
+      toast({
+        title: "Success",
+        description: `Template ${currentStatus ? 'deactivated' : 'activated'} successfully`,
+      });
+
+      refetch();
+    } catch (error: any) {
+      toast({
+        title: "Error",
+        description: error.message || "Failed to update template status",
+        variant: "destructive",
+      });
+    }
+  };
+
   if (isLoading) {
     return <div>Loading...</div>;
   }
@@ -38,7 +83,7 @@ export function EmailTemplateList({ templates, isLoading }: EmailTemplateListPro
           </TableRow>
         </TableHeader>
         <TableBody>
-          {templates.map((template) => (
+          {templates?.map((template) => (
             <TableRow key={template.id}>
               <TableCell className="font-medium">{template.name}</TableCell>
               <TableCell>{template.type}</TableCell>
@@ -47,7 +92,7 @@ export function EmailTemplateList({ templates, isLoading }: EmailTemplateListPro
               <TableCell>
                 <Switch 
                   checked={template.is_active}
-                  onCheckedChange={() => {}}
+                  onCheckedChange={() => toggleTemplateStatus(template.id, template.is_active)}
                 />
               </TableCell>
               <TableCell className="text-right space-x-2">

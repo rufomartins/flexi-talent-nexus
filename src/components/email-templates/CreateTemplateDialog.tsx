@@ -8,6 +8,8 @@ import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { EmailEditor } from "./EmailEditor";
+import { supabase } from "@/integrations/supabase/client";
+import { useToast } from "@/hooks/use-toast";
 
 const templateSchema = z.object({
   name: z.string().min(1, "Template name is required"),
@@ -19,10 +21,12 @@ const templateSchema = z.object({
 interface CreateTemplateDialogProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
+  onTemplateCreated?: () => void;
 }
 
-export function CreateTemplateDialog({ open, onOpenChange }: CreateTemplateDialogProps) {
+export function CreateTemplateDialog({ open, onOpenChange, onTemplateCreated }: CreateTemplateDialogProps) {
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const { toast } = useToast();
 
   const form = useForm<z.infer<typeof templateSchema>>({
     resolver: zodResolver(templateSchema),
@@ -36,10 +40,37 @@ export function CreateTemplateDialog({ open, onOpenChange }: CreateTemplateDialo
 
   async function onSubmit(values: z.infer<typeof templateSchema>) {
     setIsSubmitting(true);
-    // TODO: Implement template creation
-    console.log(values);
-    setIsSubmitting(false);
-    onOpenChange(false);
+    try {
+      const { error } = await supabase
+        .from('email_templates')
+        .insert({
+          name: values.name,
+          type: values.type,
+          subject: values.subject,
+          body: values.body,
+          variables: [], // We'll implement variable management later
+          is_active: true,
+        });
+
+      if (error) throw error;
+
+      toast({
+        title: "Success",
+        description: "Email template created successfully",
+      });
+
+      onTemplateCreated?.();
+      onOpenChange(false);
+      form.reset();
+    } catch (error: any) {
+      toast({
+        title: "Error",
+        description: error.message || "Failed to create template",
+        variant: "destructive",
+      });
+    } finally {
+      setIsSubmitting(false);
+    }
   }
 
   return (
@@ -125,7 +156,7 @@ export function CreateTemplateDialog({ open, onOpenChange }: CreateTemplateDialo
                 Cancel
               </Button>
               <Button type="submit" disabled={isSubmitting}>
-                Create Template
+                {isSubmitting ? "Creating..." : "Create Template"}
               </Button>
             </div>
           </form>
