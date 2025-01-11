@@ -8,6 +8,8 @@ export type TimelineEventType =
   | 'booking_updated';
 
 export interface TimelineEventDetails {
+  from?: string;  // For status changes
+  to?: string;    // For status changes
   previous_status?: string;
   new_status?: string;
   file_name?: string;
@@ -20,12 +22,12 @@ export interface TimelineEventDetails {
 export interface TimelineEvent {
   id: string;
   booking_id: string;
-  event_type: TimelineEventType;
+  type: TimelineEventType;
   user_id: string;
   details: TimelineEventDetails;
   created_at: string;
   updated_at: string;
-  users?: {
+  users: {
     id: string;
     full_name: string;
     avatar_url?: string;

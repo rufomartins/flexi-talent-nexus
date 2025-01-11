@@ -2,7 +2,8 @@ import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Loader2 } from "lucide-react";
-import type { TimelineEvent } from "./types";
+import type { TimelineEvent } from "@/types/supabase";
+import { format } from "date-fns";
 
 interface ActivityTimelineProps {
   bookingId: string;
@@ -12,23 +13,21 @@ export function ActivityTimeline({ bookingId }: ActivityTimelineProps) {
   const { data: events, isLoading } = useQuery({
     queryKey: ["booking-activity", bookingId],
     queryFn: async () => {
-      // This is a placeholder - implement actual activity tracking
-      const mockEvents: TimelineEvent[] = [
-        {
-          id: "1",
-          type: "status_change",
-          timestamp: new Date().toISOString(),
-          user: {
-            id: "1",
-            name: "System",
-          },
-          details: {
-            from: "pending",
-            to: "confirmed",
-          },
-        },
-      ];
-      return mockEvents;
+      const { data, error } = await supabase
+        .from('booking_timeline_events')
+        .select(`
+          *,
+          users (
+            id,
+            full_name,
+            avatar_url
+          )
+        `)
+        .eq('booking_id', bookingId)
+        .order('created_at', { ascending: false });
+
+      if (error) throw error;
+      return data as TimelineEvent[];
     },
   });
 
@@ -57,8 +56,8 @@ export function ActivityTimeline({ bookingId }: ActivityTimelineProps) {
                       `Status changed from ${event.details.from} to ${event.details.to}`}
                   </p>
                   <p className="text-xs text-muted-foreground">
-                    by {event.user.name} on{" "}
-                    {new Date(event.timestamp).toLocaleDateString()}
+                    by {event.users.full_name} on{" "}
+                    {format(new Date(event.created_at), 'PPp')}
                   </p>
                 </div>
               </div>
