@@ -54,7 +54,18 @@ export const BulkActionsMenu = ({
 
       if (error) throw error;
 
-      setSelectedTalents(data as TalentProfile[]);
+      // Transform the data to match TalentProfile interface
+      const transformedData = data.map(talent => ({
+        ...talent,
+        users: {
+          id: talent.users.id,
+          full_name: talent.users.full_name,
+          email: talent.users.email,
+          avatar_url: talent.users.avatar_url
+        }
+      })) as TalentProfile[];
+
+      setSelectedTalents(transformedData);
       setIsEmailDialogOpen(true);
     } catch (error: any) {
       toast({

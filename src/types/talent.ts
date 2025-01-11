@@ -1,3 +1,10 @@
+export interface DuoPartner {
+  id: string;
+  full_name: string;
+  email: string;
+  avatar_url?: string;
+}
+
 export interface TalentProfile {
   id: string;
   user_id: string;
@@ -15,6 +22,7 @@ export interface TalentProfile {
   experience_level: string;
   fee_range: Record<string, any>;
   native_language: string;
+  partner?: DuoPartner;
   users: {
     id: string;
     full_name: string;
