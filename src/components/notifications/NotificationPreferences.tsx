@@ -7,7 +7,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Label } from "@/components/ui/label";
 import { supabase } from "@/integrations/supabase/client";
 import { notify } from "@/utils/notifications";
-import type { NotificationType, NotificationPreferences as NotificationPreferencesType } from "@/types/notifications";
+import { NotificationType, NotificationPreferences as NotificationPreferencesType, EmailFrequency } from "@/types/notifications";
 
 export function NotificationPreferences({ talentId }: { talentId: string }) {
   const queryClient = useQueryClient();
@@ -52,6 +52,8 @@ export function NotificationPreferences({ talentId }: { talentId: string }) {
     return <div>Loading preferences...</div>;
   }
 
+  const notificationTypes = Object.keys(NotificationType) as Array<keyof typeof NotificationType>;
+
   return (
     <Card>
       <CardHeader>
@@ -90,7 +92,7 @@ export function NotificationPreferences({ talentId }: { talentId: string }) {
             <Label htmlFor="email-frequency">Email Frequency</Label>
             <Select
               value={preferences?.email_frequency}
-              onValueChange={(value) =>
+              onValueChange={(value: EmailFrequency) =>
                 updatePreferences.mutate({ email_frequency: value })
               }
               disabled={!preferences?.email_enabled || isSubmitting}
@@ -109,24 +111,17 @@ export function NotificationPreferences({ talentId }: { talentId: string }) {
           <div className="space-y-2">
             <Label>Notification Types</Label>
             <div className="grid gap-2">
-              {[
-                "PROJECT_MILESTONE",
-                "PAYMENT_STATUS",
-                "CASTING_OPPORTUNITY",
-                "BOOKING_CONFIRMATION",
-                "REVIEW_FEEDBACK",
-                "DOCUMENT_UPDATE"
-              ].map((type) => (
+              {notificationTypes.map((type) => (
                 <div key={type} className="flex items-center justify-between">
                   <Label htmlFor={`notification-${type}`} className="text-sm">
                     {type.split("_").map(word => word.charAt(0) + word.slice(1).toLowerCase()).join(" ")}
                   </Label>
                   <Switch
                     id={`notification-${type}`}
-                    checked={preferences?.types?.includes(type as keyof typeof NotificationType)}
+                    checked={preferences?.types?.includes(type)}
                     onCheckedChange={(checked) => {
                       const newTypes = checked
-                        ? [...(preferences?.types || []), type as keyof typeof NotificationType]
+                        ? [...(preferences?.types || []), type]
                         : preferences?.types?.filter((t) => t !== type) || [];
                       updatePreferences.mutate({ types: newTypes });
                     }}
