@@ -1,4 +1,5 @@
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts"
+import { createClient } from "https://esm.sh/@supabase/supabase-js@2"
 import { Twilio } from 'https://esm.sh/twilio@4.19.0'
 
 const corsHeaders = {
@@ -29,7 +30,7 @@ serve(async (req) => {
     }
 
     const client = new Twilio(accountSid, authToken)
-    const { to, message, notificationType, recipientId, metadata } = await req.json() as SMSPayload
+    const { to, message: smsMessage, notificationType, recipientId, metadata } = await req.json() as SMSPayload
 
     // Create notification log entry
     const supabaseClient = createClient(
@@ -41,7 +42,7 @@ serve(async (req) => {
       notification_type: notificationType,
       recipient_id: recipientId,
       phone_number: to,
-      message,
+      message: smsMessage,
       status: 'pending',
       metadata
     }
@@ -56,8 +57,8 @@ serve(async (req) => {
     }
 
     // Send SMS via Twilio
-    const message = await client.messages.create({
-      body: message,
+    const twilioMessage = await client.messages.create({
+      body: smsMessage,
       to,
       from: fromNumber,
     })
@@ -78,7 +79,7 @@ serve(async (req) => {
     }
 
     return new Response(
-      JSON.stringify({ success: true, messageId: message.sid }),
+      JSON.stringify({ success: true, messageId: twilioMessage.sid }),
       { headers: { ...corsHeaders, 'Content-Type': 'application/json' }, status: 200 }
     )
   } catch (error) {

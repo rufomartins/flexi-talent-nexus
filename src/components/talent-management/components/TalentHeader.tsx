@@ -4,7 +4,7 @@ import { canManageTalents } from "@/utils/permissions"
 import { DatabaseUser } from "@/types/user"
 
 interface TalentHeaderProps {
-  user: DatabaseUser;
+  user: Partial<DatabaseUser>;
   onAddTalent: () => void;
 }
 

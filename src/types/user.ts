@@ -18,6 +18,9 @@ export interface DatabaseUser {
   nationality: string | null;
   role: UserRole;
   status: UserStatus;
+  phone_number_verified?: boolean;
+  sms_notifications_enabled?: boolean;
+  sms_notification_types?: Database["public"]["Enums"]["notification_type"][];
 }
 
 export interface User extends SupabaseUser {
