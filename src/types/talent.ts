@@ -5,6 +5,7 @@ export interface TalentProfile {
   country: string;
   evaluation_status: 'approved' | 'under_evaluation' | 'rejected';
   is_duo: boolean;
+  duo_name?: string;
   partner_id?: string;
   created_at: string;
   updated_at: string;

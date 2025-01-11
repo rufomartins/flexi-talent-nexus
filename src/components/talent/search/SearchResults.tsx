@@ -2,7 +2,7 @@ import { TalentProfile } from "@/types/talent";
 import { Card } from "@/components/ui/card";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
-import { Loader2, Check } from "lucide-react";
+import { Loader2 } from "lucide-react";
 import { Checkbox } from "@/components/ui/checkbox";
 
 interface SearchResultsProps {
@@ -57,16 +57,15 @@ export const SearchResults = ({
               />
             )}
             <Avatar className="h-12 w-12">
-              <AvatarImage src={talent.users?.avatar_url || ''} />
+              <AvatarImage src={talent.users.avatar_url || ''} />
               <AvatarFallback>
-                {talent.users?.first_name?.[0]}
-                {talent.users?.last_name?.[0]}
+                {talent.users.full_name?.[0]}
               </AvatarFallback>
             </Avatar>
             <div className="flex-1 min-w-0">
               <div className="flex items-center justify-between">
                 <p className="text-sm font-medium truncate">
-                  {talent.users?.first_name} {talent.users?.last_name}
+                  {talent.users.full_name}
                 </p>
                 <Badge variant="secondary" className="ml-2">
                   {talent.talent_category}
