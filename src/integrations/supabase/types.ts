@@ -695,50 +695,88 @@ export type Database = {
         }
         Relationships: []
       }
-      email_templates: {
+      email_logs: {
         Row: {
-          content: string
-          created_at: string | null
-          created_by: string | null
+          body: string
+          error_message: string | null
           id: string
-          name: string
+          metadata: Json | null
+          recipient: string
+          sent_at: string | null
+          status: string
           subject: string
-          updated_at: string | null
+          template_id: string | null
         }
         Insert: {
-          content: string
-          created_at?: string | null
-          created_by?: string | null
+          body: string
+          error_message?: string | null
           id?: string
-          name: string
+          metadata?: Json | null
+          recipient: string
+          sent_at?: string | null
+          status: string
           subject: string
-          updated_at?: string | null
+          template_id?: string | null
         }
         Update: {
-          content?: string
-          created_at?: string | null
-          created_by?: string | null
+          body?: string
+          error_message?: string | null
           id?: string
-          name?: string
+          metadata?: Json | null
+          recipient?: string
+          sent_at?: string | null
+          status?: string
           subject?: string
-          updated_at?: string | null
+          template_id?: string | null
         }
         Relationships: [
           {
-            foreignKeyName: "email_templates_created_by_fkey"
-            columns: ["created_by"]
+            foreignKeyName: "email_logs_template_id_fkey"
+            columns: ["template_id"]
             isOneToOne: false
-            referencedRelation: "user_profiles"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "email_templates_created_by_fkey"
-            columns: ["created_by"]
-            isOneToOne: false
-            referencedRelation: "users"
+            referencedRelation: "email_templates"
             referencedColumns: ["id"]
           },
         ]
+      }
+      email_templates: {
+        Row: {
+          body: string
+          created_at: string | null
+          created_by: string | null
+          id: string
+          is_active: boolean | null
+          name: string
+          subject: string
+          type: Database["public"]["Enums"]["email_template_type"]
+          updated_at: string | null
+          variables: Json | null
+        }
+        Insert: {
+          body: string
+          created_at?: string | null
+          created_by?: string | null
+          id?: string
+          is_active?: boolean | null
+          name: string
+          subject: string
+          type: Database["public"]["Enums"]["email_template_type"]
+          updated_at?: string | null
+          variables?: Json | null
+        }
+        Update: {
+          body?: string
+          created_at?: string | null
+          created_by?: string | null
+          id?: string
+          is_active?: boolean | null
+          name?: string
+          subject?: string
+          type?: Database["public"]["Enums"]["email_template_type"]
+          updated_at?: string | null
+          variables?: Json | null
+        }
+        Relationships: []
       }
       equipment: {
         Row: {
@@ -2439,6 +2477,12 @@ export type Database = {
       booking_status: "pending" | "confirmed" | "cancelled" | "completed"
       casting_status: "open" | "closed"
       casting_type: "internal" | "external"
+      email_template_type:
+        | "casting_availability"
+        | "booking_confirmation"
+        | "talent_application"
+        | "project_update"
+        | "talent_invitation"
       field_type:
         | "text"
         | "long_text"
