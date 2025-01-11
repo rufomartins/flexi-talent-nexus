@@ -482,6 +482,8 @@ export type Database = {
           is_enabled: boolean | null
           last_login: string | null
           name: string
+          preferences: Json | null
+          status: string | null
         }
         Insert: {
           access_token: string
@@ -492,6 +494,8 @@ export type Database = {
           is_enabled?: boolean | null
           last_login?: string | null
           name: string
+          preferences?: Json | null
+          status?: string | null
         }
         Update: {
           access_token?: string
@@ -502,6 +506,8 @@ export type Database = {
           is_enabled?: boolean | null
           last_login?: string | null
           name?: string
+          preferences?: Json | null
+          status?: string | null
         }
         Relationships: [
           {
@@ -966,7 +972,9 @@ export type Database = {
           created_at: string | null
           guest_id: string | null
           id: string
+          liked: boolean | null
           preference_order: number | null
+          status: string | null
           talent_id: string | null
           updated_at: string | null
         }
@@ -976,7 +984,9 @@ export type Database = {
           created_at?: string | null
           guest_id?: string | null
           id?: string
+          liked?: boolean | null
           preference_order?: number | null
+          status?: string | null
           talent_id?: string | null
           updated_at?: string | null
         }
@@ -986,7 +996,9 @@ export type Database = {
           created_at?: string | null
           guest_id?: string | null
           id?: string
+          liked?: boolean | null
           preference_order?: number | null
+          status?: string | null
           talent_id?: string | null
           updated_at?: string | null
         }
