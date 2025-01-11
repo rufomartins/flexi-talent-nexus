@@ -924,6 +924,60 @@ export type Database = {
           },
         ]
       }
+      notification_logs: {
+        Row: {
+          created_at: string | null
+          error_message: string | null
+          id: string
+          message: string
+          metadata: Json | null
+          notification_type: Database["public"]["Enums"]["notification_type"]
+          phone_number: string
+          recipient_id: string | null
+          sent_at: string | null
+          status: string
+        }
+        Insert: {
+          created_at?: string | null
+          error_message?: string | null
+          id?: string
+          message: string
+          metadata?: Json | null
+          notification_type: Database["public"]["Enums"]["notification_type"]
+          phone_number: string
+          recipient_id?: string | null
+          sent_at?: string | null
+          status?: string
+        }
+        Update: {
+          created_at?: string | null
+          error_message?: string | null
+          id?: string
+          message?: string
+          metadata?: Json | null
+          notification_type?: Database["public"]["Enums"]["notification_type"]
+          phone_number?: string
+          recipient_id?: string | null
+          sent_at?: string | null
+          status?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "notification_logs_recipient_id_fkey"
+            columns: ["recipient_id"]
+            isOneToOne: false
+            referencedRelation: "user_profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "notification_logs_recipient_id_fkey"
+            columns: ["recipient_id"]
+            isOneToOne: false
+            referencedRelation: "users"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       notification_queue: {
         Row: {
           created_at: string | null
@@ -2232,7 +2286,12 @@ export type Database = {
           last_name: string | null
           mobile_phone: string | null
           nationality: string | null
+          phone_number_verified: boolean | null
           role: Database["public"]["Enums"]["user_role"]
+          sms_notification_types:
+            | Database["public"]["Enums"]["notification_type"][]
+            | null
+          sms_notifications_enabled: boolean | null
           status: Database["public"]["Enums"]["user_status"]
         }
         Insert: {
@@ -2247,7 +2306,12 @@ export type Database = {
           last_name?: string | null
           mobile_phone?: string | null
           nationality?: string | null
+          phone_number_verified?: boolean | null
           role?: Database["public"]["Enums"]["user_role"]
+          sms_notification_types?:
+            | Database["public"]["Enums"]["notification_type"][]
+            | null
+          sms_notifications_enabled?: boolean | null
           status?: Database["public"]["Enums"]["user_status"]
         }
         Update: {
@@ -2262,7 +2326,12 @@ export type Database = {
           last_name?: string | null
           mobile_phone?: string | null
           nationality?: string | null
+          phone_number_verified?: boolean | null
           role?: Database["public"]["Enums"]["user_role"]
+          sms_notification_types?:
+            | Database["public"]["Enums"]["notification_type"][]
+            | null
+          sms_notifications_enabled?: boolean | null
           status?: Database["public"]["Enums"]["user_status"]
         }
         Relationships: [
@@ -2399,6 +2468,10 @@ export type Database = {
         | "DEADLINE_WARNING"
         | "DEADLINE_APPROACHING"
         | "DEADLINE_OVERDUE"
+        | "CASTING_AVAILABILITY"
+        | "TALENT_APPLICATION"
+        | "PROJECT_UPDATE"
+        | "PAYMENT_REMINDER"
       project_delivery_status: "Pending" | "Delivered" | "R Pending"
       project_review_status: "Internal Review" | "Client Review" | "Approved"
       project_script_status: "Pending" | "In Progress" | "Approved"

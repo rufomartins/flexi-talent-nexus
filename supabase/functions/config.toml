@@ -1,0 +1,4 @@
+project_id = "uqanisnpgfgrxnlvpqss"
+
+[functions.send-sms]
+verify_jwt = true
