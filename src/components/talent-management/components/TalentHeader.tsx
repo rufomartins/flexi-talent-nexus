@@ -9,10 +9,13 @@ interface TalentHeaderProps {
 }
 
 export function TalentHeader({ user, onAddTalent }: TalentHeaderProps) {
+  // Ensure we have a user object before checking permissions
+  if (!user) return null;
+
   return (
     <div className="flex justify-between items-center mb-6">
       <h1 className="text-2xl font-semibold">Talent Management</h1>
-      {canManageTalents(user) && (
+      {canManageTalents(user as DatabaseUser) && (
         <Button onClick={onAddTalent}>
           <Plus className="h-4 w-4 mr-2" />
           Add New Talent
