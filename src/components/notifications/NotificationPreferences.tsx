@@ -7,7 +7,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Label } from "@/components/ui/label";
 import { supabase } from "@/integrations/supabase/client";
 import { notify } from "@/utils/notifications";
-import { NotificationType, NotificationPreferencesData, EmailFrequency, DatabaseNotificationType } from "@/types/notifications";
+import { NotificationType, NotificationPreferences, EmailFrequency, DatabaseNotificationType, convertToDbType } from "@/types/notifications";
 
 export function NotificationPreferences({ talentId }: { talentId: string }) {
   const queryClient = useQueryClient();
@@ -23,16 +23,22 @@ export function NotificationPreferences({ talentId }: { talentId: string }) {
         .single();
 
       if (error) throw error;
-      return data as NotificationPreferencesData;
+      return data as NotificationPreferences;
     },
   });
 
   const updatePreferences = useMutation({
-    mutationFn: async (newPreferences: Partial<NotificationPreferencesData>) => {
+    mutationFn: async (newPreferences: Partial<NotificationPreferences>) => {
       setIsSubmitting(true);
+      const dbTypes = newPreferences.types?.map(convertToDbType);
+      
       const { error } = await supabase
         .from("talent_notification_preferences")
-        .upsert({ talent_id: talentId, ...newPreferences });
+        .upsert({ 
+          talent_id: talentId,
+          ...newPreferences,
+          types: dbTypes
+        });
 
       if (error) throw error;
     },
@@ -52,12 +58,8 @@ export function NotificationPreferences({ talentId }: { talentId: string }) {
     return <div>Loading preferences...</div>;
   }
 
-  // Filter notification types to only include those supported by the database
-  const notificationTypes = Object.values(NotificationType).filter((type): type is DatabaseNotificationType => 
-    ['STATUS_CHANGE', 'PROFILE_UPDATE', 'ASSIGNMENT_UPDATE', 'DUO_PARTNER_CHANGE', 
-     'PROJECT_MILESTONE', 'PAYMENT_STATUS', 'CASTING_OPPORTUNITY', 'BOOKING_CONFIRMATION', 
-     'REVIEW_FEEDBACK', 'DOCUMENT_UPDATE'].includes(type)
-  );
+  // Use all notification types since they now match the database types
+  const notificationTypes = Object.values(NotificationType);
 
   return (
     <Card>
@@ -123,10 +125,10 @@ export function NotificationPreferences({ talentId }: { talentId: string }) {
                   </Label>
                   <Switch
                     id={`notification-${type}`}
-                    checked={preferences?.types?.includes(type)}
+                    checked={preferences?.types?.includes(type as DatabaseNotificationType)}
                     onCheckedChange={(checked) => {
                       const newTypes = checked
-                        ? [...(preferences?.types || []), type]
+                        ? [...(preferences?.types || []), type as DatabaseNotificationType]
                         : preferences?.types?.filter((t) => t !== type) || [];
                       updatePreferences.mutate({ types: newTypes });
                     }}

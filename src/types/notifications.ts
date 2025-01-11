@@ -9,54 +9,43 @@ export type DatabaseNotificationType =
   | 'CASTING_OPPORTUNITY'
   | 'BOOKING_CONFIRMATION'
   | 'REVIEW_FEEDBACK'
-  | 'DOCUMENT_UPDATE';
+  | 'DOCUMENT_UPDATE'
+  | 'NEW_ASSIGNMENT'
+  | 'DEADLINE_WARNING'
+  | 'DEADLINE_APPROACHING'
+  | 'DEADLINE_OVERDUE';
 
-// Enum for internal use
+// Enum that matches exactly with database types
 export enum NotificationType {
   STATUS_CHANGE = 'STATUS_CHANGE',
   PROFILE_UPDATE = 'PROFILE_UPDATE',
-  NEW_ASSIGNMENT = 'NEW_ASSIGNMENT',
   ASSIGNMENT_UPDATE = 'ASSIGNMENT_UPDATE',
-  DEADLINE_WARNING = 'DEADLINE_WARNING',
-  DEADLINE_APPROACHING = 'DEADLINE_APPROACHING',
-  DEADLINE_OVERDUE = 'DEADLINE_OVERDUE',
   DUO_PARTNER_CHANGE = 'DUO_PARTNER_CHANGE',
-  PROJECT_ASSIGNED = 'PROJECT_ASSIGNED',
   PROJECT_MILESTONE = 'PROJECT_MILESTONE',
   PAYMENT_STATUS = 'PAYMENT_STATUS',
   CASTING_OPPORTUNITY = 'CASTING_OPPORTUNITY',
   BOOKING_CONFIRMATION = 'BOOKING_CONFIRMATION',
   REVIEW_FEEDBACK = 'REVIEW_FEEDBACK',
-  DOCUMENT_UPDATE = 'DOCUMENT_UPDATE'
-}
-
-export enum DeadlineStatus {
-  APPROACHING = 'APPROACHING',
-  OVERDUE = 'OVERDUE'
-}
-
-export enum NotificationChannel {
-  EMAIL = 'EMAIL',
-  IN_APP = 'IN_APP',
-  SMS = 'SMS'
+  DOCUMENT_UPDATE = 'DOCUMENT_UPDATE',
+  NEW_ASSIGNMENT = 'NEW_ASSIGNMENT',
+  DEADLINE_WARNING = 'DEADLINE_WARNING',
+  DEADLINE_APPROACHING = 'DEADLINE_APPROACHING',
+  DEADLINE_OVERDUE = 'DEADLINE_OVERDUE'
 }
 
 export type EmailFrequency = 'realtime' | 'daily' | 'weekly';
 
-export interface NotificationMetadata {
-  task_id: string;
-  role_type: string;
-  content: {
-    title: string;
-    message: string;
-    action?: {
-      type: string;
-      url: string;
-    };
-  };
+export interface Notification {
+  id: string;
+  type: DatabaseNotificationType;
+  title: string;
+  message: string;
+  read: boolean;
+  created_at: string;
+  metadata?: Record<string, any>;
 }
 
-export interface NotificationPreferencesData {
+export interface NotificationPreferences {
   talent_id: string;
   email_enabled?: boolean;
   in_app_enabled?: boolean;
@@ -94,5 +83,20 @@ export interface AssignmentData {
   task_id: string;
   role_type: string;
   user_id: string;
-  status?: string;
 }
+
+export enum DeadlineStatus {
+  APPROACHING = 'APPROACHING',
+  OVERDUE = 'OVERDUE'
+}
+
+export enum NotificationChannel {
+  EMAIL = 'EMAIL',
+  IN_APP = 'IN_APP',
+  SMS = 'SMS'
+}
+
+// Helper function for type conversion
+export const convertToDbType = (type: NotificationType): DatabaseNotificationType => {
+  return type as DatabaseNotificationType;
+};
