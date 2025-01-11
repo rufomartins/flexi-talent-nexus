@@ -2,19 +2,6 @@ import { handleAssignmentNotification } from "@/services/notificationTriggers";
 import { NotificationType } from "@/types/notifications";
 import type { AssignmentTracking } from "@/types/deadlines";
 
-const createMetadata = (assignment: AssignmentTracking) => ({
-  task_id: assignment.taskId,
-  role_type: assignment.roleType,
-  content: {
-    title: 'Deadline Update',
-    message: `Task deadline update for ${assignment.roleType}`,
-    action: {
-      type: 'link',
-      url: `/projects/tasks/${assignment.taskId}`
-    }
-  }
-});
-
 export const handleDeadline = async (assignment: AssignmentTracking) => {
   const dueDate = new Date(assignment.deadlines.due);
   const now = new Date();

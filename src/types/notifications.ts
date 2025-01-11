@@ -42,23 +42,25 @@ export enum NotificationChannel {
 
 export type EmailFrequency = 'realtime' | 'daily' | 'weekly';
 
+export interface NotificationMetadata {
+  task_id: string;
+  role_type: string;
+  content: {
+    title: string;
+    message: string;
+    action?: {
+      type: string;
+      url: string;
+    };
+  };
+}
+
 export interface Notification {
   id: string;
   type: NotificationType;
   user_id: string;
   status: 'pending' | 'sent';
-  metadata: {
-    task_id: string;
-    role_type: string;
-    content: {
-      title: string;
-      message: string;
-      action?: {
-        type: string;
-        url: string;
-      };
-    };
-  };
+  metadata: NotificationMetadata;
   processed_at?: string;
   created_at: string;
 }
@@ -78,7 +80,7 @@ export interface TalentNotification {
 
 export interface DeadlinePreference {
   id: string;
-  talent_id: string;
+  user_id: string;
   warning_days: number[];
   notification_channels: NotificationChannel[];
   deadline_statuses: DeadlineStatus[];
@@ -100,6 +102,6 @@ export interface NotificationPreferences {
 export interface AssignmentData {
   task_id: string;
   role_type: string;
-  userId: string;
+  user_id: string;
   status?: string;
 }

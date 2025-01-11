@@ -52,7 +52,7 @@ export function NotificationPreferences({ talentId }: { talentId: string }) {
     return <div>Loading preferences...</div>;
   }
 
-  const notificationTypes = Object.keys(NotificationType) as Array<keyof typeof NotificationType>;
+  const notificationTypes = Object.values(NotificationType);
 
   return (
     <Card>

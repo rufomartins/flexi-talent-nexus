@@ -41,8 +41,13 @@ export class DeadlineService {
 
     return {
       ...data,
+      id: data.id,
+      user_id: data.user_id,
       notification_channels: data.notification_channels.map(c => c as NotificationChannel),
-      deadline_statuses: data.deadline_statuses.map(s => s as DeadlineStatus)
+      deadline_statuses: data.deadline_statuses.map(s => s as DeadlineStatus),
+      warning_days: data.warning_days || [],
+      created_at: data.created_at,
+      updated_at: data.updated_at
     };
   }
 }
