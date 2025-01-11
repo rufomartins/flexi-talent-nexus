@@ -52,7 +52,7 @@ export function ActivityTimeline({ bookingId }: ActivityTimelineProps) {
                 <div className="w-2 h-2 mt-2 rounded-full bg-primary" />
                 <div className="flex-1">
                   <p className="text-sm font-medium">
-                    {event.type === "status_change" &&
+                    {event.event_type === "status_change" &&
                       `Status changed from ${event.details.from} to ${event.details.to}`}
                   </p>
                   <p className="text-xs text-muted-foreground">

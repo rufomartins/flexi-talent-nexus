@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react';
 import { format } from 'date-fns';
 import { supabase } from '@/integrations/supabase/client';
-import { TimelineEvent } from '@/types/supabase/activity';
+import { TimelineEvent } from '@/types/supabase';
 import { TimelineEventItem } from './TimelineEventItem';
 import { Loader2 } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';

@@ -18,11 +18,10 @@ export interface TimelineEventDetails {
   changes?: Record<string, any>;
 }
 
-/** Timeline event record */
 export interface TimelineEvent {
   id: string;
   booking_id: string;
-  type: TimelineEventType;
+  event_type: TimelineEventType;  // Changed from 'type' to match DB column name
   user_id: string;
   details: TimelineEventDetails;
   created_at: string;
