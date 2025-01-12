@@ -1,30 +1,41 @@
 import { useState } from "react";
-import { TalentCardProps } from "./types";
+import { Heart, MessageSquare } from "lucide-react";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
-import { Heart, MessageSquare } from "lucide-react";
-import { cn } from "@/lib/utils";
+import { CommentDialog } from "../interactions/CommentDialog";
+import { PreferenceInput } from "../interactions/PreferenceInput";
+import type { TalentProfile } from "@/types/talent";
+import type { GuestSelection } from "@/types/supabase/guest-selection";
 
-export function TalentCard({ talent, selection, view, onLike, onComment, onPreferenceOrder }: TalentCardProps) {
+interface TalentCardProps {
+  talent: TalentProfile;
+  selection?: GuestSelection;
+  onSelect: (selection: Partial<GuestSelection>) => Promise<void>;
+  view: 'grid' | 'list';
+}
+
+export function TalentCard({ talent, selection, onSelect, view }: TalentCardProps) {
   const [isCommenting, setIsCommenting] = useState(false);
-  const [comment, setComment] = useState(selection?.comments || "");
 
-  const handleCommentSubmit = () => {
-    onComment(comment);
-    setIsCommenting(false);
+  const handleCommentSave = async (comment: string) => {
+    await onSelect({ comments: comment });
+  };
+
+  const handlePreferenceChange = async (rank: number) => {
+    await onSelect({ preference_order: rank });
+  };
+
+  const handleFavoriteToggle = async () => {
+    await onSelect({ is_favorite: !selection?.is_favorite });
   };
 
   if (view === "grid") {
     return (
-      <Card className={cn(
-        "overflow-hidden transition-shadow hover:shadow-md",
-        selection?.liked && "ring-2 ring-primary ring-offset-2"
-      )}>
+      <Card className="overflow-hidden">
         <CardHeader className="p-0">
           <div className="relative aspect-video bg-muted">
-            {talent.users?.avatar_url ? (
+            {talent.users.avatar_url ? (
               <img
                 src={talent.users.avatar_url}
                 alt={talent.users.full_name}
@@ -34,7 +45,7 @@ export function TalentCard({ talent, selection, view, onLike, onComment, onPrefe
               <div className="w-full h-full flex items-center justify-center">
                 <Avatar className="h-20 w-20">
                   <AvatarFallback>
-                    {talent.users?.full_name?.charAt(0)}
+                    {talent.users.full_name.charAt(0)}
                   </AvatarFallback>
                 </Avatar>
               </div>
@@ -45,7 +56,7 @@ export function TalentCard({ talent, selection, view, onLike, onComment, onPrefe
           <div className="flex items-start justify-between mb-4">
             <div>
               <h3 className="font-medium">
-                {talent.users?.full_name}
+                {talent.users.full_name}
               </h3>
               <p className="text-sm text-muted-foreground">{talent.native_language}</p>
             </div>
@@ -53,72 +64,55 @@ export function TalentCard({ talent, selection, view, onLike, onComment, onPrefe
               <Button
                 variant="ghost"
                 size="icon"
-                onClick={() => setIsCommenting(!isCommenting)}
+                onClick={() => setIsCommenting(true)}
               >
                 <MessageSquare className="h-4 w-4" />
               </Button>
               <Button
                 variant="ghost"
                 size="icon"
-                onClick={() => onLike(!selection?.liked)}
+                onClick={handleFavoriteToggle}
               >
                 <Heart
-                  className={cn("h-4 w-4", selection?.liked && "fill-primary text-primary")}
+                  className={`h-4 w-4 ${selection?.is_favorite ? "fill-primary text-primary" : ""}`}
                 />
               </Button>
             </div>
           </div>
 
-          {isCommenting && (
-            <div className="mt-2 space-y-2">
-              <Input
-                value={comment}
-                onChange={(e) => setComment(e.target.value)}
-                placeholder="Add a comment..."
-                onKeyDown={(e) => e.key === 'Enter' && handleCommentSubmit()}
-              />
-              <div className="flex justify-end gap-2">
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  onClick={() => setIsCommenting(false)}
-                >
-                  Cancel
-                </Button>
-                <Button
-                  size="sm"
-                  onClick={handleCommentSubmit}
-                >
-                  Save
-                </Button>
-              </div>
-            </div>
-          )}
-
           <div className="mt-4">
-            <Input
-              type="number"
-              placeholder="Preference order"
-              value={selection?.preference_order || ""}
-              onChange={(e) => onPreferenceOrder(parseInt(e.target.value))}
-              className="w-32"
+            <PreferenceInput
+              currentRank={selection?.preference_order}
+              onRankChange={handlePreferenceChange}
             />
           </div>
         </CardContent>
+
+        <CommentDialog
+          isOpen={isCommenting}
+          onClose={() => setIsCommenting(false)}
+          selection={selection || {
+            id: "",
+            casting_id: "",
+            talent_id: talent.id,
+            guest_id: "",
+            is_favorite: false,
+            created_at: new Date().toISOString(),
+            updated_at: new Date().toISOString(),
+          }}
+          onSave={handleCommentSave}
+        />
       </Card>
     );
   }
 
   // List view
   return (
-    <Card className={cn(
-      "transition-shadow hover:shadow-md",
-      selection?.liked && "ring-2 ring-primary ring-offset-2"
-    )}>
+    <Card>
       <CardContent className="p-4">
         <div className="flex gap-4">
           <div className="w-24 h-24 flex-shrink-0">
-            {talent.users?.avatar_url ? (
+            {talent.users.avatar_url ? (
               <img
                 src={talent.users.avatar_url}
                 alt={talent.users.full_name}
@@ -127,7 +121,7 @@ export function TalentCard({ talent, selection, view, onLike, onComment, onPrefe
             ) : (
               <Avatar className="w-full h-full">
                 <AvatarFallback>
-                  {talent.users?.full_name?.charAt(0)}
+                  {talent.users.full_name.charAt(0)}
                 </AvatarFallback>
               </Avatar>
             )}
@@ -136,7 +130,7 @@ export function TalentCard({ talent, selection, view, onLike, onComment, onPrefe
             <div className="flex justify-between items-start">
               <div>
                 <h3 className="font-medium">
-                  {talent.users?.full_name}
+                  {talent.users.full_name}
                 </h3>
                 <p className="text-sm text-muted-foreground">{talent.native_language}</p>
               </div>
@@ -144,57 +138,43 @@ export function TalentCard({ talent, selection, view, onLike, onComment, onPrefe
                 <Button
                   variant="ghost"
                   size="icon"
-                  onClick={() => setIsCommenting(!isCommenting)}
+                  onClick={() => setIsCommenting(true)}
                 >
                   <MessageSquare className="h-4 w-4" />
                 </Button>
                 <Button
                   variant="ghost"
                   size="icon"
-                  onClick={() => onLike(!selection?.liked)}
+                  onClick={handleFavoriteToggle}
                 >
                   <Heart
-                    className={cn("h-4 w-4", selection?.liked && "fill-primary text-primary")}
+                    className={`h-4 w-4 ${selection?.is_favorite ? "fill-primary text-primary" : ""}`}
                   />
                 </Button>
-                <Input
-                  type="number"
-                  placeholder="Order"
-                  value={selection?.preference_order || ""}
-                  onChange={(e) => onPreferenceOrder(parseInt(e.target.value))}
-                  className="w-20"
+                <PreferenceInput
+                  currentRank={selection?.preference_order}
+                  onRankChange={handlePreferenceChange}
                 />
               </div>
             </div>
-
-            {isCommenting && (
-              <div className="mt-4 space-y-2">
-                <Input
-                  value={comment}
-                  onChange={(e) => setComment(e.target.value)}
-                  placeholder="Add a comment..."
-                  onKeyDown={(e) => e.key === 'Enter' && handleCommentSubmit()}
-                />
-                <div className="flex justify-end gap-2">
-                  <Button
-                    variant="ghost"
-                    size="sm"
-                    onClick={() => setIsCommenting(false)}
-                  >
-                    Cancel
-                  </Button>
-                  <Button
-                    size="sm"
-                    onClick={handleCommentSubmit}
-                  >
-                    Save
-                  </Button>
-                </div>
-              </div>
-            )}
           </div>
         </div>
       </CardContent>
+
+      <CommentDialog
+        isOpen={isCommenting}
+        onClose={() => setIsCommenting(false)}
+        selection={selection || {
+          id: "",
+          casting_id: "",
+          talent_id: talent.id,
+          guest_id: "",
+          is_favorite: false,
+          created_at: new Date().toISOString(),
+          updated_at: new Date().toISOString(),
+        }}
+        onSave={handleCommentSave}
+      />
     </Card>
   );
 }
