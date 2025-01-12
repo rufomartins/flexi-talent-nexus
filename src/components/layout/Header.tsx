@@ -37,11 +37,11 @@ export const Header = () => {
   };
 
   const handleProfileClick = () => {
-    console.log("Profile clicked")
+    navigate('/profile');
   }
 
   const handleSettingsClick = () => {
-    console.log("Settings clicked")
+    navigate('/settings');
   }
 
   return (
@@ -77,15 +77,15 @@ export const Header = () => {
               </Button>
             </DropdownMenuTrigger>
             <DropdownMenuContent align="end" className="w-56">
-              <DropdownMenuItem onClick={handleProfileClick} className="cursor-pointer">
+              <DropdownMenuItem onSelect={handleProfileClick} className="cursor-pointer">
                 Profile
               </DropdownMenuItem>
-              <DropdownMenuItem onClick={handleSettingsClick} className="cursor-pointer">
+              <DropdownMenuItem onSelect={handleSettingsClick} className="cursor-pointer">
                 Settings
               </DropdownMenuItem>
               <DropdownMenuSeparator />
               <DropdownMenuItem 
-                onClick={handleSignOut}
+                onSelect={handleSignOut}
                 className="cursor-pointer text-red-600 hover:text-red-700 focus:text-red-700 hover:bg-red-50"
               >
                 Log out
