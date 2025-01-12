@@ -34,12 +34,6 @@ export function AppSidebar() {
     detailsRole: userDetails?.role,
     full_name: user?.user_metadata?.full_name
   });
-  
-  console.log("[AppSidebar] User details state:", {
-    role: userDetails?.role,
-    status: userDetails?.status,
-    full_name: userDetails?.full_name
-  });
 
   // Memoize role-based visibility to prevent unnecessary recalculations
   const { isOnboardingVisible, isSettingsVisible, isDashboardVisible, isTalentsVisible, isCastingsVisible } = useMemo(() => {
@@ -136,6 +130,20 @@ export function AppSidebar() {
                   Add New Talent
                 </Link>
               </>
+            )}
+
+            {/* Castings Link */}
+            {(DEBUG_SHOW_ALL || isCastingsVisible) && (
+              <Link
+                to="/castings"
+                className={cn(
+                  buttonVariants({ variant: "ghost" }),
+                  "justify-start"
+                )}
+              >
+                <FileSpreadsheet className="mr-2 h-4 w-4" />
+                Castings
+              </Link>
             )}
 
             {/* Projects Link */}
