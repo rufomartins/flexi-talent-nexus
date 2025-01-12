@@ -119,10 +119,20 @@ export const GuestLanding = () => {
 
       if (error) throw error;
 
-      // Convert array to record for easier lookup
+      // Convert array to record for easier lookup and ensure type compatibility
       return data.reduce((acc, selection) => ({
         ...acc,
-        [selection.talent_id]: selection,
+        [selection.talent_id]: {
+          id: selection.id,
+          casting_id: selection.casting_id,
+          talent_id: selection.talent_id,
+          guest_id: selection.guest_id,
+          preference_order: selection.preference_order,
+          comments: selection.comments,
+          is_favorite: selection.liked || false, // Map 'liked' to 'is_favorite'
+          created_at: selection.created_at,
+          updated_at: selection.updated_at
+        } as GuestSelection,
       }), {} as Record<string, GuestSelection>);
     },
   });
@@ -134,7 +144,9 @@ export const GuestLanding = () => {
         casting_id: castingId,
         guest_id: guestId,
         talent_id: talentId,
-        ...selection,
+        liked: selection.is_favorite, // Map 'is_favorite' to 'liked'
+        comments: selection.comments,
+        preference_order: selection.preference_order,
       });
 
     if (error) {
