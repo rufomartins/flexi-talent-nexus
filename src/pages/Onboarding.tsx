@@ -9,12 +9,6 @@ const Onboarding = () => {
   const { user, userDetails } = useAuth();
   const { toast } = useToast();
 
-  console.log("[Onboarding] Component initialized with:", {
-    userId: user?.id,
-    userRole: userDetails?.role || user?.user_metadata?.role,
-    userStatus: userDetails?.status
-  });
-
   const { data: candidates, isLoading, error } = useQuery({
     queryKey: ["onboarding-candidates"],
     queryFn: async () => {
@@ -38,24 +32,14 @@ const Onboarding = () => {
           description: error.message,
           variant: "destructive",
         });
-        return [];
+        throw error;
       }
 
       console.log("[Onboarding] Fetched candidates:", data?.length || 0);
-      return data;
+      return data || [];
     },
     enabled: !!user && (userDetails?.role === 'super_admin' || userDetails?.role === 'super_user')
   });
-
-  if (error) {
-    return (
-      <div className="container mx-auto py-6">
-        <div className="text-center text-red-600">
-          Error loading candidates. Please try again later.
-        </div>
-      </div>
-    );
-  }
 
   return (
     <div className="container mx-auto py-6 space-y-6">
@@ -71,6 +55,7 @@ const Onboarding = () => {
       <CandidateList 
         candidates={candidates || []} 
         isLoading={isLoading}
+        error={error as Error}
       />
     </div>
   );

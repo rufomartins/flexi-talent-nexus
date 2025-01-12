@@ -26,62 +26,33 @@ import { useMemo } from "react"
 export function AppSidebar() {
   const { user, userDetails } = useAuth();
   
-  console.log("[AppSidebar] Current user state:", {
-    id: user?.id,
-    email: user?.email,
-    metadata: user?.user_metadata,
-    metadataRole: user?.user_metadata?.role,
-    detailsRole: userDetails?.role,
-    full_name: user?.user_metadata?.full_name
-  });
-
   // Memoize role-based visibility to prevent unnecessary recalculations
-  const { isOnboardingVisible, isSettingsVisible, isDashboardVisible, isTalentsVisible, isCastingsVisible } = useMemo(() => {
+  const { 
+    isOnboardingVisible, 
+    isSettingsVisible, 
+    isDashboardVisible, 
+    isTalentsVisible, 
+    isCastingsVisible,
+    isFinancialVisible 
+  } = useMemo(() => {
     const role = userDetails?.role || user?.user_metadata?.role;
-    console.log("[AppSidebar] Resolving role for visibility checks:", role);
-    
-    const onboardingVisible = role === 'super_admin' || role === 'super_user';
-    const settingsVisible = role === 'super_admin';
-    const dashboardVisible = true; // Dashboard should be visible to all authenticated users
-    const talentsVisible = role === 'super_admin' || role === 'admin' || role === 'super_user';
-    const castingsVisible = role === 'super_admin' || role === 'admin' || role === 'super_user';
-    
-    console.log("[AppSidebar] Menu visibility flags:", {
-      onboardingVisible,
-      settingsVisible,
-      dashboardVisible,
-      talentsVisible,
-      castingsVisible,
-      currentRole: role
-    });
     
     return {
-      isOnboardingVisible: onboardingVisible,
-      isSettingsVisible: settingsVisible,
-      isDashboardVisible: dashboardVisible,
-      isTalentsVisible: talentsVisible,
-      isCastingsVisible: castingsVisible
+      isOnboardingVisible: ['super_admin', 'super_user'].includes(role),
+      isSettingsVisible: role === 'super_admin',
+      isDashboardVisible: true, // Dashboard visible to all authenticated users
+      isTalentsVisible: ['super_admin', 'admin', 'super_user'].includes(role),
+      isCastingsVisible: ['super_admin', 'admin', 'super_user'].includes(role),
+      isFinancialVisible: ['super_admin', 'admin'].includes(role)
     };
   }, [userDetails?.role, user?.user_metadata?.role]);
-
-  // Temporary override for debugging - remove in production
-  const DEBUG_SHOW_ALL = false;
-
-  console.log("[AppSidebar] Final menu state:", {
-    dashboardShown: DEBUG_SHOW_ALL || isDashboardVisible,
-    talentsShown: DEBUG_SHOW_ALL || isTalentsVisible,
-    castingsShown: DEBUG_SHOW_ALL || isCastingsVisible,
-    onboardingShown: DEBUG_SHOW_ALL || isOnboardingVisible,
-    settingsShown: DEBUG_SHOW_ALL || isSettingsVisible
-  });
 
   return (
     <Sidebar>
       <SidebarContent>
         <SidebarGroup>
           <SidebarGroupContent className="flex flex-col gap-2 p-4 pt-6">
-            {/* Dashboard Link - Always visible */}
-            {(DEBUG_SHOW_ALL || isDashboardVisible) && (
+            {isDashboardVisible && (
               <Link
                 to="/dashboard"
                 className={cn(
@@ -94,8 +65,7 @@ export function AppSidebar() {
               </Link>
             )}
 
-            {/* Talents Section */}
-            {(DEBUG_SHOW_ALL || isTalentsVisible) && (
+            {isTalentsVisible && (
               <>
                 <Link
                   to="/talents"
@@ -132,8 +102,7 @@ export function AppSidebar() {
               </>
             )}
 
-            {/* Castings Link */}
-            {(DEBUG_SHOW_ALL || isCastingsVisible) && (
+            {isCastingsVisible && (
               <Link
                 to="/castings"
                 className={cn(
@@ -146,7 +115,6 @@ export function AppSidebar() {
               </Link>
             )}
 
-            {/* Projects Link */}
             <Link
               to="/projects"
               className={cn(
@@ -158,19 +126,19 @@ export function AppSidebar() {
               Projects
             </Link>
 
-            {/* Financial Link */}
-            <Link
-              to="/financial"
-              className={cn(
-                buttonVariants({ variant: "ghost" }),
-                "justify-start"
-              )}
-            >
-              <DollarSign className="mr-2 h-4 w-4" />
-              Financial
-            </Link>
+            {isFinancialVisible && (
+              <Link
+                to="/financial"
+                className={cn(
+                  buttonVariants({ variant: "ghost" }),
+                  "justify-start"
+                )}
+              >
+                <DollarSign className="mr-2 h-4 w-4" />
+                Financial
+              </Link>
+            )}
 
-            {/* Calendar Link */}
             <Link
               to="/calendar"
               className={cn(
@@ -182,8 +150,7 @@ export function AppSidebar() {
               Calendar
             </Link>
 
-            {/* Onboarding Link - Conditionally rendered */}
-            {(DEBUG_SHOW_ALL || isOnboardingVisible) && (
+            {isOnboardingVisible && (
               <Link
                 to="/onboarding"
                 className={cn(
@@ -196,8 +163,7 @@ export function AppSidebar() {
               </Link>
             )}
 
-            {/* Settings Link - Conditionally rendered */}
-            {(DEBUG_SHOW_ALL || isSettingsVisible) && (
+            {isSettingsVisible && (
               <Link
                 to="/settings"
                 className={cn(

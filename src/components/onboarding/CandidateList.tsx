@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { Card } from "@/components/ui/card";
 import { Loader2 } from "lucide-react";
+import { Alert, AlertDescription } from "@/components/ui/alert";
 import { CandidateFilters } from "./CandidateFilters";
 import { CandidateTable } from "./CandidateTable";
 
@@ -20,9 +21,10 @@ interface Candidate {
 interface CandidateListProps {
   candidates: Candidate[];
   isLoading: boolean;
+  error?: Error | null;
 }
 
-export function CandidateList({ candidates, isLoading }: CandidateListProps) {
+export function CandidateList({ candidates, isLoading, error }: CandidateListProps) {
   const [statusFilter, setStatusFilter] = useState<string>("");
   const [searchQuery, setSearchQuery] = useState("");
 
@@ -48,11 +50,31 @@ export function CandidateList({ candidates, isLoading }: CandidateListProps) {
     }
   };
 
+  if (error) {
+    return (
+      <Alert variant="destructive" className="mb-4">
+        <AlertDescription>
+          Error loading candidates: {error.message}
+        </AlertDescription>
+      </Alert>
+    );
+  }
+
   if (isLoading) {
     return (
       <div className="flex items-center justify-center h-64">
         <Loader2 className="h-8 w-8 animate-spin" />
       </div>
+    );
+  }
+
+  if (!candidates.length) {
+    return (
+      <Card className="p-6">
+        <div className="text-center text-muted-foreground">
+          No candidates found
+        </div>
+      </Card>
     );
   }
 
