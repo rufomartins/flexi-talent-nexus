@@ -11,14 +11,21 @@ import { Input } from "@/components/ui/input"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { useAuth } from "@/contexts/auth"
 import { useToast } from "@/hooks/use-toast"
+import { useNavigate } from "react-router-dom"
 
 export const Header = () => {
   const { signOut } = useAuth();
   const { toast } = useToast();
+  const navigate = useNavigate();
 
   const handleSignOut = async () => {
     try {
       await signOut();
+      navigate('/login');
+      toast({
+        title: "Success",
+        description: "You have been logged out successfully.",
+      });
     } catch (error) {
       console.error("Error signing out:", error);
       toast({
@@ -78,7 +85,7 @@ export const Header = () => {
               </DropdownMenuItem>
               <DropdownMenuSeparator />
               <DropdownMenuItem 
-                onClick={handleSignOut} 
+                onClick={handleSignOut}
                 className="cursor-pointer text-red-600 hover:text-red-700 focus:text-red-700 hover:bg-red-50"
               >
                 Log out
