@@ -18,15 +18,14 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const fetchUserDetails = async (userId: string) => {
     console.log("Fetching user details for:", userId);
     try {
-      const { data: userData, error: userError } = await supabase
+      const { data, error } = await supabase
         .from("users")
         .select("*")
         .eq("id", userId)
         .single();
 
-      if (userError) {
-        console.error("Error fetching user details:", userError);
-        setLoading(false);
+      if (error) {
+        console.error("Error fetching user details:", error);
         toast({
           title: "Error",
           description: "Failed to load user details. Please try again.",
@@ -35,11 +34,11 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         return null;
       }
 
-      console.log("User details fetched successfully:", userData);
-      return userData;
+      console.log("User details fetched successfully:", data);
+      setUserDetails(data); // Set user details immediately
+      return data;
     } catch (error) {
       console.error("Exception in fetchUserDetails:", error);
-      setLoading(false);
       toast({
         title: "Error",
         description: "An unexpected error occurred while loading user details.",
@@ -50,7 +49,6 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   };
 
   useEffect(() => {
-    console.log("AuthProvider mounted");
     let mounted = true;
     
     const initializeAuth = async () => {
@@ -63,10 +61,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
           setUser(session?.user ?? null);
           
           if (session?.user) {
-            const userData = await fetchUserDetails(session.user.id);
-            if (userData && mounted) {
-              setUserDetails(userData);
-            }
+            await fetchUserDetails(session.user.id);
           }
           setLoading(false);
         }
@@ -90,17 +85,14 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         setUser(session?.user ?? null);
         
         if (session?.user) {
-          const userData = await fetchUserDetails(session.user.id);
-          if (userData && mounted) {
-            setUserDetails(userData);
-          }
+          await fetchUserDetails(session.user.id);
         } else {
           setUserDetails(null);
-          setLoading(false);
           if (event === "SIGNED_OUT") {
             navigate("/login", { replace: true });
           }
         }
+        setLoading(false);
       }
     });
 
@@ -169,12 +161,9 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         localStorage.removeItem("rememberMe");
       }
 
-      // Fetch user details immediately after successful sign in
+      // Immediately fetch and set user details after successful sign in
       if (data.user) {
-        const userData = await fetchUserDetails(data.user.id);
-        if (userData) {
-          setUserDetails(userData);
-        }
+        await fetchUserDetails(data.user.id);
       }
 
       toast({
