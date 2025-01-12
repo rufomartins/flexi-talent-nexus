@@ -18,26 +18,25 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const fetchUserDetails = async (userId: string) => {
     console.log("Fetching user details for:", userId);
     try {
-      const { data, error } = await supabase
+      const { data: userData, error: userError } = await supabase
         .from("users")
         .select("*")
         .eq("id", userId)
         .single();
 
-      if (error) {
-        console.error("Error fetching user details:", error);
+      if (userError) {
+        console.error("Error fetching user details:", userError);
         setLoading(false);
         toast({
           title: "Error",
           description: "Failed to load user details. Please try again.",
           variant: "destructive",
         });
-        return;
+        return null;
       }
 
-      console.log("User details fetched successfully:", data);
-      setUserDetails(data);
-      setLoading(false);
+      console.log("User details fetched successfully:", userData);
+      return userData;
     } catch (error) {
       console.error("Exception in fetchUserDetails:", error);
       setLoading(false);
@@ -46,6 +45,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         description: "An unexpected error occurred while loading user details.",
         variant: "destructive",
       });
+      return null;
     }
   };
 
@@ -61,11 +61,14 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         if (mounted) {
           setSession(session);
           setUser(session?.user ?? null);
+          
           if (session?.user) {
-            await fetchUserDetails(session.user.id);
-          } else {
-            setLoading(false);
+            const userData = await fetchUserDetails(session.user.id);
+            if (userData && mounted) {
+              setUserDetails(userData);
+            }
           }
+          setLoading(false);
         }
       } catch (error) {
         console.error("Error in initializeAuth:", error);
@@ -87,7 +90,10 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         setUser(session?.user ?? null);
         
         if (session?.user) {
-          await fetchUserDetails(session.user.id);
+          const userData = await fetchUserDetails(session.user.id);
+          if (userData && mounted) {
+            setUserDetails(userData);
+          }
         } else {
           setUserDetails(null);
           setLoading(false);
@@ -161,6 +167,14 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         localStorage.setItem("rememberMe", "true");
       } else {
         localStorage.removeItem("rememberMe");
+      }
+
+      // Fetch user details immediately after successful sign in
+      if (data.user) {
+        const userData = await fetchUserDetails(data.user.id);
+        if (userData) {
+          setUserDetails(userData);
+        }
       }
 
       toast({
