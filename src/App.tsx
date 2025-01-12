@@ -6,6 +6,7 @@ import { MainLayout } from "@/components/layout/MainLayout";
 import Dashboard from "@/pages/Dashboard";
 import Projects from "@/pages/Projects";
 import Financial from "@/pages/Financial";
+import Onboarding from "@/pages/Onboarding";
 import ProtectedRoute from "@/components/ProtectedRoute";
 
 const queryClient = new QueryClient({
@@ -28,6 +29,16 @@ function App() {
               <Route path="/dashboard" element={<Dashboard />} />
               <Route path="/projects" element={<Projects />} />
               <Route path="/financial" element={<Financial />} />
+              <Route 
+                path="/onboarding" 
+                element={
+                  <ProtectedRoute 
+                    allowedRoles={['super_admin', 'super_user']}
+                  >
+                    <Onboarding />
+                  </ProtectedRoute>
+                } 
+              />
             </Route>
           </Routes>
           <Toaster />

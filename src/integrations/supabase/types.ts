@@ -1026,6 +1026,61 @@ export type Database = {
           },
         ]
       }
+      interviews: {
+        Row: {
+          candidate_id: string | null
+          created_at: string
+          id: string
+          interviewer_id: string | null
+          notes: string | null
+          scheduled_at: string
+          status: Database["public"]["Enums"]["interview_status"] | null
+          updated_at: string
+        }
+        Insert: {
+          candidate_id?: string | null
+          created_at?: string
+          id?: string
+          interviewer_id?: string | null
+          notes?: string | null
+          scheduled_at: string
+          status?: Database["public"]["Enums"]["interview_status"] | null
+          updated_at?: string
+        }
+        Update: {
+          candidate_id?: string | null
+          created_at?: string
+          id?: string
+          interviewer_id?: string | null
+          notes?: string | null
+          scheduled_at?: string
+          status?: Database["public"]["Enums"]["interview_status"] | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "interviews_candidate_id_fkey"
+            columns: ["candidate_id"]
+            isOneToOne: false
+            referencedRelation: "onboarding_candidates"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "interviews_interviewer_id_fkey"
+            columns: ["interviewer_id"]
+            isOneToOne: false
+            referencedRelation: "user_profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "interviews_interviewer_id_fkey"
+            columns: ["interviewer_id"]
+            isOneToOne: false
+            referencedRelation: "users"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       locations: {
         Row: {
           address: string | null
@@ -1207,6 +1262,60 @@ export type Database = {
           {
             foreignKeyName: "notification_queue_user_id_fkey"
             columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "users"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      onboarding_candidates: {
+        Row: {
+          created_at: string
+          email: string
+          id: string
+          name: string
+          notes: string | null
+          phone: string | null
+          scout_id: string | null
+          status: Database["public"]["Enums"]["candidate_status"] | null
+          updated_at: string
+          video_demo_url: string | null
+        }
+        Insert: {
+          created_at?: string
+          email: string
+          id?: string
+          name: string
+          notes?: string | null
+          phone?: string | null
+          scout_id?: string | null
+          status?: Database["public"]["Enums"]["candidate_status"] | null
+          updated_at?: string
+          video_demo_url?: string | null
+        }
+        Update: {
+          created_at?: string
+          email?: string
+          id?: string
+          name?: string
+          notes?: string | null
+          phone?: string | null
+          scout_id?: string | null
+          status?: Database["public"]["Enums"]["candidate_status"] | null
+          updated_at?: string
+          video_demo_url?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "onboarding_candidates_scout_id_fkey"
+            columns: ["scout_id"]
+            isOneToOne: false
+            referencedRelation: "user_profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "onboarding_candidates_scout_id_fkey"
+            columns: ["scout_id"]
             isOneToOne: false
             referencedRelation: "users"
             referencedColumns: ["id"]
@@ -2707,6 +2816,7 @@ export type Database = {
         | "booking_created"
         | "booking_updated"
       booking_status: "pending" | "confirmed" | "cancelled" | "completed"
+      candidate_status: "new" | "emailed" | "interviewed" | "approved"
       casting_status: "open" | "closed"
       casting_type: "internal" | "external"
       email_template_type:
@@ -2727,6 +2837,7 @@ export type Database = {
         | "blank_space"
         | "custom_dropdown"
         | "fixed_dropdown"
+      interview_status: "scheduled" | "completed" | "canceled"
       location_status: "Pending" | "Confirmed" | "Unavailable"
       media_category: "photo" | "video" | "audio" | "document" | "other"
       notification_type:

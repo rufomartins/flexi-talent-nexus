@@ -1,10 +1,14 @@
 import { Link } from "react-router-dom"
-import { LayoutDashboard, Users, Search, UserPlus, FileSpreadsheet, Briefcase, MessageSquare, Calendar, DollarSign } from "lucide-react"
+import { LayoutDashboard, Users, Search, UserPlus, FileSpreadsheet, Briefcase, MessageSquare, Calendar, DollarSign, UserCheck } from "lucide-react"
 import { cn } from "@/lib/utils"
 import { buttonVariants } from "@/components/ui/button"
-import { Sidebar, SidebarContent, SidebarGroup, SidebarGroupContent, SidebarMenu, SidebarMenuItem, SidebarMenuButton, SidebarMenuSub } from "@/components/ui/sidebar"
+import { Sidebar, SidebarContent, SidebarGroup, SidebarGroupContent } from "@/components/ui/sidebar"
+import { useAuth } from "@/contexts/auth"
 
 export function AppSidebar() {
+  const { userDetails } = useAuth();
+  const isOnboardingVisible = userDetails?.role === 'super_admin' || userDetails?.role === 'super_user';
+
   return (
     <Sidebar>
       <SidebarContent>
@@ -36,7 +40,7 @@ export function AppSidebar() {
               </Link>
               
               {/* Talents Submenu */}
-              <SidebarMenuSub>
+              <div className="pl-4 flex flex-col gap-1">
                 <Link
                   to="/search"
                   className={cn(
@@ -57,8 +61,22 @@ export function AppSidebar() {
                   <UserPlus className="h-4 w-4" />
                   Add New Talent
                 </Link>
-              </SidebarMenuSub>
+              </div>
             </div>
+
+            {/* Onboarding Link - Only visible to super admin and super users */}
+            {isOnboardingVisible && (
+              <Link
+                to="/onboarding"
+                className={cn(
+                  buttonVariants({ variant: "ghost" }),
+                  "justify-start gap-2 px-2"
+                )}
+              >
+                <UserCheck className="h-4 w-4" />
+                Onboarding
+              </Link>
+            )}
 
             {/* Castings Link */}
             <Link
@@ -123,5 +141,5 @@ export function AppSidebar() {
         </SidebarGroup>
       </SidebarContent>
     </Sidebar>
-  )
+  );
 }
