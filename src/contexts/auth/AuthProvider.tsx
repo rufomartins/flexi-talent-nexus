@@ -1,9 +1,11 @@
-import { createContext, useEffect, useState } from "react";
+import { createContext, useEffect, useState, useRef } from "react";
 import { useNavigate } from "react-router-dom";
 import { Session, User } from "@supabase/supabase-js";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 import { AuthContextType } from "./types";
+
+const AUTH_TIMEOUT = 15000; // 15 seconds timeout
 
 export const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
@@ -14,6 +16,8 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [loading, setLoading] = useState(true);
   const navigate = useNavigate();
   const { toast } = useToast();
+  const initTimeoutRef = useRef<NodeJS.Timeout>();
+  const mountedRef = useRef(true);
 
   const fetchUserDetails = async (userId: string) => {
     try {
@@ -23,6 +27,11 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         .select("*")
         .eq("id", userId)
         .single();
+
+      if (!mountedRef.current) {
+        console.log("[Auth] Component unmounted during user details fetch");
+        return null;
+      }
 
       if (error) {
         console.error("[Auth] Error fetching user details:", error);
@@ -49,10 +58,25 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
   useEffect(() => {
     let mounted = true;
+    mountedRef.current = true;
 
     const initializeAuth = async () => {
       try {
         console.log("[Auth] Starting auth initialization...");
+        
+        // Set timeout for initialization
+        initTimeoutRef.current = setTimeout(() => {
+          if (mountedRef.current && loading) {
+            console.error("[Auth] Initialization timeout reached");
+            setLoading(false);
+            toast({
+              title: "Error",
+              description: "Authentication initialization timed out. Please refresh the page.",
+              variant: "destructive",
+            });
+          }
+        }, AUTH_TIMEOUT);
+
         const { data: { session }, error } = await supabase.auth.getSession();
         
         if (error) {
@@ -99,6 +123,9 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         if (mounted) {
           console.log("[Auth] Initialization complete, setting loading to false");
           setLoading(false);
+          if (initTimeoutRef.current) {
+            clearTimeout(initTimeoutRef.current);
+          }
         }
       }
     };
@@ -147,6 +174,10 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     return () => {
       console.log("[Auth] Cleaning up auth provider");
       mounted = false;
+      mountedRef.current = false;
+      if (initTimeoutRef.current) {
+        clearTimeout(initTimeoutRef.current);
+      }
       subscription.unsubscribe();
     };
   }, [navigate, toast]);
