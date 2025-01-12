@@ -5,28 +5,27 @@ type ProjectReviewStatus = Database["public"]["Enums"]["project_review_status"];
 type ProjectTalentStatus = Database["public"]["Enums"]["project_talent_status"];
 type ProjectDeliveryStatus = Database["public"]["Enums"]["project_delivery_status"];
 
+export interface ProjectFilters {
+  projectManager?: string;
+  country?: string;
+  language?: string;
+  scriptStatus?: ProjectScriptStatus;
+  reviewStatus?: ProjectReviewStatus;
+  talentStatus?: ProjectTalentStatus;
+  startDate?: Date;
+  endDate?: Date;
+}
+
 export interface Task {
   id: string;
+  language_id: string;
   name: string;
   script_status: ProjectScriptStatus;
   review_status: ProjectReviewStatus;
   talent_status: ProjectTalentStatus;
   delivery_status: ProjectDeliveryStatus;
-  language_id: string;
   priority: string;
   created_at: string;
-}
-
-export interface Language {
-  id: string;
-  language_name: string;
-  tasks: Task[];
-}
-
-export interface Country {
-  id: string;
-  country_name: string;
-  languages: Language[];
 }
 
 export interface Project {
@@ -47,4 +46,16 @@ export interface Project {
   countries?: Country[];
   created_at: string;
   updated_at: string;
+}
+
+export interface Country {
+  id: string;
+  country_name: string;
+  languages: Language[];
+}
+
+export interface Language {
+  id: string;
+  language_name: string;
+  tasks: Task[];
 }
