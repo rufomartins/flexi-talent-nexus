@@ -69,6 +69,9 @@ export const useAuthSession = () => {
     session: debouncedSession,
     user,
     loading,
-    error
+    error,
+    setSession,
+    setUser,
+    setLoading
   };
 };

@@ -8,7 +8,15 @@ import { supabase } from "@/integrations/supabase/client";
 
 export function AuthProvider({ children }: { children: React.ReactNode }) {
   const navigate = useNavigate();
-  const { session, user, loading, setSession, setUser, setLoading } = useAuthSession();
+  const { 
+    session, 
+    user, 
+    loading, 
+    setSession, 
+    setUser, 
+    setLoading 
+  } = useAuthSession();
+  
   const { userDetails, setUserDetails, fetchUserDetails } = useUserDetails();
   const { signIn, signOut } = useAuthActions(
     setLoading,
@@ -24,8 +32,8 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
       if (session?.user) {
         console.log("[Auth] Setting session and user state");
-        setSession(session);
-        setUser(session.user);
+        setSession?.(session);
+        setUser?.(session.user);
         
         const details = await fetchUserDetails(session.user.id);
         if (details) {
@@ -36,8 +44,8 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         }
       } else {
         console.log("[Auth] Clearing session and user state");
-        setSession(null);
-        setUser(null);
+        setSession?.(null);
+        setUser?.(null);
         setUserDetails(null);
         if (event === "SIGNED_OUT") {
           console.log("[Auth] User signed out, redirecting to login");
@@ -45,7 +53,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         }
       }
       
-      setLoading(false);
+      setLoading?.(false);
     });
 
     return () => {
