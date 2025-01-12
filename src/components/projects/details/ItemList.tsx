@@ -1,4 +1,4 @@
-import { ProjectItem } from "@/types/supabase/projects";
+import { ProjectItem } from "@/components/projects/types";
 import { ItemCard } from "./ItemCard";
 
 interface ItemListProps {

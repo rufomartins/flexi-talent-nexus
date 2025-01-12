@@ -16,7 +16,7 @@ export interface ProjectFilters {
   endDate?: Date;
 }
 
-export interface Task {
+export interface ProjectItem {
   id: string;
   language_id: string;
   name: string;
@@ -57,5 +57,5 @@ export interface Country {
 export interface Language {
   id: string;
   language_name: string;
-  tasks: Task[];
+  tasks: ProjectItem[];
 }
