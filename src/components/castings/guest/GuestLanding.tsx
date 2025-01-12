@@ -53,9 +53,11 @@ export const GuestLanding = () => {
           *,
           talent:talent_profiles!casting_talents_talent_id_fkey(
             *,
-            user:users!talent_profiles_user_id_fkey(
+            users!talent_profiles_user_id_fkey(
+              id,
               first_name,
               last_name,
+              full_name,
               avatar_url
             )
           )
@@ -80,8 +82,8 @@ export const GuestLanding = () => {
       if (filters.search_term) {
         const searchLower = filters.search_term.toLowerCase();
         filteredData = filteredData.filter(item => 
-          item.talent?.user?.first_name?.toLowerCase().includes(searchLower) ||
-          item.talent?.user?.last_name?.toLowerCase().includes(searchLower)
+          item.talent?.users?.first_name?.toLowerCase().includes(searchLower) ||
+          item.talent?.users?.last_name?.toLowerCase().includes(searchLower)
         );
       }
 
@@ -91,8 +93,8 @@ export const GuestLanding = () => {
         
         switch (viewSettings.sort_by) {
           case 'name':
-            const nameA = `${a.talent?.user?.first_name} ${a.talent?.user?.last_name}`;
-            const nameB = `${b.talent?.user?.first_name} ${b.talent?.user?.last_name}`;
+            const nameA = `${a.talent?.users?.first_name} ${a.talent?.users?.last_name}`;
+            const nameB = `${b.talent?.users?.first_name} ${b.talent?.users?.last_name}`;
             return nameA.localeCompare(nameB) * direction;
           case 'date_added':
             return (new Date(a.created_at).getTime() - new Date(b.created_at).getTime()) * direction;
@@ -101,7 +103,7 @@ export const GuestLanding = () => {
         }
       });
 
-      return filteredData;
+      return filteredData.map(item => item.talent);
     },
   });
 
@@ -143,7 +145,7 @@ export const GuestLanding = () => {
     }
   };
 
-  if (castingLoading || talentsLoading || selectionsLoading) {
+  if (castingLoading || talentsLoading) {
     return (
       <div className="flex items-center justify-center min-h-screen">
         <Loader2 className="h-8 w-8 animate-spin" />
@@ -180,7 +182,7 @@ export const GuestLanding = () => {
 
       <div className="mt-6">
         <TalentDisplay
-          talents={talents?.map(t => t.talent) || []}
+          talents={talents || []}
           viewMode={viewSettings.view_mode}
           selections={selections}
           onSelect={handleSelectionUpdate}

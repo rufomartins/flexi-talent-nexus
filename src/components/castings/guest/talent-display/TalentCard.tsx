@@ -24,18 +24,18 @@ export function TalentCard({ talent, selection, view, onLike, onComment, onPrefe
       )}>
         <CardHeader className="p-0">
           <div className="relative aspect-video bg-muted">
-            {talent.user?.avatar_url ? (
+            {talent.users?.avatar_url ? (
               <img
-                src={talent.user.avatar_url}
-                alt={`${talent.user.first_name} ${talent.user.last_name}`}
+                src={talent.users.avatar_url}
+                alt={`${talent.users.first_name} ${talent.users.last_name}`}
                 className="w-full h-full object-cover"
               />
             ) : (
               <div className="w-full h-full flex items-center justify-center">
                 <Avatar className="h-20 w-20">
                   <AvatarFallback>
-                    {talent.user?.first_name?.[0]}
-                    {talent.user?.last_name?.[0]}
+                    {talent.users?.first_name?.[0]}
+                    {talent.users?.last_name?.[0]}
                   </AvatarFallback>
                 </Avatar>
               </div>
@@ -46,7 +46,7 @@ export function TalentCard({ talent, selection, view, onLike, onComment, onPrefe
           <div className="flex items-start justify-between mb-4">
             <div>
               <h3 className="font-medium">
-                {talent.user?.first_name} {talent.user?.last_name}
+                {talent.users?.first_name} {talent.users?.last_name}
               </h3>
               <p className="text-sm text-muted-foreground">{talent.native_language}</p>
             </div>
@@ -119,17 +119,17 @@ export function TalentCard({ talent, selection, view, onLike, onComment, onPrefe
       <CardContent className="p-4">
         <div className="flex gap-4">
           <div className="w-24 h-24 flex-shrink-0">
-            {talent.user?.avatar_url ? (
+            {talent.users?.avatar_url ? (
               <img
-                src={talent.user.avatar_url}
-                alt={`${talent.user.first_name} ${talent.user.last_name}`}
+                src={talent.users.avatar_url}
+                alt={`${talent.users.first_name} ${talent.users.last_name}`}
                 className="w-full h-full object-cover rounded-md"
               />
             ) : (
               <Avatar className="w-full h-full">
                 <AvatarFallback>
-                  {talent.user?.first_name?.[0]}
-                  {talent.user?.last_name?.[0]}
+                  {talent.users?.first_name?.[0]}
+                  {talent.users?.last_name?.[0]}
                 </AvatarFallback>
               </Avatar>
             )}
@@ -138,7 +138,7 @@ export function TalentCard({ talent, selection, view, onLike, onComment, onPrefe
             <div className="flex justify-between items-start">
               <div>
                 <h3 className="font-medium">
-                  {talent.user?.first_name} {talent.user?.last_name}
+                  {talent.users?.first_name} {talent.users?.last_name}
                 </h3>
                 <p className="text-sm text-muted-foreground">{talent.native_language}</p>
               </div>
