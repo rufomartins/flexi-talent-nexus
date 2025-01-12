@@ -1,18 +1,17 @@
 import { useQuery } from "@tanstack/react-query";
 import { useParams } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
-import { Loader2, Download, Share2 } from "lucide-react";
+import { Loader2 } from "lucide-react";
 import { Alert, AlertDescription } from "@/components/ui/alert";
-import { Button } from "@/components/ui/button";
-import { FilterControls } from "./FilterControls";
 import { useState } from "react";
-import { GuestFilters, GuestViewSettings } from "@/types/guest-filters";
-import { TalentDisplay } from "./talent-display/TalentDisplay";
+import { useToast } from "@/hooks/use-toast";
+import { GuestHeader } from "./GuestHeader";
+import { GuestBriefing } from "./GuestBriefing";
+import { GuestContent } from "./GuestContent";
 import { ExportDialog } from "./export/ExportDialog";
 import { ShareDialog } from "./share/ShareDialog";
-import { useToast } from "@/hooks/use-toast";
+import type { GuestFilters, GuestViewSettings } from "@/types/guest-filters";
 import type { GuestSelection } from "@/types/supabase/guest-selection";
-import type { TalentProfile } from "@/types/talent";
 import type { ExportConfig } from "@/types/supabase/export";
 
 export const GuestLanding = () => {
@@ -87,7 +86,6 @@ export const GuestLanding = () => {
 
       let filteredData = data;
 
-      // Client-side filtering
       if (filters.search_term) {
         const searchLower = filters.search_term.toLowerCase();
         filteredData = filteredData.filter(item => 
@@ -96,7 +94,6 @@ export const GuestLanding = () => {
         );
       }
 
-      // Sort the data
       filteredData.sort((a, b) => {
         const direction = viewSettings.sort_direction === 'asc' ? 1 : -1;
         
@@ -112,7 +109,7 @@ export const GuestLanding = () => {
         }
       });
 
-      return filteredData.map(item => item.talent) as TalentProfile[];
+      return filteredData.map(item => item.talent);
     },
   });
 
@@ -127,7 +124,6 @@ export const GuestLanding = () => {
 
       if (error) throw error;
 
-      // Convert array to record for easier lookup and ensure type compatibility
       return data.reduce((acc, selection) => ({
         ...acc,
         [selection.talent_id]: {
@@ -137,7 +133,7 @@ export const GuestLanding = () => {
           guest_id: selection.guest_id,
           preference_order: selection.preference_order,
           comments: selection.comments,
-          is_favorite: selection.liked || false, // Map 'liked' to 'is_favorite'
+          is_favorite: selection.liked || false,
           created_at: selection.created_at,
           updated_at: selection.updated_at
         } as GuestSelection,
@@ -152,7 +148,7 @@ export const GuestLanding = () => {
         casting_id: castingId,
         guest_id: guestId,
         talent_id: talentId,
-        liked: selection.is_favorite, // Map 'is_favorite' to 'liked'
+        liked: selection.is_favorite,
         comments: selection.comments,
         preference_order: selection.preference_order,
       });
@@ -164,8 +160,6 @@ export const GuestLanding = () => {
 
   const handleExport = async (config: ExportConfig) => {
     try {
-      // Here you would implement the actual export logic
-      // For now, we'll just show a success message
       toast({
         title: "Export Successful",
         description: `Your selections have been exported as a ${config.format.toUpperCase()} file.`,
@@ -221,54 +215,27 @@ export const GuestLanding = () => {
 
   return (
     <div className="container py-8">
-      <div className="mb-8">
-        <div className="flex justify-between items-start mb-4">
-          <div>
-            <h1 className="text-3xl font-bold mb-2">{casting.name}</h1>
-            {casting.client && (
-              <p className="text-muted-foreground">Client: {casting.client.full_name}</p>
-            )}
-          </div>
-          <div className="flex gap-2">
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={() => setShowExportDialog(true)}
-            >
-              <Download className="h-4 w-4 mr-2" />
-              Export
-            </Button>
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={() => setShowShareDialog(true)}
-            >
-              <Share2 className="h-4 w-4 mr-2" />
-              Share
-            </Button>
-          </div>
-        </div>
-        {casting.briefing && (
-          <div className="mt-4 prose max-w-none" dangerouslySetInnerHTML={{ __html: casting.briefing }} />
-        )}
-      </div>
-
-      <FilterControls
-        filters={filters}
-        onFilterChange={setFilters}
-        viewSettings={viewSettings}
-        onViewChange={setViewSettings}
+      <GuestHeader 
+        casting={casting}
+        onExport={() => setShowExportDialog(true)}
+        onShare={() => setShowShareDialog(true)}
+      />
+      
+      <GuestBriefing 
+        briefing={casting.briefing}
+        clientLogo={casting.logo_url}
       />
 
-      <div className="mt-6">
-        <TalentDisplay
-          talents={talents || []}
-          viewMode={viewSettings.view_mode}
-          selections={selections}
-          onSelect={handleSelectionUpdate}
-          isLoading={talentsLoading}
-        />
-      </div>
+      <GuestContent
+        talents={talents || []}
+        selections={selections}
+        viewSettings={viewSettings}
+        filters={filters}
+        isLoading={talentsLoading}
+        onFilterChange={setFilters}
+        onViewChange={setViewSettings}
+        onSelectionUpdate={handleSelectionUpdate}
+      />
 
       <ExportDialog
         open={showExportDialog}
