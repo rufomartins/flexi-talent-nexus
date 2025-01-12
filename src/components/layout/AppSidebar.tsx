@@ -30,33 +30,39 @@ export function AppSidebar() {
     id: user?.id,
     email: user?.email,
     metadata: user?.user_metadata,
-    role: user?.user_metadata?.role
+    role: user?.user_metadata?.role,
+    full_name: user?.user_metadata?.full_name
   });
+  
   console.log("[AppSidebar] User details:", {
     role: userDetails?.role,
-    status: userDetails?.status
+    status: userDetails?.status,
+    full_name: userDetails?.full_name
   });
 
   // Memoize role-based visibility to prevent unnecessary recalculations
-  const { isOnboardingVisible, isSettingsVisible, isDashboardVisible } = useMemo(() => {
+  const { isOnboardingVisible, isSettingsVisible, isDashboardVisible, isTalentsVisible } = useMemo(() => {
     const role = userDetails?.role || user?.user_metadata?.role;
     console.log("[AppSidebar] Checking visibility with role:", role);
     
     const onboardingVisible = role === 'super_admin' || role === 'super_user';
     const settingsVisible = role === 'super_admin';
     const dashboardVisible = true; // Dashboard should be visible to all authenticated users
+    const talentsVisible = role === 'super_admin' || role === 'admin' || role === 'super_user';
     
     console.log("[AppSidebar] Visibility flags:", {
       onboardingVisible,
       settingsVisible,
       dashboardVisible,
+      talentsVisible,
       role
     });
     
     return {
       isOnboardingVisible: onboardingVisible,
       isSettingsVisible: settingsVisible,
-      isDashboardVisible: dashboardVisible
+      isDashboardVisible: dashboardVisible,
+      isTalentsVisible: talentsVisible
     };
   }, [userDetails?.role, user?.user_metadata?.role]);
 
@@ -80,6 +86,44 @@ export function AppSidebar() {
                 <LayoutDashboard className="mr-2 h-4 w-4" />
                 Dashboard
               </Link>
+            )}
+
+            {/* Talents Section */}
+            {(DEBUG_SHOW_ALL || isTalentsVisible) && (
+              <>
+                <Link
+                  to="/talents"
+                  className={cn(
+                    buttonVariants({ variant: "ghost" }),
+                    "justify-start"
+                  )}
+                >
+                  <Users className="mr-2 h-4 w-4" />
+                  Talents
+                </Link>
+
+                <Link
+                  to="/search"
+                  className={cn(
+                    buttonVariants({ variant: "ghost" }),
+                    "justify-start"
+                  )}
+                >
+                  <Search className="mr-2 h-4 w-4" />
+                  Search
+                </Link>
+
+                <Link
+                  to="/talents/new"
+                  className={cn(
+                    buttonVariants({ variant: "ghost" }),
+                    "justify-start"
+                  )}
+                >
+                  <UserPlus className="mr-2 h-4 w-4" />
+                  Add New Talent
+                </Link>
+              </>
             )}
 
             {/* Projects Link */}
