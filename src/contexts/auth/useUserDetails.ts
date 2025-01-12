@@ -12,11 +12,11 @@ export const useUserDetails = () => {
       // Validate UUID format
       const uuidRegex = /^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
       if (!uuidRegex.test(userId)) {
-        console.error("[Auth] Invalid UUID format:", userId);
+        console.error("[useUserDetails] Invalid UUID format:", userId);
         return null;
       }
 
-      console.log("[Auth] Fetching user details with validated UUID:", userId);
+      console.log("[useUserDetails] Fetching user details with validated UUID:", userId);
       
       const { data, error } = await supabase
         .from('users')
@@ -25,8 +25,8 @@ export const useUserDetails = () => {
         .maybeSingle();
 
       if (error) {
-        console.error("[Auth] Error fetching user details:", error);
-        console.log("[Auth] Failed query params - id:", userId);
+        console.error("[useUserDetails] Error fetching user details:", error);
+        console.log("[useUserDetails] Failed query params - id:", userId);
         
         // Only show toast for non-404 errors
         if (error.code !== 'PGRST116') {
@@ -40,14 +40,14 @@ export const useUserDetails = () => {
       }
 
       if (!data) {
-        console.error("[Auth] No user details found for ID:", userId);
+        console.error("[useUserDetails] No user details found for ID:", userId);
         return null;
       }
 
-      console.log("[Auth] User details fetched successfully:", data);
+      console.log("[useUserDetails] User details fetched successfully:", data);
       return data;
     } catch (error) {
-      console.error("[Auth] Exception in fetchUserDetails:", error);
+      console.error("[useUserDetails] Exception in fetchUserDetails:", error);
       return null;
     }
   };
