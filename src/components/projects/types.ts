@@ -45,15 +45,6 @@ export interface Project {
   client?: { name: string };
   project_manager?: { full_name: string };
   countries?: Country[];
-}
-
-export interface ProjectFilters {
-  projectManager?: string;
-  country?: string;
-  language?: string;
-  scriptStatus?: ProjectScriptStatus;
-  reviewStatus?: ProjectReviewStatus;
-  talentStatus?: ProjectTalentStatus;
-  startDate?: Date;
-  endDate?: Date;
+  created_at: string;
+  updated_at: string;
 }
