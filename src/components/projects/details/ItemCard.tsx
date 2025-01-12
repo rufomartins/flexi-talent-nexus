@@ -19,8 +19,7 @@ export function ItemCard({ item, onStatusChange, onAssignTalent, onAssignReviewe
         <div className="space-y-2">
           <h3 className="font-medium">{item.name}</h3>
           <div className="flex items-center gap-2 text-sm text-muted-foreground">
-            <Badge variant="outline">{item.language_name}</Badge>
-            <Badge variant="outline">{item.country_name}</Badge>
+            <Badge variant="outline">{item.language_id}</Badge>
           </div>
         </div>
         <Badge>{item.script_status}</Badge>

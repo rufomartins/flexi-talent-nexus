@@ -54,22 +54,22 @@ export function ProjectItems({ projectId, items, onItemStatusUpdate }: ProjectIt
     <Card className="p-6">
       <div className="flex justify-between items-center mb-6">
         <h2 className="text-xl font-semibold">Project Items</h2>
-        <Select defaultValue="status">
+        <Select defaultValue="script_status">
           <SelectTrigger className="w-[180px]">
             <SelectValue placeholder="Group by" />
           </SelectTrigger>
           <SelectContent>
-            <SelectItem value="status">Group by Status</SelectItem>
-            <SelectItem value="country">Group by Country</SelectItem>
-            <SelectItem value="language">Group by Language</SelectItem>
-            <SelectItem value="type">Group by Type</SelectItem>
+            <SelectItem value="script_status">Group by Script Status</SelectItem>
+            <SelectItem value="review_status">Group by Review Status</SelectItem>
+            <SelectItem value="talent_status">Group by Talent Status</SelectItem>
+            <SelectItem value="delivery_status">Group by Delivery Status</SelectItem>
           </SelectContent>
         </Select>
       </div>
 
       <ItemList
         items={items}
-        groupBy="status"
+        groupBy="script_status"
         onItemClick={handleItemClick}
       />
     </Card>
