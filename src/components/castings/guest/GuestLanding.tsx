@@ -13,6 +13,7 @@ import { ShareDialog } from "./share/ShareDialog";
 import type { GuestFilters, GuestViewSettings } from "@/types/guest-filters";
 import type { GuestSelection } from "@/types/supabase/guest-selection";
 import type { ExportConfig } from "@/types/supabase/export";
+import type { TalentProfile } from "@/types/talent";
 
 export const GuestLanding = () => {
   const { castingId, guestId } = useParams();
@@ -109,7 +110,21 @@ export const GuestLanding = () => {
         }
       });
 
-      return filteredData.map(item => item.talent);
+      return filteredData.map(item => {
+        const talentProfile = item.talent;
+        if (!talentProfile) return null;
+        
+        // Transform the database response to match TalentProfile type
+        return {
+          ...talentProfile,
+          availability: talentProfile.availability as Record<string, any>,
+          users: {
+            id: talentProfile.users.id,
+            full_name: talentProfile.users.full_name,
+            avatar_url: talentProfile.users.avatar_url
+          }
+        } as TalentProfile;
+      }).filter(Boolean) as TalentProfile[];
     },
   });
 
