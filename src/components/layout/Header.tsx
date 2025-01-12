@@ -76,17 +76,17 @@ export const Header = () => {
                 </Avatar>
               </Button>
             </DropdownMenuTrigger>
-            <DropdownMenuContent align="end" className="w-56">
-              <DropdownMenuItem onSelect={handleProfileClick} className="cursor-pointer">
+            <DropdownMenuContent align="end" className="w-56 bg-white">
+              <DropdownMenuItem onSelect={handleProfileClick} className="cursor-pointer hover:bg-gray-100">
                 Profile
               </DropdownMenuItem>
-              <DropdownMenuItem onSelect={handleSettingsClick} className="cursor-pointer">
+              <DropdownMenuItem onSelect={handleSettingsClick} className="cursor-pointer hover:bg-gray-100">
                 Settings
               </DropdownMenuItem>
               <DropdownMenuSeparator />
               <DropdownMenuItem 
                 onSelect={handleSignOut}
-                className="cursor-pointer text-red-600 hover:text-red-700 focus:text-red-700 hover:bg-red-50"
+                className="cursor-pointer text-red-600 hover:bg-red-50 focus:text-red-700"
               >
                 Log out
               </DropdownMenuItem>
