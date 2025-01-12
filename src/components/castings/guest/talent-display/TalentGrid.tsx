@@ -46,9 +46,7 @@ export function TalentGrid({ talents, selections, onSelect, isLoading, columnCou
           talent={talent}
           view="grid"
           selection={selections[talent.id]}
-          onLike={(liked) => onSelect(talent.id, { liked })}
-          onComment={(comments) => onSelect(talent.id, { comments })}
-          onPreferenceOrder={(preference_order) => onSelect(talent.id, { preference_order })}
+          onSelect={(selection) => onSelect(talent.id, selection)}
         />
       ))}
     </div>

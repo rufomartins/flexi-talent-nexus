@@ -1,16 +1,11 @@
 import { TalentProfile } from "@/types/talent";
-
-export interface TalentSelection {
-  liked: boolean;
-  comments?: string;
-  preference_order?: number;
-}
+import type { GuestSelection } from "@/types/supabase/guest-selection";
 
 export interface TalentDisplayProps {
   talents: TalentProfile[];
   viewMode: 'grid' | 'list';
-  selections: Record<string, TalentSelection>;
-  onSelect: (talentId: string, selection: Partial<TalentSelection>) => void;
+  selections: Record<string, GuestSelection>;
+  onSelect: (talentId: string, selection: Partial<GuestSelection>) => void;
   isLoading?: boolean;
 }
 
@@ -24,9 +19,7 @@ export interface TalentListProps extends TalentDisplayProps {
 
 export interface TalentCardProps {
   talent: TalentProfile;
-  selection?: TalentSelection;
+  selection?: GuestSelection;
   view: 'grid' | 'list';
-  onLike: (liked: boolean) => void;
-  onComment: (comment: string) => void;
-  onPreferenceOrder: (order: number) => void;
+  onSelect: (selection: Partial<GuestSelection>) => Promise<void>;
 }
