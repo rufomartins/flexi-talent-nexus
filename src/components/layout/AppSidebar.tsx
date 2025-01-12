@@ -26,48 +26,60 @@ import { useMemo } from "react"
 export function AppSidebar() {
   const { user, userDetails } = useAuth();
   
-  console.log("[AppSidebar] Current user:", {
+  console.log("[AppSidebar] Current user state:", {
     id: user?.id,
     email: user?.email,
     metadata: user?.user_metadata,
-    role: user?.user_metadata?.role,
+    metadataRole: user?.user_metadata?.role,
+    detailsRole: userDetails?.role,
     full_name: user?.user_metadata?.full_name
   });
   
-  console.log("[AppSidebar] User details:", {
+  console.log("[AppSidebar] User details state:", {
     role: userDetails?.role,
     status: userDetails?.status,
     full_name: userDetails?.full_name
   });
 
   // Memoize role-based visibility to prevent unnecessary recalculations
-  const { isOnboardingVisible, isSettingsVisible, isDashboardVisible, isTalentsVisible } = useMemo(() => {
+  const { isOnboardingVisible, isSettingsVisible, isDashboardVisible, isTalentsVisible, isCastingsVisible } = useMemo(() => {
     const role = userDetails?.role || user?.user_metadata?.role;
-    console.log("[AppSidebar] Checking visibility with role:", role);
+    console.log("[AppSidebar] Resolving role for visibility checks:", role);
     
     const onboardingVisible = role === 'super_admin' || role === 'super_user';
     const settingsVisible = role === 'super_admin';
     const dashboardVisible = true; // Dashboard should be visible to all authenticated users
     const talentsVisible = role === 'super_admin' || role === 'admin' || role === 'super_user';
+    const castingsVisible = role === 'super_admin' || role === 'admin' || role === 'super_user';
     
-    console.log("[AppSidebar] Visibility flags:", {
+    console.log("[AppSidebar] Menu visibility flags:", {
       onboardingVisible,
       settingsVisible,
       dashboardVisible,
       talentsVisible,
-      role
+      castingsVisible,
+      currentRole: role
     });
     
     return {
       isOnboardingVisible: onboardingVisible,
       isSettingsVisible: settingsVisible,
       isDashboardVisible: dashboardVisible,
-      isTalentsVisible: talentsVisible
+      isTalentsVisible: talentsVisible,
+      isCastingsVisible: castingsVisible
     };
   }, [userDetails?.role, user?.user_metadata?.role]);
 
   // Temporary override for debugging - remove in production
   const DEBUG_SHOW_ALL = false;
+
+  console.log("[AppSidebar] Final menu state:", {
+    dashboardShown: DEBUG_SHOW_ALL || isDashboardVisible,
+    talentsShown: DEBUG_SHOW_ALL || isTalentsVisible,
+    castingsShown: DEBUG_SHOW_ALL || isCastingsVisible,
+    onboardingShown: DEBUG_SHOW_ALL || isOnboardingVisible,
+    settingsShown: DEBUG_SHOW_ALL || isSettingsVisible
+  });
 
   return (
     <Sidebar>
