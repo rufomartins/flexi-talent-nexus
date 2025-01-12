@@ -30,7 +30,7 @@ export const useAuthSession = () => {
               variant: "destructive",
             });
           }
-        }, 15000); // 15 seconds timeout
+        }, 30000); // Increased to 30 seconds
 
         const { data: { session }, error } = await supabase.auth.getSession();
         
