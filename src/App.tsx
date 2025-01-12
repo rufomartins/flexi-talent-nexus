@@ -20,10 +20,12 @@ const queryClient = new QueryClient({
 });
 
 function App() {
+  console.log("[App] Rendering App component");
+  
   return (
     <QueryClientProvider client={queryClient}>
-      <Router>
-        <AuthProvider>
+      <AuthProvider>
+        <Router>
           <Routes>
             <Route path="/login" element={<Login />} />
             <Route element={<ProtectedRoute><MainLayout /></ProtectedRoute>}>
@@ -44,8 +46,8 @@ function App() {
             </Route>
           </Routes>
           <Toaster />
-        </AuthProvider>
-      </Router>
+        </Router>
+      </AuthProvider>
     </QueryClientProvider>
   );
 }

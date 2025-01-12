@@ -7,6 +7,8 @@ import { useAuthActions } from "./useAuthActions";
 import { supabase } from "@/integrations/supabase/client";
 
 export function AuthProvider({ children }: { children: React.ReactNode }) {
+  console.log("[AuthProvider] Initializing");
+  
   const navigate = useNavigate();
   const { 
     session, 
@@ -18,6 +20,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   } = useAuthSession();
   
   const { userDetails, setUserDetails, fetchUserDetails } = useUserDetails();
+  
   const { signIn, signOut } = useAuthActions(
     setLoading,
     setSession,
@@ -27,28 +30,30 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   );
 
   useEffect(() => {
+    console.log("[AuthProvider] Setting up auth state listener");
+    
     const { data: { subscription } } = supabase.auth.onAuthStateChange(async (event, session) => {
-      console.log("[Auth] Auth state changed:", event, session ? "Has session" : "No session");
+      console.log("[AuthProvider] Auth state changed:", event, session ? "Has session" : "No session");
 
       if (session?.user) {
-        console.log("[Auth] Setting session and user state");
+        console.log("[AuthProvider] Setting session and user state");
         setSession?.(session);
         setUser?.(session.user);
         
         const details = await fetchUserDetails(session.user.id);
         if (details) {
-          console.log("[Auth] Updated user details after state change");
+          console.log("[AuthProvider] Updated user details after state change");
           setUserDetails(details);
         } else {
-          console.error("[Auth] Failed to fetch user details after state change");
+          console.error("[AuthProvider] Failed to fetch user details after state change");
         }
       } else {
-        console.log("[Auth] Clearing session and user state");
+        console.log("[AuthProvider] Clearing session and user state");
         setSession?.(null);
         setUser?.(null);
         setUserDetails(null);
         if (event === "SIGNED_OUT") {
-          console.log("[Auth] User signed out, redirecting to login");
+          console.log("[AuthProvider] User signed out, redirecting to login");
           navigate("/login", { replace: true });
         }
       }
@@ -57,23 +62,30 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     });
 
     return () => {
-      console.log("[Auth] Cleaning up auth state subscription");
+      console.log("[AuthProvider] Cleaning up auth state subscription");
       subscription.unsubscribe();
     };
   }, [navigate, setLoading, setSession, setUser, setUserDetails, fetchUserDetails]);
 
+  const contextValue = {
+    session,
+    user,
+    userDetails,
+    setUserDetails,
+    signIn,
+    signOut,
+    loading,
+  };
+
+  console.log("[AuthProvider] Rendering with context:", {
+    hasSession: !!session,
+    hasUser: !!user,
+    hasUserDetails: !!userDetails,
+    isLoading: loading
+  });
+
   return (
-    <AuthContext.Provider
-      value={{
-        session,
-        user,
-        userDetails,
-        setUserDetails,
-        signIn,
-        signOut,
-        loading,
-      }}
-    >
+    <AuthContext.Provider value={contextValue}>
       {children}
     </AuthContext.Provider>
   );

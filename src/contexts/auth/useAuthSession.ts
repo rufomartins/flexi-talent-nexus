@@ -29,20 +29,12 @@ export const useAuthSession = () => {
 
         if (mounted) {
           if (initialSession) {
+            console.log("[Auth] Setting initial session:", initialSession.user.id);
             setSession(initialSession);
             setUser(initialSession.user);
           }
           setLoading(false);
         }
-
-        // Setup auth state change listener
-        authListener = supabase.auth.onAuthStateChange((_event, session) => {
-          if (mounted) {
-            setSession(session);
-            setUser(session?.user ?? null);
-            setLoading(false);
-          }
-        });
 
       } catch (err) {
         console.error("[Auth] Error during initialization:", err);
