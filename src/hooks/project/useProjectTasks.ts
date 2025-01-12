@@ -2,17 +2,13 @@ import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import type { Database } from "@/integrations/supabase/types";
 import { useToast } from "@/components/ui/use-toast";
-import type { Task } from "@/components/projects/types";
-
-type ProjectTranslationStatus = Database["public"]["Enums"]["project_translation_status"];
-type ProjectReviewStatus = Database["public"]["Enums"]["project_review_status"];
-type ProjectTalentStatus = Database["public"]["Enums"]["project_talent_status"];
+import type { ProjectItem } from "@/components/projects/types";
 
 interface TaskFilters {
   languageId?: string;
-  translationStatus?: ProjectTranslationStatus;
-  reviewStatus?: ProjectReviewStatus;
-  talentStatus?: ProjectTalentStatus;
+  scriptStatus?: Database["public"]["Enums"]["project_script_status"];
+  reviewStatus?: Database["public"]["Enums"]["project_review_status"];
+  talentStatus?: Database["public"]["Enums"]["project_talent_status"];
   dateRange?: { from: Date; to: Date };
 }
 
@@ -37,7 +33,7 @@ export const useProjectTasks = (projectId: string) => {
         .order("created_at", { ascending: false });
 
       if (error) throw error;
-      return data as Task[];
+      return data as ProjectItem[];
     },
   });
 
@@ -51,8 +47,8 @@ export const useProjectTasks = (projectId: string) => {
       query = query.eq("language_id", filters.languageId);
     }
 
-    if (filters.translationStatus) {
-      query = query.eq("translation_status", filters.translationStatus);
+    if (filters.scriptStatus) {
+      query = query.eq("script_status", filters.scriptStatus);
     }
 
     if (filters.reviewStatus) {
@@ -80,7 +76,7 @@ export const useProjectTasks = (projectId: string) => {
       throw error;
     }
 
-    return data;
+    return data as ProjectItem[];
   };
 
   return {

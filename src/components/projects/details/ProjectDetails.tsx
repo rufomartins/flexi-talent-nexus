@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { useToast } from "@/hooks/use-toast";
-import { Project, Task } from "../types";
+import { Project, ProjectItem } from "../types";
 import { ProjectHeader } from "./ProjectHeader";
 import { ProjectItems } from "./ProjectItems";
 import { supabase } from "@/integrations/supabase/client";
@@ -9,12 +9,12 @@ import { ProjectStats } from "../ProjectStats";
 interface ProjectDetailsProps {
   projectId: string;
   onStatusUpdate: (status: Project['status']) => Promise<void>;
-  onItemAdd: (item: Omit<Task, 'id'>) => Promise<void>;
+  onItemAdd: (item: Omit<ProjectItem, 'id'>) => Promise<void>;
 }
 
 export function ProjectDetails({ projectId, onStatusUpdate, onItemAdd }: ProjectDetailsProps) {
   const [project, setProject] = useState<Project | null>(null);
-  const [items, setItems] = useState<Task[]>([]);
+  const [items, setItems] = useState<ProjectItem[]>([]);
   const [loading, setLoading] = useState(true);
   const { toast } = useToast();
 

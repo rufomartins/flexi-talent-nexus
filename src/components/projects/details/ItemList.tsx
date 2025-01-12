@@ -9,7 +9,7 @@ interface ItemListProps {
 
 export function ItemList({ items, groupBy, onItemClick }: ItemListProps) {
   const groupedItems = items.reduce((acc, item) => {
-    const key = item[groupBy];
+    const key = item[groupBy] || 'Unknown';
     if (!acc[key]) {
       acc[key] = [];
     }
