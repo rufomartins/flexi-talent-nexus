@@ -21,11 +21,7 @@ export const Header = () => {
   const handleSignOut = async () => {
     try {
       await signOut();
-      navigate('/login');
-      toast({
-        title: "Success",
-        description: "You have been logged out successfully.",
-      });
+      // The navigation and toast are now handled in the AuthProvider after successful signOut
     } catch (error) {
       console.error("Error signing out:", error);
       toast({
