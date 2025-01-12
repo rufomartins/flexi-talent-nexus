@@ -35,7 +35,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       }
 
       console.log("User details fetched successfully:", data);
-      setUserDetails(data); // Set user details immediately
+      setUserDetails(data);
       return data;
     } catch (error) {
       console.error("Exception in fetchUserDetails:", error);
@@ -189,6 +189,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         session,
         user,
         userDetails,
+        setUserDetails,
         signIn,
         signOut,
         loading,
