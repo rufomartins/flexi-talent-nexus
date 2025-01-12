@@ -1,16 +1,8 @@
 import { useState } from "react";
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from "@/components/ui/table";
 import { Card } from "@/components/ui/card";
 import { Loader2 } from "lucide-react";
 import { CandidateFilters } from "./CandidateFilters";
-import { CandidateActions } from "./CandidateActions";
+import { CandidateTable } from "./CandidateTable";
 
 interface Candidate {
   id: string;
@@ -74,49 +66,10 @@ export function CandidateList({ candidates, isLoading }: CandidateListProps) {
           onSearchQueryChange={setSearchQuery}
         />
 
-        <div className="rounded-md border">
-          <Table>
-            <TableHeader>
-              <TableRow>
-                <TableHead>Name</TableHead>
-                <TableHead>Email</TableHead>
-                <TableHead>Phone</TableHead>
-                <TableHead>Scout</TableHead>
-                <TableHead>Status</TableHead>
-                <TableHead className="text-right">Actions</TableHead>
-              </TableRow>
-            </TableHeader>
-            <TableBody>
-              {filteredCandidates.map((candidate) => (
-                <TableRow key={candidate.id}>
-                  <TableCell className="font-medium">{candidate.name}</TableCell>
-                  <TableCell>{candidate.email}</TableCell>
-                  <TableCell>{candidate.phone}</TableCell>
-                  <TableCell>{candidate.scout?.full_name || '-'}</TableCell>
-                  <TableCell>
-                    <span
-                      className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${getStatusColor(
-                        candidate.status
-                      )}`}
-                    >
-                      {candidate.status}
-                    </span>
-                  </TableCell>
-                  <TableCell className="text-right">
-                    <CandidateActions 
-                      candidateId={candidate.id}
-                      candidateName={candidate.name}
-                      onEmailClick={() => {
-                        // Email functionality will be implemented later
-                        console.log("Send email to:", candidate.email);
-                      }}
-                    />
-                  </TableCell>
-                </TableRow>
-              ))}
-            </TableBody>
-          </Table>
-        </div>
+        <CandidateTable 
+          candidates={filteredCandidates}
+          getStatusColor={getStatusColor}
+        />
       </div>
     </Card>
   );

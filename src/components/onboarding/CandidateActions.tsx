@@ -8,20 +8,18 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { Eye, Mail, Calendar, MoreHorizontal } from "lucide-react";
 import { useNavigate } from "react-router-dom";
-import { InterviewScheduler } from "./InterviewScheduler";
+import { InterviewSchedulerDialog } from "./interview/InterviewSchedulerDialog";
 
 interface CandidateActionsProps {
   candidateId: string;
   candidateName: string;
   onEmailClick?: () => void;
-  onScheduleClick?: () => void;
 }
 
 export function CandidateActions({ 
   candidateId,
   candidateName,
   onEmailClick,
-  onScheduleClick,
 }: CandidateActionsProps) {
   const navigate = useNavigate();
   const [showScheduler, setShowScheduler] = useState(false);
@@ -52,7 +50,7 @@ export function CandidateActions({
         </DropdownMenuContent>
       </DropdownMenu>
 
-      <InterviewScheduler
+      <InterviewSchedulerDialog
         open={showScheduler}
         onOpenChange={setShowScheduler}
         candidateId={candidateId}
