@@ -15,26 +15,27 @@ const ProtectedRoute = ({ children, allowedRoles }: ProtectedRouteProps) => {
   const navigate = useNavigate();
   const [isLoading, setIsLoading] = useState(true);
   const [loadingMessage, setLoadingMessage] = useState("Initializing...");
+  const [loadingTimeout, setLoadingTimeout] = useState<NodeJS.Timeout | null>(null);
 
   useEffect(() => {
     const fetchUserDetails = async () => {
       try {
         if (!user?.id) {
-          console.log("No user ID available for fetching details");
+          console.log("[ProtectedRoute] No user ID available for fetching details");
           return;
         }
 
         setLoadingMessage("Fetching user details...");
-        console.log("Fetching user details for:", user.id);
+        console.log("[ProtectedRoute] Fetching user details for:", user.id);
         
         const { data: userData, error: userError } = await supabase
           .from("users")
           .select("*")
           .eq("id", user.id)
-          .single();
+          .maybeSingle();
 
         if (userError) {
-          console.error("Error fetching user details:", userError);
+          console.error("[ProtectedRoute] Error fetching user details:", userError);
           toast({
             title: "Error",
             description: "Failed to load user details. Please try again.",
@@ -44,41 +45,50 @@ const ProtectedRoute = ({ children, allowedRoles }: ProtectedRouteProps) => {
         }
 
         if (userData) {
-          console.log("User details fetched successfully:", userData);
+          console.log("[ProtectedRoute] User details fetched successfully:", userData);
           setUserDetails(userData);
         } else {
-          console.log("No user details found");
+          console.log("[ProtectedRoute] No user details found");
         }
       } catch (error) {
-        console.error("Exception in fetchUserDetails:", error);
+        console.error("[ProtectedRoute] Exception in fetchUserDetails:", error);
       }
     };
 
     const initRoute = async () => {
       try {
-        console.log("InitRoute - Current state:", { loading, user, userDetails });
+        console.log("[ProtectedRoute] InitRoute - Current state:", { loading, user, userDetails });
         
+        // Set a timeout to prevent infinite loading
+        const timeout = setTimeout(() => {
+          console.warn("[ProtectedRoute] Loading timeout reached, forcing state update");
+          setIsLoading(false);
+          setLoadingMessage("Loading timeout reached. Please refresh the page.");
+        }, 10000); // 10 second timeout
+        
+        setLoadingTimeout(timeout);
+
         if (!loading) {
           if (!user) {
-            console.log("No authenticated user, redirecting to login");
+            console.log("[ProtectedRoute] No authenticated user, redirecting to login");
             navigate("/login");
             return;
           }
 
           if (!userDetails && user) {
-            console.log("User found but no details, fetching details...");
+            console.log("[ProtectedRoute] User found but no details, fetching details...");
             await fetchUserDetails();
           }
 
           if (allowedRoles && userDetails) {
             setLoadingMessage("Verifying permissions...");
-            console.log("Checking role access:", {
+            console.log("[ProtectedRoute] Checking role access:", {
               userRole: userDetails.role,
               allowedRoles,
             });
             
             if (!allowedRoles.includes(userDetails.role)) {
-              console.log("User does not have required role, redirecting to dashboard");
+              console.log("[ProtectedRoute] User does not have required role, redirecting to dashboard");
               toast({
                 title: "Access Denied",
                 description: "You don't have permission to access this page.",
@@ -89,27 +99,27 @@ const ProtectedRoute = ({ children, allowedRoles }: ProtectedRouteProps) => {
             }
           }
           
-          console.log("Route initialization complete");
+          console.log("[ProtectedRoute] Route initialization complete");
           setIsLoading(false);
-        } else {
-          console.log("Auth context still loading...");
         }
       } catch (error) {
-        console.error("Error in initRoute:", error);
+        console.error("[ProtectedRoute] Error in initRoute:", error);
         toast({
           title: "Error",
           description: "An error occurred while initializing the route.",
           variant: "destructive",
         });
-      } finally {
-        if (!loading) {
-          setIsLoading(false);
-        }
       }
     };
 
     initRoute();
-  }, [user, loading, navigate, allowedRoles, userDetails, setUserDetails]);
+
+    return () => {
+      if (loadingTimeout) {
+        clearTimeout(loadingTimeout);
+      }
+    };
+  }, [user, loading, navigate, allowedRoles, userDetails, setUserDetails, loadingTimeout]);
 
   if (loading || isLoading) {
     return (
