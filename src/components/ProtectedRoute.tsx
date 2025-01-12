@@ -42,8 +42,6 @@ const ProtectedRoute = ({ children, allowedRoles }: ProtectedRouteProps) => {
         }
       } catch (error) {
         console.error("Exception in ProtectedRoute fetchUserDetails:", error);
-      } finally {
-        setIsLoading(false);
       }
     };
 
@@ -51,13 +49,14 @@ const ProtectedRoute = ({ children, allowedRoles }: ProtectedRouteProps) => {
     if (!loading && !user) {
       console.log("No authenticated user found, redirecting to login");
       navigate("/login");
+      setIsLoading(false);
       return;
     }
 
     // If we have a user but no userDetails, fetch them
     if (user && !userDetails) {
       console.log("User found but no details, fetching details...");
-      fetchUserDetails();
+      fetchUserDetails().finally(() => setIsLoading(false));
     } else {
       setIsLoading(false);
     }
@@ -83,7 +82,7 @@ const ProtectedRoute = ({ children, allowedRoles }: ProtectedRouteProps) => {
   }, [user, loading, navigate, allowedRoles, userDetails, setUserDetails]);
 
   // Show loading state only when necessary
-  if (isLoading || loading || (user && !userDetails)) {
+  if (loading || (user && !userDetails)) {
     return (
       <div className="h-screen w-screen flex items-center justify-center">
         <Loader2 className="h-8 w-8 animate-spin" />
