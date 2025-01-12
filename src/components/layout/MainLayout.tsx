@@ -13,14 +13,14 @@ export const MainLayout = () => {
         </div>
 
         {/* Main layout container */}
-        <div className="flex min-h-screen">
+        <div className="flex min-h-screen pt-16"> {/* Added pt-16 for header height */}
           {/* Sidebar - fixed position with proper top offset */}
-          <div className="fixed left-0 top-16 bottom-0 w-64 bg-white">
+          <div className="fixed left-0 top-16 bottom-0 w-64 bg-white border-r border-border">
             <AppSidebar />
           </div>
 
-          {/* Main content - removed margin, adjusted padding */}
-          <main className="flex-1 pl-64 pt-16 bg-muted/50">
+          {/* Main content - adjusted padding */}
+          <main className="flex-1 pl-64 bg-muted/50">
             <Outlet />
           </main>
         </div>

@@ -1,5 +1,5 @@
 import { Link } from "react-router-dom"
-import { LayoutDashboard, Users, Search, UserPlus, FileSpreadsheet, Briefcase, MessageSquare, Calendar, DollarSign, UserCheck } from "lucide-react"
+import { LayoutDashboard, Users, Search, UserPlus, FileSpreadsheet, Briefcase, MessageSquare, Calendar, DollarSign, Settings, UserCheck } from "lucide-react"
 import { cn } from "@/lib/utils"
 import { buttonVariants } from "@/components/ui/button"
 import { Sidebar, SidebarContent, SidebarGroup, SidebarGroupContent } from "@/components/ui/sidebar"
@@ -8,31 +8,46 @@ import { useAuth } from "@/contexts/auth"
 export function AppSidebar() {
   const { userDetails } = useAuth();
   const isOnboardingVisible = userDetails?.role === 'super_admin' || userDetails?.role === 'super_user';
+  const isSettingsVisible = userDetails?.role === 'super_admin';
 
   return (
     <Sidebar>
       <SidebarContent>
         <SidebarGroup>
-          <SidebarGroupContent className="flex flex-col gap-1">
+          <SidebarGroupContent className="flex flex-col gap-2 p-4">
             {/* Dashboard Link */}
             <Link
               to="/dashboard"
               className={cn(
                 buttonVariants({ variant: "ghost" }),
-                "justify-start gap-2 px-2"
+                "justify-start gap-2 px-2 w-full"
               )}
             >
               <LayoutDashboard className="h-4 w-4" />
               Dashboard
             </Link>
 
+            {/* Onboarding Link - Only visible to super admin and super users */}
+            {isOnboardingVisible && (
+              <Link
+                to="/onboarding"
+                className={cn(
+                  buttonVariants({ variant: "ghost" }),
+                  "justify-start gap-2 px-2 w-full"
+                )}
+              >
+                <UserCheck className="h-4 w-4" />
+                Onboarding
+              </Link>
+            )}
+
             {/* Talents Section with Submenus */}
-            <div className="flex flex-col">
+            <div className="flex flex-col gap-1">
               <Link
                 to="/talents"
                 className={cn(
                   buttonVariants({ variant: "ghost" }),
-                  "justify-start gap-2 px-2"
+                  "justify-start gap-2 px-2 w-full"
                 )}
               >
                 <Users className="h-4 w-4" />
@@ -45,7 +60,7 @@ export function AppSidebar() {
                   to="/search"
                   className={cn(
                     buttonVariants({ variant: "ghost" }),
-                    "justify-start gap-2 px-2"
+                    "justify-start gap-2 px-2 w-full"
                   )}
                 >
                   <Search className="h-4 w-4" />
@@ -55,7 +70,7 @@ export function AppSidebar() {
                   to="/talents/new"
                   className={cn(
                     buttonVariants({ variant: "ghost" }),
-                    "justify-start gap-2 px-2"
+                    "justify-start gap-2 px-2 w-full"
                   )}
                 >
                   <UserPlus className="h-4 w-4" />
@@ -64,26 +79,12 @@ export function AppSidebar() {
               </div>
             </div>
 
-            {/* Onboarding Link - Only visible to super admin and super users */}
-            {isOnboardingVisible && (
-              <Link
-                to="/onboarding"
-                className={cn(
-                  buttonVariants({ variant: "ghost" }),
-                  "justify-start gap-2 px-2"
-                )}
-              >
-                <UserCheck className="h-4 w-4" />
-                Onboarding
-              </Link>
-            )}
-
             {/* Castings Link */}
             <Link
               to="/castings"
               className={cn(
                 buttonVariants({ variant: "ghost" }),
-                "justify-start gap-2 px-2"
+                "justify-start gap-2 px-2 w-full"
               )}
             >
               <FileSpreadsheet className="h-4 w-4" />
@@ -95,7 +96,7 @@ export function AppSidebar() {
               to="/projects"
               className={cn(
                 buttonVariants({ variant: "ghost" }),
-                "justify-start gap-2 px-2"
+                "justify-start gap-2 px-2 w-full"
               )}
             >
               <Briefcase className="h-4 w-4" />
@@ -107,7 +108,7 @@ export function AppSidebar() {
               to="/messages"
               className={cn(
                 buttonVariants({ variant: "ghost" }),
-                "justify-start gap-2 px-2"
+                "justify-start gap-2 px-2 w-full"
               )}
             >
               <MessageSquare className="h-4 w-4" />
@@ -119,7 +120,7 @@ export function AppSidebar() {
               to="/financial"
               className={cn(
                 buttonVariants({ variant: "ghost" }),
-                "justify-start gap-2 px-2"
+                "justify-start gap-2 px-2 w-full"
               )}
             >
               <DollarSign className="h-4 w-4" />
@@ -131,12 +132,26 @@ export function AppSidebar() {
               to="/calendar"
               className={cn(
                 buttonVariants({ variant: "ghost" }),
-                "justify-start gap-2 px-2"
+                "justify-start gap-2 px-2 w-full"
               )}
             >
               <Calendar className="h-4 w-4" />
               Calendar
             </Link>
+
+            {/* Settings Link - Only visible to super admin */}
+            {isSettingsVisible && (
+              <Link
+                to="/settings"
+                className={cn(
+                  buttonVariants({ variant: "ghost" }),
+                  "justify-start gap-2 px-2 w-full"
+                )}
+              >
+                <Settings className="h-4 w-4" />
+                Settings
+              </Link>
+            )}
           </SidebarGroupContent>
         </SidebarGroup>
       </SidebarContent>
