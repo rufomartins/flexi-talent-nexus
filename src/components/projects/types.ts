@@ -4,16 +4,17 @@ type ProjectScriptStatus = Database["public"]["Enums"]["project_script_status"];
 type ProjectReviewStatus = Database["public"]["Enums"]["project_review_status"];
 type ProjectTalentStatus = Database["public"]["Enums"]["project_talent_status"];
 type ProjectDeliveryStatus = Database["public"]["Enums"]["project_delivery_status"];
-type ProjectTranslationStatus = Database["public"]["Enums"]["project_translation_status"];
 
 export interface Task {
   id: string;
   name: string;
   script_status: ProjectScriptStatus;
-  translation_status: ProjectTranslationStatus;
   review_status: ProjectReviewStatus;
   talent_status: ProjectTalentStatus;
   delivery_status: ProjectDeliveryStatus;
+  language_id: string;
+  priority: string;
+  created_at: string;
 }
 
 export interface Language {

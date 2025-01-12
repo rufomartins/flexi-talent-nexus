@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { useToast } from "@/hooks/use-toast";
-import { Project, ProjectItem } from "@/types/supabase/projects";
+import { Project, Task } from "../types";
 import { ProjectHeader } from "./ProjectHeader";
 import { ProjectItems } from "./ProjectItems";
 import { supabase } from "@/integrations/supabase/client";
@@ -9,12 +9,12 @@ import { ProjectStats } from "../ProjectStats";
 interface ProjectDetailsProps {
   projectId: string;
   onStatusUpdate: (status: Project['status']) => Promise<void>;
-  onItemAdd: (item: Omit<ProjectItem, 'id'>) => Promise<void>;
+  onItemAdd: (item: Omit<Task, 'id'>) => Promise<void>;
 }
 
 export function ProjectDetails({ projectId, onStatusUpdate, onItemAdd }: ProjectDetailsProps) {
   const [project, setProject] = useState<Project | null>(null);
-  const [items, setItems] = useState<ProjectItem[]>([]);
+  const [items, setItems] = useState<Task[]>([]);
   const [loading, setLoading] = useState(true);
   const { toast } = useToast();
 
@@ -71,11 +71,11 @@ export function ProjectDetails({ projectId, onStatusUpdate, onItemAdd }: Project
     },
     {
       title: "In Progress",
-      value: items.filter(item => item.status === 'in_progress').length
+      value: items.filter(item => item.script_status === 'In Progress').length
     },
     {
       title: "Completed",
-      value: items.filter(item => item.status === 'completed').length
+      value: items.filter(item => item.delivery_status === 'Delivered').length
     }
   ];
 
@@ -92,11 +92,11 @@ export function ProjectDetails({ projectId, onStatusUpdate, onItemAdd }: Project
       <ProjectItems
         projectId={projectId}
         items={items}
-        onItemStatusUpdate={async (itemId, status) => {
+        onItemStatusUpdate={async (itemId, updates) => {
           try {
             const { error } = await supabase
               .from('project_tasks')
-              .update({ status })
+              .update(updates)
               .eq('id', itemId);
 
             if (error) throw error;

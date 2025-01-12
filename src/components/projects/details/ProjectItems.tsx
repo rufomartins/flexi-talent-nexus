@@ -1,6 +1,6 @@
 import { useEffect } from "react";
 import { useToast } from "@/hooks/use-toast";
-import { ProjectItem } from "@/types/supabase/projects";
+import { Task } from "../types";
 import { ItemList } from "./ItemList";
 import { supabase } from "@/integrations/supabase/client";
 import { Card } from "@/components/ui/card";
@@ -14,8 +14,8 @@ import {
 
 interface ProjectItemsProps {
   projectId: string;
-  items: ProjectItem[];
-  onItemStatusUpdate: (itemId: string, status: string) => Promise<void>;
+  items: Task[];
+  onItemStatusUpdate: (itemId: string, updates: Partial<Task>) => Promise<void>;
 }
 
 export function ProjectItems({ projectId, items, onItemStatusUpdate }: ProjectItemsProps) {
