@@ -5,9 +5,24 @@ import { Loader2 } from "lucide-react";
 import { TalentCard } from "./TalentCard";
 import { SelectionControls } from "./SelectionControls";
 import { Alert, AlertDescription } from "@/components/ui/alert";
+import { FilterControls } from "./FilterControls";
+import { useState } from "react";
+import { GuestFilters, GuestViewSettings } from "@/types/guest-filters";
 
 export const GuestLanding = () => {
   const { castingId, guestId } = useParams();
+  const [filters, setFilters] = useState<GuestFilters>({
+    show_only_available: false,
+    filter_out_rejected: false,
+    show_only_approved_auditions: false,
+    search_term: '',
+  });
+
+  const [viewSettings, setViewSettings] = useState<GuestViewSettings>({
+    view_mode: 'grid',
+    sort_by: 'name',
+    sort_direction: 'asc',
+  });
 
   const { data: casting, isLoading: castingLoading, error: castingError } = useQuery({
     queryKey: ["casting", castingId],
@@ -30,9 +45,9 @@ export const GuestLanding = () => {
   });
 
   const { data: talents, isLoading: talentsLoading } = useQuery({
-    queryKey: ["casting-talents", castingId],
+    queryKey: ["casting-talents", castingId, filters],
     queryFn: async () => {
-      const { data, error } = await supabase
+      let query = supabase
         .from("casting_talents")
         .select(`
           *,
@@ -45,11 +60,48 @@ export const GuestLanding = () => {
             )
           )
         `)
-        .eq("casting_id", castingId)
-        .eq("availability_status", "available");
+        .eq("casting_id", castingId);
+
+      if (filters.show_only_available) {
+        query = query.eq("availability_status", "available");
+      }
+
+      if (filters.round_filter) {
+        query = query.eq("round", filters.round_filter);
+      }
+
+      const { data, error } = await query;
 
       if (error) throw error;
-      return data;
+
+      let filteredData = data;
+
+      // Client-side filtering
+      if (filters.search_term) {
+        const searchLower = filters.search_term.toLowerCase();
+        filteredData = filteredData.filter(item => 
+          item.talent?.user?.first_name?.toLowerCase().includes(searchLower) ||
+          item.talent?.user?.last_name?.toLowerCase().includes(searchLower)
+        );
+      }
+
+      // Sort the data
+      filteredData.sort((a, b) => {
+        const direction = viewSettings.sort_direction === 'asc' ? 1 : -1;
+        
+        switch (viewSettings.sort_by) {
+          case 'name':
+            const nameA = `${a.talent?.user?.first_name} ${a.talent?.user?.last_name}`;
+            const nameB = `${b.talent?.user?.first_name} ${b.talent?.user?.last_name}`;
+            return nameA.localeCompare(nameB) * direction;
+          case 'date_added':
+            return (new Date(a.created_at).getTime() - new Date(b.created_at).getTime()) * direction;
+          default:
+            return 0;
+        }
+      });
+
+      return filteredData;
     },
   });
 
@@ -95,14 +147,20 @@ export const GuestLanding = () => {
         )}
       </div>
 
-      <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
+      <FilterControls
+        filters={filters}
+        onFilterChange={setFilters}
+        viewSettings={viewSettings}
+        onViewChange={setViewSettings}
+      />
+
+      <div className={`mt-6 ${viewSettings.view_mode === 'grid' ? 'grid gap-6 md:grid-cols-2 lg:grid-cols-3' : 'space-y-4'}`}>
         {talents?.map((talentData) => (
           <TalentCard
             key={talentData.talent.id}
             talent={talentData.talent}
             selection={selections?.find(s => s.talent_id === talentData.talent_id)}
             onSelect={(selection) => {
-              // Handle selection
               console.log('Selection:', selection);
             }}
           />
