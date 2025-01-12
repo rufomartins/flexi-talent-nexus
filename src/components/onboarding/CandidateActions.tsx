@@ -14,12 +14,14 @@ interface CandidateActionsProps {
   candidateId: string;
   candidateName: string;
   onEmailClick?: () => void;
+  onScheduleClick?: () => void;
 }
 
 export function CandidateActions({ 
   candidateId,
   candidateName,
   onEmailClick,
+  onScheduleClick,
 }: CandidateActionsProps) {
   const navigate = useNavigate();
   const [showScheduler, setShowScheduler] = useState(false);

@@ -105,13 +105,10 @@ export function CandidateList({ candidates, isLoading }: CandidateListProps) {
                   <TableCell className="text-right">
                     <CandidateActions 
                       candidateId={candidate.id}
+                      candidateName={candidate.name}
                       onEmailClick={() => {
                         // Email functionality will be implemented later
                         console.log("Send email to:", candidate.email);
-                      }}
-                      onScheduleClick={() => {
-                        // Interview scheduling will be implemented next
-                        console.log("Schedule interview for:", candidate.name);
                       }}
                     />
                   </TableCell>
