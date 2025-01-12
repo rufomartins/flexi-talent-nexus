@@ -17,9 +17,13 @@ const ProtectedRoute = ({ children, allowedRoles }: ProtectedRouteProps) => {
 
   useEffect(() => {
     const fetchUserDetails = async () => {
-      if (!user) return;
+      if (!user) {
+        setIsLoading(false);
+        return;
+      }
 
       try {
+        console.log("Fetching user details for:", user.id);
         const { data: userData, error: userError } = await supabase
           .from("users")
           .select("*")
@@ -27,7 +31,7 @@ const ProtectedRoute = ({ children, allowedRoles }: ProtectedRouteProps) => {
           .single();
 
         if (userError) {
-          console.error("Error fetching user details in ProtectedRoute:", userError);
+          console.error("Error fetching user details:", userError);
           toast({
             title: "Error",
             description: "Failed to load user details. Please try again.",
@@ -37,52 +41,50 @@ const ProtectedRoute = ({ children, allowedRoles }: ProtectedRouteProps) => {
         }
 
         if (userData) {
-          console.log("User details fetched successfully:", userData);
+          console.log("User details fetched:", userData);
           setUserDetails(userData);
         }
       } catch (error) {
-        console.error("Exception in ProtectedRoute fetchUserDetails:", error);
+        console.error("Exception in fetchUserDetails:", error);
+      } finally {
+        setIsLoading(false);
       }
     };
 
-    const initializeRoute = async () => {
-      // If not loading and no user, redirect to login
-      if (!loading && !user) {
-        console.log("No authenticated user found, redirecting to login");
-        navigate("/login");
-        setIsLoading(false);
+    // If not loading and no user, redirect to login
+    if (!loading && !user) {
+      console.log("No authenticated user, redirecting to login");
+      navigate("/login");
+      setIsLoading(false);
+      return;
+    }
+
+    // If we have a user but no userDetails, fetch them
+    if (user && !userDetails) {
+      console.log("User found but no details, fetching details...");
+      fetchUserDetails();
+    } else {
+      setIsLoading(false);
+    }
+
+    // Check role access if allowedRoles is specified and we have userDetails
+    if (!loading && user && allowedRoles && userDetails) {
+      console.log("Checking role access:", {
+        userRole: userDetails.role,
+        allowedRoles,
+      });
+      
+      if (!allowedRoles.includes(userDetails.role)) {
+        console.log("User does not have required role, redirecting to dashboard");
+        toast({
+          title: "Access Denied",
+          description: "You don't have permission to access this page.",
+          variant: "destructive",
+        });
+        navigate("/dashboard");
         return;
       }
-
-      // If we have a user but no userDetails, fetch them
-      if (user && !userDetails) {
-        console.log("User found but no details, fetching details...");
-        await fetchUserDetails();
-      }
-
-      // Check role access if allowedRoles is specified and we have userDetails
-      if (!loading && user && allowedRoles && userDetails) {
-        console.log("Checking role access:", {
-          userRole: userDetails.role,
-          allowedRoles,
-        });
-        
-        if (!allowedRoles.includes(userDetails.role)) {
-          console.log("User does not have required role, redirecting to dashboard");
-          toast({
-            title: "Access Denied",
-            description: "You don't have permission to access this page.",
-            variant: "destructive",
-          });
-          navigate("/dashboard");
-          return;
-        }
-      }
-
-      setIsLoading(false);
-    };
-
-    initializeRoute();
+    }
   }, [user, loading, navigate, allowedRoles, userDetails, setUserDetails]);
 
   // Show loading state only when necessary
@@ -94,7 +96,7 @@ const ProtectedRoute = ({ children, allowedRoles }: ProtectedRouteProps) => {
     );
   }
 
-  // If no user and still loading, return null (let the redirect happen)
+  // If no user, return null (let the redirect happen)
   if (!user) {
     return null;
   }
