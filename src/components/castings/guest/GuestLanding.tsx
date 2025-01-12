@@ -8,7 +8,7 @@ import { useState } from "react";
 import { GuestFilters, GuestViewSettings } from "@/types/guest-filters";
 import { TalentDisplay } from "./talent-display/TalentDisplay";
 import { TalentSelection } from "./talent-display/types";
-import type { TalentProfile } from "@/types/supabase/talent";
+import type { TalentProfile } from "@/types/talent";
 
 export const GuestLanding = () => {
   const { castingId, guestId } = useParams();

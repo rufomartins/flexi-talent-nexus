@@ -1,10 +1,12 @@
+import type { TalentCategory } from './supabase/talent';
 import type { DuoPartner } from './talent-profile';
 
-export type TalentCategory = 'UGC' | 'TRANSLATOR' | 'REVIEWER' | 'VOICE_OVER';
+export type { DuoPartner };
+export type { TalentCategory };
 
 export interface TalentProfile {
   id: string;
-  user_id: string | null;
+  user_id: string;
   talent_category: TalentCategory;
   country: string;
   evaluation_status: string | null;
@@ -12,7 +14,7 @@ export interface TalentProfile {
   duo_name?: string | null;
   partner_id?: string | null;
   created_at: string | null;
-  updated_at: string | null;
+  updated_at: string;
   agent_id: string | null;
   availability: Record<string, any> | null;
   category: string | null;

@@ -1,5 +1,6 @@
 import type { BaseRecord } from './base';
-import type { TalentCategory } from '../talent';
+
+export type TalentCategory = 'UGC' | 'TRANSLATOR' | 'REVIEWER' | 'VOICE_OVER';
 
 export interface TalentProfile extends BaseRecord {
   user_id: string;
