@@ -15,7 +15,7 @@ export const MainLayout = () => {
         {/* Main layout container */}
         <div className="flex min-h-screen pt-16"> {/* Added pt-16 for header height */}
           {/* Sidebar - fixed position with proper top offset */}
-          <div className="fixed left-0 top-16 bottom-0 w-64 bg-white border-r border-border">
+          <div className="fixed left-0 top-16 bottom-0 w-64 bg-white border-r border-border overflow-y-auto">
             <AppSidebar />
           </div>
 

@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "@/contexts/auth";
 import { Loader2 } from "lucide-react";
+import { toast } from "@/hooks/use-toast";
 
 interface ProtectedRouteProps {
   children: React.ReactNode;
@@ -23,17 +24,27 @@ const ProtectedRoute = ({ children, allowedRoles }: ProtectedRouteProps) => {
 
     // Check role access if allowedRoles is specified
     if (!loading && user && allowedRoles && userDetails) {
+      console.log("Checking role access:", {
+        userRole: userDetails.role,
+        allowedRoles,
+      });
+      
       if (!allowedRoles.includes(userDetails.role)) {
         console.log("User does not have required role, redirecting to dashboard");
+        toast({
+          title: "Access Denied",
+          description: "You don't have permission to access this page.",
+          variant: "destructive",
+        });
         navigate("/dashboard");
         return;
       }
     }
 
-    // For development/preview purposes: show content after 2 seconds
+    // For development/preview purposes: show content after a short delay
     const timer = setTimeout(() => {
       setShowContent(true);
-    }, 2000);
+    }, 1000);
 
     return () => clearTimeout(timer);
   }, [user, loading, navigate, allowedRoles, userDetails]);

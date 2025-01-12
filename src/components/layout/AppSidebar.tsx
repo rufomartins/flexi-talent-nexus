@@ -7,6 +7,9 @@ import { useAuth } from "@/contexts/auth"
 
 export function AppSidebar() {
   const { userDetails } = useAuth();
+  console.log("Current user details:", userDetails); // Debug log
+
+  // Check if user has super_admin or super_user role
   const isOnboardingVisible = userDetails?.role === 'super_admin' || userDetails?.role === 'super_user';
   const isSettingsVisible = userDetails?.role === 'super_admin';
 
@@ -14,7 +17,7 @@ export function AppSidebar() {
     <Sidebar>
       <SidebarContent>
         <SidebarGroup>
-          <SidebarGroupContent className="flex flex-col gap-2 p-4">
+          <SidebarGroupContent className="flex flex-col gap-2 p-4 pt-6">
             {/* Dashboard Link */}
             <Link
               to="/dashboard"
