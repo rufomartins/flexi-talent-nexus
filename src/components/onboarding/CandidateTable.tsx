@@ -59,9 +59,8 @@ export function CandidateTable({ candidates, getStatusColor }: CandidateTablePro
                 <CandidateActions 
                   candidateId={candidate.id}
                   candidateName={candidate.name}
-                  onEmailClick={() => {
-                    console.log("Send email to:", candidate.email);
-                  }}
+                  email={candidate.email}
+                  phone={candidate.phone}
                 />
               </TableCell>
             </TableRow>

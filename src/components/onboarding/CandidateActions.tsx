@@ -6,7 +6,7 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { Eye, Mail, Calendar, MoreHorizontal, MessageSquare } from "lucide-react";
+import { Eye, Mail, Calendar, MoreHorizontal } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { InterviewSchedulerDialog } from "./interview/InterviewSchedulerDialog";
 import { EmailAndSmsComposer } from "./communication/EmailAndSmsComposer";
