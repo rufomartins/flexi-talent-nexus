@@ -18,14 +18,12 @@ export interface TalentProfile extends BaseRecord {
   native_language?: string;
   partner_id?: string;
   phone_number?: string;
-  talent_category?: TalentCategory;
+  talent_category: TalentCategory;
   talent_type?: string;
   whatsapp_number?: string;
   users: {
     id: string;
-    first_name?: string;
-    last_name?: string;
-    full_name?: string;
+    full_name: string;
     avatar_url?: string;
   };
 }

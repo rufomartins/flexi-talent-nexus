@@ -6,21 +6,25 @@ export type BookingStatus = 'pending' | 'confirmed' | 'completed' | 'cancelled';
 export interface Booking extends BaseRecord {
   casting_id: string;
   created_by: string;
-  details: string;
-  email_template_id: string;
-  start_date: string;
-  end_date: string;
-  final_fee: number;
-  talent_fee: number;
-  payment_status: string;
-  project_id: string;
+  details?: string;
+  email_template_id?: string;
+  end_date: Date;
+  final_fee?: number;
+  payment_status?: string;
+  project_id?: string;
+  start_date: Date;
   status: BookingStatus;
+  talent_fee?: number;
+  talent_id: string;
+}
+
+export interface BookingDetailsData extends Booking {
   talent_profiles: TalentProfile;
   projects?: {
     name: string;
     description: string;
   };
-  booking_files?: Array<{
+  booking_files: Array<{
     id: string;
     file_name: string;
     file_type: string;
