@@ -19,10 +19,10 @@ export interface TalentProfile {
   created_at: string | null;
   updated_at: string | null;
   agent_id: string | null;
-  availability: Record<string, any> | null;
+  availability: Json | null;  // Changed from Record<string, any> to Json
   category: string | null;
   experience_level: string | null;
-  fee_range: Record<string, any> | null;
+  fee_range: Json | null;  // Also ensure this matches
   native_language: string | null;
   partner?: DuoPartner;
   users: {
@@ -46,3 +46,6 @@ export interface EmailTemplate {
   updated_at: string;
   created_by: string;
 }
+
+// Add Json type if not already imported
+import { Json } from '@/integrations/supabase/types';
