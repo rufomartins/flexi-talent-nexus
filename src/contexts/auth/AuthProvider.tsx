@@ -21,7 +21,15 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
   const fetchUserDetails = async (userId: string) => {
     try {
-      console.log("[Auth] Fetching user details for:", userId);
+      // Validate UUID format
+      const uuidRegex = /^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
+      if (!uuidRegex.test(userId)) {
+        console.error("[Auth] Invalid UUID format:", userId);
+        return null;
+      }
+
+      console.log("[Auth] Fetching user details with validated UUID:", userId);
+      
       const { data, error } = await supabase
         .from("users")
         .select("*")
@@ -35,6 +43,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
       if (error) {
         console.error("[Auth] Error fetching user details:", error);
+        console.log("[Auth] Failed query params - id:", userId);
         toast({
           title: "Error",
           description: "Failed to load user details. Please try again.",
