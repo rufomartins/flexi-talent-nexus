@@ -123,7 +123,8 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         description: "You have been successfully signed out.",
       });
 
-      navigate('/login');
+      // Force navigation to login page
+      navigate('/login', { replace: true });
     } catch (error: any) {
       console.error("Sign out error:", error);
       toast({
