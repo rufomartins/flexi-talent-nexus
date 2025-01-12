@@ -1,9 +1,10 @@
 import { useState } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
+import { DatabaseUser } from '@/types/user';
 
 export const useUserDetails = () => {
-  const [userDetails, setUserDetails] = useState<any | null>(null);
+  const [userDetails, setUserDetails] = useState<DatabaseUser | null>(null);
   const { toast } = useToast();
 
   const fetchUserDetails = async (userId: string) => {
@@ -15,29 +16,26 @@ export const useUserDetails = () => {
         return null;
       }
 
-      // For debugging, try hardcoded ID first
-      const debugQuery = supabase
-        .from('users')
-        .select('*')
-        .eq('id', '183c7a85-74ce-41c8-ba7e-06a4b0a32d4e');
-      console.log("[Auth] Debug query:", debugQuery);
-
       console.log("[Auth] Fetching user details with validated UUID:", userId);
       
       const { data, error } = await supabase
-        .from("users")
-        .select("*")
-        .eq("id", userId)
-        .single();
+        .from('users')
+        .select('*')
+        .eq('id', userId)
+        .maybeSingle();
 
       if (error) {
         console.error("[Auth] Error fetching user details:", error);
         console.log("[Auth] Failed query params - id:", userId);
-        toast({
-          title: "Error",
-          description: "Failed to load user details. Please try again.",
-          variant: "destructive",
-        });
+        
+        // Only show toast for non-404 errors
+        if (error.code !== 'PGRST116') {
+          toast({
+            title: "Error",
+            description: "Failed to load user details. Please try again.",
+            variant: "destructive",
+          });
+        }
         return null;
       }
 
