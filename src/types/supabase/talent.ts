@@ -1,6 +1,5 @@
 import type { BaseRecord } from './base';
-
-export type TalentCategory = 'UGC' | 'TRANSLATOR' | 'REVIEWER' | 'VOICE_OVER';
+import type { TalentCategory } from '../talent';
 
 export interface TalentProfile extends BaseRecord {
   user_id: string;
@@ -14,7 +13,7 @@ export interface TalentProfile extends BaseRecord {
   experience_level: string;
   fee_range?: Record<string, any>;
   internal_remarks?: string;
-  is_duo?: boolean;
+  is_duo: boolean;
   native_language?: string;
   partner_id?: string;
   phone_number?: string;

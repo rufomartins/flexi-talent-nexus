@@ -27,15 +27,14 @@ export function TalentCard({ talent, selection, view, onLike, onComment, onPrefe
             {talent.users?.avatar_url ? (
               <img
                 src={talent.users.avatar_url}
-                alt={`${talent.users.first_name} ${talent.users.last_name}`}
+                alt={talent.users.full_name}
                 className="w-full h-full object-cover"
               />
             ) : (
               <div className="w-full h-full flex items-center justify-center">
                 <Avatar className="h-20 w-20">
                   <AvatarFallback>
-                    {talent.users?.first_name?.[0]}
-                    {talent.users?.last_name?.[0]}
+                    {talent.users?.full_name?.charAt(0)}
                   </AvatarFallback>
                 </Avatar>
               </div>
@@ -46,7 +45,7 @@ export function TalentCard({ talent, selection, view, onLike, onComment, onPrefe
           <div className="flex items-start justify-between mb-4">
             <div>
               <h3 className="font-medium">
-                {talent.users?.first_name} {talent.users?.last_name}
+                {talent.users?.full_name}
               </h3>
               <p className="text-sm text-muted-foreground">{talent.native_language}</p>
             </div>
@@ -122,14 +121,13 @@ export function TalentCard({ talent, selection, view, onLike, onComment, onPrefe
             {talent.users?.avatar_url ? (
               <img
                 src={talent.users.avatar_url}
-                alt={`${talent.users.first_name} ${talent.users.last_name}`}
+                alt={talent.users.full_name}
                 className="w-full h-full object-cover rounded-md"
               />
             ) : (
               <Avatar className="w-full h-full">
                 <AvatarFallback>
-                  {talent.users?.first_name?.[0]}
-                  {talent.users?.last_name?.[0]}
+                  {talent.users?.full_name?.charAt(0)}
                 </AvatarFallback>
               </Avatar>
             )}
@@ -138,7 +136,7 @@ export function TalentCard({ talent, selection, view, onLike, onComment, onPrefe
             <div className="flex justify-between items-start">
               <div>
                 <h3 className="font-medium">
-                  {talent.users?.first_name} {talent.users?.last_name}
+                  {talent.users?.full_name}
                 </h3>
                 <p className="text-sm text-muted-foreground">{talent.native_language}</p>
               </div>
