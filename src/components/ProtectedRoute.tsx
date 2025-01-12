@@ -15,7 +15,6 @@ const ProtectedRoute = ({ children, allowedRoles }: ProtectedRouteProps) => {
   const navigate = useNavigate();
   const [isLoading, setIsLoading] = useState(true);
   const [loadingMessage, setLoadingMessage] = useState("Initializing...");
-  const [loadingTimeout, setLoadingTimeout] = useState<NodeJS.Timeout | null>(null);
   const [retryCount, setRetryCount] = useState(0);
   const MAX_RETRIES = 3;
 
@@ -141,29 +140,26 @@ const ProtectedRoute = ({ children, allowedRoles }: ProtectedRouteProps) => {
 
     // Set a timeout to prevent infinite loading
     const timeout = setTimeout(() => {
-      console.warn("[ProtectedRoute] Loading timeout reached, forcing state update");
-      setIsLoading(false);
-      setLoadingMessage("Loading timeout reached. Please refresh the page.");
-      // Use metadata as fallback if available
-      if (user?.user_metadata?.role && !userDetails) {
-        setUserDetails({
-          id: user.id,
-          role: user.user_metadata.role,
-          full_name: user.user_metadata.full_name || user.email,
-          status: 'active'
-        });
+      if (isLoading && retryCount >= MAX_RETRIES) {
+        console.warn("[ProtectedRoute] Loading timeout reached");
+        setIsLoading(false);
+        setLoadingMessage("Loading timeout reached. Please refresh the page.");
+        // Use metadata as fallback if available
+        if (user?.user_metadata?.role && !userDetails) {
+          setUserDetails({
+            id: user.id,
+            role: user.user_metadata.role,
+            full_name: user.user_metadata.full_name || user.email,
+            status: 'active'
+          });
+        }
       }
     }, 10000); // 10 second timeout
-    
-    setLoadingTimeout(timeout);
+
     initRoute();
 
-    return () => {
-      if (loadingTimeout) {
-        clearTimeout(loadingTimeout);
-      }
-    };
-  }, [user, loading, userDetails]); // Removed navigate and other stable dependencies
+    return () => clearTimeout(timeout);
+  }, [user, loading, userDetails, retryCount]); // Removed navigate from deps as it's stable
 
   if (loading || isLoading) {
     return (
