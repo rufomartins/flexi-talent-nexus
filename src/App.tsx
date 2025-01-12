@@ -24,8 +24,8 @@ function App() {
   
   return (
     <QueryClientProvider client={queryClient}>
-      <AuthProvider>
-        <Router>
+      <Router>
+        <AuthProvider>
           <Routes>
             <Route path="/login" element={<Login />} />
             <Route element={<ProtectedRoute><MainLayout /></ProtectedRoute>}>
@@ -46,8 +46,8 @@ function App() {
             </Route>
           </Routes>
           <Toaster />
-        </Router>
-      </AuthProvider>
+        </AuthProvider>
+      </Router>
     </QueryClientProvider>
   );
 }
