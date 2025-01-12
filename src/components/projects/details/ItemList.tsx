@@ -3,7 +3,7 @@ import { ItemCard } from "./ItemCard";
 
 interface ItemListProps {
   items: ProjectItem[];
-  groupBy: 'status' | 'country' | 'language' | 'type';
+  groupBy: keyof Pick<ProjectItem, 'script_status' | 'review_status' | 'talent_status' | 'delivery_status'>;
   onItemClick: (itemId: string) => void;
 }
 
