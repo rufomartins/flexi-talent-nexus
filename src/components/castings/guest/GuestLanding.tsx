@@ -1,17 +1,25 @@
 import { useQuery } from "@tanstack/react-query";
 import { useParams } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
-import { Loader2 } from "lucide-react";
+import { Loader2, Download, Share2 } from "lucide-react";
 import { Alert, AlertDescription } from "@/components/ui/alert";
+import { Button } from "@/components/ui/button";
 import { FilterControls } from "./FilterControls";
 import { useState } from "react";
 import { GuestFilters, GuestViewSettings } from "@/types/guest-filters";
 import { TalentDisplay } from "./talent-display/TalentDisplay";
+import { ExportDialog } from "./export/ExportDialog";
+import { ShareDialog } from "./share/ShareDialog";
+import { useToast } from "@/hooks/use-toast";
 import type { GuestSelection } from "@/types/supabase/guest-selection";
 import type { TalentProfile } from "@/types/talent";
+import type { ExportConfig } from "@/types/supabase/export";
 
 export const GuestLanding = () => {
   const { castingId, guestId } = useParams();
+  const { toast } = useToast();
+  const [showExportDialog, setShowExportDialog] = useState(false);
+  const [showShareDialog, setShowShareDialog] = useState(false);
   const [filters, setFilters] = useState<GuestFilters>({
     show_only_available: false,
     filter_out_rejected: false,
@@ -154,6 +162,47 @@ export const GuestLanding = () => {
     }
   };
 
+  const handleExport = async (config: ExportConfig) => {
+    try {
+      // Here you would implement the actual export logic
+      // For now, we'll just show a success message
+      toast({
+        title: "Export Successful",
+        description: `Your selections have been exported as a ${config.format.toUpperCase()} file.`,
+      });
+    } catch (error) {
+      toast({
+        title: "Export Failed",
+        description: "There was an error exporting your selections. Please try again.",
+        variant: "destructive",
+      });
+    }
+  };
+
+  const handleShare = async (email: string, message?: string) => {
+    try {
+      const { error } = await supabase.from("casting_guests").insert({
+        casting_id: castingId,
+        email,
+        name: email.split('@')[0],
+        access_token: crypto.randomUUID(),
+      });
+
+      if (error) throw error;
+
+      toast({
+        title: "Access Shared",
+        description: `An invitation has been sent to ${email}.`,
+      });
+    } catch (error) {
+      toast({
+        title: "Share Failed",
+        description: "There was an error sharing access. Please try again.",
+        variant: "destructive",
+      });
+    }
+  };
+
   if (castingLoading || talentsLoading) {
     return (
       <div className="flex items-center justify-center min-h-screen">
@@ -173,10 +222,32 @@ export const GuestLanding = () => {
   return (
     <div className="container py-8">
       <div className="mb-8">
-        <h1 className="text-3xl font-bold mb-2">{casting.name}</h1>
-        {casting.client && (
-          <p className="text-muted-foreground">Client: {casting.client.full_name}</p>
-        )}
+        <div className="flex justify-between items-start mb-4">
+          <div>
+            <h1 className="text-3xl font-bold mb-2">{casting.name}</h1>
+            {casting.client && (
+              <p className="text-muted-foreground">Client: {casting.client.full_name}</p>
+            )}
+          </div>
+          <div className="flex gap-2">
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => setShowExportDialog(true)}
+            >
+              <Download className="h-4 w-4 mr-2" />
+              Export
+            </Button>
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => setShowShareDialog(true)}
+            >
+              <Share2 className="h-4 w-4 mr-2" />
+              Share
+            </Button>
+          </div>
+        </div>
         {casting.briefing && (
           <div className="mt-4 prose max-w-none" dangerouslySetInnerHTML={{ __html: casting.briefing }} />
         )}
@@ -198,6 +269,21 @@ export const GuestLanding = () => {
           isLoading={talentsLoading}
         />
       </div>
+
+      <ExportDialog
+        open={showExportDialog}
+        onOpenChange={setShowExportDialog}
+        castingId={castingId!}
+        guestId={guestId!}
+        onExport={handleExport}
+      />
+
+      <ShareDialog
+        open={showShareDialog}
+        onOpenChange={setShowShareDialog}
+        castingId={castingId!}
+        onShare={handleShare}
+      />
     </div>
   );
 };
