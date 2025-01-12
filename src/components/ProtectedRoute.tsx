@@ -27,6 +27,12 @@ const ProtectedRoute = ({ children, allowedRoles }: ProtectedRouteProps) => {
           return;
         }
 
+        // Early exit if we already have user details
+        if (userDetails) {
+          console.log("[ProtectedRoute] User details already loaded:", userDetails);
+          return;
+        }
+
         setLoadingMessage("Fetching user details...");
         console.log("[ProtectedRoute] Fetching user details for:", user.id);
         console.log("[ProtectedRoute] User metadata:", user.user_metadata);
@@ -82,65 +88,47 @@ const ProtectedRoute = ({ children, allowedRoles }: ProtectedRouteProps) => {
 
     const initRoute = async () => {
       try {
-        console.log("[ProtectedRoute] InitRoute - Current state:", { 
-          loading, 
-          user: user?.id,
-          userMetadata: user?.user_metadata,
-          userDetails: userDetails?.role
-        });
-        
-        // Set a timeout to prevent infinite loading
-        const timeout = setTimeout(() => {
-          console.warn("[ProtectedRoute] Loading timeout reached, forcing state update");
-          setIsLoading(false);
-          setLoadingMessage("Loading timeout reached. Please refresh the page.");
-          // Use metadata as fallback if available
-          if (user?.user_metadata?.role && !userDetails) {
-            setUserDetails({
-              id: user.id,
-              role: user.user_metadata.role,
-              full_name: user.user_metadata.full_name || user.email,
-              status: 'active'
-            });
-          }
-        }, 10000); // 10 second timeout
-        
-        setLoadingTimeout(timeout);
+        // Early exit conditions
+        if (loading) {
+          console.log("[ProtectedRoute] Still loading auth state...");
+          return;
+        }
 
-        if (!loading) {
-          if (!user) {
-            console.log("[ProtectedRoute] No authenticated user, redirecting to login");
-            navigate("/login");
+        if (!user) {
+          console.log("[ProtectedRoute] No authenticated user, redirecting to login");
+          navigate("/login");
+          setIsLoading(false);
+          return;
+        }
+
+        if (!userDetails) {
+          console.log("[ProtectedRoute] User found but no details, fetching details...");
+          await fetchUserDetails();
+          return;
+        }
+
+        // Role check only if we have user details and allowed roles
+        if (allowedRoles && userDetails) {
+          setLoadingMessage("Verifying permissions...");
+          console.log("[ProtectedRoute] Checking role access:", {
+            userRole: userDetails.role,
+            allowedRoles,
+          });
+          
+          if (!allowedRoles.includes(userDetails.role)) {
+            console.log("[ProtectedRoute] User does not have required role, redirecting to dashboard");
+            toast({
+              title: "Access Denied",
+              description: "You don't have permission to access this page.",
+              variant: "destructive",
+            });
+            navigate("/dashboard");
             return;
           }
-
-          if (!userDetails && user) {
-            console.log("[ProtectedRoute] User found but no details, fetching details...");
-            await fetchUserDetails();
-          }
-
-          if (allowedRoles && userDetails) {
-            setLoadingMessage("Verifying permissions...");
-            console.log("[ProtectedRoute] Checking role access:", {
-              userRole: userDetails.role,
-              allowedRoles,
-            });
-            
-            if (!allowedRoles.includes(userDetails.role)) {
-              console.log("[ProtectedRoute] User does not have required role, redirecting to dashboard");
-              toast({
-                title: "Access Denied",
-                description: "You don't have permission to access this page.",
-                variant: "destructive",
-              });
-              navigate("/dashboard");
-              return;
-            }
-          }
-          
-          console.log("[ProtectedRoute] Route initialization complete");
-          setIsLoading(false);
         }
+        
+        console.log("[ProtectedRoute] Route initialization complete");
+        setIsLoading(false);
       } catch (error) {
         console.error("[ProtectedRoute] Error in initRoute:", error);
         toast({
@@ -151,6 +139,23 @@ const ProtectedRoute = ({ children, allowedRoles }: ProtectedRouteProps) => {
       }
     };
 
+    // Set a timeout to prevent infinite loading
+    const timeout = setTimeout(() => {
+      console.warn("[ProtectedRoute] Loading timeout reached, forcing state update");
+      setIsLoading(false);
+      setLoadingMessage("Loading timeout reached. Please refresh the page.");
+      // Use metadata as fallback if available
+      if (user?.user_metadata?.role && !userDetails) {
+        setUserDetails({
+          id: user.id,
+          role: user.user_metadata.role,
+          full_name: user.user_metadata.full_name || user.email,
+          status: 'active'
+        });
+      }
+    }, 10000); // 10 second timeout
+    
+    setLoadingTimeout(timeout);
     initRoute();
 
     return () => {
@@ -158,7 +163,7 @@ const ProtectedRoute = ({ children, allowedRoles }: ProtectedRouteProps) => {
         clearTimeout(loadingTimeout);
       }
     };
-  }, [user, loading, navigate, allowedRoles, userDetails, setUserDetails, loadingTimeout, retryCount]);
+  }, [user, loading, userDetails]); // Removed navigate and other stable dependencies
 
   if (loading || isLoading) {
     return (
