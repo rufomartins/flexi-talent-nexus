@@ -20,14 +20,14 @@ const ProtectedRoute = ({ children, allowedRoles }: ProtectedRouteProps) => {
       if (!user) return;
 
       try {
-        const { data, error } = await supabase
+        const { data: userData, error: userError } = await supabase
           .from("users")
           .select("*")
           .eq("id", user.id)
           .single();
 
-        if (error) {
-          console.error("Error fetching user details in ProtectedRoute:", error);
+        if (userError) {
+          console.error("Error fetching user details in ProtectedRoute:", userError);
           toast({
             title: "Error",
             description: "Failed to load user details. Please try again.",
@@ -36,8 +36,10 @@ const ProtectedRoute = ({ children, allowedRoles }: ProtectedRouteProps) => {
           return;
         }
 
-        console.log("User details fetched in ProtectedRoute:", data);
-        setUserDetails(data);
+        if (userData) {
+          console.log("User details fetched successfully:", userData);
+          setUserDetails(userData);
+        }
       } catch (error) {
         console.error("Exception in ProtectedRoute fetchUserDetails:", error);
       }
@@ -75,16 +77,18 @@ const ProtectedRoute = ({ children, allowedRoles }: ProtectedRouteProps) => {
       }
     }
 
-    // For development/preview purposes: show content after a short delay
+    // Show content after a short delay to prevent flashing
     const timer = setTimeout(() => {
-      setShowContent(true);
-    }, 1000);
+      if (user && userDetails) {
+        setShowContent(true);
+      }
+    }, 500);
 
     return () => clearTimeout(timer);
   }, [user, loading, navigate, allowedRoles, userDetails, setUserDetails]);
 
-  // Show loading state only when necessary and not timed out
-  if (!showContent && (loading || (allowedRoles && !userDetails))) {
+  // Show loading state only when necessary
+  if (!showContent && (loading || (user && !userDetails))) {
     return (
       <div className="h-screen w-screen flex items-center justify-center">
         <Loader2 className="h-8 w-8 animate-spin" />
