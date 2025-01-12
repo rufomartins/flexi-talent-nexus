@@ -17,17 +17,12 @@ const ProtectedRoute = ({ children, allowedRoles }: ProtectedRouteProps) => {
 
   useEffect(() => {
     const fetchUserDetails = async () => {
-      if (!user) {
-        setIsLoading(false);
-        return;
-      }
-
       try {
-        console.log("Fetching user details for:", user.id);
+        console.log("Fetching user details for:", user?.id);
         const { data: userData, error: userError } = await supabase
           .from("users")
           .select("*")
-          .eq("id", user.id)
+          .eq("id", user?.id)
           .single();
 
         if (userError) {
@@ -46,48 +41,48 @@ const ProtectedRoute = ({ children, allowedRoles }: ProtectedRouteProps) => {
         }
       } catch (error) {
         console.error("Exception in fetchUserDetails:", error);
-      } finally {
+      }
+    };
+
+    const initRoute = async () => {
+      if (!loading) {
+        if (!user) {
+          console.log("No authenticated user, redirecting to login");
+          navigate("/login");
+          setIsLoading(false);
+          return;
+        }
+
+        if (!userDetails && user) {
+          console.log("User found but no details, fetching details...");
+          await fetchUserDetails();
+        }
+
+        if (allowedRoles && userDetails) {
+          console.log("Checking role access:", {
+            userRole: userDetails.role,
+            allowedRoles,
+          });
+          
+          if (!allowedRoles.includes(userDetails.role)) {
+            console.log("User does not have required role, redirecting to dashboard");
+            toast({
+              title: "Access Denied",
+              description: "You don't have permission to access this page.",
+              variant: "destructive",
+            });
+            navigate("/dashboard");
+            return;
+          }
+        }
+
         setIsLoading(false);
       }
     };
 
-    // If not loading and no user, redirect to login
-    if (!loading && !user) {
-      console.log("No authenticated user, redirecting to login");
-      navigate("/login");
-      setIsLoading(false);
-      return;
-    }
-
-    // If we have a user but no userDetails, fetch them
-    if (user && !userDetails) {
-      console.log("User found but no details, fetching details...");
-      fetchUserDetails();
-    } else {
-      setIsLoading(false);
-    }
-
-    // Check role access if allowedRoles is specified and we have userDetails
-    if (!loading && user && allowedRoles && userDetails) {
-      console.log("Checking role access:", {
-        userRole: userDetails.role,
-        allowedRoles,
-      });
-      
-      if (!allowedRoles.includes(userDetails.role)) {
-        console.log("User does not have required role, redirecting to dashboard");
-        toast({
-          title: "Access Denied",
-          description: "You don't have permission to access this page.",
-          variant: "destructive",
-        });
-        navigate("/dashboard");
-        return;
-      }
-    }
+    initRoute();
   }, [user, loading, navigate, allowedRoles, userDetails, setUserDetails]);
 
-  // Show loading state only when necessary
   if (loading || isLoading) {
     return (
       <div className="h-screen w-screen flex items-center justify-center">
@@ -96,12 +91,10 @@ const ProtectedRoute = ({ children, allowedRoles }: ProtectedRouteProps) => {
     );
   }
 
-  // If no user, return null (let the redirect happen)
   if (!user) {
     return null;
   }
 
-  // Render children when we have all necessary data
   return <>{children}</>;
 };
 
