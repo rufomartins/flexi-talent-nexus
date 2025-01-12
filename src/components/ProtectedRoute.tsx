@@ -45,44 +45,48 @@ const ProtectedRoute = ({ children, allowedRoles }: ProtectedRouteProps) => {
       }
     };
 
-    // If not loading and no user, redirect to login
-    if (!loading && !user) {
-      console.log("No authenticated user found, redirecting to login");
-      navigate("/login");
-      setIsLoading(false);
-      return;
-    }
-
-    // If we have a user but no userDetails, fetch them
-    if (user && !userDetails) {
-      console.log("User found but no details, fetching details...");
-      fetchUserDetails().finally(() => setIsLoading(false));
-    } else {
-      setIsLoading(false);
-    }
-
-    // Check role access if allowedRoles is specified and we have userDetails
-    if (!loading && user && allowedRoles && userDetails) {
-      console.log("Checking role access:", {
-        userRole: userDetails.role,
-        allowedRoles,
-      });
-      
-      if (!allowedRoles.includes(userDetails.role)) {
-        console.log("User does not have required role, redirecting to dashboard");
-        toast({
-          title: "Access Denied",
-          description: "You don't have permission to access this page.",
-          variant: "destructive",
-        });
-        navigate("/dashboard");
+    const initializeRoute = async () => {
+      // If not loading and no user, redirect to login
+      if (!loading && !user) {
+        console.log("No authenticated user found, redirecting to login");
+        navigate("/login");
+        setIsLoading(false);
         return;
       }
-    }
+
+      // If we have a user but no userDetails, fetch them
+      if (user && !userDetails) {
+        console.log("User found but no details, fetching details...");
+        await fetchUserDetails();
+      }
+
+      // Check role access if allowedRoles is specified and we have userDetails
+      if (!loading && user && allowedRoles && userDetails) {
+        console.log("Checking role access:", {
+          userRole: userDetails.role,
+          allowedRoles,
+        });
+        
+        if (!allowedRoles.includes(userDetails.role)) {
+          console.log("User does not have required role, redirecting to dashboard");
+          toast({
+            title: "Access Denied",
+            description: "You don't have permission to access this page.",
+            variant: "destructive",
+          });
+          navigate("/dashboard");
+          return;
+        }
+      }
+
+      setIsLoading(false);
+    };
+
+    initializeRoute();
   }, [user, loading, navigate, allowedRoles, userDetails, setUserDetails]);
 
   // Show loading state only when necessary
-  if (loading || (user && !userDetails)) {
+  if (loading || isLoading) {
     return (
       <div className="h-screen w-screen flex items-center justify-center">
         <Loader2 className="h-8 w-8 animate-spin" />

@@ -1,4 +1,4 @@
-import { createContext, useContext, useEffect, useState } from "react";
+import { createContext, useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { Session, User } from "@supabase/supabase-js";
 import { supabase } from "@/integrations/supabase/client";
@@ -39,37 +39,26 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       return data;
     } catch (error) {
       console.error("Exception in fetchUserDetails:", error);
-      toast({
-        title: "Error",
-        description: "An unexpected error occurred while loading user details.",
-        variant: "destructive",
-      });
       return null;
     }
   };
 
   useEffect(() => {
-    let mounted = true;
-    
     const initializeAuth = async () => {
       try {
         const { data: { session } } = await supabase.auth.getSession();
         console.log("Initial session check:", session ? "Found session" : "No session");
         
-        if (mounted) {
-          setSession(session);
-          setUser(session?.user ?? null);
-          
-          if (session?.user) {
-            await fetchUserDetails(session.user.id);
-          }
-          setLoading(false);
+        setSession(session);
+        setUser(session?.user ?? null);
+        
+        if (session?.user) {
+          await fetchUserDetails(session.user.id);
         }
       } catch (error) {
         console.error("Error in initializeAuth:", error);
-        if (mounted) {
-          setLoading(false);
-        }
+      } finally {
+        setLoading(false);
       }
     };
 
@@ -78,24 +67,21 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     const { data: { subscription } } = supabase.auth.onAuthStateChange(async (event, session) => {
       console.log("Auth state changed:", event, session ? "Has session" : "No session");
       
-      if (mounted) {
-        setSession(session);
-        setUser(session?.user ?? null);
-        
-        if (session?.user) {
-          await fetchUserDetails(session.user.id);
-        } else {
-          setUserDetails(null);
-          if (event === "SIGNED_OUT") {
-            navigate("/login", { replace: true });
-          }
+      setSession(session);
+      setUser(session?.user ?? null);
+      
+      if (session?.user) {
+        await fetchUserDetails(session.user.id);
+      } else {
+        setUserDetails(null);
+        if (event === "SIGNED_OUT") {
+          navigate("/login", { replace: true });
         }
-        setLoading(false);
       }
+      setLoading(false);
     });
 
     return () => {
-      mounted = false;
       subscription.unsubscribe();
     };
   }, [navigate]);
