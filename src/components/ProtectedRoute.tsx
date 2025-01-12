@@ -16,6 +16,8 @@ const ProtectedRoute = ({ children, allowedRoles }: ProtectedRouteProps) => {
   const [isLoading, setIsLoading] = useState(true);
   const [loadingMessage, setLoadingMessage] = useState("Initializing...");
   const [loadingTimeout, setLoadingTimeout] = useState<NodeJS.Timeout | null>(null);
+  const [retryCount, setRetryCount] = useState(0);
+  const MAX_RETRIES = 3;
 
   useEffect(() => {
     const fetchUserDetails = async () => {
@@ -27,6 +29,7 @@ const ProtectedRoute = ({ children, allowedRoles }: ProtectedRouteProps) => {
 
         setLoadingMessage("Fetching user details...");
         console.log("[ProtectedRoute] Fetching user details for:", user.id);
+        console.log("[ProtectedRoute] User metadata:", user.user_metadata);
         
         const { data: userData, error: userError } = await supabase
           .from("users")
@@ -36,6 +39,11 @@ const ProtectedRoute = ({ children, allowedRoles }: ProtectedRouteProps) => {
 
         if (userError) {
           console.error("[ProtectedRoute] Error fetching user details:", userError);
+          if (retryCount < MAX_RETRIES) {
+            console.log(`[ProtectedRoute] Retrying fetch (${retryCount + 1}/${MAX_RETRIES})`);
+            setRetryCount(prev => prev + 1);
+            return;
+          }
           toast({
             title: "Error",
             description: "Failed to load user details. Please try again.",
@@ -47,23 +55,54 @@ const ProtectedRoute = ({ children, allowedRoles }: ProtectedRouteProps) => {
         if (userData) {
           console.log("[ProtectedRoute] User details fetched successfully:", userData);
           setUserDetails(userData);
+          setRetryCount(0); // Reset retry count on success
         } else {
-          console.log("[ProtectedRoute] No user details found");
+          console.log("[ProtectedRoute] No user details found, checking metadata");
+          // Fallback to user metadata if available
+          if (user.user_metadata?.role) {
+            console.log("[ProtectedRoute] Using role from metadata:", user.user_metadata.role);
+            setUserDetails({
+              id: user.id,
+              role: user.user_metadata.role,
+              full_name: user.user_metadata.full_name || user.email,
+              status: 'active'
+            });
+          } else {
+            console.warn("[ProtectedRoute] No user details or metadata available");
+          }
         }
       } catch (error) {
         console.error("[ProtectedRoute] Exception in fetchUserDetails:", error);
+        if (retryCount < MAX_RETRIES) {
+          console.log(`[ProtectedRoute] Retrying fetch (${retryCount + 1}/${MAX_RETRIES})`);
+          setRetryCount(prev => prev + 1);
+        }
       }
     };
 
     const initRoute = async () => {
       try {
-        console.log("[ProtectedRoute] InitRoute - Current state:", { loading, user, userDetails });
+        console.log("[ProtectedRoute] InitRoute - Current state:", { 
+          loading, 
+          user: user?.id,
+          userMetadata: user?.user_metadata,
+          userDetails: userDetails?.role
+        });
         
         // Set a timeout to prevent infinite loading
         const timeout = setTimeout(() => {
           console.warn("[ProtectedRoute] Loading timeout reached, forcing state update");
           setIsLoading(false);
           setLoadingMessage("Loading timeout reached. Please refresh the page.");
+          // Use metadata as fallback if available
+          if (user?.user_metadata?.role && !userDetails) {
+            setUserDetails({
+              id: user.id,
+              role: user.user_metadata.role,
+              full_name: user.user_metadata.full_name || user.email,
+              status: 'active'
+            });
+          }
         }, 10000); // 10 second timeout
         
         setLoadingTimeout(timeout);
@@ -119,7 +158,7 @@ const ProtectedRoute = ({ children, allowedRoles }: ProtectedRouteProps) => {
         clearTimeout(loadingTimeout);
       }
     };
-  }, [user, loading, navigate, allowedRoles, userDetails, setUserDetails, loadingTimeout]);
+  }, [user, loading, navigate, allowedRoles, userDetails, setUserDetails, loadingTimeout, retryCount]);
 
   if (loading || isLoading) {
     return (
@@ -127,6 +166,11 @@ const ProtectedRoute = ({ children, allowedRoles }: ProtectedRouteProps) => {
         <Loader2 className="h-8 w-8 animate-spin" />
         <p className="text-sm text-muted-foreground">{loadingMessage}</p>
         {loading && <p className="text-xs text-muted-foreground">Waiting for authentication...</p>}
+        {retryCount > 0 && (
+          <p className="text-xs text-muted-foreground">
+            Retry attempt {retryCount}/{MAX_RETRIES}...
+          </p>
+        )}
       </div>
     );
   }

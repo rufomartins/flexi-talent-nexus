@@ -26,12 +26,19 @@ import { useMemo } from "react"
 export function AppSidebar() {
   const { user, userDetails } = useAuth();
   
-  console.log("[AppSidebar] Current user:", user);
-  console.log("[AppSidebar] User details:", userDetails);
+  console.log("[AppSidebar] Current user:", {
+    id: user?.id,
+    email: user?.email,
+    metadata: user?.user_metadata
+  });
+  console.log("[AppSidebar] User details:", {
+    role: userDetails?.role,
+    status: userDetails?.status
+  });
 
   // Memoize role-based visibility to prevent unnecessary recalculations
   const { isOnboardingVisible, isSettingsVisible } = useMemo(() => {
-    const role = userDetails?.role;
+    const role = userDetails?.role || user?.user_metadata?.role;
     console.log("[AppSidebar] Checking visibility with role:", role);
     
     const onboardingVisible = role === 'super_admin' || role === 'super_user';
@@ -47,7 +54,10 @@ export function AppSidebar() {
       isOnboardingVisible: onboardingVisible,
       isSettingsVisible: settingsVisible
     };
-  }, [userDetails?.role]);
+  }, [userDetails?.role, user?.user_metadata?.role]);
+
+  // Temporary override for debugging - remove in production
+  const DEBUG_SHOW_ALL = false;
 
   return (
     <Sidebar>
@@ -103,7 +113,7 @@ export function AppSidebar() {
             </Link>
 
             {/* Onboarding Link - Conditionally rendered */}
-            {isOnboardingVisible && (
+            {(DEBUG_SHOW_ALL || isOnboardingVisible) && (
               <Link
                 to="/onboarding"
                 className={cn(
@@ -117,7 +127,7 @@ export function AppSidebar() {
             )}
 
             {/* Settings Link - Conditionally rendered */}
-            {isSettingsVisible && (
+            {(DEBUG_SHOW_ALL || isSettingsVisible) && (
               <Link
                 to="/settings"
                 className={cn(
