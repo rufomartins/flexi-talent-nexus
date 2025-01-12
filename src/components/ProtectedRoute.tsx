@@ -19,13 +19,18 @@ const ProtectedRoute = ({ children, allowedRoles }: ProtectedRouteProps) => {
   useEffect(() => {
     const fetchUserDetails = async () => {
       try {
+        if (!user?.id) {
+          console.log("No user ID available for fetching details");
+          return;
+        }
+
         setLoadingMessage("Fetching user details...");
-        console.log("Fetching user details for:", user?.id);
+        console.log("Fetching user details for:", user.id);
         
         const { data: userData, error: userError } = await supabase
           .from("users")
           .select("*")
-          .eq("id", user?.id)
+          .eq("id", user.id)
           .single();
 
         if (userError) {
@@ -39,8 +44,10 @@ const ProtectedRoute = ({ children, allowedRoles }: ProtectedRouteProps) => {
         }
 
         if (userData) {
-          console.log("User details fetched:", userData);
+          console.log("User details fetched successfully:", userData);
           setUserDetails(userData);
+        } else {
+          console.log("No user details found");
         }
       } catch (error) {
         console.error("Exception in fetchUserDetails:", error);
@@ -49,9 +56,9 @@ const ProtectedRoute = ({ children, allowedRoles }: ProtectedRouteProps) => {
 
     const initRoute = async () => {
       try {
+        console.log("InitRoute - Current state:", { loading, user, userDetails });
+        
         if (!loading) {
-          setLoadingMessage("Checking authentication...");
-          
           if (!user) {
             console.log("No authenticated user, redirecting to login");
             navigate("/login");
@@ -81,6 +88,11 @@ const ProtectedRoute = ({ children, allowedRoles }: ProtectedRouteProps) => {
               return;
             }
           }
+          
+          console.log("Route initialization complete");
+          setIsLoading(false);
+        } else {
+          console.log("Auth context still loading...");
         }
       } catch (error) {
         console.error("Error in initRoute:", error);
@@ -90,7 +102,9 @@ const ProtectedRoute = ({ children, allowedRoles }: ProtectedRouteProps) => {
           variant: "destructive",
         });
       } finally {
-        setIsLoading(false);
+        if (!loading) {
+          setIsLoading(false);
+        }
       }
     };
 
@@ -102,6 +116,7 @@ const ProtectedRoute = ({ children, allowedRoles }: ProtectedRouteProps) => {
       <div className="h-screen w-screen flex flex-col items-center justify-center gap-4">
         <Loader2 className="h-8 w-8 animate-spin" />
         <p className="text-sm text-muted-foreground">{loadingMessage}</p>
+        {loading && <p className="text-xs text-muted-foreground">Waiting for authentication...</p>}
       </div>
     );
   }
