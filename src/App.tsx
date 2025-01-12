@@ -1,5 +1,5 @@
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
+import { BrowserRouter as Router, Routes, Route, Navigate } from "react-router-dom";
 import { AuthProvider } from "@/contexts/auth";
 import { Toaster } from "@/components/ui/toaster";
 import { MainLayout } from "@/components/layout/MainLayout";
@@ -8,6 +8,7 @@ import Projects from "@/pages/Projects";
 import Financial from "@/pages/Financial";
 import Onboarding from "@/pages/Onboarding";
 import ProtectedRoute from "@/components/ProtectedRoute";
+import Login from "@/pages/Login";
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -20,12 +21,13 @@ const queryClient = new QueryClient({
 
 function App() {
   return (
-    <QueryClientProvider client={queryClient}>
-      <Router>
-        <AuthProvider>
+    <AuthProvider>
+      <QueryClientProvider client={queryClient}>
+        <Router>
           <Routes>
+            <Route path="/login" element={<Login />} />
             <Route element={<ProtectedRoute><MainLayout /></ProtectedRoute>}>
-              <Route path="/" element={<Dashboard />} />
+              <Route path="/" element={<Navigate to="/dashboard" replace />} />
               <Route path="/dashboard" element={<Dashboard />} />
               <Route path="/projects" element={<Projects />} />
               <Route path="/financial" element={<Financial />} />
@@ -42,9 +44,9 @@ function App() {
             </Route>
           </Routes>
           <Toaster />
-        </AuthProvider>
-      </Router>
-    </QueryClientProvider>
+        </Router>
+      </QueryClientProvider>
+    </AuthProvider>
   );
 }
 
