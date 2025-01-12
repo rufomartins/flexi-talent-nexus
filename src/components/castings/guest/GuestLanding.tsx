@@ -2,12 +2,12 @@ import { useQuery } from "@tanstack/react-query";
 import { useParams } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { Loader2 } from "lucide-react";
-import { TalentCard } from "./TalentCard";
-import { SelectionControls } from "./SelectionControls";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { FilterControls } from "./FilterControls";
 import { useState } from "react";
 import { GuestFilters, GuestViewSettings } from "@/types/guest-filters";
+import { TalentDisplay } from "./talent-display/TalentDisplay";
+import { TalentSelection } from "./talent-display/types";
 
 export const GuestLanding = () => {
   const { castingId, guestId } = useParams();
@@ -105,7 +105,7 @@ export const GuestLanding = () => {
     },
   });
 
-  const { data: selections, isLoading: selectionsLoading } = useQuery({
+  const { data: selections = {}, isLoading: selectionsLoading } = useQuery({
     queryKey: ["guest-selections", castingId, guestId],
     queryFn: async () => {
       const { data, error } = await supabase
@@ -115,9 +115,33 @@ export const GuestLanding = () => {
         .eq("guest_id", guestId);
 
       if (error) throw error;
-      return data;
+
+      // Convert array to record for easier lookup
+      return data.reduce((acc, selection) => ({
+        ...acc,
+        [selection.talent_id]: {
+          liked: selection.liked,
+          comments: selection.comments,
+          preference_order: selection.preference_order,
+        },
+      }), {} as Record<string, TalentSelection>);
     },
   });
+
+  const handleSelectionUpdate = async (talentId: string, selection: Partial<TalentSelection>) => {
+    const { error } = await supabase
+      .from("guest_selections")
+      .upsert({
+        casting_id: castingId,
+        guest_id: guestId,
+        talent_id: talentId,
+        ...selection,
+      });
+
+    if (error) {
+      console.error("Error updating selection:", error);
+    }
+  };
 
   if (castingLoading || talentsLoading || selectionsLoading) {
     return (
@@ -140,7 +164,7 @@ export const GuestLanding = () => {
       <div className="mb-8">
         <h1 className="text-3xl font-bold mb-2">{casting.name}</h1>
         {casting.client && (
-          <p className="text-gray-600">Client: {casting.client.full_name}</p>
+          <p className="text-muted-foreground">Client: {casting.client.full_name}</p>
         )}
         {casting.briefing && (
           <div className="mt-4 prose max-w-none" dangerouslySetInnerHTML={{ __html: casting.briefing }} />
@@ -154,17 +178,14 @@ export const GuestLanding = () => {
         onViewChange={setViewSettings}
       />
 
-      <div className={`mt-6 ${viewSettings.view_mode === 'grid' ? 'grid gap-6 md:grid-cols-2 lg:grid-cols-3' : 'space-y-4'}`}>
-        {talents?.map((talentData) => (
-          <TalentCard
-            key={talentData.talent.id}
-            talent={talentData.talent}
-            selection={selections?.find(s => s.talent_id === talentData.talent_id)}
-            onSelect={(selection) => {
-              console.log('Selection:', selection);
-            }}
-          />
-        ))}
+      <div className="mt-6">
+        <TalentDisplay
+          talents={talents?.map(t => t.talent) || []}
+          viewMode={viewSettings.view_mode}
+          selections={selections}
+          onSelect={handleSelectionUpdate}
+          isLoading={talentsLoading}
+        />
       </div>
     </div>
   );
