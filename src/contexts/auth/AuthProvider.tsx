@@ -16,8 +16,8 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const { toast } = useToast();
 
   const fetchUserDetails = async (userId: string) => {
-    console.log("Fetching user details for:", userId);
     try {
+      console.log("Fetching user details for:", userId);
       const { data, error } = await supabase
         .from("users")
         .select("*")
@@ -26,16 +26,10 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
       if (error) {
         console.error("Error fetching user details:", error);
-        toast({
-          title: "Error",
-          description: "Failed to load user details. Please try again.",
-          variant: "destructive",
-        });
         return null;
       }
 
-      console.log("User details fetched successfully:", data);
-      setUserDetails(data);
+      console.log("User details fetched:", data);
       return data;
     } catch (error) {
       console.error("Exception in fetchUserDetails:", error);
@@ -48,33 +42,41 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
     const initializeAuth = async () => {
       try {
-        console.log("Initializing auth...");
+        console.log("Starting auth initialization...");
         const { data: { session }, error } = await supabase.auth.getSession();
         
-        if (error) {
-          console.error("Error getting session:", error);
-          throw error;
-        }
+        if (error) throw error;
 
-        console.log("Initial session check:", session ? "Found session" : "No session");
-        
-        if (mounted) {
+        if (!mounted) return;
+
+        if (session?.user) {
+          console.log("Session found, setting user");
           setSession(session);
-          setUser(session?.user ?? null);
+          setUser(session.user);
           
-          if (session?.user) {
-            await fetchUserDetails(session.user.id);
+          const details = await fetchUserDetails(session.user.id);
+          if (mounted && details) {
+            console.log("Setting user details");
+            setUserDetails(details);
           }
+        } else {
+          console.log("No session found");
+          setSession(null);
+          setUser(null);
+          setUserDetails(null);
         }
       } catch (error) {
-        console.error("Error in initializeAuth:", error);
-        toast({
-          title: "Error",
-          description: "Failed to initialize authentication.",
-          variant: "destructive",
-        });
+        console.error("Auth initialization error:", error);
+        if (mounted) {
+          toast({
+            title: "Error",
+            description: "Failed to initialize authentication.",
+            variant: "destructive",
+          });
+        }
       } finally {
         if (mounted) {
+          console.log("Auth initialization complete");
           setLoading(false);
         }
       }
@@ -83,20 +85,27 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     initializeAuth();
 
     const { data: { subscription } } = supabase.auth.onAuthStateChange(async (event, session) => {
-      console.log("Auth state changed:", event, session ? "Has session" : "No session");
+      if (!mounted) return;
+      
+      console.log("Auth state changed:", event);
+
+      if (session?.user) {
+        setSession(session);
+        setUser(session.user);
+        const details = await fetchUserDetails(session.user.id);
+        if (mounted && details) {
+          setUserDetails(details);
+        }
+      } else {
+        setSession(null);
+        setUser(null);
+        setUserDetails(null);
+        if (event === "SIGNED_OUT") {
+          navigate("/login", { replace: true });
+        }
+      }
       
       if (mounted) {
-        setSession(session);
-        setUser(session?.user ?? null);
-        
-        if (session?.user) {
-          await fetchUserDetails(session.user.id);
-        } else {
-          setUserDetails(null);
-          if (event === "SIGNED_OUT") {
-            navigate("/login", { replace: true });
-          }
-        }
         setLoading(false);
       }
     });
@@ -105,7 +114,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       mounted = false;
       subscription.unsubscribe();
     };
-  }, [navigate]);
+  }, [navigate, toast]);
 
   const signOut = async () => {
     console.log("Attempting sign out");
