@@ -92,7 +92,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
           setUserDetails(null);
           setLoading(false);
           if (event === "SIGNED_OUT") {
-            navigate("/login");
+            navigate("/login", { replace: true });
           }
         }
       }
@@ -106,11 +106,9 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
   const signOut = async () => {
     console.log("Attempting sign out");
+    setLoading(true);
     try {
-      const { error } = await supabase.auth.signOut();
-      if (error) throw error;
-      
-      // Clear all auth state
+      // First clear all state
       setSession(null);
       setUser(null);
       setUserDetails(null);
@@ -118,12 +116,22 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       // Clear all localStorage
       localStorage.clear();
       
+      // Then sign out from Supabase
+      const { error } = await supabase.auth.signOut();
+      if (error) {
+        console.error("Supabase signOut error:", error);
+        throw error;
+      }
+      
+      console.log("Successfully signed out from Supabase");
+      
       toast({
         title: "Signed out",
         description: "You have been successfully signed out.",
       });
 
       // Force navigation to login page
+      console.log("Navigating to login page");
       navigate('/login', { replace: true });
     } catch (error: any) {
       console.error("Sign out error:", error);
@@ -133,6 +141,8 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         variant: "destructive",
       });
       throw error;
+    } finally {
+      setLoading(false);
     }
   };
 

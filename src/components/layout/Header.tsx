@@ -20,10 +20,11 @@ export const Header = () => {
 
   const handleSignOut = async () => {
     try {
+      console.log("Header: Initiating sign out");
       await signOut();
-      // Navigation is handled in AuthProvider
+      console.log("Header: Sign out completed");
     } catch (error) {
-      console.error("Error signing out:", error);
+      console.error("Header: Error signing out:", error);
       toast({
         title: "Error",
         description: "Failed to sign out. Please try again.",
