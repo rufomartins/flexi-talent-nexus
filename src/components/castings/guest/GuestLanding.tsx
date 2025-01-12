@@ -8,6 +8,7 @@ import { useState } from "react";
 import { GuestFilters, GuestViewSettings } from "@/types/guest-filters";
 import { TalentDisplay } from "./talent-display/TalentDisplay";
 import { TalentSelection } from "./talent-display/types";
+import type { TalentProfile } from "@/types/supabase/talent";
 
 export const GuestLanding = () => {
   const { castingId, guestId } = useParams();
@@ -103,7 +104,7 @@ export const GuestLanding = () => {
         }
       });
 
-      return filteredData.map(item => item.talent);
+      return filteredData.map(item => item.talent) as TalentProfile[];
     },
   });
 
@@ -191,4 +192,3 @@ export const GuestLanding = () => {
       </div>
     </div>
   );
-};

@@ -1,16 +1,9 @@
-/**
- * Base types used across the application
- */
+import type { Json } from '@/integrations/supabase/types';
 
-/** Timestamp string in ISO format */
-export type Timestamp = string;
-
-/** Generic JSON object */
-export type Json = Record<string, any>;
-
-/** Base interface for database records */
-export interface BaseRecord {
+export interface BaseEntity {
   id: string;
-  created_at: Timestamp;
-  updated_at: Timestamp;
+  created_at: string;
+  updated_at?: string;
 }
+
+export type { Json };
