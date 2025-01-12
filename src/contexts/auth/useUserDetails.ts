@@ -9,6 +9,8 @@ export const useUserDetails = () => {
 
   const fetchUserDetails = async (userId: string) => {
     try {
+      console.log("[useUserDetails] Starting fetch for user details:", { userId });
+      
       // Validate UUID format
       const uuidRegex = /^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
       if (!uuidRegex.test(userId)) {
@@ -16,8 +18,6 @@ export const useUserDetails = () => {
         return null;
       }
 
-      console.log("[useUserDetails] Fetching user details with validated UUID:", userId);
-      
       const { data, error } = await supabase
         .from('users')
         .select('*')
@@ -40,11 +40,11 @@ export const useUserDetails = () => {
       }
 
       if (!data) {
-        console.error("[useUserDetails] No user details found for ID:", userId);
+        console.warn("[useUserDetails] No user details found for ID:", userId);
         return null;
       }
 
-      console.log("[useUserDetails] User details fetched successfully:", data);
+      console.log("[useUserDetails] Fetched user details successfully:", data);
       return data;
     } catch (error) {
       console.error("[useUserDetails] Exception in fetchUserDetails:", error);

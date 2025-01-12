@@ -2,12 +2,17 @@ import { useQuery } from "@tanstack/react-query";
 import { useAuth } from "@/contexts/auth";
 import { useToast } from "@/hooks/use-toast";
 import { CandidateList } from "@/components/onboarding/CandidateList";
-import { UserPlus } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 
 const Onboarding = () => {
   const { user, userDetails } = useAuth();
   const { toast } = useToast();
+
+  console.log("[Onboarding] Initializing with auth state:", {
+    userId: user?.id,
+    userRole: userDetails?.role || user?.user_metadata?.role,
+    hasUserDetails: !!userDetails
+  });
 
   const { data: candidates, isLoading, error } = useQuery({
     queryKey: ["onboarding-candidates"],
@@ -40,6 +45,21 @@ const Onboarding = () => {
     },
     enabled: !!user && (userDetails?.role === 'super_admin' || userDetails?.role === 'super_user')
   });
+
+  // If not authorized, show message
+  if (!user || !(userDetails?.role === 'super_admin' || userDetails?.role === 'super_user')) {
+    console.log("[Onboarding] User not authorized:", {
+      hasUser: !!user,
+      userRole: userDetails?.role
+    });
+    return (
+      <div className="container mx-auto py-6">
+        <div className="bg-destructive/15 text-destructive px-4 py-2 rounded-md">
+          You don't have permission to access this page.
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="container mx-auto py-6 space-y-6">

@@ -26,6 +26,14 @@ import { useMemo } from "react"
 export function AppSidebar() {
   const { user, userDetails } = useAuth();
   
+  // Log current auth state
+  console.log("[AppSidebar] Rendering with auth state:", {
+    userId: user?.id,
+    userMetadata: user?.user_metadata,
+    userDetailsRole: userDetails?.role,
+    userMetadataRole: user?.user_metadata?.role
+  });
+  
   // Memoize role-based visibility to prevent unnecessary recalculations
   const { 
     isOnboardingVisible, 
@@ -37,7 +45,7 @@ export function AppSidebar() {
   } = useMemo(() => {
     const role = userDetails?.role || user?.user_metadata?.role;
     
-    return {
+    const visibility = {
       isOnboardingVisible: ['super_admin', 'super_user'].includes(role),
       isSettingsVisible: role === 'super_admin',
       isDashboardVisible: true, // Dashboard visible to all authenticated users
@@ -45,6 +53,10 @@ export function AppSidebar() {
       isCastingsVisible: ['super_admin', 'admin', 'super_user'].includes(role),
       isFinancialVisible: ['super_admin', 'admin'].includes(role)
     };
+
+    console.log("[AppSidebar] Calculated visibility:", { role, ...visibility });
+    
+    return visibility;
   }, [userDetails?.role, user?.user_metadata?.role]);
 
   return (
