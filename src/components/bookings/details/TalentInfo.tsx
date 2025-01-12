@@ -26,7 +26,6 @@ export function TalentInfo({ booking }: TalentInfoProps) {
           </Avatar>
           <div>
             <h3 className="font-medium">{talent.full_name}</h3>
-            <p className="text-sm text-muted-foreground">{talent.email}</p>
           </div>
         </div>
 

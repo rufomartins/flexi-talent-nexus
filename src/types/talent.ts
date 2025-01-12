@@ -15,7 +15,7 @@ export interface TalentProfile {
   id: string;
   user_id: string | null;
   talent_category: TalentCategory;
-  country: string | null;
+  country: string;
   evaluation_status: string | null;
   is_duo: boolean | null;
   duo_name?: string | null;
@@ -31,8 +31,6 @@ export interface TalentProfile {
   partner?: DuoPartner;
   users: {
     id: string;
-    first_name: string;
-    last_name: string;
     full_name: string;
     avatar_url?: string;
   };

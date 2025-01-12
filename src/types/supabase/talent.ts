@@ -7,11 +7,11 @@ export interface TalentProfile extends BaseRecord {
   agent_id?: string;
   availability: Record<string, any>;
   category?: string;
-  country?: string;
+  country: string;
   created_by?: string;
   duo_name?: string;
   evaluation_status: string;
-  experience_level?: string;
+  experience_level: string;
   fee_range?: Record<string, any>;
   internal_remarks?: string;
   is_duo?: boolean;
