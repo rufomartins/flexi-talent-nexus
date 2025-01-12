@@ -3,6 +3,7 @@ import { useNavigate } from "react-router-dom";
 import { useAuth } from "@/contexts/auth";
 import { Loader2 } from "lucide-react";
 import { toast } from "@/hooks/use-toast";
+import { supabase } from "@/integrations/supabase/client";
 
 interface ProtectedRouteProps {
   children: React.ReactNode;
@@ -10,11 +11,38 @@ interface ProtectedRouteProps {
 }
 
 const ProtectedRoute = ({ children, allowedRoles }: ProtectedRouteProps) => {
-  const { user, userDetails, loading } = useAuth();
+  const { user, userDetails, loading, setUserDetails } = useAuth();
   const navigate = useNavigate();
   const [showContent, setShowContent] = useState(false);
 
   useEffect(() => {
+    const fetchUserDetails = async () => {
+      if (!user) return;
+
+      try {
+        const { data, error } = await supabase
+          .from("users")
+          .select("*")
+          .eq("id", user.id)
+          .single();
+
+        if (error) {
+          console.error("Error fetching user details in ProtectedRoute:", error);
+          toast({
+            title: "Error",
+            description: "Failed to load user details. Please try again.",
+            variant: "destructive",
+          });
+          return;
+        }
+
+        console.log("User details fetched in ProtectedRoute:", data);
+        setUserDetails(data);
+      } catch (error) {
+        console.error("Exception in ProtectedRoute fetchUserDetails:", error);
+      }
+    };
+
     // If not loading and no user, redirect to login
     if (!loading && !user) {
       console.log("No authenticated user found, redirecting to login");
@@ -22,7 +50,13 @@ const ProtectedRoute = ({ children, allowedRoles }: ProtectedRouteProps) => {
       return;
     }
 
-    // Check role access if allowedRoles is specified
+    // If we have a user but no userDetails, fetch them
+    if (user && !userDetails) {
+      console.log("User found but no details, fetching details...");
+      fetchUserDetails();
+    }
+
+    // Check role access if allowedRoles is specified and we have userDetails
     if (!loading && user && allowedRoles && userDetails) {
       console.log("Checking role access:", {
         userRole: userDetails.role,
@@ -47,7 +81,7 @@ const ProtectedRoute = ({ children, allowedRoles }: ProtectedRouteProps) => {
     }, 1000);
 
     return () => clearTimeout(timer);
-  }, [user, loading, navigate, allowedRoles, userDetails]);
+  }, [user, loading, navigate, allowedRoles, userDetails, setUserDetails]);
 
   // Show loading state only when necessary and not timed out
   if (!showContent && (loading || (allowedRoles && !userDetails))) {
