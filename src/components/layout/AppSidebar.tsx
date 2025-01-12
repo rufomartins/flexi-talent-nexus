@@ -21,20 +21,16 @@ import {
   SidebarGroupContent 
 } from "@/components/ui/sidebar"
 import { useAuth } from "@/contexts/auth"
+import { useMemo } from "react"
 
 export function AppSidebar() {
   const { userDetails } = useAuth();
-  console.log("Current user details in AppSidebar:", userDetails); // Debug log
 
-  // Check if user has super_admin or super_user role
-  const isOnboardingVisible = userDetails?.role === 'super_admin' || userDetails?.role === 'super_user';
-  const isSettingsVisible = userDetails?.role === 'super_admin';
-
-  console.log("Role-based visibility:", { // Debug log
-    role: userDetails?.role,
-    isOnboardingVisible,
-    isSettingsVisible
-  });
+  // Memoize role-based visibility to prevent unnecessary recalculations
+  const { isOnboardingVisible, isSettingsVisible } = useMemo(() => ({
+    isOnboardingVisible: userDetails?.role === 'super_admin' || userDetails?.role === 'super_user',
+    isSettingsVisible: userDetails?.role === 'super_admin'
+  }), [userDetails?.role]);
 
   return (
     <Sidebar>
@@ -46,74 +42,56 @@ export function AppSidebar() {
               to="/dashboard"
               className={cn(
                 buttonVariants({ variant: "ghost" }),
-                "justify-start gap-2 px-2 w-full"
+                "justify-start"
               )}
             >
-              <LayoutDashboard className="h-4 w-4" />
+              <LayoutDashboard className="mr-2 h-4 w-4" />
               Dashboard
             </Link>
 
-            {/* Onboarding Link - Only visible to super admin and super users */}
-            {isOnboardingVisible && (
-              <Link
-                to="/onboarding"
-                className={cn(
-                  buttonVariants({ variant: "ghost" }),
-                  "justify-start gap-2 px-2 w-full"
-                )}
-              >
-                <UserCheck className="h-4 w-4" />
-                Onboarding
-              </Link>
-            )}
+            {/* Talents Section */}
+            <Link
+              to="/talents"
+              className={cn(
+                buttonVariants({ variant: "ghost" }),
+                "justify-start"
+              )}
+            >
+              <Users className="mr-2 h-4 w-4" />
+              Talents
+            </Link>
 
-            {/* Talents Section with Submenus */}
-            <div className="flex flex-col gap-1">
-              <Link
-                to="/talents"
-                className={cn(
-                  buttonVariants({ variant: "ghost" }),
-                  "justify-start gap-2 px-2 w-full"
-                )}
-              >
-                <Users className="h-4 w-4" />
-                Talents
-              </Link>
-              
-              {/* Talents Submenu */}
-              <div className="pl-4 flex flex-col gap-1">
-                <Link
-                  to="/search"
-                  className={cn(
-                    buttonVariants({ variant: "ghost" }),
-                    "justify-start gap-2 px-2 w-full"
-                  )}
-                >
-                  <Search className="h-4 w-4" />
-                  Search
-                </Link>
-                <Link
-                  to="/talents/new"
-                  className={cn(
-                    buttonVariants({ variant: "ghost" }),
-                    "justify-start gap-2 px-2 w-full"
-                  )}
-                >
-                  <UserPlus className="h-4 w-4" />
-                  Add New Talent
-                </Link>
-              </div>
-            </div>
+            <Link
+              to="/search"
+              className={cn(
+                buttonVariants({ variant: "ghost" }),
+                "justify-start"
+              )}
+            >
+              <Search className="mr-2 h-4 w-4" />
+              Search
+            </Link>
+
+            <Link
+              to="/add-talent"
+              className={cn(
+                buttonVariants({ variant: "ghost" }),
+                "justify-start"
+              )}
+            >
+              <UserPlus className="mr-2 h-4 w-4" />
+              Add new talent
+            </Link>
 
             {/* Castings Link */}
             <Link
               to="/castings"
               className={cn(
                 buttonVariants({ variant: "ghost" }),
-                "justify-start gap-2 px-2 w-full"
+                "justify-start"
               )}
             >
-              <FileSpreadsheet className="h-4 w-4" />
+              <FileSpreadsheet className="mr-2 h-4 w-4" />
               Castings
             </Link>
 
@@ -122,10 +100,10 @@ export function AppSidebar() {
               to="/projects"
               className={cn(
                 buttonVariants({ variant: "ghost" }),
-                "justify-start gap-2 px-2 w-full"
+                "justify-start"
               )}
             >
-              <Briefcase className="h-4 w-4" />
+              <Briefcase className="mr-2 h-4 w-4" />
               Projects
             </Link>
 
@@ -134,11 +112,23 @@ export function AppSidebar() {
               to="/messages"
               className={cn(
                 buttonVariants({ variant: "ghost" }),
-                "justify-start gap-2 px-2 w-full"
+                "justify-start"
               )}
             >
-              <MessageSquare className="h-4 w-4" />
+              <MessageSquare className="mr-2 h-4 w-4" />
               Messages
+            </Link>
+
+            {/* Users Link */}
+            <Link
+              to="/users"
+              className={cn(
+                buttonVariants({ variant: "ghost" }),
+                "justify-start"
+              )}
+            >
+              <Users className="mr-2 h-4 w-4" />
+              Users
             </Link>
 
             {/* Financial Link */}
@@ -146,10 +136,10 @@ export function AppSidebar() {
               to="/financial"
               className={cn(
                 buttonVariants({ variant: "ghost" }),
-                "justify-start gap-2 px-2 w-full"
+                "justify-start"
               )}
             >
-              <DollarSign className="h-4 w-4" />
+              <DollarSign className="mr-2 h-4 w-4" />
               Financial
             </Link>
 
@@ -158,23 +148,37 @@ export function AppSidebar() {
               to="/calendar"
               className={cn(
                 buttonVariants({ variant: "ghost" }),
-                "justify-start gap-2 px-2 w-full"
+                "justify-start"
               )}
             >
-              <Calendar className="h-4 w-4" />
+              <Calendar className="mr-2 h-4 w-4" />
               Calendar
             </Link>
 
-            {/* Settings Link - Only visible to super admin */}
+            {/* Onboarding Link - Conditionally rendered */}
+            {isOnboardingVisible && (
+              <Link
+                to="/onboarding"
+                className={cn(
+                  buttonVariants({ variant: "ghost" }),
+                  "justify-start"
+                )}
+              >
+                <UserCheck className="mr-2 h-4 w-4" />
+                Onboarding
+              </Link>
+            )}
+
+            {/* Settings Link - Conditionally rendered */}
             {isSettingsVisible && (
               <Link
                 to="/settings"
                 className={cn(
                   buttonVariants({ variant: "ghost" }),
-                  "justify-start gap-2 px-2 w-full"
+                  "justify-start"
                 )}
               >
-                <Settings className="h-4 w-4" />
+                <Settings className="mr-2 h-4 w-4" />
                 Settings
               </Link>
             )}

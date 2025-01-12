@@ -1,89 +1,74 @@
-import { useState, useEffect, useRef } from 'react';
-import { Session, User } from '@supabase/supabase-js';
-import { supabase } from '@/integrations/supabase/client';
-import { useToast } from '@/hooks/use-toast';
+import { useEffect, useState } from "react";
+import { supabase } from "@/integrations/supabase/client";
+import { Session, User } from "@supabase/supabase-js";
+import { useDebounce } from "@/hooks/useDebounce";
 
 export const useAuthSession = () => {
   const [session, setSession] = useState<Session | null>(null);
   const [user, setUser] = useState<User | null>(null);
   const [loading, setLoading] = useState(true);
-  const { toast } = useToast();
-  const initTimeoutRef = useRef<NodeJS.Timeout>();
-  const mountedRef = useRef(true);
+  const [error, setError] = useState<Error | null>(null);
+
+  // Debounce session updates to prevent rapid re-renders
+  const debouncedSession = useDebounce(session, 300);
 
   useEffect(() => {
     let mounted = true;
-    mountedRef.current = true;
+    let authListener: any = null;
 
     const initializeAuth = async () => {
       try {
-        console.log("[Auth] Starting auth initialization...");
+        console.info("[Auth] Starting auth initialization...");
         
-        // Set timeout for initialization
-        initTimeoutRef.current = setTimeout(() => {
-          if (mountedRef.current && loading) {
-            console.error("[Auth] Initialization timeout reached");
-            setLoading(false);
-            toast({
-              title: "Error",
-              description: "Authentication initialization timed out. Please refresh the page.",
-              variant: "destructive",
-            });
+        // Get initial session
+        const { data: { session: initialSession }, error: sessionError } = await supabase.auth.getSession();
+        
+        if (sessionError) {
+          throw sessionError;
+        }
+
+        if (mounted) {
+          if (initialSession) {
+            setSession(initialSession);
+            setUser(initialSession.user);
           }
-        }, 30000); // Increased to 30 seconds
-
-        const { data: { session }, error } = await supabase.auth.getSession();
-        
-        if (error) {
-          console.error("[Auth] Session fetch error:", error);
-          throw error;
-        }
-
-        if (!mounted) {
-          console.log("[Auth] Component unmounted during initialization");
-          return;
-        }
-
-        if (session?.user) {
-          console.log("[Auth] Valid session found for user:", session.user.id);
-          setSession(session);
-          setUser(session.user);
-        } else {
-          console.log("[Auth] No valid session found");
-          setSession(null);
-          setUser(null);
-        }
-      } catch (error) {
-        console.error("[Auth] Initialization error:", error);
-        if (mounted) {
-          toast({
-            title: "Error",
-            description: "Failed to initialize authentication.",
-            variant: "destructive",
-          });
-        }
-      } finally {
-        if (mounted) {
-          console.log("[Auth] Initialization complete, setting loading to false");
           setLoading(false);
-          if (initTimeoutRef.current) {
-            clearTimeout(initTimeoutRef.current);
+        }
+
+        // Setup auth state change listener
+        authListener = supabase.auth.onAuthStateChange((_event, session) => {
+          if (mounted) {
+            setSession(session);
+            setUser(session?.user ?? null);
+            setLoading(false);
           }
+        });
+
+      } catch (err) {
+        console.error("[Auth] Error during initialization:", err);
+        if (mounted) {
+          setError(err as Error);
+          setLoading(false);
         }
       }
     };
 
     initializeAuth();
 
+    // Cleanup function
     return () => {
-      console.log("[Auth] Cleaning up auth session");
       mounted = false;
-      mountedRef.current = false;
-      if (initTimeoutRef.current) {
-        clearTimeout(initTimeoutRef.current);
+      console.info("[Auth] Cleaning up auth state subscription");
+      if (authListener) {
+        authListener.data?.subscription?.unsubscribe();
       }
     };
-  }, [loading, toast]);
+  }, []);
 
-  return { session, user, loading, setSession, setUser, setLoading };
+  return {
+    session: debouncedSession,
+    user,
+    loading,
+    error
+  };
 };
