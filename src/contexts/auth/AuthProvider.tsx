@@ -46,6 +46,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   useEffect(() => {
     const initializeAuth = async () => {
       try {
+        console.log("Initializing auth...");
         const { data: { session } } = await supabase.auth.getSession();
         console.log("Initial session check:", session ? "Found session" : "No session");
         
@@ -57,6 +58,11 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         }
       } catch (error) {
         console.error("Error in initializeAuth:", error);
+        toast({
+          title: "Error",
+          description: "Failed to initialize authentication.",
+          variant: "destructive",
+        });
       } finally {
         setLoading(false);
       }
@@ -90,15 +96,12 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     console.log("Attempting sign out");
     setLoading(true);
     try {
-      // First clear all state
       setSession(null);
       setUser(null);
       setUserDetails(null);
       
-      // Clear all localStorage
       localStorage.clear();
       
-      // Then sign out from Supabase
       const { error } = await supabase.auth.signOut();
       if (error) {
         console.error("Supabase signOut error:", error);
@@ -112,7 +115,6 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         description: "You have been successfully signed out.",
       });
 
-      // Force navigation to login page
       console.log("Navigating to login page");
       navigate('/login', { replace: true });
     } catch (error: any) {
@@ -145,7 +147,6 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         localStorage.removeItem("rememberMe");
       }
 
-      // Immediately fetch and set user details after successful sign in
       if (data.user) {
         const userDetails = await fetchUserDetails(data.user.id);
         if (!userDetails) {
