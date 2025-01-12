@@ -7,7 +7,7 @@ import { FilterControls } from "./FilterControls";
 import { useState } from "react";
 import { GuestFilters, GuestViewSettings } from "@/types/guest-filters";
 import { TalentDisplay } from "./talent-display/TalentDisplay";
-import { TalentSelection } from "./talent-display/types";
+import type { GuestSelection } from "@/types/supabase/guest-selection";
 import type { TalentProfile } from "@/types/talent";
 
 export const GuestLanding = () => {
@@ -122,16 +122,12 @@ export const GuestLanding = () => {
       // Convert array to record for easier lookup
       return data.reduce((acc, selection) => ({
         ...acc,
-        [selection.talent_id]: {
-          liked: selection.liked,
-          comments: selection.comments,
-          preference_order: selection.preference_order,
-        },
-      }), {} as Record<string, TalentSelection>);
+        [selection.talent_id]: selection,
+      }), {} as Record<string, GuestSelection>);
     },
   });
 
-  const handleSelectionUpdate = async (talentId: string, selection: Partial<TalentSelection>) => {
+  const handleSelectionUpdate = async (talentId: string, selection: Partial<GuestSelection>) => {
     const { error } = await supabase
       .from("guest_selections")
       .upsert({

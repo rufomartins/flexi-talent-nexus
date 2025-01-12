@@ -35,7 +35,7 @@ export function TalentList({ talents, selections, onSelect, isLoading, showDetai
           talent={talent}
           view="list"
           selection={selections[talent.id]}
-          onSelect={(selection) => onSelect(talent.id, selection)}
+          onSelect={async (selection) => await onSelect(talent.id, selection)}
         />
       ))}
     </div>

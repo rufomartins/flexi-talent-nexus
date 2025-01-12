@@ -46,7 +46,7 @@ export function TalentGrid({ talents, selections, onSelect, isLoading, columnCou
           talent={talent}
           view="grid"
           selection={selections[talent.id]}
-          onSelect={(selection) => onSelect(talent.id, selection)}
+          onSelect={async (selection) => await onSelect(talent.id, selection)}
         />
       ))}
     </div>
