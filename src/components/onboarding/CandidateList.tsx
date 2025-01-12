@@ -1,5 +1,4 @@
 import { useState } from "react";
-import { useNavigate } from "react-router-dom";
 import {
   Table,
   TableBody,
@@ -8,24 +7,10 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import { Button } from "@/components/ui/button";
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
-import { Input } from "@/components/ui/input";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
 import { Card } from "@/components/ui/card";
-import { Eye, MoreHorizontal, Mail, Calendar } from "lucide-react";
 import { Loader2 } from "lucide-react";
+import { CandidateFilters } from "./CandidateFilters";
+import { CandidateActions } from "./CandidateActions";
 
 interface Candidate {
   id: string;
@@ -46,7 +31,6 @@ interface CandidateListProps {
 }
 
 export function CandidateList({ candidates, isLoading }: CandidateListProps) {
-  const navigate = useNavigate();
   const [statusFilter, setStatusFilter] = useState<string>("");
   const [searchQuery, setSearchQuery] = useState("");
 
@@ -83,31 +67,12 @@ export function CandidateList({ candidates, isLoading }: CandidateListProps) {
   return (
     <Card>
       <div className="p-4 space-y-4">
-        <div className="flex items-center gap-4">
-          <div className="flex-1">
-            <Input
-              placeholder="Search candidates..."
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-              className="max-w-sm"
-            />
-          </div>
-          <Select
-            value={statusFilter}
-            onValueChange={setStatusFilter}
-          >
-            <SelectTrigger className="w-[180px]">
-              <SelectValue placeholder="Filter by status" />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="">All statuses</SelectItem>
-              <SelectItem value="new">New</SelectItem>
-              <SelectItem value="emailed">Emailed</SelectItem>
-              <SelectItem value="interviewed">Interviewed</SelectItem>
-              <SelectItem value="approved">Approved</SelectItem>
-            </SelectContent>
-          </Select>
-        </div>
+        <CandidateFilters
+          statusFilter={statusFilter}
+          onStatusFilterChange={setStatusFilter}
+          searchQuery={searchQuery}
+          onSearchQueryChange={setSearchQuery}
+        />
 
         <div className="rounded-md border">
           <Table>
@@ -138,29 +103,17 @@ export function CandidateList({ candidates, isLoading }: CandidateListProps) {
                     </span>
                   </TableCell>
                   <TableCell className="text-right">
-                    <DropdownMenu>
-                      <DropdownMenuTrigger asChild>
-                        <Button variant="ghost" size="sm">
-                          <MoreHorizontal className="h-4 w-4" />
-                        </Button>
-                      </DropdownMenuTrigger>
-                      <DropdownMenuContent align="end">
-                        <DropdownMenuItem
-                          onClick={() => navigate(`/onboarding/${candidate.id}`)}
-                        >
-                          <Eye className="mr-2 h-4 w-4" />
-                          View Profile
-                        </DropdownMenuItem>
-                        <DropdownMenuItem>
-                          <Mail className="mr-2 h-4 w-4" />
-                          Send Email
-                        </DropdownMenuItem>
-                        <DropdownMenuItem>
-                          <Calendar className="mr-2 h-4 w-4" />
-                          Schedule Interview
-                        </DropdownMenuItem>
-                      </DropdownMenuContent>
-                    </DropdownMenu>
+                    <CandidateActions 
+                      candidateId={candidate.id}
+                      onEmailClick={() => {
+                        // Email functionality will be implemented later
+                        console.log("Send email to:", candidate.email);
+                      }}
+                      onScheduleClick={() => {
+                        // Interview scheduling will be implemented next
+                        console.log("Schedule interview for:", candidate.name);
+                      }}
+                    />
                   </TableCell>
                 </TableRow>
               ))}
