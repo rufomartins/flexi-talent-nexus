@@ -13,7 +13,7 @@ interface ProtectedRouteProps {
 const ProtectedRoute = ({ children, allowedRoles }: ProtectedRouteProps) => {
   const { user, userDetails, loading, setUserDetails } = useAuth();
   const navigate = useNavigate();
-  const [showContent, setShowContent] = useState(false);
+  const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
     const fetchUserDetails = async () => {
@@ -42,6 +42,8 @@ const ProtectedRoute = ({ children, allowedRoles }: ProtectedRouteProps) => {
         }
       } catch (error) {
         console.error("Exception in ProtectedRoute fetchUserDetails:", error);
+      } finally {
+        setIsLoading(false);
       }
     };
 
@@ -56,6 +58,8 @@ const ProtectedRoute = ({ children, allowedRoles }: ProtectedRouteProps) => {
     if (user && !userDetails) {
       console.log("User found but no details, fetching details...");
       fetchUserDetails();
+    } else {
+      setIsLoading(false);
     }
 
     // Check role access if allowedRoles is specified and we have userDetails
@@ -76,19 +80,10 @@ const ProtectedRoute = ({ children, allowedRoles }: ProtectedRouteProps) => {
         return;
       }
     }
-
-    // Show content after a short delay to prevent flashing
-    const timer = setTimeout(() => {
-      if (user && userDetails) {
-        setShowContent(true);
-      }
-    }, 500);
-
-    return () => clearTimeout(timer);
   }, [user, loading, navigate, allowedRoles, userDetails, setUserDetails]);
 
   // Show loading state only when necessary
-  if (!showContent && (loading || (user && !userDetails))) {
+  if (isLoading || loading || (user && !userDetails)) {
     return (
       <div className="h-screen w-screen flex items-center justify-center">
         <Loader2 className="h-8 w-8 animate-spin" />
@@ -101,7 +96,7 @@ const ProtectedRoute = ({ children, allowedRoles }: ProtectedRouteProps) => {
     return null;
   }
 
-  // Render children when we have content
+  // Render children when we have all necessary data
   return <>{children}</>;
 };
 
