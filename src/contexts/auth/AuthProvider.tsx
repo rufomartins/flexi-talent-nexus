@@ -75,9 +75,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
     initializeAuth();
 
-    const {
-      data: { subscription },
-    } = supabase.auth.onAuthStateChange(async (event, session) => {
+    const { data: { subscription } } = supabase.auth.onAuthStateChange(async (event, session) => {
       console.log("Auth state changed:", event, session ? "Has session" : "No session");
       
       if (mounted) {
@@ -163,7 +161,10 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
       // Immediately fetch and set user details after successful sign in
       if (data.user) {
-        await fetchUserDetails(data.user.id);
+        const userDetails = await fetchUserDetails(data.user.id);
+        if (!userDetails) {
+          throw new Error("Failed to fetch user details");
+        }
       }
 
       toast({
