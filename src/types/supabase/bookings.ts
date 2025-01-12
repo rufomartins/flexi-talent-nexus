@@ -1,10 +1,8 @@
 import { BaseRecord } from './base';
-import { TalentProfile } from './users';
+import { TalentProfile } from './talent';
 
-/** Possible booking statuses */
 export type BookingStatus = 'pending' | 'confirmed' | 'completed' | 'cancelled';
 
-/** Booking record from the database */
 export interface Booking extends BaseRecord {
   casting_id: string;
   created_by: string;
@@ -23,22 +21,6 @@ export interface Booking extends BaseRecord {
     description: string;
   };
   booking_files?: Array<{
-    id: string;
-    file_name: string;
-    file_type: string;
-    file_path: string;
-    created_at: string;
-  }>;
-}
-
-/** Extended booking data for detailed views */
-export interface BookingDetailsData extends Booking {
-  talent_profiles: TalentProfile;
-  projects?: {
-    name: string;
-    description: string;
-  };
-  booking_files: Array<{
     id: string;
     file_name: string;
     file_type: string;

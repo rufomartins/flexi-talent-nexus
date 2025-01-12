@@ -1,6 +1,5 @@
 import { BaseRecord } from './base';
 
-/** Project record from the database */
 export interface Project extends BaseRecord {
   name: string;
   description: string;

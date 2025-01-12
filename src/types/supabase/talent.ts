@@ -1,22 +1,24 @@
-import type { BaseEntity, Json } from './base';
+import type { BaseRecord } from './base';
 
-export interface TalentProfile extends BaseEntity {
+export type TalentCategory = 'UGC' | 'TRANSLATOR' | 'REVIEWER' | 'VOICE_OVER';
+
+export interface TalentProfile extends BaseRecord {
   user_id: string;
   agent_id?: string;
-  availability: Json;
+  availability: Record<string, any>;
   category?: string;
   country?: string;
   created_by?: string;
   duo_name?: string;
   evaluation_status: string;
   experience_level?: string;
-  fee_range?: Json;
+  fee_range?: Record<string, any>;
   internal_remarks?: string;
   is_duo?: boolean;
   native_language?: string;
   partner_id?: string;
   phone_number?: string;
-  talent_category?: string;
+  talent_category?: TalentCategory;
   talent_type?: string;
   whatsapp_number?: string;
   users: {

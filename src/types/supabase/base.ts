@@ -1,6 +1,6 @@
 import type { Json } from '@/integrations/supabase/types';
 
-export interface BaseEntity {
+export interface BaseRecord {
   id: string;
   created_at: string;
   updated_at?: string;

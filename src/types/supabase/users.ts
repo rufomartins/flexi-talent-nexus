@@ -1,9 +1,7 @@
 import { BaseRecord } from './base';
 
-/** Available user roles in the system */
 export type UserRole = 'super_admin' | 'admin' | 'super_user' | 'user';
 
-/** User record from the database */
 export interface User extends BaseRecord {
   email: string;
   full_name: string;
@@ -13,7 +11,6 @@ export interface User extends BaseRecord {
   status: 'active' | 'inactive';
 }
 
-/** Talent profile with associated user data */
 export interface TalentProfile extends BaseRecord {
   user_id: string;
   category?: string;
