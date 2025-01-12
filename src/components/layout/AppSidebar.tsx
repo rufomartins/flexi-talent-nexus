@@ -29,7 +29,8 @@ export function AppSidebar() {
   console.log("[AppSidebar] Current user:", {
     id: user?.id,
     email: user?.email,
-    metadata: user?.user_metadata
+    metadata: user?.user_metadata,
+    role: user?.user_metadata?.role
   });
   console.log("[AppSidebar] User details:", {
     role: userDetails?.role,
@@ -37,22 +38,25 @@ export function AppSidebar() {
   });
 
   // Memoize role-based visibility to prevent unnecessary recalculations
-  const { isOnboardingVisible, isSettingsVisible } = useMemo(() => {
+  const { isOnboardingVisible, isSettingsVisible, isDashboardVisible } = useMemo(() => {
     const role = userDetails?.role || user?.user_metadata?.role;
     console.log("[AppSidebar] Checking visibility with role:", role);
     
     const onboardingVisible = role === 'super_admin' || role === 'super_user';
     const settingsVisible = role === 'super_admin';
+    const dashboardVisible = true; // Dashboard should be visible to all authenticated users
     
     console.log("[AppSidebar] Visibility flags:", {
       onboardingVisible,
       settingsVisible,
+      dashboardVisible,
       role
     });
     
     return {
       isOnboardingVisible: onboardingVisible,
-      isSettingsVisible: settingsVisible
+      isSettingsVisible: settingsVisible,
+      isDashboardVisible: dashboardVisible
     };
   }, [userDetails?.role, user?.user_metadata?.role]);
 
@@ -65,16 +69,18 @@ export function AppSidebar() {
         <SidebarGroup>
           <SidebarGroupContent className="flex flex-col gap-2 p-4 pt-6">
             {/* Dashboard Link - Always visible */}
-            <Link
-              to="/dashboard"
-              className={cn(
-                buttonVariants({ variant: "ghost" }),
-                "justify-start"
-              )}
-            >
-              <LayoutDashboard className="mr-2 h-4 w-4" />
-              Dashboard
-            </Link>
+            {(DEBUG_SHOW_ALL || isDashboardVisible) && (
+              <Link
+                to="/dashboard"
+                className={cn(
+                  buttonVariants({ variant: "ghost" }),
+                  "justify-start"
+                )}
+              >
+                <LayoutDashboard className="mr-2 h-4 w-4" />
+                Dashboard
+              </Link>
+            )}
 
             {/* Projects Link */}
             <Link
