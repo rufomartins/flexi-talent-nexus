@@ -17,7 +17,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
   const fetchUserDetails = async (userId: string) => {
     try {
-      console.log("Fetching user details for:", userId);
+      console.log("[Auth] Fetching user details for:", userId);
       const { data, error } = await supabase
         .from("users")
         .select("*")
@@ -25,14 +25,24 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         .single();
 
       if (error) {
-        console.error("Error fetching user details:", error);
+        console.error("[Auth] Error fetching user details:", error);
+        toast({
+          title: "Error",
+          description: "Failed to load user details. Please try again.",
+          variant: "destructive",
+        });
         return null;
       }
 
-      console.log("User details fetched:", data);
+      if (!data) {
+        console.error("[Auth] No user details found for ID:", userId);
+        return null;
+      }
+
+      console.log("[Auth] User details fetched successfully:", data);
       return data;
     } catch (error) {
-      console.error("Exception in fetchUserDetails:", error);
+      console.error("[Auth] Exception in fetchUserDetails:", error);
       return null;
     }
   };
@@ -42,31 +52,42 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
     const initializeAuth = async () => {
       try {
-        console.log("Starting auth initialization...");
+        console.log("[Auth] Starting auth initialization...");
         const { data: { session }, error } = await supabase.auth.getSession();
         
-        if (error) throw error;
+        if (error) {
+          console.error("[Auth] Session fetch error:", error);
+          throw error;
+        }
 
-        if (!mounted) return;
+        if (!mounted) {
+          console.log("[Auth] Component unmounted during initialization");
+          return;
+        }
 
         if (session?.user) {
-          console.log("Session found, setting user");
+          console.log("[Auth] Valid session found for user:", session.user.id);
           setSession(session);
           setUser(session.user);
           
           const details = await fetchUserDetails(session.user.id);
-          if (mounted && details) {
-            console.log("Setting user details");
-            setUserDetails(details);
+          if (mounted) {
+            if (details) {
+              console.log("[Auth] Setting user details");
+              setUserDetails(details);
+            } else {
+              console.error("[Auth] Failed to fetch user details");
+              setUserDetails(null);
+            }
           }
         } else {
-          console.log("No session found");
+          console.log("[Auth] No valid session found");
           setSession(null);
           setUser(null);
           setUserDetails(null);
         }
       } catch (error) {
-        console.error("Auth initialization error:", error);
+        console.error("[Auth] Initialization error:", error);
         if (mounted) {
           toast({
             title: "Error",
@@ -76,7 +97,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         }
       } finally {
         if (mounted) {
-          console.log("Auth initialization complete");
+          console.log("[Auth] Initialization complete, setting loading to false");
           setLoading(false);
         }
       }
@@ -85,32 +106,46 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     initializeAuth();
 
     const { data: { subscription } } = supabase.auth.onAuthStateChange(async (event, session) => {
-      if (!mounted) return;
+      if (!mounted) {
+        console.log("[Auth] Ignoring auth state change - component unmounted");
+        return;
+      }
       
-      console.log("Auth state changed:", event);
+      console.log("[Auth] Auth state changed:", event, session ? "Has session" : "No session");
 
       if (session?.user) {
+        console.log("[Auth] Setting session and user state");
         setSession(session);
         setUser(session.user);
+        
         const details = await fetchUserDetails(session.user.id);
-        if (mounted && details) {
-          setUserDetails(details);
+        if (mounted) {
+          if (details) {
+            console.log("[Auth] Updated user details after state change");
+            setUserDetails(details);
+          } else {
+            console.error("[Auth] Failed to fetch user details after state change");
+          }
         }
       } else {
+        console.log("[Auth] Clearing session and user state");
         setSession(null);
         setUser(null);
         setUserDetails(null);
         if (event === "SIGNED_OUT") {
+          console.log("[Auth] User signed out, redirecting to login");
           navigate("/login", { replace: true });
         }
       }
       
       if (mounted) {
+        console.log("[Auth] State change processing complete");
         setLoading(false);
       }
     });
 
     return () => {
+      console.log("[Auth] Cleaning up auth provider");
       mounted = false;
       subscription.unsubscribe();
     };
