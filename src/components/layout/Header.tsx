@@ -21,7 +21,7 @@ export const Header = () => {
   const handleSignOut = async () => {
     try {
       await signOut();
-      // The navigation and toast are now handled in the AuthProvider after successful signOut
+      // Let the AuthProvider handle navigation and toast
     } catch (error) {
       console.error("Error signing out:", error);
       toast({

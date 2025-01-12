@@ -104,6 +104,37 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     };
   }, [navigate]);
 
+  const signOut = async () => {
+    console.log("Attempting sign out");
+    try {
+      const { error } = await supabase.auth.signOut();
+      if (error) throw error;
+      
+      // Clear all auth state
+      setSession(null);
+      setUser(null);
+      setUserDetails(null);
+      
+      // Clear all localStorage
+      localStorage.clear();
+      
+      toast({
+        title: "Signed out",
+        description: "You have been successfully signed out.",
+      });
+
+      navigate('/login');
+    } catch (error: any) {
+      console.error("Sign out error:", error);
+      toast({
+        title: "Error",
+        description: "There was an error signing out.",
+        variant: "destructive",
+      });
+      throw error;
+    }
+  };
+
   const signIn = async (email: string, password: string, rememberMe: boolean) => {
     console.log("Attempting sign in for:", email);
     try {
@@ -135,37 +166,6 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       throw error;
     } finally {
       setLoading(false);
-    }
-  };
-
-  const signOut = async () => {
-    console.log("Attempting sign out");
-    try {
-      const { error } = await supabase.auth.signOut();
-      if (error) throw error;
-      
-      // Clear all auth state
-      setSession(null);
-      setUser(null);
-      setUserDetails(null);
-      
-      // Clear all localStorage
-      localStorage.clear();
-      
-      toast({
-        title: "Signed out",
-        description: "You have been successfully signed out.",
-      });
-
-      navigate('/login');
-    } catch (error: any) {
-      console.error("Sign out error:", error);
-      toast({
-        title: "Error",
-        description: "There was an error signing out.",
-        variant: "destructive",
-      });
-      throw error;
     }
   };
 
