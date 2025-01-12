@@ -6,23 +6,27 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { Eye, Mail, Calendar, MoreHorizontal } from "lucide-react";
+import { Eye, Mail, Calendar, MoreHorizontal, MessageSquare } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { InterviewSchedulerDialog } from "./interview/InterviewSchedulerDialog";
+import { EmailAndSmsComposer } from "./communication/EmailAndSmsComposer";
 
 interface CandidateActionsProps {
   candidateId: string;
   candidateName: string;
-  onEmailClick?: () => void;
+  email?: string;
+  phone?: string;
 }
 
 export function CandidateActions({ 
   candidateId,
   candidateName,
-  onEmailClick,
+  email,
+  phone,
 }: CandidateActionsProps) {
   const navigate = useNavigate();
   const [showScheduler, setShowScheduler] = useState(false);
+  const [showCommunication, setShowCommunication] = useState(false);
 
   return (
     <>
@@ -39,9 +43,9 @@ export function CandidateActions({
             <Eye className="mr-2 h-4 w-4" />
             View Profile
           </DropdownMenuItem>
-          <DropdownMenuItem onClick={onEmailClick}>
+          <DropdownMenuItem onClick={() => setShowCommunication(true)}>
             <Mail className="mr-2 h-4 w-4" />
-            Send Email
+            Send Email/SMS
           </DropdownMenuItem>
           <DropdownMenuItem onClick={() => setShowScheduler(true)}>
             <Calendar className="mr-2 h-4 w-4" />
@@ -55,6 +59,15 @@ export function CandidateActions({
         onOpenChange={setShowScheduler}
         candidateId={candidateId}
         candidateName={candidateName}
+      />
+
+      <EmailAndSmsComposer
+        open={showCommunication}
+        onOpenChange={setShowCommunication}
+        candidateId={candidateId}
+        candidateName={candidateName}
+        email={email}
+        phone={phone}
       />
     </>
   );
