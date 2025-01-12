@@ -24,13 +24,30 @@ import { useAuth } from "@/contexts/auth"
 import { useMemo } from "react"
 
 export function AppSidebar() {
-  const { userDetails } = useAuth();
+  const { user, userDetails } = useAuth();
+  
+  console.log("[AppSidebar] Current user:", user);
+  console.log("[AppSidebar] User details:", userDetails);
 
   // Memoize role-based visibility to prevent unnecessary recalculations
-  const { isOnboardingVisible, isSettingsVisible } = useMemo(() => ({
-    isOnboardingVisible: userDetails?.role === 'super_admin' || userDetails?.role === 'super_user',
-    isSettingsVisible: userDetails?.role === 'super_admin'
-  }), [userDetails?.role]);
+  const { isOnboardingVisible, isSettingsVisible } = useMemo(() => {
+    const role = userDetails?.role;
+    console.log("[AppSidebar] Checking visibility with role:", role);
+    
+    const onboardingVisible = role === 'super_admin' || role === 'super_user';
+    const settingsVisible = role === 'super_admin';
+    
+    console.log("[AppSidebar] Visibility flags:", {
+      onboardingVisible,
+      settingsVisible,
+      role
+    });
+    
+    return {
+      isOnboardingVisible: onboardingVisible,
+      isSettingsVisible: settingsVisible
+    };
+  }, [userDetails?.role]);
 
   return (
     <Sidebar>
@@ -49,52 +66,6 @@ export function AppSidebar() {
               Dashboard
             </Link>
 
-            {/* Talents Section */}
-            <Link
-              to="/talents"
-              className={cn(
-                buttonVariants({ variant: "ghost" }),
-                "justify-start"
-              )}
-            >
-              <Users className="mr-2 h-4 w-4" />
-              Talents
-            </Link>
-
-            <Link
-              to="/search"
-              className={cn(
-                buttonVariants({ variant: "ghost" }),
-                "justify-start"
-              )}
-            >
-              <Search className="mr-2 h-4 w-4" />
-              Search
-            </Link>
-
-            <Link
-              to="/add-talent"
-              className={cn(
-                buttonVariants({ variant: "ghost" }),
-                "justify-start"
-              )}
-            >
-              <UserPlus className="mr-2 h-4 w-4" />
-              Add new talent
-            </Link>
-
-            {/* Castings Link */}
-            <Link
-              to="/castings"
-              className={cn(
-                buttonVariants({ variant: "ghost" }),
-                "justify-start"
-              )}
-            >
-              <FileSpreadsheet className="mr-2 h-4 w-4" />
-              Castings
-            </Link>
-
             {/* Projects Link */}
             <Link
               to="/projects"
@@ -105,30 +76,6 @@ export function AppSidebar() {
             >
               <Briefcase className="mr-2 h-4 w-4" />
               Projects
-            </Link>
-
-            {/* Messages Link */}
-            <Link
-              to="/messages"
-              className={cn(
-                buttonVariants({ variant: "ghost" }),
-                "justify-start"
-              )}
-            >
-              <MessageSquare className="mr-2 h-4 w-4" />
-              Messages
-            </Link>
-
-            {/* Users Link */}
-            <Link
-              to="/users"
-              className={cn(
-                buttonVariants({ variant: "ghost" }),
-                "justify-start"
-              )}
-            >
-              <Users className="mr-2 h-4 w-4" />
-              Users
             </Link>
 
             {/* Financial Link */}
