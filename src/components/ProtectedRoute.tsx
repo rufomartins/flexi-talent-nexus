@@ -1,9 +1,10 @@
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "@/contexts/auth";
-import { Loader2 } from "lucide-react";
+import { Loader2, AlertTriangle } from "lucide-react";
 import { toast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
+import { Alert, AlertDescription } from "@/components/ui/alert";
 
 interface ProtectedRouteProps {
   children: React.ReactNode;
@@ -16,6 +17,7 @@ const ProtectedRoute = ({ children, allowedRoles }: ProtectedRouteProps) => {
   const [isLoading, setIsLoading] = useState(true);
   const [loadingMessage, setLoadingMessage] = useState("Initializing...");
   const [retryCount, setRetryCount] = useState(0);
+  const [error, setError] = useState<string | null>(null);
   const MAX_RETRIES = 3;
 
   useEffect(() => {
@@ -49,6 +51,7 @@ const ProtectedRoute = ({ children, allowedRoles }: ProtectedRouteProps) => {
             setRetryCount(prev => prev + 1);
             return;
           }
+          setError("Failed to load user details. Please try again.");
           toast({
             title: "Error",
             description: "Failed to load user details. Please try again.",
@@ -61,6 +64,7 @@ const ProtectedRoute = ({ children, allowedRoles }: ProtectedRouteProps) => {
           console.log("[ProtectedRoute] User details fetched successfully:", userData);
           setUserDetails(userData);
           setRetryCount(0); // Reset retry count on success
+          setError(null);
         } else {
           console.log("[ProtectedRoute] No user details found, checking metadata");
           // Fallback to user metadata if available
@@ -72,8 +76,10 @@ const ProtectedRoute = ({ children, allowedRoles }: ProtectedRouteProps) => {
               full_name: user.user_metadata.full_name || user.email,
               status: 'active'
             });
+            setError(null);
           } else {
             console.warn("[ProtectedRoute] No user details or metadata available");
+            setError("Unable to load user profile. Please contact support.");
           }
         }
       } catch (error) {
@@ -81,6 +87,8 @@ const ProtectedRoute = ({ children, allowedRoles }: ProtectedRouteProps) => {
         if (retryCount < MAX_RETRIES) {
           console.log(`[ProtectedRoute] Retrying fetch (${retryCount + 1}/${MAX_RETRIES})`);
           setRetryCount(prev => prev + 1);
+        } else {
+          setError("An unexpected error occurred. Please try again later.");
         }
       }
     };
@@ -128,8 +136,10 @@ const ProtectedRoute = ({ children, allowedRoles }: ProtectedRouteProps) => {
         
         console.log("[ProtectedRoute] Route initialization complete");
         setIsLoading(false);
+        setError(null);
       } catch (error) {
         console.error("[ProtectedRoute] Error in initRoute:", error);
+        setError("An error occurred while initializing the route.");
         toast({
           title: "Error",
           description: "An error occurred while initializing the route.",
@@ -144,6 +154,7 @@ const ProtectedRoute = ({ children, allowedRoles }: ProtectedRouteProps) => {
         console.warn("[ProtectedRoute] Loading timeout reached");
         setIsLoading(false);
         setLoadingMessage("Loading timeout reached. Please refresh the page.");
+        setError("Loading timeout reached. Please refresh and try again.");
         // Use metadata as fallback if available
         if (user?.user_metadata?.role && !userDetails) {
           setUserDetails({
@@ -172,6 +183,23 @@ const ProtectedRoute = ({ children, allowedRoles }: ProtectedRouteProps) => {
             Retry attempt {retryCount}/{MAX_RETRIES}...
           </p>
         )}
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="h-screen w-screen flex flex-col items-center justify-center gap-4">
+        <Alert variant="destructive" className="max-w-md">
+          <AlertTriangle className="h-4 w-4" />
+          <AlertDescription>{error}</AlertDescription>
+        </Alert>
+        <button 
+          onClick={() => window.location.reload()}
+          className="text-sm text-primary hover:underline"
+        >
+          Refresh Page
+        </button>
       </div>
     );
   }
