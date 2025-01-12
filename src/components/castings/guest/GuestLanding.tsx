@@ -51,9 +51,9 @@ export const GuestLanding = () => {
         .from("casting_talents")
         .select(`
           *,
-          talent:talent_profiles(
+          talent:talent_profiles!casting_talents_talent_id_fkey(
             *,
-            user:users(
+            user:users!talent_profiles_user_id_fkey(
               first_name,
               last_name,
               avatar_url

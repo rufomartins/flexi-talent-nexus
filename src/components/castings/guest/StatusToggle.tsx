@@ -1,5 +1,6 @@
 import { Switch } from "@/components/ui/switch";
 import { Label } from "@/components/ui/label";
+import { GuestFilters } from "@/types/guest-filters";
 
 interface StatusToggleProps {
   filterKey: keyof GuestFilters;
