@@ -20,24 +20,36 @@ export function TalentDisplay({
 }: TalentDisplayProps) {
   const { toast } = useToast();
 
+  const filteredTalents = useMemo(() => {
+    return talents
+      .filter(talent => {
+        if (filters.search_term) {
+          const searchLower = filters.search_term.toLowerCase();
+          return talent.users.full_name.toLowerCase().includes(searchLower);
+        }
+        return true;
+      })
+      .sort((a, b) => {
+        const direction = sort.direction === 'asc' ? 1 : -1;
+        
+        switch (sort.field) {
+          case 'name':
+            return direction * a.users.full_name.localeCompare(b.users.full_name);
+          case 'date_added':
+            return direction * (new Date(a.created_at).getTime() - new Date(b.created_at).getTime());
+          case 'favorite':
+            const aFavorite = selections[a.id]?.is_favorite ? 1 : 0;
+            const bFavorite = selections[b.id]?.is_favorite ? 1 : 0;
+            return direction * (bFavorite - aFavorite);
+          default:
+            return 0;
+        }
+      });
+  }, [talents, sort, filters, selections]);
+
   const handlePreferenceSet = async (talentId: string, order: number) => {
     try {
       if (!onSelect) return;
-
-      // Check for duplicate preference order
-      const existingSelection = Object.values(selections).find(
-        s => s.preference_order === order && s.talent_id !== talentId
-      );
-      
-      if (existingSelection) {
-        toast({
-          title: "Duplicate Preference",
-          description: `Preference order ${order} is already assigned to another talent`,
-          variant: "destructive"
-        });
-        return;
-      }
-
       await onSelect(talentId, { preference_order: order });
       
       toast({
@@ -73,27 +85,6 @@ export function TalentDisplay({
     }
   };
 
-  const filteredAndSortedTalents = useMemo(() => {
-    return talents
-      .filter(talent => 
-        talent.users.full_name.toLowerCase().includes(filters.search.toLowerCase()) ||
-        talent.native_language?.toLowerCase().includes(filters.search.toLowerCase())
-      )
-      .sort((a, b) => {
-        if (sort.field === 'name') {
-          return sort.direction === 'asc'
-            ? a.users.full_name.localeCompare(b.users.full_name)
-            : b.users.full_name.localeCompare(a.users.full_name);
-        }
-        if (sort.field === 'preferenceOrder') {
-          const orderA = selections[a.id]?.preference_order || 0;
-          const orderB = selections[b.id]?.preference_order || 0;
-          return sort.direction === 'asc' ? orderA - orderB : orderB - orderA;
-        }
-        return 0;
-      });
-  }, [talents, filters.search, sort, selections]);
-
   if (isLoading) {
     return <div>Loading...</div>;
   }
@@ -102,7 +93,7 @@ export function TalentDisplay({
     <div className="space-y-6">
       {viewMode === 'grid' ? (
         <TalentGrid
-          talents={filteredAndSortedTalents}
+          talents={filteredTalents}
           viewMode={viewMode}
           sort={sort}
           filters={filters}
@@ -116,7 +107,7 @@ export function TalentDisplay({
         />
       ) : (
         <TalentList
-          talents={filteredAndSortedTalents}
+          talents={filteredTalents}
           viewMode={viewMode}
           sort={sort}
           filters={filters}

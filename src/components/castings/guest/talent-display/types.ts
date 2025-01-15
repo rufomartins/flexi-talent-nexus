@@ -5,6 +5,9 @@ import type { SortField, SortDirection, FilterState } from "@/types/guest-filter
 export interface TalentDisplayProps {
   talents: TalentProfile[];
   viewMode: 'grid' | 'list';
+  selections: Record<string, GuestSelection>;
+  onSelect: (talentId: string, update: Partial<GuestSelection>) => Promise<void>;
+  isLoading: boolean;
   sort: {
     field: SortField;
     direction: SortDirection;
@@ -12,11 +15,6 @@ export interface TalentDisplayProps {
   filters: FilterState;
   castingId: string;
   guestId: string;
-  selections?: Record<string, GuestSelection>;
-  onSelect?: (talentId: string, update: Partial<GuestSelection>) => Promise<void>;
-  isLoading?: boolean;
-  savingStatus?: Record<string, boolean>;
-  errorMessages?: Record<string, string>;
 }
 
 export interface TalentGridProps extends TalentDisplayProps {
