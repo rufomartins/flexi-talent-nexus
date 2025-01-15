@@ -1,19 +1,18 @@
-import { useQuery } from "@tanstack/react-query";
+import { useState } from "react";
 import { useParams } from "react-router-dom";
-import { supabase } from "@/integrations/supabase/client";
-import { Loader2 } from "lucide-react";
-import { Alert, AlertDescription } from "@/components/ui/alert";
-import { useState, useMemo } from "react";
 import { useToast } from "@/hooks/use-toast";
-import type { TalentProfile } from "@/types/talent";
-import type { FilterState, GuestViewSettings } from "@/types/guest-filters";
+import { Alert, AlertDescription } from "@/components/ui/alert";
+import { Loader2 } from "lucide-react";
+import type { GuestViewSettings } from "@/types/guest-filters";
+import type { FilterState } from "@/types/guest-filters";
 import type { GuestSelection } from "@/types/supabase/guest-selection";
-import type { ExportConfig } from "@/types/supabase/export";
-import { GuestHeader } from "./header/GuestHeader";
-import { StatusBar } from "./status/StatusBar";
-import { GuestContent } from "./content/GuestContent";
-import { ExportDialog } from "./export/ExportDialog";
-import { ShareDialog } from "./share/ShareDialog";
+import { GuestHeader } from "./GuestHeader";
+import { StatusBar } from "./StatusBar";
+import { GuestContent } from "./GuestContent";
+import { useTalents } from "@/hooks/useTalents";
+import { useSelections } from "@/hooks/useSelections";
+import { useGuestStatus } from "@/hooks/useGuestStatus";
+import { supabase } from "@/integrations/supabase/client";
 
 export const GuestLanding = () => {
   const { castingId, guestId } = useParams();
@@ -34,112 +33,9 @@ export const GuestLanding = () => {
     show_only_approved_auditions: false
   });
 
-  const { data: casting, isLoading: castingLoading, error: castingError } = useQuery({
-    queryKey: ["casting", castingId],
-    queryFn: async () => {
-      const { data, error } = await supabase
-        .from("castings")
-        .select(`
-          *,
-          client:users!castings_client_id_fkey (
-            id,
-            full_name
-          )
-        `)
-        .eq("id", castingId)
-        .single();
-
-      if (error) throw error;
-      return data;
-    },
-  });
-
-  const { data: talents, isLoading: talentsLoading } = useQuery({
-    queryKey: ["casting-talents", castingId, filters],
-    queryFn: async () => {
-      let query = supabase
-        .from("casting_talents")
-        .select(`
-          *,
-          talent:talent_profiles!casting_talents_talent_id_fkey(
-            *,
-            users!talent_profiles_user_id_fkey(
-              id,
-              first_name,
-              last_name,
-              full_name,
-              avatar_url
-            )
-          )
-        `)
-        .eq("casting_id", castingId);
-
-      if (filters.show_only_available) {
-        query = query.eq("availability_status", "available");
-      }
-
-      if (filters.round_filter) {
-        query = query.eq("round", filters.round_filter);
-      }
-
-      const { data, error } = await query;
-
-      if (error) throw error;
-
-      let filteredData = data;
-
-      if (filters.search_term) {
-        const searchLower = filters.search_term.toLowerCase();
-        filteredData = filteredData.filter(item => 
-          item.talent?.users?.first_name?.toLowerCase().includes(searchLower) ||
-          item.talent?.users?.last_name?.toLowerCase().includes(searchLower)
-        );
-      }
-
-      return filteredData.map(item => {
-        const talentProfile = item.talent;
-        if (!talentProfile) return null;
-        
-        return {
-          ...talentProfile,
-          availability: talentProfile.availability as Record<string, any>,
-          users: {
-            id: talentProfile.users.id,
-            full_name: talentProfile.users.full_name,
-            avatar_url: talentProfile.users.avatar_url
-          }
-        } as TalentProfile;
-      }).filter(Boolean) as TalentProfile[];
-    },
-  });
-
-  const { data: selections = {}, isLoading: selectionsLoading } = useQuery({
-    queryKey: ["guest-selections", castingId, guestId],
-    queryFn: async () => {
-      const { data, error } = await supabase
-        .from("guest_selections")
-        .select("*")
-        .eq("casting_id", castingId)
-        .eq("guest_id", guestId);
-
-      if (error) throw error;
-
-      return data.reduce((acc, selection) => ({
-        ...acc,
-        [selection.talent_id]: {
-          id: selection.id,
-          casting_id: selection.casting_id,
-          talent_id: selection.talent_id,
-          guest_id: selection.guest_id,
-          preference_order: selection.preference_order,
-          comments: selection.comments,
-          is_favorite: selection.liked || false,
-          created_at: selection.created_at,
-          updated_at: selection.updated_at
-        } as GuestSelection,
-      }), {} as Record<string, GuestSelection>);
-    },
-  });
+  const { data: talents, isLoading: talentsLoading } = useTalents(castingId!);
+  const { data: selections, isLoading: selectionsLoading } = useSelections(castingId!, guestId!);
+  const status = useGuestStatus(talents, selections);
 
   const handleSelectionUpdate = async (talentId: string, selection: Partial<GuestSelection>) => {
     try {
@@ -173,7 +69,7 @@ export const GuestLanding = () => {
     }
   };
 
-  const handleExport = async (config: ExportConfig) => {
+  const handleExport = async () => {
     try {
       toast({
         title: "Export Started",
@@ -205,13 +101,7 @@ export const GuestLanding = () => {
     }
   };
 
-  const status = useMemo(() => ({
-    total: talents?.length ?? 0,
-    selected: Object.keys(selections ?? {}).length,
-    favorites: Object.values(selections ?? {}).filter(s => s.is_favorite).length
-  }), [talents, selections]);
-
-  if (castingLoading || talentsLoading) {
+  if (talentsLoading || selectionsLoading) {
     return (
       <div className="flex items-center justify-center min-h-screen">
         <Loader2 className="h-8 w-8 animate-spin" />
@@ -219,10 +109,10 @@ export const GuestLanding = () => {
     );
   }
 
-  if (castingError) {
+  if (!castingId || !guestId) {
     return (
       <Alert variant="destructive">
-        <AlertDescription>Failed to load casting details. Please try again.</AlertDescription>
+        <AlertDescription>Missing required parameters. Please check the URL.</AlertDescription>
       </Alert>
     );
   }
@@ -230,10 +120,9 @@ export const GuestLanding = () => {
   return (
     <div className="container mx-auto px-4 py-6">
       <GuestHeader
-        castingName={casting?.name ?? "Talent Selection"}
-        totalSelected={status.selected}
-        onExport={() => setShowExportDialog(true)}
-        onShare={() => setShowShareDialog(true)}
+        casting={{ name: "Talent Selection" }}
+        onExport={handleExport}
+        onShare={handleShare}
       />
 
       <StatusBar status={status} />
@@ -243,25 +132,10 @@ export const GuestLanding = () => {
         selections={selections ?? {}}
         viewSettings={viewSettings}
         filters={filters}
-        isLoading={talentsLoading}
+        isLoading={talentsLoading || selectionsLoading}
+        castingId={castingId}
+        guestId={guestId}
         onSelectionUpdate={handleSelectionUpdate}
-        castingId={castingId!}
-        guestId={guestId!}
-      />
-
-      <ExportDialog
-        open={showExportDialog}
-        onOpenChange={setShowExportDialog}
-        castingId={castingId!}
-        guestId={guestId!}
-        onExport={handleExport}
-      />
-
-      <ShareDialog
-        open={showShareDialog}
-        onOpenChange={setShowShareDialog}
-        castingId={castingId!}
-        onShare={handleShare}
       />
     </div>
   );
