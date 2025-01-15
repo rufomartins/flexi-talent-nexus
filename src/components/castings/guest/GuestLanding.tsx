@@ -1,114 +1,19 @@
 import { useQuery } from "@tanstack/react-query";
 import { useParams } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
-import { Loader2, FileDown, Share } from "lucide-react";
+import { Loader2 } from "lucide-react";
 import { Alert, AlertDescription } from "@/components/ui/alert";
-import { Button } from "@/components/ui/button";
-import { Card, CardHeader, CardTitle } from "@/components/ui/card";
 import { useState, useMemo } from "react";
 import { useToast } from "@/hooks/use-toast";
 import type { TalentProfile } from "@/types/talent";
 import type { FilterState, GuestViewSettings } from "@/types/guest-filters";
 import type { GuestSelection } from "@/types/supabase/guest-selection";
 import type { ExportConfig } from "@/types/supabase/export";
-import { TalentDisplay } from "./talent-display/TalentDisplay";
+import { GuestHeader } from "./header/GuestHeader";
+import { StatusBar } from "./status/StatusBar";
+import { GuestContent } from "./content/GuestContent";
 import { ExportDialog } from "./export/ExportDialog";
 import { ShareDialog } from "./share/ShareDialog";
-
-interface GuestHeaderProps {
-  castingName: string;
-  totalSelected: number;
-  onExport: () => void;
-  onShare: () => void;
-}
-
-const GuestHeader: React.FC<GuestHeaderProps> = ({
-  castingName,
-  totalSelected,
-  onExport,
-  onShare
-}) => {
-  return (
-    <div className="flex items-center justify-between mb-6">
-      <div>
-        <h1 className="text-2xl font-bold">{castingName}</h1>
-        <p className="text-gray-600">
-          Selected: {totalSelected} talents
-        </p>
-      </div>
-      <div className="flex gap-3">
-        <Button onClick={onExport} variant="outline">
-          <FileDown className="w-4 h-4 mr-2" />
-          Export
-        </Button>
-        <Button onClick={onShare}>
-          <Share className="w-4 h-4 mr-2" />
-          Share
-        </Button>
-      </div>
-    </div>
-  );
-};
-
-interface StatusBarProps {
-  status: {
-    total: number;
-    selected: number;
-    favorites: number;
-  };
-}
-
-const StatusBar: React.FC<StatusBarProps> = ({ status }) => {
-  return (
-    <div className="grid grid-cols-3 gap-4 mb-6">
-      <Card>
-        <CardHeader>
-          <CardTitle>Total Talents</CardTitle>
-          <div className="text-2xl font-bold">{status.total}</div>
-        </CardHeader>
-      </Card>
-      <Card>
-        <CardHeader>
-          <CardTitle>Selected</CardTitle>
-          <div className="text-2xl font-bold">{status.selected}</div>
-        </CardHeader>
-      </Card>
-      <Card>
-        <CardHeader>
-          <CardTitle>Favorites</CardTitle>
-          <div className="text-2xl font-bold">{status.favorites}</div>
-        </CardHeader>
-      </Card>
-    </div>
-  );
-};
-
-interface GuestContentWrapperProps {
-  talents: TalentProfile[];
-  selections: Record<string, GuestSelection>;
-  viewSettings: GuestViewSettings;
-  filters: FilterState;
-  isLoading: boolean;
-  onSelectionUpdate: (talentId: string, selection: Partial<GuestSelection>) => Promise<void>;
-  castingId: string;
-  guestId: string;
-}
-
-const GuestContentWrapper: React.FC<GuestContentWrapperProps> = (props) => {
-  return (
-    <div className="space-y-6">
-      <TalentDisplay 
-        {...props}
-        viewMode={props.viewSettings.view_mode}
-        onSelect={props.onSelectionUpdate}
-        sort={{
-          field: props.viewSettings.sort_by,
-          direction: props.viewSettings.sort_direction
-        }}
-      />
-    </div>
-  );
-};
 
 export const GuestLanding = () => {
   const { castingId, guestId } = useParams();
@@ -333,7 +238,7 @@ export const GuestLanding = () => {
 
       <StatusBar status={status} />
 
-      <GuestContentWrapper
+      <GuestContent
         talents={talents ?? []}
         selections={selections ?? {}}
         viewSettings={viewSettings}
