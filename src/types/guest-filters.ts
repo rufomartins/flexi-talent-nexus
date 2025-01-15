@@ -1,5 +1,4 @@
 import type { TalentProfile } from "./talent";
-import type { GuestSelection } from "./supabase/guest-selection";
 
 export type SortField = 'name' | 'favorite' | 'date_added';
 export type SortDirection = 'asc' | 'desc';
@@ -18,12 +17,11 @@ export interface FilterState {
   round_filter?: number;
 }
 
+export type GuestFilters = FilterState;
+
 export interface TalentDisplayProps {
   talents: TalentProfile[];
   viewMode: 'grid' | 'list';
-  selections: Record<string, GuestSelection>;
-  onSelect: (talentId: string, update: Partial<GuestSelection>) => Promise<void>;
-  isLoading: boolean;
   sort: {
     field: SortField;
     direction: SortDirection;

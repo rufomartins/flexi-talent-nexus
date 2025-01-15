@@ -14,7 +14,7 @@ import { TalentDisplay } from "./talent-display/TalentDisplay";
 import { SelectionSummary } from "./SelectionSummary";
 import { supabase } from "@/integrations/supabase/client";
 import type { TalentProfile } from "@/types/talent";
-import type { FilterState, SortField, SortDirection } from "./talent-display/types";
+import type { FilterState, SortField, SortDirection } from "@/types/guest-filters";
 import type { GuestSelection } from "@/types/supabase/guest-selection";
 
 interface GuestViewPageProps {
@@ -29,8 +29,10 @@ export function GuestViewPage({ castingId, guestId }: GuestViewPageProps) {
   });
   
   const [filters, setFilters] = useState<FilterState>({
-    search: '',
-    preferenceStatus: 'all'
+    search_term: '',
+    show_only_available: false,
+    filter_out_rejected: false,
+    show_only_approved_auditions: false,
   });
   
   const [viewMode, setViewMode] = useState<'grid' | 'list'>('grid');
@@ -158,10 +160,10 @@ export function GuestViewPage({ castingId, guestId }: GuestViewPageProps) {
           <div className="flex-grow max-w-md">
             <Input
               placeholder="Search talents..."
-              value={filters.search}
+              value={filters.search_term}
               onChange={(e) => setFilters(prev => ({
                 ...prev,
-                search: e.target.value
+                search_term: e.target.value
               }))}
               className="w-full"
             />
@@ -181,16 +183,19 @@ export function GuestViewPage({ castingId, guestId }: GuestViewPageProps) {
             <SelectContent>
               <SelectItem value="name-asc">Name (A-Z)</SelectItem>
               <SelectItem value="name-desc">Name (Z-A)</SelectItem>
-              <SelectItem value="preferenceOrder-asc">Preference (Low to High)</SelectItem>
-              <SelectItem value="preferenceOrder-desc">Preference (High to Low)</SelectItem>
+              <SelectItem value="favorite-asc">Favorites (Low to High)</SelectItem>
+              <SelectItem value="favorite-desc">Favorites (High to Low)</SelectItem>
             </SelectContent>
           </Select>
 
           {/* Filter by Selection Status */}
           <Select
-            value={filters.preferenceStatus}
-            onValueChange={(value: FilterState['preferenceStatus']) => 
-              setFilters(prev => ({ ...prev, preferenceStatus: value }))
+            value={filters.show_only_available ? 'selected' : 'all'}
+            onValueChange={(value) => 
+              setFilters(prev => ({ 
+                ...prev, 
+                show_only_available: value === 'selected'
+              }))
             }
           >
             <SelectTrigger className="w-[180px]">

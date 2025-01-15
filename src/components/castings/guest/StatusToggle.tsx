@@ -1,9 +1,9 @@
 import { Switch } from "@/components/ui/switch";
 import { Label } from "@/components/ui/label";
-import { GuestFilters } from "@/types/guest-filters";
+import { FilterState } from "@/types/guest-filters";
 
 interface StatusToggleProps {
-  filterKey: keyof GuestFilters;
+  filterKey: keyof FilterState;
   label: string;
   value: boolean;
   onChange: (value: boolean) => void;
