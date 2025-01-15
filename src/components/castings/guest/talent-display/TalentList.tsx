@@ -35,7 +35,8 @@ export function TalentList({ talents, selections, onSelect, isLoading, showDetai
           talent={talent}
           view="list"
           selection={selections[talent.id]}
-          onSelect={async (selection) => await onSelect(talent.id, selection)}
+          onPreferenceSet={async (order) => await onSelect(talent.id, { preference_order: order })}
+          onCommentAdd={async (comment) => await onSelect(talent.id, { comments: comment })}
         />
       ))}
     </div>

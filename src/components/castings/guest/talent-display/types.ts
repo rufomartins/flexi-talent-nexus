@@ -5,7 +5,7 @@ export interface TalentDisplayProps {
   talents: TalentProfile[];
   viewMode: 'grid' | 'list';
   selections: Record<string, GuestSelection>;
-  onSelect: (talentId: string, selection: Partial<GuestSelection>) => void;
+  onSelect: (talentId: string, update: Partial<GuestSelection>) => Promise<void>;
   isLoading?: boolean;
 }
 

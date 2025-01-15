@@ -1,16 +1,9 @@
 import { TalentCard } from "./TalentCard";
 import { ViewControls } from "./ViewControls";
-import { useState } from "react";
+import { useState, useMemo } from "react";
 import type { TalentProfile } from "@/types/talent";
 import type { GuestSelection } from "@/types/supabase/guest-selection";
-
-interface TalentDisplayProps {
-  talents: TalentProfile[];
-  viewMode: 'grid' | 'list';
-  selections: Record<string, GuestSelection>;
-  onSelect: (talentId: string, update: Partial<GuestSelection>) => Promise<void>;
-  isLoading: boolean;
-}
+import type { TalentDisplayProps } from "./types";
 
 export function TalentDisplay({
   talents,
@@ -33,24 +26,26 @@ export function TalentDisplay({
     await onSelect(talentId, { comments: comment });
   };
 
-  const filteredAndSortedTalents = talents
-    .filter(talent => 
-      talent.users.full_name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      talent.native_language?.toLowerCase().includes(searchQuery.toLowerCase())
-    )
-    .sort((a, b) => {
-      if (sortOption.field === 'name') {
-        return sortOption.direction === 'asc'
-          ? a.users.full_name.localeCompare(b.users.full_name)
-          : b.users.full_name.localeCompare(a.users.full_name);
-      }
-      if (sortOption.field === 'preferenceOrder') {
-        const orderA = selections[a.id]?.preference_order || 0;
-        const orderB = selections[b.id]?.preference_order || 0;
-        return sortOption.direction === 'asc' ? orderA - orderB : orderB - orderA;
-      }
-      return 0;
-    });
+  const filteredAndSortedTalents = useMemo(() => {
+    return talents
+      .filter(talent => 
+        talent.users.full_name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        talent.native_language?.toLowerCase().includes(searchQuery.toLowerCase())
+      )
+      .sort((a, b) => {
+        if (sortOption.field === 'name') {
+          return sortOption.direction === 'asc'
+            ? a.users.full_name.localeCompare(b.users.full_name)
+            : b.users.full_name.localeCompare(a.users.full_name);
+        }
+        if (sortOption.field === 'preferenceOrder') {
+          const orderA = selections[a.id]?.preference_order || 0;
+          const orderB = selections[b.id]?.preference_order || 0;
+          return sortOption.direction === 'asc' ? orderA - orderB : orderB - orderA;
+        }
+        return 0;
+      });
+  }, [talents, searchQuery, sortOption, selections]);
 
   if (isLoading) {
     return <div>Loading...</div>;
@@ -77,8 +72,8 @@ export function TalentDisplay({
             key={talent.id}
             talent={talent}
             selection={selections[talent.id]}
-            onPreferenceSet={(order) => handlePreferenceSet(talent.id, order)}
-            onCommentAdd={(comment) => handleCommentAdd(talent.id, comment)}
+            onPreferenceSet={async (order) => await handlePreferenceSet(talent.id, order)}
+            onCommentAdd={async (comment) => await handleCommentAdd(talent.id, comment)}
             view={viewMode}
           />
         ))}
