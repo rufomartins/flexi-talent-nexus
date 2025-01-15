@@ -11,6 +11,7 @@ import {
   SelectValue 
 } from "@/components/ui/select";
 import { TalentDisplay } from "./talent-display/TalentDisplay";
+import { SelectionSummary } from "./SelectionSummary";
 import { supabase } from "@/integrations/supabase/client";
 
 interface GuestViewPageProps {
@@ -48,7 +49,7 @@ export function GuestViewPage({ castingId, guestId }: GuestViewPageProps) {
           talent_id,
           talent_profiles!inner (
             id,
-            users!inner (
+            users (
               id,
               full_name,
               avatar_url
@@ -71,6 +72,11 @@ export function GuestViewPage({ castingId, guestId }: GuestViewPageProps) {
         <p className="text-gray-600">
           Select your preferred talents by assigning numbers from 1-20.
         </p>
+      </div>
+
+      {/* Selection Summary */}
+      <div className="mb-6">
+        <SelectionSummary castingId={castingId} guestId={guestId} />
       </div>
 
       {/* Controls Section */}
