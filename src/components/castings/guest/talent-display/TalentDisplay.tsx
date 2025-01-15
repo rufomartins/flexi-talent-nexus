@@ -1,29 +1,72 @@
-import { TalentCard } from "./TalentCard";
-import { ViewControls } from "./ViewControls";
 import { useState, useMemo } from "react";
-import type { TalentProfile } from "@/types/talent";
-import type { GuestSelection } from "@/types/supabase/guest-selection";
+import { ViewControls } from "./ViewControls";
+import { TalentCard } from "./TalentCard";
 import type { TalentDisplayProps } from "./types";
+import { useToast } from "@/hooks/use-toast";
 
 export function TalentDisplay({
   talents,
   viewMode,
   selections,
   onSelect,
-  isLoading
+  isLoading,
+  savingStatus = {},
+  errorMessages = {}
 }: TalentDisplayProps) {
   const [searchQuery, setSearchQuery] = useState("");
   const [sortOption, setSortOption] = useState<{ field: string; direction: 'asc' | 'desc' }>({ 
     field: 'name', 
     direction: 'asc' 
   });
+  const { toast } = useToast();
 
   const handlePreferenceSet = async (talentId: string, order: number) => {
-    await onSelect(talentId, { preference_order: order });
+    try {
+      // Check for duplicate preference order
+      const existingSelection = Object.values(selections).find(
+        s => s.preference_order === order && s.talent_id !== talentId
+      );
+      
+      if (existingSelection) {
+        toast({
+          title: "Duplicate Preference",
+          description: `Preference order ${order} is already assigned to another talent`,
+          variant: "destructive"
+        });
+        return;
+      }
+
+      await onSelect(talentId, { preference_order: order });
+      
+      toast({
+        title: "Selection Saved",
+        description: "Your preference has been updated",
+      });
+    } catch (error) {
+      console.error("Error setting preference:", error);
+      toast({
+        title: "Error",
+        description: "Failed to save your preference",
+        variant: "destructive"
+      });
+    }
   };
 
   const handleCommentAdd = async (talentId: string, comment: string) => {
-    await onSelect(talentId, { comments: comment });
+    try {
+      await onSelect(talentId, { comments: comment });
+      toast({
+        title: "Comment Saved",
+        description: "Your comment has been updated",
+      });
+    } catch (error) {
+      console.error("Error adding comment:", error);
+      toast({
+        title: "Error",
+        description: "Failed to save your comment",
+        variant: "destructive"
+      });
+    }
   };
 
   const filteredAndSortedTalents = useMemo(() => {
@@ -72,9 +115,11 @@ export function TalentDisplay({
             key={talent.id}
             talent={talent}
             selection={selections[talent.id]}
-            onPreferenceSet={async (talentId, order) => await handlePreferenceSet(talentId, order)}
-            onCommentAdd={async (talentId, comment) => await handleCommentAdd(talentId, comment)}
+            onPreferenceSet={handlePreferenceSet}
+            onCommentAdd={handleCommentAdd}
             view={viewMode}
+            isSaving={savingStatus[talent.id]}
+            errorMessage={errorMessages[talent.id]}
           />
         ))}
       </div>
