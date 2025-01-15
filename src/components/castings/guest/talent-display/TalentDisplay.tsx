@@ -20,7 +20,10 @@ export function TalentDisplay({
   isLoading
 }: TalentDisplayProps) {
   const [searchQuery, setSearchQuery] = useState("");
-  const [sortOption, setSortOption] = useState({ field: 'name', direction: 'asc' as const });
+  const [sortOption, setSortOption] = useState<{ field: string; direction: 'asc' | 'desc' }>({ 
+    field: 'name', 
+    direction: 'asc' 
+  });
 
   const handlePreferenceSet = async (talentId: string, order: number) => {
     await onSelect(talentId, { preference_order: order });
@@ -74,8 +77,8 @@ export function TalentDisplay({
             key={talent.id}
             talent={talent}
             selection={selections[talent.id]}
-            onPreferenceSet={handlePreferenceSet}
-            onCommentAdd={handleCommentAdd}
+            onPreferenceSet={(order) => handlePreferenceSet(talent.id, order)}
+            onCommentAdd={(comment) => handleCommentAdd(talent.id, comment)}
             view={viewMode}
           />
         ))}
