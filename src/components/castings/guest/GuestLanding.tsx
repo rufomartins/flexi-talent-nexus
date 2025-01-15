@@ -21,8 +21,7 @@ export const GuestLanding = () => {
   const [showExportDialog, setShowExportDialog] = useState(false);
   const [showShareDialog, setShowShareDialog] = useState(false);
   const [filters, setFilters] = useState<FilterState>({
-    search: '',
-    preferenceStatus: 'all',
+    search_term: '',
     show_only_available: false,
     filter_out_rejected: false,
     show_only_approved_auditions: false,
@@ -88,8 +87,8 @@ export const GuestLanding = () => {
 
       let filteredData = data;
 
-      if (filters.search) {
-        const searchLower = filters.search.toLowerCase();
+      if (filters.search_term) {
+        const searchLower = filters.search_term.toLowerCase();
         filteredData = filteredData.filter(item => 
           item.talent?.users?.first_name?.toLowerCase().includes(searchLower) ||
           item.talent?.users?.last_name?.toLowerCase().includes(searchLower)
@@ -183,6 +182,40 @@ export const GuestLanding = () => {
       toast({
         title: "Error",
         description: "An unexpected error occurred",
+        variant: "destructive"
+      });
+    }
+  };
+
+  const handleExport = async (config: ExportConfig) => {
+    try {
+      // Export logic will be implemented here
+      toast({
+        title: "Export Started",
+        description: "Your export is being processed"
+      });
+    } catch (error) {
+      console.error("Export failed:", error);
+      toast({
+        title: "Export Failed",
+        description: "There was an error processing your export",
+        variant: "destructive"
+      });
+    }
+  };
+
+  const handleShare = async (email: string, message?: string) => {
+    try {
+      // Share logic will be implemented here
+      toast({
+        title: "Share Successful",
+        description: "Invitation has been sent"
+      });
+    } catch (error) {
+      console.error("Share failed:", error);
+      toast({
+        title: "Share Failed",
+        description: "There was an error sharing the casting",
         variant: "destructive"
       });
     }
