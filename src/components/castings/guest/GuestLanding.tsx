@@ -1,35 +1,121 @@
 import { useQuery } from "@tanstack/react-query";
 import { useParams } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
-import { Loader2 } from "lucide-react";
+import { Loader2, FileDown, Share } from "lucide-react";
 import { Alert, AlertDescription } from "@/components/ui/alert";
-import { useState } from "react";
+import { Button } from "@/components/ui/button";
+import { Card, CardHeader, CardTitle } from "@/components/ui/card";
+import { useState, useMemo } from "react";
 import { useToast } from "@/hooks/use-toast";
-import { GuestHeader } from "./header/GuestHeader";
-import { StatusBar } from "./status/StatusBar";
-import { GuestContent } from "./content/GuestContent";
-import { ExportDialog } from "./export/ExportDialog";
-import { ShareDialog } from "./share/ShareDialog";
+import type { TalentProfile } from "@/types/talent";
 import type { FilterState, GuestViewSettings } from "@/types/guest-filters";
 import type { GuestSelection } from "@/types/supabase/guest-selection";
-import type { ExportConfig } from "@/types/supabase/export";
+import { TalentDisplay } from "./talent-display/TalentDisplay";
+
+interface GuestHeaderProps {
+  castingName: string;
+  totalSelected: number;
+  onExport: () => void;
+  onShare: () => void;
+}
+
+const GuestHeader: React.FC<GuestHeaderProps> = ({
+  castingName,
+  totalSelected,
+  onExport,
+  onShare
+}) => {
+  return (
+    <div className="flex items-center justify-between mb-6">
+      <div>
+        <h1 className="text-2xl font-bold">{castingName}</h1>
+        <p className="text-gray-600">
+          Selected: {totalSelected} talents
+        </p>
+      </div>
+      <div className="flex gap-3">
+        <Button onClick={onExport} variant="outline">
+          <FileDown className="w-4 h-4 mr-2" />
+          Export
+        </Button>
+        <Button onClick={onShare}>
+          <Share className="w-4 h-4 mr-2" />
+          Share
+        </Button>
+      </div>
+    </div>
+  );
+};
+
+interface StatusBarProps {
+  status: {
+    total: number;
+    selected: number;
+    favorites: number;
+  };
+}
+
+const StatusBar: React.FC<StatusBarProps> = ({ status }) => {
+  return (
+    <div className="grid grid-cols-3 gap-4 mb-6">
+      <Card>
+        <CardHeader>
+          <CardTitle>Total Talents</CardTitle>
+          <div className="text-2xl font-bold">{status.total}</div>
+        </CardHeader>
+      </Card>
+      <Card>
+        <CardHeader>
+          <CardTitle>Selected</CardTitle>
+          <div className="text-2xl font-bold">{status.selected}</div>
+        </CardHeader>
+      </Card>
+      <Card>
+        <CardHeader>
+          <CardTitle>Favorites</CardTitle>
+          <div className="text-2xl font-bold">{status.favorites}</div>
+        </CardHeader>
+      </Card>
+    </div>
+  );
+};
+
+interface GuestContentWrapperProps {
+  talents: TalentProfile[];
+  selections: Record<string, GuestSelection>;
+  viewSettings: GuestViewSettings;
+  filters: FilterState;
+  isLoading: boolean;
+  onSelectionUpdate: (talentId: string, selection: Partial<GuestSelection>) => Promise<void>;
+  castingId: string;
+  guestId: string;
+}
+
+const GuestContentWrapper: React.FC<GuestContentWrapperProps> = (props) => {
+  return (
+    <div className="space-y-6">
+      <TalentDisplay {...props} />
+    </div>
+  );
+};
 
 export const GuestLanding = () => {
   const { castingId, guestId } = useParams();
   const { toast } = useToast();
   const [showExportDialog, setShowExportDialog] = useState(false);
   const [showShareDialog, setShowShareDialog] = useState(false);
+  
+  const [viewSettings, setViewSettings] = useState<GuestViewSettings>({
+    view_mode: 'grid',
+    sort_by: 'name',
+    sort_direction: 'asc'
+  });
+  
   const [filters, setFilters] = useState<FilterState>({
     search_term: '',
     show_only_available: false,
     filter_out_rejected: false,
-    show_only_approved_auditions: false,
-  });
-
-  const [viewSettings, setViewSettings] = useState<GuestViewSettings>({
-    view_mode: 'grid',
-    sort_by: 'name',
-    sort_direction: 'asc',
+    show_only_approved_auditions: false
   });
 
   const { data: casting, isLoading: castingLoading, error: castingError } = useQuery({
@@ -203,6 +289,12 @@ export const GuestLanding = () => {
     }
   };
 
+  const status = useMemo(() => ({
+    total: talents?.length ?? 0,
+    selected: Object.keys(selections ?? {}).length,
+    favorites: Object.values(selections ?? {}).filter(s => s.is_favorite).length
+  }), [talents, selections]);
+
   if (castingLoading || talentsLoading) {
     return (
       <div className="flex items-center justify-center min-h-screen">
@@ -219,34 +311,26 @@ export const GuestLanding = () => {
     );
   }
 
-  const status = {
-    total: talents?.length ?? 0,
-    selected: Object.keys(selections).length,
-    favorites: Object.values(selections).filter(s => s.is_favorite).length
-  };
-
   return (
-    <div className="container py-8">
-      <GuestHeader 
-        casting={casting}
+    <div className="container mx-auto px-4 py-6">
+      <GuestHeader
+        castingName={casting?.name ?? "Talent Selection"}
         totalSelected={status.selected}
         onExport={() => setShowExportDialog(true)}
         onShare={() => setShowShareDialog(true)}
       />
-      
+
       <StatusBar status={status} />
 
-      <GuestContent
-        talents={talents || []}
-        selections={selections}
+      <GuestContentWrapper
+        talents={talents ?? []}
+        selections={selections ?? {}}
         viewSettings={viewSettings}
         filters={filters}
         isLoading={talentsLoading}
+        onSelectionUpdate={handleSelectionUpdate}
         castingId={castingId!}
         guestId={guestId!}
-        onFilterChange={setFilters}
-        onViewChange={setViewSettings}
-        onSelectionUpdate={handleSelectionUpdate}
       />
 
       <ExportDialog
