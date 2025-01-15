@@ -6,9 +6,9 @@ import { Loader2 } from "lucide-react";
 import type { GuestViewSettings } from "@/types/guest-filters";
 import type { FilterState } from "@/types/guest-filters";
 import type { GuestSelection } from "@/types/supabase/guest-selection";
-import { GuestHeader } from "./GuestHeader";
-import { StatusBar } from "./StatusBar";
-import { GuestContent } from "./GuestContent";
+import { GuestHeader } from "./header/GuestHeader";
+import { StatusBar } from "./status/StatusBar";
+import { GuestContent } from "./content/GuestContent";
 import { useTalents } from "@/hooks/useTalents";
 import { useSelections } from "@/hooks/useSelections";
 import { useGuestStatus } from "@/hooks/useGuestStatus";
@@ -17,8 +17,6 @@ import { supabase } from "@/integrations/supabase/client";
 export const GuestLanding = () => {
   const { castingId, guestId } = useParams();
   const { toast } = useToast();
-  const [showExportDialog, setShowExportDialog] = useState(false);
-  const [showShareDialog, setShowShareDialog] = useState(false);
   
   const [viewSettings, setViewSettings] = useState<GuestViewSettings>({
     view_mode: 'grid',
@@ -69,7 +67,7 @@ export const GuestLanding = () => {
     }
   };
 
-  const handleExport = async () => {
+  const handleExport = () => {
     try {
       toast({
         title: "Export Started",
@@ -85,7 +83,7 @@ export const GuestLanding = () => {
     }
   };
 
-  const handleShare = async (email: string, message?: string) => {
+  const handleShare = () => {
     try {
       toast({
         title: "Share Successful",
@@ -120,7 +118,8 @@ export const GuestLanding = () => {
   return (
     <div className="container mx-auto px-4 py-6">
       <GuestHeader
-        casting={{ name: "Talent Selection" }}
+        castingName="Talent Selection"
+        totalSelected={status.selected}
         onExport={handleExport}
         onShare={handleShare}
       />
@@ -136,6 +135,8 @@ export const GuestLanding = () => {
         castingId={castingId}
         guestId={guestId}
         onSelectionUpdate={handleSelectionUpdate}
+        onFilterChange={setFilters}
+        onViewChange={setViewSettings}
       />
     </div>
   );
