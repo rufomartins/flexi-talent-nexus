@@ -10,6 +10,8 @@ interface GuestContentProps {
   viewSettings: GuestViewSettings;
   filters: GuestFilters;
   isLoading: boolean;
+  castingId: string;
+  guestId: string;
   onFilterChange: (filters: GuestFilters) => void;
   onViewChange: (settings: GuestViewSettings) => void;
   onSelectionUpdate: (talentId: string, update: Partial<GuestSelection>) => Promise<void>;
@@ -21,6 +23,8 @@ export const GuestContent: React.FC<GuestContentProps> = ({
   viewSettings,
   filters,
   isLoading,
+  castingId,
+  guestId,
   onFilterChange,
   onViewChange,
   onSelectionUpdate,
@@ -41,6 +45,13 @@ export const GuestContent: React.FC<GuestContentProps> = ({
           selections={selections}
           onSelect={onSelectionUpdate}
           isLoading={isLoading}
+          sort={{
+            field: viewSettings.sort_by,
+            direction: viewSettings.sort_direction
+          }}
+          filters={filters}
+          castingId={castingId}
+          guestId={guestId}
         />
       </div>
     </div>

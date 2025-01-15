@@ -73,7 +73,7 @@ export function GuestViewPage({ castingId, guestId }: GuestViewPageProps) {
     }
   });
 
-  const { data: selections, isLoading: selectionsLoading } = useQuery({
+  const { data: selections = {}, isLoading: selectionsLoading } = useQuery({
     queryKey: ['guest-selections', castingId, guestId],
     queryFn: async () => {
       const { data, error } = await supabase
@@ -84,10 +84,21 @@ export function GuestViewPage({ castingId, guestId }: GuestViewPageProps) {
 
       if (error) throw error;
 
-      return data.reduce((acc, selection) => {
-        acc[selection.talent_id] = selection;
-        return acc;
-      }, {} as Record<string, GuestSelection>);
+      return data.reduce((acc, selection) => ({
+        ...acc,
+        [selection.talent_id]: {
+          id: selection.id,
+          casting_id: selection.casting_id,
+          talent_id: selection.talent_id,
+          guest_id: selection.guest_id,
+          preference_order: selection.preference_order,
+          comments: selection.comments,
+          is_favorite: selection.liked || false,
+          status: selection.status || 'shortlisted',
+          created_at: selection.created_at,
+          updated_at: selection.updated_at
+        } as GuestSelection,
+      }), {} as Record<string, GuestSelection>);
     }
   });
 
@@ -98,10 +109,15 @@ export function GuestViewPage({ castingId, guestId }: GuestViewPageProps) {
         casting_id: castingId,
         guest_id: guestId,
         talent_id: talentId,
-        ...update
+        liked: update.is_favorite,
+        comments: update.comments,
+        preference_order: update.preference_order,
+        status: update.status || 'shortlisted'
       });
 
-    if (error) throw error;
+    if (error) {
+      console.error("Error updating selection:", error);
+    }
   };
 
   return (
