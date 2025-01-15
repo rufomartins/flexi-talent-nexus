@@ -1,20 +1,19 @@
 import { useState, useMemo } from "react";
-import { ViewControls } from "./ViewControls";
+import { useToast } from "@/hooks/use-toast";
 import { TalentGrid } from "./TalentGrid";
 import { TalentList } from "./TalentList";
 import type { TalentDisplayProps } from "./types";
-import { useToast } from "@/hooks/use-toast";
 
 export function TalentDisplay({
   talents,
   viewMode,
+  selections,
+  onSelect,
+  isLoading,
   sort,
   filters,
   castingId,
   guestId,
-  selections = {},
-  onSelect,
-  isLoading,
   savingStatus = {},
   errorMessages = {}
 }: TalentDisplayProps) {
@@ -49,7 +48,6 @@ export function TalentDisplay({
 
   const handlePreferenceSet = async (talentId: string, order: number) => {
     try {
-      if (!onSelect) return;
       await onSelect(talentId, { preference_order: order });
       
       toast({
@@ -68,8 +66,6 @@ export function TalentDisplay({
 
   const handleCommentAdd = async (talentId: string, comment: string) => {
     try {
-      if (!onSelect) return;
-      
       await onSelect(talentId, { comments: comment });
       toast({
         title: "Comment Saved",

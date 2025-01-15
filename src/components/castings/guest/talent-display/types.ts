@@ -1,6 +1,16 @@
-import { TalentProfile } from "@/types/talent";
+import type { TalentProfile } from "@/types/talent";
 import type { GuestSelection } from "@/types/supabase/guest-selection";
-import type { SortField, SortDirection, FilterState } from "@/types/guest-filters";
+
+export type SortField = 'name' | 'preferenceOrder' | 'favorite' | 'date_added';
+export type SortDirection = 'asc' | 'desc';
+
+export interface FilterState {
+  search_term: string;
+  show_only_available: boolean;
+  filter_out_rejected: boolean;
+  show_only_approved_auditions: boolean;
+  round_filter?: number;
+}
 
 export interface TalentDisplayProps {
   talents: TalentProfile[];
@@ -15,12 +25,14 @@ export interface TalentDisplayProps {
   filters: FilterState;
   castingId: string;
   guestId: string;
+  savingStatus?: Record<string, boolean>;
+  errorMessages?: Record<string, string>;
 }
 
 export interface TalentGridProps extends TalentDisplayProps {
-  columnCount?: number;
+  viewMode: 'grid';
 }
 
 export interface TalentListProps extends TalentDisplayProps {
-  showDetailedInfo?: boolean;
+  viewMode: 'list';
 }
