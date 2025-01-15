@@ -22,6 +22,14 @@ interface SelectionSummaryProps {
   guestId: string;
 }
 
+interface Selection {
+  talent_id: string;
+  preference_order: number;
+  comments: string | null;
+  talent_name: string;
+  talent_avatar: string | null;
+}
+
 export function SelectionSummary({ castingId, guestId }: SelectionSummaryProps) {
   const { data: selections, isLoading } = useQuery({
     queryKey: ['guest-selections', castingId, guestId],
@@ -34,7 +42,7 @@ export function SelectionSummary({ castingId, guestId }: SelectionSummaryProps) 
           comments,
           talent_profiles!inner (
             id,
-            users (
+            user:user_id (
               full_name,
               avatar_url
             )
@@ -45,7 +53,14 @@ export function SelectionSummary({ castingId, guestId }: SelectionSummaryProps) 
         .order('preference_order', { ascending: true });
 
       if (error) throw error;
-      return data;
+
+      return data.map((selection) => ({
+        talent_id: selection.talent_id,
+        preference_order: selection.preference_order,
+        comments: selection.comments,
+        talent_name: selection.talent_profiles.user.full_name,
+        talent_avatar: selection.talent_profiles.user.avatar_url
+      })) as Selection[];
     }
   });
 
@@ -76,15 +91,15 @@ export function SelectionSummary({ castingId, guestId }: SelectionSummaryProps) 
               <div className="flex items-center gap-2 flex-grow">
                 <Avatar>
                   <AvatarImage 
-                    src={selection.talent_profiles.users.avatar_url} 
-                    alt={selection.talent_profiles.users.full_name} 
+                    src={selection.talent_avatar || undefined} 
+                    alt={selection.talent_name} 
                   />
                   <AvatarFallback>
-                    {selection.talent_profiles.users.full_name.charAt(0)}
+                    {selection.talent_name.charAt(0)}
                   </AvatarFallback>
                 </Avatar>
                 <span className="font-medium">
-                  {selection.talent_profiles.users.full_name}
+                  {selection.talent_name}
                 </span>
               </div>
 

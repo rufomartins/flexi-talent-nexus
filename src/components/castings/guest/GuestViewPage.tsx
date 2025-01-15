@@ -49,18 +49,32 @@ export function GuestViewPage({ castingId, guestId }: GuestViewPageProps) {
           talent_id,
           talent_profiles!inner (
             id,
-            users (
+            talent_category,
+            country,
+            native_language,
+            user:user_id (
               id,
               full_name,
               avatar_url
-            ),
-            native_language
+            )
           )
         `)
         .eq('casting_id', castingId);
       
       if (error) throw error;
-      return data;
+      
+      return data.map((item) => ({
+        id: item.talent_profiles.id,
+        user_id: item.talent_profiles.user.id,
+        talent_category: item.talent_profiles.talent_category,
+        country: item.talent_profiles.country,
+        native_language: item.talent_profiles.native_language,
+        users: {
+          id: item.talent_profiles.user.id,
+          full_name: item.talent_profiles.user.full_name,
+          avatar_url: item.talent_profiles.user.avatar_url
+        }
+      }));
     }
   });
 
