@@ -1,22 +1,18 @@
 import { Grid, List } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import type { SortField, SortDirection } from "@/types/guest-filters";
 
 interface ViewControlsProps {
   viewMode: 'grid' | 'list';
   onViewChange: (mode: 'grid' | 'list') => void;
-  searchQuery: string;
-  onSearchChange: (query: string) => void;
-  sortOption: { field: string; direction: 'asc' | 'desc' };
-  onSortChange: (option: { field: string; direction: 'asc' | 'desc' }) => void;
+  sortOption: { field: SortField; direction: SortDirection };
+  onSortChange: (option: { field: SortField; direction: SortDirection }) => void;
 }
 
 export function ViewControls({
   viewMode,
   onViewChange,
-  searchQuery,
-  onSearchChange,
   sortOption,
   onSortChange,
 }: ViewControlsProps) {
@@ -39,20 +35,10 @@ export function ViewControls({
         </Button>
       </div>
 
-      <div className="flex-grow max-w-md">
-        <Input
-          type="text"
-          value={searchQuery}
-          onChange={(e) => onSearchChange(e.target.value)}
-          placeholder="Search talents..."
-          className="w-full"
-        />
-      </div>
-
       <Select
         value={`${sortOption.field}-${sortOption.direction}`}
         onValueChange={(value) => {
-          const [field, direction] = value.split('-') as [string, 'asc' | 'desc'];
+          const [field, direction] = value.split('-') as [SortField, SortDirection];
           onSortChange({ field, direction });
         }}
       >
@@ -62,8 +48,10 @@ export function ViewControls({
         <SelectContent>
           <SelectItem value="name-asc">Name (A-Z)</SelectItem>
           <SelectItem value="name-desc">Name (Z-A)</SelectItem>
-          <SelectItem value="preferenceOrder-asc">Preference (Low to High)</SelectItem>
-          <SelectItem value="preferenceOrder-desc">Preference (High to Low)</SelectItem>
+          <SelectItem value="favorite-asc">Favorites (Low to High)</SelectItem>
+          <SelectItem value="favorite-desc">Favorites (High to Low)</SelectItem>
+          <SelectItem value="date_added-asc">Date Added (Oldest)</SelectItem>
+          <SelectItem value="date_added-desc">Date Added (Newest)</SelectItem>
         </SelectContent>
       </Select>
     </div>

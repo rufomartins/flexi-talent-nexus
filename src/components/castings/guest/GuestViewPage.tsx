@@ -1,15 +1,8 @@
 import { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
-import { LayoutGrid, List, Loader2 } from "lucide-react";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { 
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue 
-} from "@/components/ui/select";
+import { Loader2 } from "lucide-react";
+import { ViewControls } from "./talent-display/ViewControls";
+import { SearchFilterBar } from "./talent-display/SearchFilterBar";
 import { TalentDisplay } from "./talent-display/TalentDisplay";
 import { SelectionSummary } from "./SelectionSummary";
 import { supabase } from "@/integrations/supabase/client";
@@ -23,6 +16,7 @@ interface GuestViewPageProps {
 }
 
 export function GuestViewPage({ castingId, guestId }: GuestViewPageProps) {
+  const [viewMode, setViewMode] = useState<'grid' | 'list'>('grid');
   const [sort, setSort] = useState<{field: SortField; direction: SortDirection}>({
     field: 'name',
     direction: 'asc'
@@ -34,8 +28,6 @@ export function GuestViewPage({ castingId, guestId }: GuestViewPageProps) {
     filter_out_rejected: false,
     show_only_approved_auditions: false,
   });
-  
-  const [viewMode, setViewMode] = useState<'grid' | 'list'>('grid');
 
   const { data: talents, isLoading: talentsLoading } = useQuery({
     queryKey: ['casting-talents', castingId],
@@ -88,18 +80,7 @@ export function GuestViewPage({ castingId, guestId }: GuestViewPageProps) {
 
       return data.reduce((acc, selection) => ({
         ...acc,
-        [selection.talent_id]: {
-          id: selection.id,
-          casting_id: selection.casting_id,
-          talent_id: selection.talent_id,
-          guest_id: selection.guest_id,
-          preference_order: selection.preference_order,
-          comments: selection.comments,
-          is_favorite: selection.liked || false,
-          status: selection.status || 'shortlisted',
-          created_at: selection.created_at,
-          updated_at: selection.updated_at
-        } as GuestSelection,
+        [selection.talent_id]: selection as GuestSelection,
       }), {} as Record<string, GuestSelection>);
     }
   });
@@ -111,10 +92,7 @@ export function GuestViewPage({ castingId, guestId }: GuestViewPageProps) {
         casting_id: castingId,
         guest_id: guestId,
         talent_id: talentId,
-        liked: update.is_favorite,
-        comments: update.comments,
-        preference_order: update.preference_order,
-        status: update.status || 'shortlisted'
+        ...update
       });
 
     if (error) {
@@ -138,76 +116,17 @@ export function GuestViewPage({ castingId, guestId }: GuestViewPageProps) {
       </div>
 
       {/* Controls Section */}
-      <div className="bg-white rounded-lg shadow p-4 mb-6">
-        <div className="flex flex-wrap gap-4 items-center">
-          {/* View Toggle */}
-          <div className="flex gap-2">
-            <Button
-              variant={viewMode === 'grid' ? 'default' : 'outline'}
-              onClick={() => setViewMode('grid')}
-            >
-              <LayoutGrid className="w-4 h-4" />
-            </Button>
-            <Button
-              variant={viewMode === 'list' ? 'default' : 'outline'}
-              onClick={() => setViewMode('list')}
-            >
-              <List className="w-4 h-4" />
-            </Button>
-          </div>
-
-          {/* Search Input */}
-          <div className="flex-grow max-w-md">
-            <Input
-              placeholder="Search talents..."
-              value={filters.search_term}
-              onChange={(e) => setFilters(prev => ({
-                ...prev,
-                search_term: e.target.value
-              }))}
-              className="w-full"
-            />
-          </div>
-
-          {/* Sort Controls */}
-          <Select
-            value={`${sort.field}-${sort.direction}`}
-            onValueChange={(value) => {
-              const [field, direction] = value.split('-') as [SortField, SortDirection];
-              setSort({ field, direction });
-            }}
-          >
-            <SelectTrigger className="w-[180px]">
-              <SelectValue placeholder="Sort by" />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="name-asc">Name (A-Z)</SelectItem>
-              <SelectItem value="name-desc">Name (Z-A)</SelectItem>
-              <SelectItem value="favorite-asc">Favorites (Low to High)</SelectItem>
-              <SelectItem value="favorite-desc">Favorites (High to Low)</SelectItem>
-            </SelectContent>
-          </Select>
-
-          {/* Filter by Selection Status */}
-          <Select
-            value={filters.show_only_available ? 'selected' : 'all'}
-            onValueChange={(value) => 
-              setFilters(prev => ({ 
-                ...prev, 
-                show_only_available: value === 'selected'
-              }))
-            }
-          >
-            <SelectTrigger className="w-[180px]">
-              <SelectValue placeholder="Filter by status" />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="all">All Talents</SelectItem>
-              <SelectItem value="selected">Selected Only</SelectItem>
-              <SelectItem value="unselected">Unselected Only</SelectItem>
-            </SelectContent>
-          </Select>
-        </div>
+      <div className="bg-white rounded-lg shadow p-4 mb-6 space-y-4">
+        <ViewControls
+          viewMode={viewMode}
+          onViewChange={setViewMode}
+          sortOption={sort}
+          onSortChange={setSort}
+        />
+        <SearchFilterBar
+          filters={filters}
+          onFilterChange={setFilters}
+        />
       </div>
 
       {/* Talents Display */}
