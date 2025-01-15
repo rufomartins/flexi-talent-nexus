@@ -5,15 +5,14 @@ import { Loader2 } from "lucide-react";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { useState } from "react";
 import { useToast } from "@/hooks/use-toast";
-import { GuestHeader } from "./GuestHeader";
-import { GuestBriefing } from "./GuestBriefing";
-import { GuestContent } from "./GuestContent";
+import { GuestHeader } from "./header/GuestHeader";
+import { StatusBar } from "./status/StatusBar";
+import { GuestContent } from "./content/GuestContent";
 import { ExportDialog } from "./export/ExportDialog";
 import { ShareDialog } from "./share/ShareDialog";
 import type { FilterState, GuestViewSettings } from "@/types/guest-filters";
 import type { GuestSelection } from "@/types/supabase/guest-selection";
 import type { ExportConfig } from "@/types/supabase/export";
-import type { TalentProfile } from "@/types/talent";
 
 export const GuestLanding = () => {
   const { castingId, guestId } = useParams();
@@ -95,21 +94,6 @@ export const GuestLanding = () => {
         );
       }
 
-      filteredData.sort((a, b) => {
-        const direction = viewSettings.sort_direction === 'asc' ? 1 : -1;
-        
-        switch (viewSettings.sort_by) {
-          case 'name':
-            const nameA = `${a.talent?.users?.first_name} ${a.talent?.users?.last_name}`;
-            const nameB = `${b.talent?.users?.first_name} ${b.talent?.users?.last_name}`;
-            return nameA.localeCompare(nameB) * direction;
-          case 'date_added':
-            return (new Date(a.created_at).getTime() - new Date(b.created_at).getTime()) * direction;
-          default:
-            return 0;
-        }
-      });
-
       return filteredData.map(item => {
         const talentProfile = item.talent;
         if (!talentProfile) return null;
@@ -189,7 +173,6 @@ export const GuestLanding = () => {
 
   const handleExport = async (config: ExportConfig) => {
     try {
-      // Export logic will be implemented here
       toast({
         title: "Export Started",
         description: "Your export is being processed"
@@ -206,7 +189,6 @@ export const GuestLanding = () => {
 
   const handleShare = async (email: string, message?: string) => {
     try {
-      // Share logic will be implemented here
       toast({
         title: "Share Successful",
         description: "Invitation has been sent"
@@ -237,18 +219,22 @@ export const GuestLanding = () => {
     );
   }
 
+  const status = {
+    total: talents?.length ?? 0,
+    selected: Object.keys(selections).length,
+    favorites: Object.values(selections).filter(s => s.is_favorite).length
+  };
+
   return (
     <div className="container py-8">
       <GuestHeader 
         casting={casting}
+        totalSelected={status.selected}
         onExport={() => setShowExportDialog(true)}
         onShare={() => setShowShareDialog(true)}
       />
       
-      <GuestBriefing 
-        briefing={casting.briefing}
-        clientLogo={casting.logo_url}
-      />
+      <StatusBar status={status} />
 
       <GuestContent
         talents={talents || []}
