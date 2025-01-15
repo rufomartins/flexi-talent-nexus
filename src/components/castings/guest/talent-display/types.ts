@@ -1,18 +1,26 @@
 import { TalentProfile } from "@/types/talent";
 import type { GuestSelection } from "@/types/supabase/guest-selection";
 
-export interface SelectionState {
-  talentId: string;
-  preferenceOrder: number;
-  status: 'pending' | 'saved' | 'error';
-  timestamp: Date;
+export type SortField = 'name' | 'preferenceOrder';
+export type SortDirection = 'asc' | 'desc';
+
+export interface FilterState {
+  search: string;
+  preferenceStatus: 'all' | 'selected' | 'unselected';
 }
 
 export interface TalentDisplayProps {
   talents: TalentProfile[];
   viewMode: 'grid' | 'list';
-  selections: Record<string, GuestSelection>;
-  onSelect: (talentId: string, update: Partial<GuestSelection>) => Promise<void>;
+  sort: {
+    field: SortField;
+    direction: SortDirection;
+  };
+  filters: FilterState;
+  castingId: string;
+  guestId: string;
+  selections?: Record<string, GuestSelection>;
+  onSelect?: (talentId: string, update: Partial<GuestSelection>) => Promise<void>;
   isLoading?: boolean;
   savingStatus?: Record<string, boolean>;
   errorMessages?: Record<string, string>;

@@ -1,27 +1,29 @@
 import { useState, useMemo } from "react";
 import { ViewControls } from "./ViewControls";
-import { TalentCard } from "./TalentCard";
+import { TalentGrid } from "./TalentGrid";
+import { TalentList } from "./TalentList";
 import type { TalentDisplayProps } from "./types";
 import { useToast } from "@/hooks/use-toast";
 
 export function TalentDisplay({
   talents,
   viewMode,
-  selections,
+  sort,
+  filters,
+  castingId,
+  guestId,
+  selections = {},
   onSelect,
   isLoading,
   savingStatus = {},
   errorMessages = {}
 }: TalentDisplayProps) {
-  const [searchQuery, setSearchQuery] = useState("");
-  const [sortOption, setSortOption] = useState<{ field: string; direction: 'asc' | 'desc' }>({ 
-    field: 'name', 
-    direction: 'asc' 
-  });
   const { toast } = useToast();
 
   const handlePreferenceSet = async (talentId: string, order: number) => {
     try {
+      if (!onSelect) return;
+
       // Check for duplicate preference order
       const existingSelection = Object.values(selections).find(
         s => s.preference_order === order && s.talent_id !== talentId
@@ -54,6 +56,8 @@ export function TalentDisplay({
 
   const handleCommentAdd = async (talentId: string, comment: string) => {
     try {
+      if (!onSelect) return;
+      
       await onSelect(talentId, { comments: comment });
       toast({
         title: "Comment Saved",
@@ -72,23 +76,23 @@ export function TalentDisplay({
   const filteredAndSortedTalents = useMemo(() => {
     return talents
       .filter(talent => 
-        talent.users.full_name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        talent.native_language?.toLowerCase().includes(searchQuery.toLowerCase())
+        talent.users.full_name.toLowerCase().includes(filters.search.toLowerCase()) ||
+        talent.native_language?.toLowerCase().includes(filters.search.toLowerCase())
       )
       .sort((a, b) => {
-        if (sortOption.field === 'name') {
-          return sortOption.direction === 'asc'
+        if (sort.field === 'name') {
+          return sort.direction === 'asc'
             ? a.users.full_name.localeCompare(b.users.full_name)
             : b.users.full_name.localeCompare(a.users.full_name);
         }
-        if (sortOption.field === 'preferenceOrder') {
+        if (sort.field === 'preferenceOrder') {
           const orderA = selections[a.id]?.preference_order || 0;
           const orderB = selections[b.id]?.preference_order || 0;
-          return sortOption.direction === 'asc' ? orderA - orderB : orderB - orderA;
+          return sort.direction === 'asc' ? orderA - orderB : orderB - orderA;
         }
         return 0;
       });
-  }, [talents, searchQuery, sortOption, selections]);
+  }, [talents, filters.search, sort, selections]);
 
   if (isLoading) {
     return <div>Loading...</div>;
@@ -96,33 +100,35 @@ export function TalentDisplay({
 
   return (
     <div className="space-y-6">
-      <ViewControls
-        viewMode={viewMode}
-        onViewChange={() => {}}
-        searchQuery={searchQuery}
-        onSearchChange={setSearchQuery}
-        sortOption={sortOption}
-        onSortChange={setSortOption}
-      />
-      
-      <div className={
-        viewMode === 'grid' 
-          ? 'grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6'
-          : 'space-y-4'
-      }>
-        {filteredAndSortedTalents.map(talent => (
-          <TalentCard
-            key={talent.id}
-            talent={talent}
-            selection={selections[talent.id]}
-            onPreferenceSet={handlePreferenceSet}
-            onCommentAdd={handleCommentAdd}
-            view={viewMode}
-            isSaving={savingStatus[talent.id]}
-            errorMessage={errorMessages[talent.id]}
-          />
-        ))}
-      </div>
+      {viewMode === 'grid' ? (
+        <TalentGrid
+          talents={filteredAndSortedTalents}
+          viewMode={viewMode}
+          sort={sort}
+          filters={filters}
+          castingId={castingId}
+          guestId={guestId}
+          selections={selections}
+          onSelect={onSelect}
+          isLoading={isLoading}
+          savingStatus={savingStatus}
+          errorMessages={errorMessages}
+        />
+      ) : (
+        <TalentList
+          talents={filteredAndSortedTalents}
+          viewMode={viewMode}
+          sort={sort}
+          filters={filters}
+          castingId={castingId}
+          guestId={guestId}
+          selections={selections}
+          onSelect={onSelect}
+          isLoading={isLoading}
+          savingStatus={savingStatus}
+          errorMessages={errorMessages}
+        />
+      )}
     </div>
   );
 }

@@ -14,18 +14,12 @@ import { TalentDisplay } from "./talent-display/TalentDisplay";
 import { SelectionSummary } from "./SelectionSummary";
 import { supabase } from "@/integrations/supabase/client";
 import type { TalentProfile } from "@/types/talent";
+import type { FilterState, SortField, SortDirection } from "./talent-display/types";
+import type { GuestSelection } from "@/types/supabase/guest-selection";
 
 interface GuestViewPageProps {
   castingId: string;
   guestId: string;
-}
-
-type SortField = 'name' | 'preferenceOrder';
-type SortDirection = 'asc' | 'desc';
-
-interface FilterState {
-  search: string;
-  preferenceStatus: 'all' | 'selected' | 'unselected';
 }
 
 export function GuestViewPage({ castingId, guestId }: GuestViewPageProps) {
@@ -79,7 +73,36 @@ export function GuestViewPage({ castingId, guestId }: GuestViewPageProps) {
     }
   });
 
-  // ... keep existing code (Header Section, Selection Summary, Controls Section)
+  const { data: selections, isLoading: selectionsLoading } = useQuery({
+    queryKey: ['guest-selections', castingId, guestId],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from('guest_selections')
+        .select('*')
+        .eq('casting_id', castingId)
+        .eq('guest_id', guestId);
+
+      if (error) throw error;
+
+      return data.reduce((acc, selection) => {
+        acc[selection.talent_id] = selection;
+        return acc;
+      }, {} as Record<string, GuestSelection>);
+    }
+  });
+
+  const handleSelect = async (talentId: string, update: Partial<GuestSelection>) => {
+    const { error } = await supabase
+      .from('guest_selections')
+      .upsert({
+        casting_id: castingId,
+        guest_id: guestId,
+        talent_id: talentId,
+        ...update
+      });
+
+    if (error) throw error;
+  };
 
   return (
     <div className="container mx-auto px-4 py-6">
@@ -167,7 +190,7 @@ export function GuestViewPage({ castingId, guestId }: GuestViewPageProps) {
       </div>
 
       {/* Talents Display */}
-      {talentsLoading ? (
+      {talentsLoading || selectionsLoading ? (
         <div className="flex justify-center py-12">
           <Loader2 className="w-8 h-8 animate-spin" />
         </div>
@@ -179,6 +202,9 @@ export function GuestViewPage({ castingId, guestId }: GuestViewPageProps) {
           filters={filters}
           castingId={castingId}
           guestId={guestId}
+          selections={selections}
+          onSelect={handleSelect}
+          isLoading={talentsLoading || selectionsLoading}
         />
       )}
     </div>
