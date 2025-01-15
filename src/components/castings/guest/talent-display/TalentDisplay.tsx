@@ -1,5 +1,4 @@
-import { useState, useMemo } from "react";
-import { useToast } from "@/hooks/use-toast";
+import { useMemo } from "react";
 import { TalentGrid } from "./TalentGrid";
 import { TalentList } from "./TalentList";
 import type { TalentDisplayProps } from "./types";
@@ -17,8 +16,6 @@ export function TalentDisplay({
   savingStatus = {},
   errorMessages = {}
 }: TalentDisplayProps) {
-  const { toast } = useToast();
-
   const filteredTalents = useMemo(() => {
     return talents
       .filter(talent => {
@@ -45,45 +42,6 @@ export function TalentDisplay({
         }
       });
   }, [talents, sort, filters, selections]);
-
-  const handlePreferenceSet = async (talentId: string, order: number) => {
-    try {
-      await onSelect(talentId, { preference_order: order });
-      
-      toast({
-        title: "Selection Saved",
-        description: "Your preference has been updated",
-      });
-    } catch (error) {
-      console.error("Error setting preference:", error);
-      toast({
-        title: "Error",
-        description: "Failed to save your preference",
-        variant: "destructive"
-      });
-    }
-  };
-
-  const handleCommentAdd = async (talentId: string, comment: string) => {
-    try {
-      await onSelect(talentId, { comments: comment });
-      toast({
-        title: "Comment Saved",
-        description: "Your comment has been updated",
-      });
-    } catch (error) {
-      console.error("Error adding comment:", error);
-      toast({
-        title: "Error",
-        description: "Failed to save your comment",
-        variant: "destructive"
-      });
-    }
-  };
-
-  if (isLoading) {
-    return <div>Loading...</div>;
-  }
 
   return (
     <div className="space-y-6">

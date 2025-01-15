@@ -1,16 +1,6 @@
 import type { TalentProfile } from "@/types/talent";
 import type { GuestSelection } from "@/types/supabase/guest-selection";
-
-export type SortField = 'name' | 'preferenceOrder' | 'favorite' | 'date_added';
-export type SortDirection = 'asc' | 'desc';
-
-export interface FilterState {
-  search_term: string;
-  show_only_available: boolean;
-  filter_out_rejected: boolean;
-  show_only_approved_auditions: boolean;
-  round_filter?: number;
-}
+import type { FilterState } from "@/types/guest-filters";
 
 export interface TalentDisplayProps {
   talents: TalentProfile[];
@@ -19,8 +9,8 @@ export interface TalentDisplayProps {
   onSelect: (talentId: string, update: Partial<GuestSelection>) => Promise<void>;
   isLoading: boolean;
   sort: {
-    field: SortField;
-    direction: SortDirection;
+    field: 'name' | 'favorite' | 'date_added';
+    direction: 'asc' | 'desc';
   };
   filters: FilterState;
   castingId: string;

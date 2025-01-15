@@ -7,12 +7,12 @@ export interface GuestViewSettings {
   sort_direction: SortDirection;
 }
 
-export interface GuestFilters {
-  search_term?: string;
+export interface FilterState {
+  search_term: string;
   show_only_available: boolean;
   filter_out_rejected: boolean;
   show_only_approved_auditions: boolean;
   round_filter?: number;
 }
 
-export type FilterState = GuestFilters;
+export type GuestFilters = FilterState;
