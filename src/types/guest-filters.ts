@@ -1,9 +1,9 @@
 export interface GuestFilters {
-  show_only_available: boolean;
-  filter_out_rejected: boolean;
-  show_only_approved_auditions: boolean;
-  round_filter?: number;
   search_term?: string;
+  show_only_available?: boolean;
+  filter_out_rejected?: boolean;
+  show_only_approved_auditions?: boolean;
+  round_filter?: number;
 }
 
 export interface GuestViewSettings {
