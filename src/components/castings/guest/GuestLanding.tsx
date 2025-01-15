@@ -10,7 +10,10 @@ import { useToast } from "@/hooks/use-toast";
 import type { TalentProfile } from "@/types/talent";
 import type { FilterState, GuestViewSettings } from "@/types/guest-filters";
 import type { GuestSelection } from "@/types/supabase/guest-selection";
+import type { ExportConfig } from "@/types/supabase/export";
 import { TalentDisplay } from "./talent-display/TalentDisplay";
+import { ExportDialog } from "./export/ExportDialog";
+import { ShareDialog } from "./share/ShareDialog";
 
 interface GuestHeaderProps {
   castingName: string;
@@ -94,7 +97,15 @@ interface GuestContentWrapperProps {
 const GuestContentWrapper: React.FC<GuestContentWrapperProps> = (props) => {
   return (
     <div className="space-y-6">
-      <TalentDisplay {...props} />
+      <TalentDisplay 
+        {...props}
+        viewMode={props.viewSettings.view_mode}
+        onSelect={props.onSelectionUpdate}
+        sort={{
+          field: props.viewSettings.sort_by,
+          direction: props.viewSettings.sort_direction
+        }}
+      />
     </div>
   );
 };

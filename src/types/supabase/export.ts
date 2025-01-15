@@ -4,12 +4,12 @@ export interface ExportConfig {
     talents: boolean;
     comments: boolean;
     preferences: boolean;
-    media?: boolean;
+    media: boolean;
   };
-  filterBy?: {
-    favorited?: boolean;
-    hasComments?: boolean;
-    preferenceRange?: {
+  filterBy: {
+    favorited: boolean;
+    hasComments: boolean;
+    preferenceRange: {
       min: number;
       max: number;
     };
