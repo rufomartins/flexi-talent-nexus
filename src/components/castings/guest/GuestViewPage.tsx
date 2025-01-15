@@ -7,7 +7,7 @@ import { TalentDisplay } from "./talent-display/TalentDisplay";
 import { SelectionSummary } from "./SelectionSummary";
 import { supabase } from "@/integrations/supabase/client";
 import type { TalentProfile } from "@/types/talent";
-import type { FilterState, SortField, SortDirection } from "@/types/guest-filters";
+import type { FilterState, SortField, SortDirection, GuestViewSettings } from "@/types/guest-filters";
 import type { GuestSelection } from "@/types/supabase/guest-selection";
 
 interface GuestViewPageProps {
@@ -80,7 +80,10 @@ export function GuestViewPage({ castingId, guestId }: GuestViewPageProps) {
 
       return data.reduce((acc, selection) => ({
         ...acc,
-        [selection.talent_id]: selection as GuestSelection,
+        [selection.talent_id]: {
+          ...selection,
+          is_favorite: selection.liked // Map 'liked' to 'is_favorite'
+        } as GuestSelection,
       }), {} as Record<string, GuestSelection>);
     }
   });

@@ -12,6 +12,12 @@ export interface FilterState {
   round_filter?: number;
 }
 
+export interface GuestViewSettings {
+  view_mode: 'grid' | 'list';
+  sort_by: SortField;
+  sort_direction: SortDirection;
+}
+
 export interface TalentDisplayProps {
   talents: TalentProfile[];
   viewMode: 'grid' | 'list';
@@ -35,4 +41,8 @@ export interface TalentGridProps extends TalentDisplayProps {
 
 export interface TalentListProps extends TalentDisplayProps {
   viewMode: 'list';
+}
+
+export interface GuestFilters extends FilterState {
+  // Additional guest-specific filter properties can be added here
 }
