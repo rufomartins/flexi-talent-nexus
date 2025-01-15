@@ -31,8 +31,10 @@ export interface TalentDisplayProps {
 
 export interface TalentGridProps extends TalentDisplayProps {
   viewMode: 'grid';
+  columnCount?: number;
 }
 
 export interface TalentListProps extends TalentDisplayProps {
   viewMode: 'list';
+  showDetailedInfo?: boolean;
 }

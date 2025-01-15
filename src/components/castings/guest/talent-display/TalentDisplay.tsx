@@ -89,31 +89,35 @@ export function TalentDisplay({
     <div className="space-y-6">
       {viewMode === 'grid' ? (
         <TalentGrid
-          talents={filteredTalents}
-          viewMode={viewMode}
-          sort={sort}
-          filters={filters}
-          castingId={castingId}
-          guestId={guestId}
-          selections={selections}
-          onSelect={onSelect}
-          isLoading={isLoading}
-          savingStatus={savingStatus}
-          errorMessages={errorMessages}
+          {...{
+            talents: filteredTalents,
+            viewMode,
+            selections,
+            onSelect,
+            isLoading,
+            sort,
+            filters,
+            castingId,
+            guestId,
+            savingStatus,
+            errorMessages
+          }}
         />
       ) : (
         <TalentList
-          talents={filteredTalents}
-          viewMode={viewMode}
-          sort={sort}
-          filters={filters}
-          castingId={castingId}
-          guestId={guestId}
-          selections={selections}
-          onSelect={onSelect}
-          isLoading={isLoading}
-          savingStatus={savingStatus}
-          errorMessages={errorMessages}
+          {...{
+            talents: filteredTalents,
+            viewMode,
+            selections,
+            onSelect,
+            isLoading,
+            sort,
+            filters,
+            castingId,
+            guestId,
+            savingStatus,
+            errorMessages
+          }}
         />
       )}
     </div>
