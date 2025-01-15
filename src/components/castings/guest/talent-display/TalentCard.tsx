@@ -1,10 +1,21 @@
-import { useState } from "react";
-import { MessageSquare, Heart, Loader2 } from "lucide-react";
+import { Heart, MessageSquare, Loader2 } from "lucide-react";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
-import type { TalentCardProps } from "./types";
+import { useState } from "react";
+import type { TalentProfile } from "@/types/talent";
+import type { GuestSelection } from "@/types/supabase/guest-selection";
+
+interface TalentCardProps {
+  talent: TalentProfile;
+  selection?: GuestSelection;
+  view: 'grid' | 'list';
+  onPreferenceSet: (talentId: string, order: number) => Promise<void>;
+  onCommentAdd: (talentId: string, comment: string) => Promise<void>;
+  isSaving?: boolean;
+  errorMessage?: string;
+}
 
 export function TalentCard({
   talent,
@@ -41,15 +52,14 @@ export function TalentCard({
           {talent.users?.avatar_url ? (
             <img
               src={talent.users.avatar_url}
-              alt={`${talent.users.first_name} ${talent.users.last_name}`}
+              alt={talent.users.full_name}
               className="w-full h-full object-cover"
             />
           ) : (
             <div className="w-full h-full flex items-center justify-center">
               <Avatar className="h-20 w-20">
                 <AvatarFallback>
-                  {talent.users?.first_name?.[0]}
-                  {talent.users?.last_name?.[0]}
+                  {talent.users?.full_name?.[0]}
                 </AvatarFallback>
               </Avatar>
             </div>
@@ -60,7 +70,7 @@ export function TalentCard({
         <div className="flex items-start justify-between mb-4">
           <div>
             <h3 className="font-medium">
-              {talent.users?.first_name} {talent.users?.last_name}
+              {talent.users?.full_name}
             </h3>
             <p className="text-sm text-gray-600">{talent.native_language}</p>
           </div>
@@ -77,9 +87,7 @@ export function TalentCard({
               size="icon"
               onClick={() => onCommentAdd(talent.id, comment)}
             >
-              <Heart
-                className={`h-4 w-4 ${selection?.liked ? "fill-red-500 text-red-500" : ""}`}
-              />
+              <Heart className="h-4 w-4" />
             </Button>
           </div>
         </div>
