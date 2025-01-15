@@ -1,7 +1,7 @@
 import { useMemo } from "react";
 import { TalentGrid } from "./TalentGrid";
 import { TalentList } from "./TalentList";
-import type { TalentDisplayProps } from "./types";
+import type { TalentDisplayProps } from "@/types/guest-filters";
 
 export function TalentDisplay({
   talents,

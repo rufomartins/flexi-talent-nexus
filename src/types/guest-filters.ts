@@ -1,4 +1,5 @@
 import type { TalentProfile } from "./talent";
+import type { GuestSelection } from "./supabase/guest-selection";
 
 export type SortField = 'name' | 'favorite' | 'date_added';
 export type SortDirection = 'asc' | 'desc';
@@ -22,6 +23,9 @@ export type GuestFilters = FilterState;
 export interface TalentDisplayProps {
   talents: TalentProfile[];
   viewMode: 'grid' | 'list';
+  selections: Record<string, GuestSelection>;
+  onSelect: (talentId: string, update: Partial<GuestSelection>) => Promise<void>;
+  isLoading: boolean;
   sort: {
     field: SortField;
     direction: SortDirection;
@@ -31,4 +35,12 @@ export interface TalentDisplayProps {
   guestId: string;
   savingStatus?: { [key: string]: boolean };
   errorMessages?: { [key: string]: string };
+}
+
+export interface TalentGridProps extends TalentDisplayProps {
+  viewMode: 'grid';
+}
+
+export interface TalentListProps extends TalentDisplayProps {
+  viewMode: 'list';
 }
