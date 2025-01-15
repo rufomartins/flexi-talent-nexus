@@ -21,6 +21,6 @@ export interface TalentCardProps {
   talent: TalentProfile;
   selection?: GuestSelection;
   view: 'grid' | 'list';
-  onPreferenceSet: (order: number) => Promise<void>;
-  onCommentAdd: (comment: string) => Promise<void>;
+  onPreferenceSet: (talentId: string, order: number) => Promise<void>;
+  onCommentAdd: (talentId: string, comment: string) => Promise<void>;
 }

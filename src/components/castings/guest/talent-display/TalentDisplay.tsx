@@ -72,8 +72,8 @@ export function TalentDisplay({
             key={talent.id}
             talent={talent}
             selection={selections[talent.id]}
-            onPreferenceSet={async (order: number) => await handlePreferenceSet(talent.id, order)}
-            onCommentAdd={async (comment: string) => await handleCommentAdd(talent.id, comment)}
+            onPreferenceSet={async (talentId, order) => await handlePreferenceSet(talentId, order)}
+            onCommentAdd={async (talentId, comment) => await handleCommentAdd(talentId, comment)}
             view={viewMode}
           />
         ))}
