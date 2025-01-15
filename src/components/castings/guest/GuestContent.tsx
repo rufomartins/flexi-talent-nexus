@@ -1,18 +1,18 @@
 import { FilterControls } from "./FilterControls";
 import { TalentDisplay } from "./talent-display/TalentDisplay";
 import type { TalentProfile } from "@/types/talent";
-import type { GuestFilters, GuestViewSettings } from "@/types/guest-filters";
+import type { FilterState, GuestViewSettings } from "@/types/guest-filters";
 import type { GuestSelection } from "@/types/supabase/guest-selection";
 
 interface GuestContentProps {
   talents: TalentProfile[];
   selections: Record<string, GuestSelection>;
   viewSettings: GuestViewSettings;
-  filters: GuestFilters;
+  filters: FilterState;
   isLoading: boolean;
   castingId: string;
   guestId: string;
-  onFilterChange: (filters: GuestFilters) => void;
+  onFilterChange: (filters: FilterState) => void;
   onViewChange: (settings: GuestViewSettings) => void;
   onSelectionUpdate: (talentId: string, update: Partial<GuestSelection>) => Promise<void>;
 }

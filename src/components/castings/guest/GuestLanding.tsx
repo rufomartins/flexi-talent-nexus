@@ -10,7 +10,7 @@ import { GuestBriefing } from "./GuestBriefing";
 import { GuestContent } from "./GuestContent";
 import { ExportDialog } from "./export/ExportDialog";
 import { ShareDialog } from "./share/ShareDialog";
-import type { GuestFilters, GuestViewSettings } from "@/types/guest-filters";
+import type { FilterState, GuestViewSettings } from "@/types/guest-filters";
 import type { GuestSelection } from "@/types/supabase/guest-selection";
 import type { ExportConfig } from "@/types/supabase/export";
 import type { TalentProfile } from "@/types/talent";
@@ -20,11 +20,12 @@ export const GuestLanding = () => {
   const { toast } = useToast();
   const [showExportDialog, setShowExportDialog] = useState(false);
   const [showShareDialog, setShowShareDialog] = useState(false);
-  const [filters, setFilters] = useState<GuestFilters>({
+  const [filters, setFilters] = useState<FilterState>({
+    search: '',
+    preferenceStatus: 'all',
     show_only_available: false,
     filter_out_rejected: false,
     show_only_approved_auditions: false,
-    search_term: '',
   });
 
   const [viewSettings, setViewSettings] = useState<GuestViewSettings>({
@@ -87,8 +88,8 @@ export const GuestLanding = () => {
 
       let filteredData = data;
 
-      if (filters.search_term) {
-        const searchLower = filters.search_term.toLowerCase();
+      if (filters.search) {
+        const searchLower = filters.search.toLowerCase();
         filteredData = filteredData.filter(item => 
           item.talent?.users?.first_name?.toLowerCase().includes(searchLower) ||
           item.talent?.users?.last_name?.toLowerCase().includes(searchLower)
@@ -114,7 +115,6 @@ export const GuestLanding = () => {
         const talentProfile = item.talent;
         if (!talentProfile) return null;
         
-        // Transform the database response to match TalentProfile type
         return {
           ...talentProfile,
           availability: talentProfile.availability as Record<string, any>,
@@ -157,57 +157,33 @@ export const GuestLanding = () => {
   });
 
   const handleSelectionUpdate = async (talentId: string, selection: Partial<GuestSelection>) => {
-    const { error } = await supabase
-      .from("guest_selections")
-      .upsert({
-        casting_id: castingId,
-        guest_id: guestId,
-        talent_id: talentId,
-        liked: selection.is_favorite,
-        comments: selection.comments,
-        preference_order: selection.preference_order,
-      });
-
-    if (error) {
-      console.error("Error updating selection:", error);
-    }
-  };
-
-  const handleExport = async (config: ExportConfig) => {
     try {
-      toast({
-        title: "Export Successful",
-        description: `Your selections have been exported as a ${config.format.toUpperCase()} file.`,
-      });
+      const { error } = await supabase
+        .from("guest_selections")
+        .upsert({
+          casting_id: castingId,
+          guest_id: guestId,
+          talent_id: talentId,
+          liked: selection.is_favorite,
+          comments: selection.comments,
+          preference_order: selection.preference_order,
+          status: selection.status || 'shortlisted'
+        });
+
+      if (error) {
+        console.error("Error updating selection:", error);
+        toast({
+          title: "Error",
+          description: "Failed to update selection",
+          variant: "destructive"
+        });
+      }
     } catch (error) {
+      console.error("Error in handleSelectionUpdate:", error);
       toast({
-        title: "Export Failed",
-        description: "There was an error exporting your selections. Please try again.",
-        variant: "destructive",
-      });
-    }
-  };
-
-  const handleShare = async (email: string, message?: string) => {
-    try {
-      const { error } = await supabase.from("casting_guests").insert({
-        casting_id: castingId,
-        email,
-        name: email.split('@')[0],
-        access_token: crypto.randomUUID(),
-      });
-
-      if (error) throw error;
-
-      toast({
-        title: "Access Shared",
-        description: `An invitation has been sent to ${email}.`,
-      });
-    } catch (error) {
-      toast({
-        title: "Share Failed",
-        description: "There was an error sharing access. Please try again.",
-        variant: "destructive",
+        title: "Error",
+        description: "An unexpected error occurred",
+        variant: "destructive"
       });
     }
   };
@@ -247,6 +223,8 @@ export const GuestLanding = () => {
         viewSettings={viewSettings}
         filters={filters}
         isLoading={talentsLoading}
+        castingId={castingId!}
+        guestId={guestId!}
         onFilterChange={setFilters}
         onViewChange={setViewSettings}
         onSelectionUpdate={handleSelectionUpdate}
