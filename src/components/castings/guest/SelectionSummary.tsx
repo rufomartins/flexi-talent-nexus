@@ -23,11 +23,14 @@ interface SelectionSummaryProps {
 }
 
 interface Selection {
+  id: string;
   talent_id: string;
   preference_order: number;
   comments: string | null;
-  talent_name: string;
-  talent_avatar: string | null;
+  talent: {
+    full_name: string;
+    avatar_url: string | null;
+  };
 }
 
 export function SelectionSummary({ castingId, guestId }: SelectionSummaryProps) {
@@ -37,12 +40,13 @@ export function SelectionSummary({ castingId, guestId }: SelectionSummaryProps) 
       const { data, error } = await supabase
         .from('guest_selections')
         .select(`
+          id,
           talent_id,
           preference_order,
           comments,
-          talent_profiles!inner (
-            id,
-            user:user_id (
+          talent_profiles!talent_id!inner (
+            users!user_id!inner (
+              id,
               full_name,
               avatar_url
             )
@@ -54,12 +58,15 @@ export function SelectionSummary({ castingId, guestId }: SelectionSummaryProps) 
 
       if (error) throw error;
 
-      return data.map((selection) => ({
+      return data?.map(selection => ({
+        id: selection.id,
         talent_id: selection.talent_id,
         preference_order: selection.preference_order,
         comments: selection.comments,
-        talent_name: selection.talent_profiles.user.full_name,
-        talent_avatar: selection.talent_profiles.user.avatar_url
+        talent: {
+          full_name: selection.talent_profiles.users.full_name,
+          avatar_url: selection.talent_profiles.users.avatar_url
+        }
       })) as Selection[];
     }
   });
@@ -91,15 +98,15 @@ export function SelectionSummary({ castingId, guestId }: SelectionSummaryProps) 
               <div className="flex items-center gap-2 flex-grow">
                 <Avatar>
                   <AvatarImage 
-                    src={selection.talent_avatar || undefined} 
-                    alt={selection.talent_name} 
+                    src={selection.talent.avatar_url || undefined} 
+                    alt={selection.talent.full_name} 
                   />
                   <AvatarFallback>
-                    {selection.talent_name.charAt(0)}
+                    {selection.talent.full_name.charAt(0)}
                   </AvatarFallback>
                 </Avatar>
                 <span className="font-medium">
-                  {selection.talent_name}
+                  {selection.talent.full_name}
                 </span>
               </div>
 

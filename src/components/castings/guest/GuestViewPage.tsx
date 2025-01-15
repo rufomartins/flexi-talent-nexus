@@ -13,6 +13,7 @@ import {
 import { TalentDisplay } from "./talent-display/TalentDisplay";
 import { SelectionSummary } from "./SelectionSummary";
 import { supabase } from "@/integrations/supabase/client";
+import type { TalentProfile } from "@/types/talent";
 
 interface GuestViewPageProps {
   castingId: string;
@@ -46,13 +47,17 @@ export function GuestViewPage({ castingId, guestId }: GuestViewPageProps) {
       const { data, error } = await supabase
         .from('casting_talents')
         .select(`
-          talent_id,
           talent_profiles!inner (
             id,
+            user_id,
             talent_category,
             country,
             native_language,
-            user:user_id (
+            evaluation_status,
+            is_duo,
+            created_at,
+            updated_at,
+            users!user_id!inner (
               id,
               full_name,
               avatar_url
@@ -63,20 +68,18 @@ export function GuestViewPage({ castingId, guestId }: GuestViewPageProps) {
       
       if (error) throw error;
       
-      return data.map((item) => ({
-        id: item.talent_profiles.id,
-        user_id: item.talent_profiles.user.id,
-        talent_category: item.talent_profiles.talent_category,
-        country: item.talent_profiles.country,
-        native_language: item.talent_profiles.native_language,
+      return data?.map(item => ({
+        ...item.talent_profiles,
         users: {
-          id: item.talent_profiles.user.id,
-          full_name: item.talent_profiles.user.full_name,
-          avatar_url: item.talent_profiles.user.avatar_url
+          id: item.talent_profiles.users.id,
+          full_name: item.talent_profiles.users.full_name,
+          avatar_url: item.talent_profiles.users.avatar_url
         }
-      }));
+      })) as TalentProfile[];
     }
   });
+
+  // ... keep existing code (Header Section, Selection Summary, Controls Section)
 
   return (
     <div className="container mx-auto px-4 py-6">
