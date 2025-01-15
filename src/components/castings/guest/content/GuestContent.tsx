@@ -2,6 +2,7 @@ import { TalentDisplay } from "../talent-display/TalentDisplay";
 import type { TalentProfile } from "@/types/talent";
 import type { FilterState, GuestViewSettings } from "@/types/guest-filters";
 import type { GuestSelection } from "@/types/supabase/guest-selection";
+import { Dispatch, SetStateAction } from "react";
 
 interface GuestContentProps {
   talents: TalentProfile[];
@@ -12,6 +13,8 @@ interface GuestContentProps {
   castingId: string;
   guestId: string;
   onSelectionUpdate: (talentId: string, update: Partial<GuestSelection>) => Promise<void>;
+  onFilterChange: Dispatch<SetStateAction<FilterState>>;
+  onViewChange: Dispatch<SetStateAction<GuestViewSettings>>;
 }
 
 export const GuestContent: React.FC<GuestContentProps> = ({
@@ -23,6 +26,8 @@ export const GuestContent: React.FC<GuestContentProps> = ({
   castingId,
   guestId,
   onSelectionUpdate,
+  onFilterChange,
+  onViewChange,
 }) => {
   return (
     <div className="space-y-6">

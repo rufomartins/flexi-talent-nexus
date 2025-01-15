@@ -1,5 +1,6 @@
 import type { TalentProfile } from "./talent";
 import type { GuestSelection } from "./supabase/guest-selection";
+import { Dispatch, SetStateAction } from "react";
 
 export type SortField = 'name' | 'favorite' | 'date_added';
 export type SortDirection = 'asc' | 'desc';
