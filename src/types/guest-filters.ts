@@ -10,7 +10,7 @@ export interface GuestViewSettings {
   sort_direction: SortDirection;
 }
 
-export interface GuestFilters {
+export interface FilterState {
   search_term: string;
   show_only_available: boolean;
   filter_out_rejected: boolean;
@@ -28,7 +28,7 @@ export interface TalentDisplayProps {
     field: SortField;
     direction: SortDirection;
   };
-  filters: GuestFilters;
+  filters: FilterState;
   castingId: string;
   guestId: string;
   savingStatus?: { [key: string]: boolean };

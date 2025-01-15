@@ -2,7 +2,7 @@ import { TalentListProps } from "./types";
 import { TalentCard } from "./TalentCard";
 import { Skeleton } from "@/components/ui/skeleton";
 
-export function TalentList({ talents, selections, onSelect, isLoading, showDetailedInfo }: TalentListProps) {
+export function TalentList({ talents, selections, onSelect, isLoading }: TalentListProps) {
   if (isLoading) {
     return (
       <div className="space-y-4">

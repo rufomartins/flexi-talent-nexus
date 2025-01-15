@@ -3,16 +3,10 @@ import { TalentCard } from "./TalentCard";
 import { Skeleton } from "@/components/ui/skeleton";
 import { cn } from "@/lib/utils";
 
-export function TalentGrid({ talents, selections, onSelect, isLoading, columnCount = 3 }: TalentGridProps) {
+export function TalentGrid({ talents, selections, onSelect, isLoading }: TalentGridProps) {
   if (isLoading) {
     return (
-      <div className={cn(
-        "grid gap-6",
-        {
-          'md:grid-cols-2 lg:grid-cols-3': columnCount === 3,
-          'md:grid-cols-2 lg:grid-cols-4': columnCount === 4
-        }
-      )}>
+      <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
         {[...Array(6)].map((_, i) => (
           <div key={i} className="space-y-4">
             <Skeleton className="aspect-video w-full" />
@@ -33,13 +27,7 @@ export function TalentGrid({ talents, selections, onSelect, isLoading, columnCou
   }
 
   return (
-    <div className={cn(
-      "grid gap-6",
-      {
-        'md:grid-cols-2 lg:grid-cols-3': columnCount === 3,
-        'md:grid-cols-2 lg:grid-cols-4': columnCount === 4
-      }
-    )}>
+    <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
       {talents.map((talent) => (
         <TalentCard
           key={talent.id}
