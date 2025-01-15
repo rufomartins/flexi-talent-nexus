@@ -1,38 +1,51 @@
 import { useState } from "react";
-import { Heart, MessageSquare } from "lucide-react";
+import { MessageSquare } from "lucide-react";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
-import { CommentDialog } from "../interactions/CommentDialog";
-import { PreferenceInput } from "../interactions/PreferenceInput";
+import { Input } from "@/components/ui/input";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
+import { Textarea } from "@/components/ui/textarea";
 import type { TalentProfile } from "@/types/talent";
 import type { GuestSelection } from "@/types/supabase/guest-selection";
 
 interface TalentCardProps {
   talent: TalentProfile;
   selection?: GuestSelection;
-  onSelect: (selection: Partial<GuestSelection>) => Promise<void>;
+  onPreferenceSet: (talentId: string, order: number) => Promise<void>;
+  onCommentAdd: (talentId: string, comment: string) => Promise<void>;
   view: 'grid' | 'list';
 }
 
-export function TalentCard({ talent, selection, onSelect, view }: TalentCardProps) {
+export function TalentCard({ 
+  talent, 
+  selection, 
+  onPreferenceSet, 
+  onCommentAdd,
+  view 
+}: TalentCardProps) {
   const [isCommenting, setIsCommenting] = useState(false);
+  const [comment, setComment] = useState(selection?.comments || "");
+  const [preferenceOrder, setPreferenceOrder] = useState<number | undefined>(
+    selection?.preference_order
+  );
 
-  const handleCommentSave = async (comment: string) => {
-    await onSelect({ comments: comment });
+  const handlePreferenceChange = async (value: string) => {
+    const order = parseInt(value);
+    if (!isNaN(order) && order >= 1 && order <= 20) {
+      setPreferenceOrder(order);
+      await onPreferenceSet(talent.id, order);
+    }
   };
 
-  const handlePreferenceChange = async (rank: number) => {
-    await onSelect({ preference_order: rank });
+  const handleCommentSave = async () => {
+    await onCommentAdd(talent.id, comment);
+    setIsCommenting(false);
   };
 
-  const handleFavoriteToggle = async () => {
-    await onSelect({ is_favorite: !selection?.is_favorite });
-  };
-
-  if (view === "grid") {
+  if (view === 'grid') {
     return (
-      <Card className="overflow-hidden">
+      <Card>
         <CardHeader className="p-0">
           <div className="relative aspect-video bg-muted">
             {talent.users.avatar_url ? (
@@ -55,53 +68,48 @@ export function TalentCard({ talent, selection, onSelect, view }: TalentCardProp
         <CardContent className="p-4">
           <div className="flex items-start justify-between mb-4">
             <div>
-              <h3 className="font-medium">
-                {talent.users.full_name}
-              </h3>
+              <h3 className="font-medium">{talent.users.full_name}</h3>
               <p className="text-sm text-muted-foreground">{talent.native_language}</p>
             </div>
-            <div className="flex items-center gap-2">
-              <Button
-                variant="ghost"
-                size="icon"
-                onClick={() => setIsCommenting(true)}
-              >
-                <MessageSquare className="h-4 w-4" />
-              </Button>
-              <Button
-                variant="ghost"
-                size="icon"
-                onClick={handleFavoriteToggle}
-              >
-                <Heart
-                  className={`h-4 w-4 ${selection?.is_favorite ? "fill-primary text-primary" : ""}`}
-                />
-              </Button>
-            </div>
+            <Button
+              variant="ghost"
+              size="icon"
+              onClick={() => setIsCommenting(true)}
+            >
+              <MessageSquare className="h-4 w-4" />
+            </Button>
           </div>
 
-          <div className="mt-4">
-            <PreferenceInput
-              currentRank={selection?.preference_order}
-              onRankChange={handlePreferenceChange}
-            />
-          </div>
+          <Input
+            type="number"
+            min="1"
+            max="20"
+            value={preferenceOrder || ''}
+            onChange={(e) => handlePreferenceChange(e.target.value)}
+            placeholder="Set preference (1-20)"
+            className="w-full"
+          />
         </CardContent>
 
-        <CommentDialog
-          isOpen={isCommenting}
-          onClose={() => setIsCommenting(false)}
-          selection={selection || {
-            id: "",
-            casting_id: "",
-            talent_id: talent.id,
-            guest_id: "",
-            is_favorite: false,
-            created_at: new Date().toISOString(),
-            updated_at: new Date().toISOString(),
-          }}
-          onSave={handleCommentSave}
-        />
+        <Dialog open={isCommenting} onOpenChange={setIsCommenting}>
+          <DialogContent>
+            <DialogHeader>
+              <DialogTitle>Add Comment</DialogTitle>
+            </DialogHeader>
+            <Textarea
+              value={comment}
+              onChange={(e) => setComment(e.target.value)}
+              placeholder="Add your comments..."
+              className="min-h-[100px]"
+            />
+            <DialogFooter>
+              <Button variant="outline" onClick={() => setIsCommenting(false)}>
+                Cancel
+              </Button>
+              <Button onClick={handleCommentSave}>Save Comment</Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
       </Card>
     );
   }
@@ -142,18 +150,14 @@ export function TalentCard({ talent, selection, onSelect, view }: TalentCardProp
                 >
                   <MessageSquare className="h-4 w-4" />
                 </Button>
-                <Button
-                  variant="ghost"
-                  size="icon"
-                  onClick={handleFavoriteToggle}
-                >
-                  <Heart
-                    className={`h-4 w-4 ${selection?.is_favorite ? "fill-primary text-primary" : ""}`}
-                  />
-                </Button>
-                <PreferenceInput
-                  currentRank={selection?.preference_order}
-                  onRankChange={handlePreferenceChange}
+                <Input
+                  type="number"
+                  min="1"
+                  max="20"
+                  value={preferenceOrder || ''}
+                  onChange={(e) => handlePreferenceChange(e.target.value)}
+                  placeholder="Preference"
+                  className="w-20"
                 />
               </div>
             </div>
@@ -161,20 +165,25 @@ export function TalentCard({ talent, selection, onSelect, view }: TalentCardProp
         </div>
       </CardContent>
 
-      <CommentDialog
-        isOpen={isCommenting}
-        onClose={() => setIsCommenting(false)}
-        selection={selection || {
-          id: "",
-          casting_id: "",
-          talent_id: talent.id,
-          guest_id: "",
-          is_favorite: false,
-          created_at: new Date().toISOString(),
-          updated_at: new Date().toISOString(),
-        }}
-        onSave={handleCommentSave}
-      />
+      <Dialog open={isCommenting} onOpenChange={setIsCommenting}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Add Comment</DialogTitle>
+          </DialogHeader>
+          <Textarea
+            value={comment}
+            onChange={(e) => setComment(e.target.value)}
+            placeholder="Add your comments..."
+            className="min-h-[100px]"
+          />
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setIsCommenting(false)}>
+              Cancel
+            </Button>
+            <Button onClick={handleCommentSave}>Save Comment</Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </Card>
   );
 }
