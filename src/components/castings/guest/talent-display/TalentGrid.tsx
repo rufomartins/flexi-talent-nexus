@@ -46,8 +46,8 @@ export function TalentGrid({ talents, selections, onSelect, isLoading, columnCou
           talent={talent}
           view="grid"
           selection={selections[talent.id]}
-          onPreferenceSet={async (order) => await onSelect(talent.id, { preference_order: order })}
-          onCommentAdd={async (comment) => await onSelect(talent.id, { comments: comment })}
+          onPreferenceSet={async (order: number) => await onSelect(talent.id, { preference_order: order })}
+          onCommentAdd={async (comment: string) => await onSelect(talent.id, { comments: comment })}
         />
       ))}
     </div>
