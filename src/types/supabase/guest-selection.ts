@@ -6,7 +6,7 @@ export interface GuestSelection {
   preference_order?: number;
   comments?: string;
   status: string;
-  is_favorite: boolean;
+  liked: boolean;
   created_at: string;
   updated_at: string;
 }

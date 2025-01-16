@@ -37,6 +37,8 @@ export interface TalentDisplayProps {
   guestId: string;
   savingStatus?: { [key: string]: boolean };
   errorMessages?: { [key: string]: string };
+  selectedTalents: Set<string>;
+  onTalentSelect: (talentId: string, selected: boolean) => void;
 }
 
 export interface TalentGridProps extends TalentDisplayProps {
