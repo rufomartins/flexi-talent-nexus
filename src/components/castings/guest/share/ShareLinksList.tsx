@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { useQuery, useQueryClient } from "@tanstack/react-query";
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { format } from "date-fns";
 import { toast } from "sonner";
@@ -20,7 +20,7 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { MoreVerticalIcon, CopyIcon, TrashIcon } from "lucide-react";
+import { MoreVerticalIcon, CopyIcon, TrashIcon, CheckIcon, XIcon } from "lucide-react";
 import type { ShareLink } from "@/types/guest-filters";
 
 interface ShareLinksListProps {
