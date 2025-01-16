@@ -3,6 +3,7 @@ import { TalentDisplay } from "../talent-display/TalentDisplay";
 import { TalentGridSkeleton } from "@/components/loading/LoadingStates";
 import type { TalentProfile } from "@/types/talent";
 import type { GuestSelection } from "@/types/supabase/guest-selection";
+import type { SortField, SortDirection } from "@/types/guest-filters";
 
 interface TalentListingSectionProps {
   talents: TalentProfile[];
@@ -10,8 +11,8 @@ interface TalentListingSectionProps {
   viewMode: 'grid' | 'list';
   isLoading: boolean;
   sort: {
-    field: string;
-    direction: 'asc' | 'desc';
+    field: SortField;
+    direction: SortDirection;
   };
   filters: any;
   castingId: string;
