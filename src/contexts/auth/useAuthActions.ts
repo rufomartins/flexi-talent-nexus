@@ -13,35 +13,43 @@ export const useAuthActions = (
   const { toast } = useToast();
 
   const signOut = async () => {
-    console.log("Attempting sign out");
+    console.log("[Auth] Starting sign out process");
     setLoading(true);
     try {
+      // Clear all state first
+      console.log("[Auth] Clearing application state");
       setSession(null);
       setUser(null);
       setUserDetails(null);
       
+      // Clear all local storage
+      console.log("[Auth] Clearing local storage");
       localStorage.clear();
+      sessionStorage.clear();
       
-      const { error } = await supabase.auth.signOut();
+      // Kill all active sessions in Supabase
+      console.log("[Auth] Killing all Supabase sessions");
+      const { error } = await supabase.auth.signOut({ scope: 'global' });
       if (error) {
-        console.error("Supabase signOut error:", error);
+        console.error("[Auth] Supabase signOut error:", error);
         throw error;
       }
       
-      console.log("Successfully signed out from Supabase");
+      console.log("[Auth] Successfully signed out from Supabase");
       
       toast({
         title: "Signed out",
         description: "You have been successfully signed out.",
       });
 
-      console.log("Navigating to login page");
+      console.log("[Auth] Navigating to login page");
+      // Use replace to prevent going back to the previous page
       navigate('/login', { replace: true });
     } catch (error: any) {
-      console.error("Sign out error:", error);
+      console.error("[Auth] Sign out error:", error);
       toast({
         title: "Error",
-        description: "There was an error signing out.",
+        description: "There was an error signing out. Please try again.",
         variant: "destructive",
       });
       throw error;
