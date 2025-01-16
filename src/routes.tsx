@@ -1,20 +1,19 @@
 import { createBrowserRouter } from "react-router-dom";
 import { MainLayout } from "@/components/layout/MainLayout";
 import { SharedView } from "@/components/castings/guest/shared/SharedView";
-import { useParams } from "react-router-dom";
-import { Dashboard } from "@/pages/dashboard";
-import { Castings } from "@/pages/castings";
-import { CastingDetails } from "@/pages/castings/[id]";
-import { GuestView } from "@/pages/castings/guest/[id]";
-import { TalentProfiles } from "@/pages/talent-profiles";
-import { TalentProfileDetails } from "@/pages/talent-profiles/[id]";
-import { Settings } from "@/pages/settings";
-import { Clients } from "@/pages/clients";
-import { ClientDetails } from "@/pages/clients/[id]";
-import { Projects } from "@/pages/projects";
-import { ProjectDetails } from "@/pages/projects/[id]";
-import { Users } from "@/pages/users";
-import { UserDetails } from "@/pages/users/[id]";
+import Dashboard from "@/pages/dashboard";
+import Castings from "@/pages/castings";
+import CastingDetails from "@/pages/castings/[id]";
+import GuestView from "@/pages/castings/guest/[id]";
+import TalentProfiles from "@/pages/talent-profiles";
+import TalentProfileDetails from "@/pages/talent-profiles/[id]";
+import Settings from "@/pages/settings";
+import Clients from "@/pages/clients";
+import ClientDetails from "@/pages/clients/[id]";
+import Projects from "@/pages/projects";
+import ProjectDetails from "@/pages/projects/[id]";
+import Users from "@/pages/users";
+import UserDetails from "@/pages/users/[id]";
 
 export const router = createBrowserRouter([
   {
