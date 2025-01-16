@@ -96,7 +96,12 @@ export const useUserDetails = () => {
         return null;
       }
 
-      console.log("[useUserDetails] Fetched user details successfully:", userData);
+      console.log("[useUserDetails] Fetched user details successfully:", {
+        id: userData.id,
+        email: userData.email,
+        role: userData.role,
+        isSuperAdmin: userData.role === 'super_admin'
+      });
       return userData as DatabaseUser;
     } catch (error) {
       console.error("[useUserDetails] Exception in fetchUserDetails:", error);
