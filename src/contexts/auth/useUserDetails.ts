@@ -11,7 +11,10 @@ export const useUserDetails = () => {
   const fetchUserDetails = useCallback(async (userId: string) => {
     try {
       setIsLoading(true);
-      console.log("[useUserDetails] Starting fetch for user details:", { userId });
+      console.log("[useUserDetails] Starting fetch for user details:", { 
+        userId,
+        timestamp: new Date().toISOString()
+      });
       
       // Validate UUID format
       const uuidRegex = /^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
@@ -25,7 +28,70 @@ export const useUserDetails = () => {
         return null;
       }
 
-      // First try to get from users table which has RLS policies
+      // First try to get basic info to verify access
+      const { data: basicData, error: basicError } = await supabase
+        .from('users')
+        .select('id, role')
+        .eq('id', userId)
+        .maybeSingle();
+
+      if (basicError) {
+        console.error("[useUserDetails] Error fetching basic user details:", {
+          error: basicError,
+          userId,
+          errorCode: basicError.code,
+          hint: basicError.hint,
+          details: basicError.details
+        });
+        
+        if (basicError.code !== 'PGRST116') {
+          toast({
+            title: "Error",
+            description: "Failed to load user details. Please try again.",
+            variant: "destructive",
+          });
+        }
+        return null;
+      }
+
+      if (!basicData) {
+        console.warn("[useUserDetails] No basic user details found for ID:", userId);
+        // Try to get basic info from auth.users as fallback
+        const { data: { user: authUser } } = await supabase.auth.getUser(userId);
+        
+        if (authUser) {
+          console.log("[useUserDetails] Found auth user, creating minimal profile:", {
+            id: authUser.id,
+            email: authUser.email,
+            role: authUser.user_metadata?.role
+          });
+          
+          // Create minimal user details from auth data
+          const minimalUserData: DatabaseUser = {
+            id: authUser.id,
+            full_name: authUser.user_metadata?.full_name || '',
+            email: authUser.email,
+            role: authUser.user_metadata?.role || 'user',
+            status: 'active',
+            created_at: authUser.created_at,
+            last_login: authUser.last_sign_in_at,
+            sms_notifications_enabled: false,
+            phone_number_verified: false,
+            sms_notification_types: [],
+            avatar_url: null,
+            company_id: null,
+            first_name: null,
+            last_name: null,
+            gender: null,
+            mobile_phone: null,
+            nationality: null
+          };
+          return minimalUserData;
+        }
+        return null;
+      }
+
+      // If we have basic access, get full user details
       const { data: userData, error: userError } = await supabase
         .from('users')
         .select(`
@@ -50,50 +116,11 @@ export const useUserDetails = () => {
         .maybeSingle();
 
       if (userError) {
-        console.error("[useUserDetails] Error fetching user details:", userError);
-        console.log("[useUserDetails] Failed query params - id:", userId);
-        
-        // Only show toast for non-404 errors
-        if (userError.code !== 'PGRST116') {
-          toast({
-            title: "Error",
-            description: "Failed to load user details. Please try again.",
-            variant: "destructive",
-          });
-        }
-        return null;
-      }
-
-      if (!userData) {
-        console.warn("[useUserDetails] No user details found for ID:", userId);
-        // Try to get basic info from auth.users as fallback
-        const { data: { user: authUser } } = await supabase.auth.getUser(userId);
-        
-        if (authUser) {
-          // Create minimal user details from auth data
-          const minimalUserData: DatabaseUser = {
-            id: authUser.id,
-            full_name: authUser.user_metadata?.full_name || '',
-            email: authUser.email,  // Include email from auth user
-            role: 'user',
-            status: 'active',
-            created_at: authUser.created_at,
-            last_login: authUser.last_sign_in_at,
-            sms_notifications_enabled: false,
-            phone_number_verified: false,
-            sms_notification_types: [],
-            // Initialize all nullable fields
-            avatar_url: null,
-            company_id: null,
-            first_name: null,
-            last_name: null,
-            gender: null,
-            mobile_phone: null,
-            nationality: null
-          };
-          console.log("[useUserDetails] Created minimal user data from auth:", minimalUserData);
-          return minimalUserData;
-        }
+        console.error("[useUserDetails] Error fetching full user details:", {
+          error: userError,
+          userId,
+          basicRole: basicData.role
+        });
         return null;
       }
 
@@ -104,7 +131,7 @@ export const useUserDetails = () => {
         email: authUser?.email || null
       };
 
-      console.log("[useUserDetails] Fetched user details successfully:", {
+      console.log("[useUserDetails] Successfully fetched user details:", {
         id: userWithEmail.id,
         email: userWithEmail.email,
         role: userWithEmail.role,
