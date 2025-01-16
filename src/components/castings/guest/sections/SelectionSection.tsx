@@ -21,7 +21,12 @@ export const SelectionSection: React.FC<SelectionSectionProps> = ({
           selectedTalents={new Set()}
           onTalentSelect={() => {}}
           sort={{ field: 'name', direction: 'asc' }}
-          filters={{}}
+          filters={{
+            search_term: '',
+            show_only_available: false,
+            filter_out_rejected: false,
+            show_only_approved_auditions: false
+          }}
           castingId=""
           guestId=""
         />

@@ -22,6 +22,18 @@ export interface GuestViewSettings {
   sort_direction: SortDirection;
 }
 
+export interface GuestContentProps {
+  talents: TalentProfile[];
+  selections: Record<string, GuestSelection>;
+  viewSettings: GuestViewSettings;
+  filters: FilterState;
+  isLoading: boolean;
+  onSelect: (talentId: string, update: Partial<GuestSelection>) => Promise<void>;
+  onViewChange: (settings: GuestViewSettings) => void;
+  onFilterChange: (filters: FilterState) => void;
+  castingId: string;
+}
+
 export interface TalentDisplayProps {
   talents: TalentProfile[];
   viewMode: 'grid' | 'list';

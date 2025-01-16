@@ -1,28 +1,33 @@
-import { format } from "date-fns";
+import { useState } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import { MoreVertical, Copy, Trash, Check, X } from "lucide-react";
-import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
+import { format } from "date-fns";
+import { toast } from "sonner";
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuSeparator, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
-import { Skeleton } from "@/components/ui/skeleton";
-import type { ShareLink } from "../../types";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
+import { CheckIcon, CopyIcon, MoreVerticalIcon, TrashIcon, XIcon } from "lucide-react";
+import type { ShareLink } from "@/types/guest-filters";
 
 interface ShareLinksListProps {
   castingId: string;
 }
 
-const TableSkeleton = () => (
-  <div className="space-y-3">
-    <Skeleton className="h-8 w-full" />
-    <Skeleton className="h-20 w-full" />
-  </div>
-);
-
 export const ShareLinksList: React.FC<ShareLinksListProps> = ({ castingId }) => {
-  const { toast } = useToast();
   const queryClient = useQueryClient();
 
   const { data: shareLinks, isLoading } = useQuery({
@@ -32,8 +37,8 @@ export const ShareLinksList: React.FC<ShareLinksListProps> = ({ castingId }) => 
         .from('share_links')
         .select(`
           *,
-          casting:castings (name),
-          guest:casting_guests (full_name)
+          casting:castings!inner (name),
+          guest:casting_guests!inner (full_name)
         `)
         .eq('casting_id', castingId)
         .order('created_at', { ascending: false });
@@ -53,23 +58,16 @@ export const ShareLinksList: React.FC<ShareLinksListProps> = ({ castingId }) => 
       if (error) throw error;
     },
     onSuccess: () => {
-      queryClient.invalidateQueries(['share-links', castingId]);
-      toast({
-        title: "Success",
-        description: "Share link revoked",
-      });
+      queryClient.invalidateQueries({ queryKey: ['share-links', castingId] });
+      toast.success('Share link revoked');
     },
     onError: () => {
-      toast({
-        title: "Error",
-        description: "Failed to revoke share link",
-        variant: "destructive"
-      });
+      toast.error('Failed to revoke share link');
     }
   });
 
   if (isLoading) {
-    return <TableSkeleton />;
+    return <div>Loading...</div>;
   }
 
   return (
@@ -108,23 +106,23 @@ export const ShareLinksList: React.FC<ShareLinksListProps> = ({ castingId }) => 
               </TableCell>
               <TableCell>
                 {link.allow_comments ? (
-                  <Check className="w-4 h-4 text-green-500" />
+                  <CheckIcon className="w-4 h-4 text-green-500" />
                 ) : (
-                  <X className="w-4 h-4 text-gray-400" />
+                  <XIcon className="w-4 h-4 text-gray-400" />
                 )}
               </TableCell>
               <TableCell>
                 {new Date(link.expires_at) < new Date() ? (
                   <Badge variant="destructive">Expired</Badge>
                 ) : (
-                  <Badge variant="default">Active</Badge>
+                  <Badge variant="success">Active</Badge>
                 )}
               </TableCell>
               <TableCell>
                 <DropdownMenu>
                   <DropdownMenuTrigger asChild>
                     <Button variant="ghost" size="icon">
-                      <MoreVertical className="w-4 h-4" />
+                      <MoreVerticalIcon className="w-4 h-4" />
                     </Button>
                   </DropdownMenuTrigger>
                   <DropdownMenuContent align="end">
@@ -133,13 +131,10 @@ export const ShareLinksList: React.FC<ShareLinksListProps> = ({ castingId }) => 
                         navigator.clipboard.writeText(
                           `${window.location.origin}/share/${link.token}`
                         );
-                        toast({
-                          title: "Success",
-                          description: "Link copied to clipboard"
-                        });
+                        toast.success('Link copied to clipboard');
                       }}
                     >
-                      <Copy className="w-4 h-4 mr-2" />
+                      <CopyIcon className="w-4 h-4 mr-2" />
                       Copy Link
                     </DropdownMenuItem>
                     <DropdownMenuSeparator />
@@ -151,7 +146,7 @@ export const ShareLinksList: React.FC<ShareLinksListProps> = ({ castingId }) => 
                         }
                       }}
                     >
-                      <Trash className="w-4 h-4 mr-2" />
+                      <TrashIcon className="w-4 h-4 mr-2" />
                       Revoke Link
                     </DropdownMenuItem>
                   </DropdownMenuContent>
