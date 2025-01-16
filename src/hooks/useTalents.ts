@@ -1,6 +1,7 @@
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import type { TalentProfile } from "@/types/talent";
+import { toast } from "sonner";
 
 const transformTalentData = (data: any[]): TalentProfile[] => {
   return data.map(item => ({
@@ -30,35 +31,42 @@ export function useTalents(castingId: string) {
   return useQuery({
     queryKey: ['casting-talents', castingId],
     queryFn: async () => {
-      const { data, error } = await supabase
-        .from('casting_talents')
-        .select(`
-          talent_profiles!inner (
-            id,
-            user_id,
-            talent_category,
-            country,
-            native_language,
-            evaluation_status,
-            is_duo,
-            created_at,
-            updated_at,
-            agent_id,
-            availability,
-            category,
-            experience_level,
-            fee_range,
-            user:user_id (
+      try {
+        const { data, error } = await supabase
+          .from('casting_talents')
+          .select(`
+            talent_profiles!inner (
               id,
-              full_name,
-              avatar_url
+              user_id,
+              talent_category,
+              country,
+              native_language,
+              evaluation_status,
+              is_duo,
+              created_at,
+              updated_at,
+              agent_id,
+              availability,
+              category,
+              experience_level,
+              fee_range,
+              user:user_id (
+                id,
+                full_name,
+                avatar_url
+              )
             )
-          )
-        `)
-        .eq('casting_id', castingId);
+          `)
+          .eq('casting_id', castingId);
 
-      if (error) throw error;
-      return transformTalentData(data || []);
-    }
+        if (error) throw error;
+        return transformTalentData(data || []);
+      } catch (error) {
+        toast.error('Failed to fetch talents');
+        throw error;
+      }
+    },
+    retry: 2,
+    retryDelay: attemptIndex => Math.min(1000 * 2 ** attemptIndex, 30000)
   });
 }
