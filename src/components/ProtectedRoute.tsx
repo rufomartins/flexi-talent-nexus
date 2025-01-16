@@ -22,10 +22,10 @@ const ProtectedRoute = ({ children, allowedRoles }: ProtectedRouteProps) => {
   const MAX_RETRIES = 3;
 
   const handleRetry = () => {
+    console.log("[ProtectedRoute] Retrying initialization");
     setError(null);
     setRetryCount(0);
     setIsLoading(true);
-    // This will trigger the useEffect to run again
   };
 
   useEffect(() => {
@@ -37,12 +37,21 @@ const ProtectedRoute = ({ children, allowedRoles }: ProtectedRouteProps) => {
         }
 
         if (userDetails) {
-          console.log("[ProtectedRoute] User details already loaded:", userDetails);
+          console.log("[ProtectedRoute] User details already loaded:", {
+            id: userDetails.id,
+            role: userDetails.role,
+            email: user.email,
+            isSuperAdmin: user.email === 'cmartins@gtmd.studio'
+          });
           return;
         }
 
         setLoadingMessage("Fetching user details...");
-        console.log("[ProtectedRoute] Fetching user details for:", user.id);
+        console.log("[ProtectedRoute] Fetching user details for:", {
+          userId: user.id,
+          email: user.email,
+          metadata: user.user_metadata
+        });
         
         const { data: userData, error: userError } = await supabase
           .from("users")
@@ -51,7 +60,11 @@ const ProtectedRoute = ({ children, allowedRoles }: ProtectedRouteProps) => {
           .maybeSingle();
 
         if (userError) {
-          console.error("[ProtectedRoute] Error fetching user details:", userError);
+          console.error("[ProtectedRoute] Error fetching user details:", {
+            error: userError,
+            userId: user.id,
+            email: user.email
+          });
           if (retryCount < MAX_RETRIES) {
             setRetryCount(prev => prev + 1);
             return;
@@ -67,7 +80,10 @@ const ProtectedRoute = ({ children, allowedRoles }: ProtectedRouteProps) => {
         } else {
           // Fallback to user metadata if available
           if (user.user_metadata?.role) {
-            console.log("[ProtectedRoute] Using role from metadata:", user.user_metadata.role);
+            console.log("[ProtectedRoute] Using role from metadata:", {
+              role: user.user_metadata.role,
+              email: user.email
+            });
             setUserDetails({
               id: user.id,
               role: user.user_metadata.role,
@@ -76,6 +92,7 @@ const ProtectedRoute = ({ children, allowedRoles }: ProtectedRouteProps) => {
             });
             setError(null);
           } else {
+            console.error("[ProtectedRoute] No user details or metadata available");
             setError("Unable to load user profile. Please contact support.");
           }
         }
@@ -109,9 +126,16 @@ const ProtectedRoute = ({ children, allowedRoles }: ProtectedRouteProps) => {
           console.log("[ProtectedRoute] Checking role access:", {
             userRole: userDetails.role,
             allowedRoles,
+            email: user.email,
+            isSuperAdmin: user.email === 'cmartins@gtmd.studio'
           });
           
           if (!allowedRoles.includes(userDetails.role)) {
+            console.warn("[ProtectedRoute] Access denied for user:", {
+              email: user.email,
+              role: userDetails.role,
+              requiredRoles: allowedRoles
+            });
             toast({
               title: "Access Denied",
               description: "You don't have permission to access this page.",
@@ -125,6 +149,7 @@ const ProtectedRoute = ({ children, allowedRoles }: ProtectedRouteProps) => {
         setIsLoading(false);
         setError(null);
       } catch (error) {
+        console.error("[ProtectedRoute] Error in initRoute:", error);
         setError("An error occurred while initializing the route.");
         setIsLoading(false);
       }
@@ -168,7 +193,15 @@ const ProtectedRoute = ({ children, allowedRoles }: ProtectedRouteProps) => {
             <AlertTitle>Super Admin Debug Info</AlertTitle>
             <AlertDescription className="text-xs">
               <pre className="mt-2 whitespace-pre-wrap">
-                {JSON.stringify({ user, userDetails, retryCount }, null, 2)}
+                {JSON.stringify({ 
+                  user: {
+                    id: user.id,
+                    email: user.email,
+                    metadata: user.user_metadata
+                  }, 
+                  userDetails,
+                  retryCount 
+                }, null, 2)}
               </pre>
             </AlertDescription>
           </Alert>

@@ -42,15 +42,23 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       console.log(`[AuthProvider] Retrying session fetch attempt ${retryCount + 1}/${MAX_RETRIES}`);
       const { data: { session: newSession }, error } = await supabase.auth.getSession();
       
-      if (error) throw error;
+      if (error) {
+        console.error("[AuthProvider] Error during retry:", error);
+        throw error;
+      }
       
       if (newSession) {
-        console.log("[AuthProvider] Session retrieved successfully on retry");
+        console.log("[AuthProvider] Session retrieved successfully on retry:", {
+          userId: newSession.user.id,
+          email: newSession.user.email,
+          metadata: newSession.user.user_metadata
+        });
         setSession?.(newSession);
         setUser?.(newSession.user);
         return true;
       }
       
+      console.log("[AuthProvider] No session found during retry");
       return false;
     } catch (error) {
       console.error("[AuthProvider] Error during retry:", error);
@@ -65,15 +73,22 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     
     const initializeAuth = async () => {
       try {
+        console.info("[Auth] Starting auth initialization...");
+        
         const { data: { session: initialSession }, error: sessionError } = await supabase.auth.getSession();
         
-        if (sessionError) throw sessionError;
+        if (sessionError) {
+          console.error("[AuthProvider] Session error during initialization:", sessionError);
+          throw sessionError;
+        }
 
         if (mounted) {
           if (initialSession) {
             console.log("[AuthProvider] Initial session found:", {
               userId: initialSession.user.id,
-              email: initialSession.user.email
+              email: initialSession.user.email,
+              metadata: initialSession.user.user_metadata,
+              lastSignIn: initialSession.user.last_sign_in_at
             });
             setSession?.(initialSession);
             setUser?.(initialSession.user);
@@ -82,6 +97,8 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
             if (details) {
               console.log("[AuthProvider] User details loaded:", details);
               setUserDetails(details);
+            } else {
+              console.warn("[AuthProvider] No user details found for user:", initialSession.user.id);
             }
           } else {
             console.log("[AuthProvider] No initial session found");
@@ -112,7 +129,11 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     };
 
     const { data: { subscription } } = supabase.auth.onAuthStateChange(async (event, session) => {
-      console.log("[AuthProvider] Auth state changed:", event, session ? "Has session" : "No session");
+      console.log("[AuthProvider] Auth state changed:", event, session ? {
+        userId: session.user.id,
+        email: session.user.email,
+        metadata: session.user.user_metadata
+      } : "No session");
       console.log("[AuthProvider] Current mounted state:", mounted);
 
       if (!mounted) {
@@ -165,7 +186,9 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     hasUserDetails: !!userDetails,
     isLoading: sessionLoading,
     retryCount,
-    hasError: !!initializationError
+    hasError: !!initializationError,
+    userEmail: user?.email,
+    isSuperAdmin: user?.email === 'cmartins@gtmd.studio'
   });
 
   if (initializationError && !sessionLoading) {
