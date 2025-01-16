@@ -100,6 +100,9 @@ export const useAuthActions = (
           id: userDetails.id,
           role: userDetails.role
         });
+        
+        // Navigate to dashboard after successful login
+        navigate('/dashboard', { replace: true });
       }
 
       toast({

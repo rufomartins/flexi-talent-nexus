@@ -9,7 +9,7 @@ import { toast } from "@/hooks/use-toast";
 import { Loader2 } from "lucide-react";
 
 const MAX_RETRIES = 3;
-const RETRY_DELAY = 1000; // 1 second
+const RETRY_DELAY = 1000;
 
 export function AuthProvider({ children }: { children: React.ReactNode }) {
   console.log("[AuthProvider] Initializing provider");
@@ -66,14 +66,19 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     }
   };
 
+  // Initialize auth state
   useEffect(() => {
     console.log("[AuthProvider] Setting up auth state listener");
     let mounted = true;
     let retryTimeout: NodeJS.Timeout;
-    
+
     const initializeAuth = async () => {
       try {
         console.info("[Auth] Starting auth initialization...");
+        
+        // Clear any stale data
+        localStorage.clear();
+        sessionStorage.clear();
         
         const { data: { session: initialSession }, error: sessionError } = await supabase.auth.getSession();
         
@@ -97,11 +102,14 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
             if (details) {
               console.log("[AuthProvider] User details loaded:", details);
               setUserDetails(details);
+              navigate("/dashboard");
             } else {
               console.warn("[AuthProvider] No user details found for user:", initialSession.user.id);
+              navigate("/login");
             }
           } else {
             console.log("[AuthProvider] No initial session found");
+            navigate("/login");
           }
           setLoading?.(false);
         }
@@ -119,11 +127,13 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
                 description: "Failed to initialize session. Please refresh the page.",
                 variant: "destructive",
               });
+              navigate("/login");
             }
           }, RETRY_DELAY);
         } else {
           setInitializationError(error as Error);
           setLoading?.(false);
+          navigate("/login");
         }
       }
     };
@@ -150,8 +160,10 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         if (details) {
           console.log("[AuthProvider] Updated user details after state change:", details);
           setUserDetails(details);
+          navigate("/dashboard");
         } else {
           console.error("[AuthProvider] Failed to fetch user details after state change");
+          navigate("/login");
         }
       } else {
         console.log("[AuthProvider] Clearing session and user state");
@@ -179,17 +191,6 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       subscription.unsubscribe();
     };
   }, [navigate, setLoading, setSession, setUser, setUserDetails, fetchUserDetails, retryCount]);
-
-  console.log("[AuthProvider] Rendering with context:", {
-    hasSession: !!session,
-    hasUser: !!user,
-    hasUserDetails: !!userDetails,
-    isLoading: sessionLoading,
-    retryCount,
-    hasError: !!initializationError,
-    userEmail: user?.email,
-    isSuperAdmin: user?.email === 'cmartins@gtmd.studio'
-  });
 
   if (initializationError && !sessionLoading) {
     return (
