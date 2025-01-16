@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Card } from "@/components/ui/card";
+import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { FileDown, Share2, Copy, CheckCircle } from "lucide-react";
 import { ViewSettingsSection } from "./sections/ViewSettingsSection";
@@ -7,6 +7,7 @@ import { FilterSection } from "./sections/FilterSection";
 import { TalentListingSection } from "./sections/TalentListingSection";
 import { ExportDialog } from "./export/ExportDialog";
 import { ShareDialog } from "./share/ShareDialog";
+import { ShareLinksList } from "./share/ShareLinksList";
 import { Alert, AlertTitle, AlertDescription } from "@/components/ui/alert";
 import { Input } from "@/components/ui/input";
 import { exportSelections } from "@/utils/exportSelections";
@@ -125,53 +126,67 @@ export const GuestContent: React.FC<GuestContentProps> = ({
   };
 
   return (
-    <Card className="p-4 space-y-6">
-      <div className="flex justify-between items-center">
-        <ViewSettingsSection
-          viewSettings={viewSettings}
-          onViewChange={onViewChange}
-        />
-        <div className="flex gap-2">
-          <Button 
-            variant="outline"
-            onClick={() => setIsShareDialogOpen(true)}
-            disabled={Object.keys(selections).length === 0}
-          >
-            <Share2 className="mr-2 h-4 w-4" />
-            Share
-          </Button>
-          <Button onClick={() => setIsExportDialogOpen(true)} variant="outline">
-            <FileDown className="mr-2 h-4 w-4" />
-            Export
-          </Button>
+    <div className="space-y-6">
+      <Card className="p-4">
+        <div className="flex justify-between items-center">
+          <ViewSettingsSection
+            viewSettings={viewSettings}
+            onViewChange={onViewChange}
+          />
+          <div className="flex gap-2">
+            <Button 
+              variant="outline"
+              onClick={() => setIsShareDialogOpen(true)}
+              disabled={Object.keys(selections).length === 0}
+            >
+              <Share2 className="mr-2 h-4 w-4" />
+              Share
+            </Button>
+            <Button onClick={() => setIsExportDialogOpen(true)} variant="outline">
+              <FileDown className="mr-2 h-4 w-4" />
+              Export
+            </Button>
+          </div>
         </div>
-      </div>
-      
-      <FilterSection
-        filters={filters}
-        onFilterChange={onFilterChange}
-      />
-      
-      <TalentListingSection
-        talents={talents}
-        selections={selections}
-        viewMode={viewSettings.view_mode}
-        isLoading={isLoading}
-        sort={{
-          field: viewSettings.sort_by,
-          direction: viewSettings.sort_direction
-        }}
-        filters={filters}
-        castingId={castingId}
-        guestId={guestId}
-        onSelect={onSelectionUpdate}
-        onMultipleSelect={onMultipleUpdate}
-        onReorder={onReorder}
-        onRemove={onRemove}
-        selectedTalents={selectedTalents}
-        onTalentSelect={handleTalentSelect}
-        onBatchUpdate={handleBatchUpdate}
-      />
+        
+        <FilterSection
+          filters={filters}
+          onFilterChange={onFilterChange}
+        />
+        
+        <TalentListingSection
+          talents={talents}
+          selections={selections}
+          viewMode={viewSettings.view_mode}
+          isLoading={isLoading}
+          sort={{
+            field: viewSettings.sort_by,
+            direction: viewSettings.sort_direction
+          }}
+          filters={filters}
+          castingId={castingId}
+          guestId={guestId}
+          onSelect={onSelectionUpdate}
+          onMultipleSelect={onMultipleUpdate}
+          onReorder={onReorder}
+          onRemove={onRemove}
+          selectedTalents={selectedTalents}
+          onTalentSelect={handleTalentSelect}
+          onBatchUpdate={handleBatchUpdate}
+        />
+      </Card>
+
+      <Card>
+        <CardHeader>
+          <CardTitle>Share Links</CardTitle>
+          <CardDescription>
+            Manage active share links for this selection
+          </CardDescription>
+        </CardHeader>
+        <CardContent>
+          <ShareLinksList castingId={castingId} />
+        </CardContent>
+      </Card>
 
       <ExportDialog
         open={isExportDialogOpen}
@@ -214,11 +229,6 @@ export const GuestContent: React.FC<GuestContentProps> = ({
           </AlertDescription>
         </Alert>
       )}
-    </Card>
+    </div>
   );
 };
-
-interface BatchSelectionUpdate {
-  talentIds: string[];
-  update: Partial<GuestSelection>;
-}
