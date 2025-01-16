@@ -9,7 +9,7 @@ export interface DatabaseUser {
   avatar_url: string | null;
   company_id: string | null;
   created_at: string;
-  email: string | null;  // Added email field as optional since it comes from auth
+  email?: string | null;  // Made email optional and nullable
   first_name: string | null;
   full_name: string | null;
   gender: string | null;

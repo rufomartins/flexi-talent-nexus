@@ -74,6 +74,7 @@ export const useUserDetails = () => {
           const minimalUserData: DatabaseUser = {
             id: authUser.id,
             full_name: authUser.user_metadata?.full_name || '',
+            email: authUser.email,  // Include email from auth user
             role: 'user',
             status: 'active',
             created_at: authUser.created_at,
@@ -96,13 +97,21 @@ export const useUserDetails = () => {
         return null;
       }
 
+      // Get email from auth user since it's not in the users table
+      const { data: { user: authUser } } = await supabase.auth.getUser(userId);
+      const userWithEmail: DatabaseUser = {
+        ...userData,
+        email: authUser?.email || null
+      };
+
       console.log("[useUserDetails] Fetched user details successfully:", {
-        id: userData.id,
-        email: userData.email,
-        role: userData.role,
-        isSuperAdmin: userData.role === 'super_admin'
+        id: userWithEmail.id,
+        email: userWithEmail.email,
+        role: userWithEmail.role,
+        isSuperAdmin: userWithEmail.role === 'super_admin'
       });
-      return userData as DatabaseUser;
+      
+      return userWithEmail;
     } catch (error) {
       console.error("[useUserDetails] Exception in fetchUserDetails:", error);
       toast({
