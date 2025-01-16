@@ -1,4 +1,5 @@
-import { UserX } from "lucide-react";
+import { Star, StarOff, Trash } from "lucide-react";
+import { Button } from "@/components/ui/button";
 import { TalentDisplay } from "../talent-display/TalentDisplay";
 import { TalentGridSkeleton } from "@/components/loading/LoadingStates";
 import { BatchActionBar } from "../batch/BatchActionBar";
@@ -54,7 +55,7 @@ export const TalentListingSection: React.FC<TalentListingSectionProps> = ({
 
     const update: Partial<GuestSelection> = action === 'remove' 
       ? { status: 'removed' }
-      : { liked: action === 'favorite' };
+      : { is_favorite: action === 'favorite' };
 
     await onBatchUpdate({
       talentIds: Array.from(selectedTalents),
@@ -69,9 +70,7 @@ export const TalentListingSection: React.FC<TalentListingSectionProps> = ({
   if (!talents.length) {
     return (
       <div className="flex flex-col items-center justify-center py-12">
-        <UserX className="w-12 h-12 text-gray-400 mb-4" />
-        <h3 className="text-lg font-medium">No talents found</h3>
-        <p className="text-gray-600">Try adjusting your filters</p>
+        <p className="text-muted-foreground">No talents found</p>
       </div>
     );
   }
@@ -102,6 +101,8 @@ export const TalentListingSection: React.FC<TalentListingSectionProps> = ({
         guestId={guestId}
         selectedTalents={selectedTalents}
         onTalentSelect={onTalentSelect}
+        savingStatus={{}}
+        errorMessages={{}}
       />
     </div>
   );

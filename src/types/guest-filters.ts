@@ -12,6 +12,10 @@ export interface FilterState {
   round_filter?: number;
 }
 
+export interface GuestFilters extends FilterState {
+  // Additional guest-specific filter properties can be added here
+}
+
 export interface GuestViewSettings {
   view_mode: 'grid' | 'list';
   sort_by: SortField;
@@ -34,8 +38,8 @@ export interface TalentDisplayProps {
   filters: FilterState;
   castingId: string;
   guestId: string;
-  savingStatus?: { [key: string]: boolean };
-  errorMessages?: { [key: string]: string };
+  savingStatus?: Record<string, boolean>;
+  errorMessages?: Record<string, string>;
   selectedTalents: Set<string>;
   onTalentSelect: (talentId: string, selected: boolean) => void;
 }

@@ -1,4 +1,3 @@
-import { useMemo } from "react";
 import { TalentGrid } from "./TalentGrid";
 import { TalentList } from "./TalentList";
 import type { TalentDisplayProps } from "@/types/guest-filters";
@@ -7,7 +6,12 @@ export function TalentDisplay({
   talents,
   viewMode,
   selections,
+  selectedTalents,
   onSelect,
+  onTalentSelect,
+  onMultipleSelect,
+  onReorder,
+  onRemove,
   isLoading,
   sort,
   filters,
@@ -16,68 +20,43 @@ export function TalentDisplay({
   savingStatus = {},
   errorMessages = {}
 }: TalentDisplayProps) {
-  const filteredTalents = useMemo(() => {
-    return talents
-      .filter(talent => {
-        if (filters.search_term) {
-          const searchLower = filters.search_term.toLowerCase();
-          return talent.users.full_name.toLowerCase().includes(searchLower);
-        }
-        return true;
-      })
-      .sort((a, b) => {
-        const direction = sort.direction === 'asc' ? 1 : -1;
-        
-        switch (sort.field) {
-          case 'name':
-            return direction * a.users.full_name.localeCompare(b.users.full_name);
-          case 'date_added':
-            return direction * (new Date(a.created_at).getTime() - new Date(b.created_at).getTime());
-          case 'favorite':
-            const aFavorite = selections[a.id]?.is_favorite ? 1 : 0;
-            const bFavorite = selections[b.id]?.is_favorite ? 1 : 0;
-            return direction * (bFavorite - aFavorite);
-          default:
-            return 0;
-        }
-      });
-  }, [talents, sort, filters, selections]);
-
-  return (
-    <div className="space-y-6">
-      {viewMode === 'grid' ? (
-        <TalentGrid
-          {...{
-            talents: filteredTalents,
-            viewMode,
-            selections,
-            onSelect,
-            isLoading,
-            sort,
-            filters,
-            castingId,
-            guestId,
-            savingStatus,
-            errorMessages
-          }}
-        />
-      ) : (
-        <TalentList
-          {...{
-            talents: filteredTalents,
-            viewMode,
-            selections,
-            onSelect,
-            isLoading,
-            sort,
-            filters,
-            castingId,
-            guestId,
-            savingStatus,
-            errorMessages
-          }}
-        />
-      )}
-    </div>
+  return viewMode === 'grid' ? (
+    <TalentGrid
+      talents={talents}
+      viewMode="grid"
+      selections={selections}
+      selectedTalents={selectedTalents}
+      onSelect={onSelect}
+      onTalentSelect={onTalentSelect}
+      onMultipleSelect={onMultipleSelect}
+      onReorder={onReorder}
+      onRemove={onRemove}
+      isLoading={isLoading}
+      sort={sort}
+      filters={filters}
+      castingId={castingId}
+      guestId={guestId}
+      savingStatus={savingStatus}
+      errorMessages={errorMessages}
+    />
+  ) : (
+    <TalentList
+      talents={talents}
+      viewMode="list"
+      selections={selections}
+      selectedTalents={selectedTalents}
+      onSelect={onSelect}
+      onTalentSelect={onTalentSelect}
+      onMultipleSelect={onMultipleSelect}
+      onReorder={onReorder}
+      onRemove={onRemove}
+      isLoading={isLoading}
+      sort={sort}
+      filters={filters}
+      castingId={castingId}
+      guestId={guestId}
+      savingStatus={savingStatus}
+      errorMessages={errorMessages}
+    />
   );
 }
