@@ -11,7 +11,15 @@
 
   <body>
     <div id="root"></div>
-    <script src="https://cdn.gpteng.co/gptengineer.js" type="module"></script>
+    <script>
+      // Set up a global origin variable that can be used by gptengineer.js
+      window.LOVABLE_ORIGIN = window.location.origin;
+    </script>
+    <script 
+      src="https://cdn.gpteng.co/gptengineer.js" 
+      type="module" 
+      data-origin={window.LOVABLE_ORIGIN}
+    ></script>
     <script type="module" src="/src/main.tsx"></script>
   </body>
 </html>
