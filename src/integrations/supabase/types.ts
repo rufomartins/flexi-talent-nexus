@@ -1811,6 +1811,64 @@ export type Database = {
           },
         ]
       }
+      share_links: {
+        Row: {
+          allow_comments: boolean
+          casting_id: string
+          created_at: string
+          created_by: string
+          expires_at: string
+          guest_id: string
+          id: string
+          readonly: boolean
+          token: string
+        }
+        Insert: {
+          allow_comments?: boolean
+          casting_id: string
+          created_at?: string
+          created_by: string
+          expires_at: string
+          guest_id: string
+          id?: string
+          readonly?: boolean
+          token: string
+        }
+        Update: {
+          allow_comments?: boolean
+          casting_id?: string
+          created_at?: string
+          created_by?: string
+          expires_at?: string
+          guest_id?: string
+          id?: string
+          readonly?: boolean
+          token?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "share_links_casting_id_fkey"
+            columns: ["casting_id"]
+            isOneToOne: false
+            referencedRelation: "castings"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "share_links_created_by_fkey"
+            columns: ["created_by"]
+            isOneToOne: false
+            referencedRelation: "casting_guests"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "share_links_guest_id_fkey"
+            columns: ["guest_id"]
+            isOneToOne: false
+            referencedRelation: "casting_guests"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       shot_lists: {
         Row: {
           created_at: string | null

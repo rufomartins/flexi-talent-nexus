@@ -2,66 +2,95 @@ import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
 import { Label } from "@/components/ui/label";
-import { Input } from "@/components/ui/input";
-import { Textarea } from "@/components/ui/textarea";
-import { Loader2 } from "lucide-react";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Checkbox } from "@/components/ui/checkbox";
+import { Loader2, Share } from "lucide-react";
+import { toast } from "sonner";
+
+interface ShareConfig {
+  expiresIn: number;  // Hours
+  allowComments: boolean;
+  readonly: boolean;
+}
 
 interface ShareDialogProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
-  castingId: string;
-  onShare: (email: string, message?: string) => Promise<void>;
+  onShare: (config: ShareConfig) => Promise<void>;
+  isSharing?: boolean;
 }
 
-export function ShareDialog({ open, onOpenChange, onShare }: ShareDialogProps) {
-  const [isLoading, setIsLoading] = useState(false);
-  const [email, setEmail] = useState("");
-  const [message, setMessage] = useState("");
+export function ShareDialog({ 
+  open, 
+  onOpenChange, 
+  onShare,
+  isSharing = false 
+}: ShareDialogProps) {
+  const [config, setConfig] = useState<ShareConfig>({
+    expiresIn: 24,
+    allowComments: true,
+    readonly: false
+  });
 
-  const handleShare = async () => {
-    if (!email) return;
-
+  const handleSubmit = async () => {
     try {
-      setIsLoading(true);
-      await onShare(email, message);
+      await onShare(config);
+      toast.success("Share link created successfully");
       onOpenChange(false);
-      setEmail("");
-      setMessage("");
     } catch (error) {
-      console.error('Share failed:', error);
-    } finally {
-      setIsLoading(false);
+      toast.error("Failed to create share link");
+      console.error("Share error:", error);
     }
   };
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="sm:max-w-[425px]">
+      <DialogContent className="sm:max-w-md">
         <DialogHeader>
-          <DialogTitle>Share Casting Access</DialogTitle>
+          <DialogTitle>Share Selections</DialogTitle>
         </DialogHeader>
 
         <div className="grid gap-4 py-4">
-          <div className="space-y-2">
-            <Label htmlFor="email">Email Address</Label>
-            <Input
-              id="email"
-              type="email"
-              placeholder="colleague@company.com"
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-            />
+          <div className="grid gap-2">
+            <Label htmlFor="expires">Link expires in</Label>
+            <Select
+              value={config.expiresIn.toString()}
+              onValueChange={(value) => 
+                setConfig(prev => ({ ...prev, expiresIn: parseInt(value) }))
+              }
+            >
+              <SelectTrigger>
+                <SelectValue placeholder="Select expiration time" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="24">24 hours</SelectItem>
+                <SelectItem value="48">2 days</SelectItem>
+                <SelectItem value="72">3 days</SelectItem>
+                <SelectItem value="168">1 week</SelectItem>
+              </SelectContent>
+            </Select>
           </div>
 
-          <div className="space-y-2">
-            <Label htmlFor="message">Message (Optional)</Label>
-            <Textarea
-              id="message"
-              placeholder="Add a personal message..."
-              value={message}
-              onChange={(e) => setMessage(e.target.value)}
-              className="h-24"
+          <div className="flex items-center space-x-2">
+            <Checkbox
+              id="comments"
+              checked={config.allowComments}
+              onCheckedChange={(checked) => 
+                setConfig(prev => ({ ...prev, allowComments: checked as boolean }))
+              }
             />
+            <Label htmlFor="comments">Allow comments from viewers</Label>
+          </div>
+
+          <div className="flex items-center space-x-2">
+            <Checkbox
+              id="readonly"
+              checked={config.readonly}
+              onCheckedChange={(checked) => 
+                setConfig(prev => ({ ...prev, readonly: checked as boolean }))
+              }
+            />
+            <Label htmlFor="readonly">Read-only access</Label>
           </div>
         </div>
 
@@ -69,9 +98,18 @@ export function ShareDialog({ open, onOpenChange, onShare }: ShareDialogProps) {
           <Button variant="outline" onClick={() => onOpenChange(false)}>
             Cancel
           </Button>
-          <Button onClick={handleShare} disabled={isLoading || !email}>
-            {isLoading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-            Share Access
+          <Button onClick={handleSubmit} disabled={isSharing}>
+            {isSharing ? (
+              <>
+                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                Creating link...
+              </>
+            ) : (
+              <>
+                <Share className="mr-2 h-4 w-4" />
+                Create share link
+              </>
+            )}
           </Button>
         </DialogFooter>
       </DialogContent>
