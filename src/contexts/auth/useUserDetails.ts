@@ -70,7 +70,7 @@ export const useUserDetails = () => {
           const minimalUserData: DatabaseUser = {
             id: authUser.id,
             full_name: authUser.user_metadata?.full_name || '',
-            email: authUser.email,
+            email: authUser.email || '',
             role: authUser.user_metadata?.role || 'user',
             status: 'active',
             created_at: authUser.created_at,
