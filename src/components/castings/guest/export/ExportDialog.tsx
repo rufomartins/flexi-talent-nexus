@@ -10,11 +10,11 @@ import type { ExportOptions } from "@/types/export";
 
 interface ExportDialogProps {
   open: boolean;
-  onClose: () => void;
+  onOpenChange: (open: boolean) => void;
   onExport: (options: ExportOptions) => Promise<void>;
 }
 
-export function ExportDialog({ open, onClose, onExport }: ExportDialogProps) {
+export function ExportDialog({ open, onOpenChange, onExport }: ExportDialogProps) {
   const [format, setFormat] = useState<'csv' | 'excel'>('excel');
   const [includeDetails, setIncludeDetails] = useState(true);
   const [isExporting, setIsExporting] = useState(false);
@@ -23,7 +23,7 @@ export function ExportDialog({ open, onClose, onExport }: ExportDialogProps) {
     setIsExporting(true);
     try {
       await onExport({ format, includeDetails });
-      onClose();
+      onOpenChange(false);
       toast.success('Export completed successfully');
     } catch (error) {
       console.error('Export failed:', error);
@@ -34,7 +34,7 @@ export function ExportDialog({ open, onClose, onExport }: ExportDialogProps) {
   };
 
   return (
-    <Dialog open={open} onOpenChange={onClose}>
+    <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="sm:max-w-md">
         <DialogHeader>
           <DialogTitle>Export Selections</DialogTitle>
@@ -62,7 +62,7 @@ export function ExportDialog({ open, onClose, onExport }: ExportDialogProps) {
           </div>
         </div>
         <DialogFooter>
-          <Button variant="outline" onClick={onClose}>Cancel</Button>
+          <Button variant="outline" onClick={() => onOpenChange(false)}>Cancel</Button>
           <Button onClick={handleExport} disabled={isExporting}>
             {isExporting ? (
               <>
