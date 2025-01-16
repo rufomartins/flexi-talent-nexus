@@ -37,8 +37,8 @@ export const ShareLinksList: React.FC<ShareLinksListProps> = ({ castingId }) => 
         .from('share_links')
         .select(`
           *,
-          casting:castings!inner (name),
-          guest:casting_guests!inner (full_name)
+          casting:castings(name),
+          guest:casting_guests(full_name)
         `)
         .eq('casting_id', castingId)
         .order('created_at', { ascending: false });
@@ -47,6 +47,9 @@ export const ShareLinksList: React.FC<ShareLinksListProps> = ({ castingId }) => 
       
       return data.map(link => ({
         ...link,
+        casting: {
+          name: link.casting?.name || 'Unknown Casting'
+        },
         guest: {
           full_name: link.guest?.full_name || 'Unknown Guest'
         }
