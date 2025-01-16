@@ -47,7 +47,7 @@ export const GuestContent: React.FC<GuestContentProps> = ({
       <SelectionSection
         talents={talents}
         selections={selections}
-        viewMode={viewSettings.viewMode}
+        viewMode={viewSettings.view_mode}
         isLoading={isLoading}
         onSelect={onSelect}
       />

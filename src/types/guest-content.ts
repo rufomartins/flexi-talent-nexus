@@ -26,8 +26,3 @@ export interface SelectionSectionProps {
 export interface ShareSectionProps {
   castingId: string;
 }
-
-export interface BatchSelectionUpdate {
-  talentIds: string[];
-  update: Partial<GuestSelection>;
-}
