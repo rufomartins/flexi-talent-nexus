@@ -1,9 +1,15 @@
 import { UserX } from "lucide-react";
 import { TalentDisplay } from "../talent-display/TalentDisplay";
 import { TalentGridSkeleton } from "@/components/loading/LoadingStates";
+import { BatchActionBar } from "../batch/BatchActionBar";
 import type { TalentProfile } from "@/types/talent";
 import type { GuestSelection } from "@/types/supabase/guest-selection";
 import type { SortField, SortDirection } from "@/types/guest-filters";
+
+interface BatchSelectionUpdate {
+  talentIds: string[];
+  update: Partial<GuestSelection>;
+}
 
 interface TalentListingSectionProps {
   talents: TalentProfile[];
@@ -21,6 +27,9 @@ interface TalentListingSectionProps {
   onMultipleSelect?: (selections: Record<string, Partial<GuestSelection>>) => Promise<void>;
   onReorder: (newOrder: Record<string, number>) => Promise<void>;
   onRemove?: (talentId: string) => Promise<void>;
+  selectedTalents: Set<string>;
+  onTalentSelect: (talentId: string, selected: boolean) => void;
+  onBatchUpdate: (update: BatchSelectionUpdate) => Promise<void>;
 }
 
 export const TalentListingSection: React.FC<TalentListingSectionProps> = ({
@@ -35,8 +44,24 @@ export const TalentListingSection: React.FC<TalentListingSectionProps> = ({
   onSelect,
   onMultipleSelect,
   onReorder,
-  onRemove
+  onRemove,
+  selectedTalents,
+  onTalentSelect,
+  onBatchUpdate
 }) => {
+  const handleBatchAction = async (action: 'favorite' | 'unfavorite' | 'remove') => {
+    if (selectedTalents.size === 0) return;
+
+    const update: Partial<GuestSelection> = action === 'remove' 
+      ? { status: 'removed' }
+      : { liked: action === 'favorite' };
+
+    await onBatchUpdate({
+      talentIds: Array.from(selectedTalents),
+      update
+    });
+  };
+
   if (isLoading) {
     return <TalentGridSkeleton />;
   }
@@ -52,19 +77,32 @@ export const TalentListingSection: React.FC<TalentListingSectionProps> = ({
   }
 
   return (
-    <TalentDisplay
-      talents={talents}
-      viewMode={viewMode}
-      selections={selections}
-      onSelect={onSelect}
-      onMultipleSelect={onMultipleSelect}
-      onReorder={onReorder}
-      onRemove={onRemove}
-      isLoading={isLoading}
-      sort={sort}
-      filters={filters}
-      castingId={castingId}
-      guestId={guestId}
-    />
+    <div>
+      {selectedTalents.size > 0 && (
+        <BatchActionBar 
+          selectedCount={selectedTalents.size}
+          onFavorite={() => handleBatchAction('favorite')}
+          onUnfavorite={() => handleBatchAction('unfavorite')}
+          onRemove={() => handleBatchAction('remove')}
+        />
+      )}
+      
+      <TalentDisplay
+        talents={talents}
+        viewMode={viewMode}
+        selections={selections}
+        onSelect={onSelect}
+        onMultipleSelect={onMultipleSelect}
+        onReorder={onReorder}
+        onRemove={onRemove}
+        isLoading={isLoading}
+        sort={sort}
+        filters={filters}
+        castingId={castingId}
+        guestId={guestId}
+        selectedTalents={selectedTalents}
+        onTalentSelect={onTalentSelect}
+      />
+    </div>
   );
 };

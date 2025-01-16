@@ -1,3 +1,4 @@
+import { useState } from "react";
 import { Card } from "@/components/ui/card";
 import { ViewSettingsSection } from "./sections/ViewSettingsSection";
 import { FilterSection } from "./sections/FilterSection";
@@ -5,6 +6,7 @@ import { TalentListingSection } from "./sections/TalentListingSection";
 import type { TalentProfile } from "@/types/talent";
 import type { FilterState, GuestViewSettings } from "@/types/guest-filters";
 import type { GuestSelection } from "@/types/supabase/guest-selection";
+import type { Dispatch, SetStateAction } from "react";
 
 interface GuestContentProps {
   talents: TalentProfile[];
@@ -18,8 +20,8 @@ interface GuestContentProps {
   onMultipleUpdate: (updates: Record<string, Partial<GuestSelection>>) => Promise<void>;
   onReorder: (newOrder: Record<string, number>) => Promise<void>;
   onRemove: (talentId: string) => Promise<void>;
-  onViewChange: (settings: GuestViewSettings) => void;
-  onFilterChange: (filters: FilterState) => void;
+  onViewChange: Dispatch<SetStateAction<GuestViewSettings>>;
+  onFilterChange: Dispatch<SetStateAction<FilterState>>;
 }
 
 export const GuestContent: React.FC<GuestContentProps> = ({
@@ -37,6 +39,30 @@ export const GuestContent: React.FC<GuestContentProps> = ({
   onViewChange,
   onFilterChange,
 }) => {
+  const [selectedTalents, setSelectedTalents] = useState<Set<string>>(new Set());
+
+  const handleTalentSelect = (talentId: string, selected: boolean) => {
+    setSelectedTalents(prev => {
+      const next = new Set(prev);
+      if (selected) {
+        next.add(talentId);
+      } else {
+        next.delete(talentId);
+      }
+      return next;
+    });
+  };
+
+  const handleBatchUpdate = async (update: BatchSelectionUpdate) => {
+    await onMultipleUpdate(
+      update.talentIds.reduce((acc, talentId) => ({
+        ...acc,
+        [talentId]: update.update
+      }), {})
+    );
+    setSelectedTalents(new Set()); // Clear selections after update
+  };
+
   return (
     <Card className="p-4 space-y-6">
       <ViewSettingsSection
@@ -65,7 +91,15 @@ export const GuestContent: React.FC<GuestContentProps> = ({
         onMultipleSelect={onMultipleUpdate}
         onReorder={onReorder}
         onRemove={onRemove}
+        selectedTalents={selectedTalents}
+        onTalentSelect={handleTalentSelect}
+        onBatchUpdate={handleBatchUpdate}
       />
     </Card>
   );
 };
+
+interface BatchSelectionUpdate {
+  talentIds: string[];
+  update: Partial<GuestSelection>;
+}
