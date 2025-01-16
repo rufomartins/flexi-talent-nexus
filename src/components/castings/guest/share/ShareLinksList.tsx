@@ -37,8 +37,8 @@ export const ShareLinksList: React.FC<ShareLinksListProps> = ({ castingId }) => 
         .from('share_links')
         .select(`
           *,
-          casting:castings(name),
-          guest:casting_guests(full_name)
+          casting:castings!casting_id(name),
+          guest:casting_guests!guest_id(full_name)
         `)
         .eq('casting_id', castingId)
         .order('created_at', { ascending: false });
