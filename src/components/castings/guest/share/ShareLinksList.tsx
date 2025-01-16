@@ -21,7 +21,7 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { MoreVerticalIcon, CopyIcon, TrashIcon, CheckIcon, XIcon } from "lucide-react";
-import type { ShareLink } from "@/types/guest-filters";
+import type { ShareLink } from "@/types/share-link";
 
 interface ShareLinksListProps {
   castingId: string;

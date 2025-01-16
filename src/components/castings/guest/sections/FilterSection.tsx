@@ -1,20 +1,24 @@
+import React from "react";
 import { Card, CardContent } from "@/components/ui/card";
 import { ViewControls } from "../talent-display/ViewControls";
 import { FilterControls } from "../FilterControls";
-import type { FilterSectionProps } from "@/types/guest-content";
-import type { GuestViewSettings } from "@/types/guest-filters";
+import type { FilterState, GuestViewSettings } from "@/types/guest-filters";
+
+interface FilterSectionProps {
+  viewSettings: GuestViewSettings;
+  filters: FilterState;
+  onViewChange: (settings: GuestViewSettings) => void;
+  onFilterChange: (filters: FilterState) => void;
+}
 
 export const FilterSection: React.FC<FilterSectionProps> = ({
   viewSettings,
   filters,
   onViewChange,
-  onFilterChange
+  onFilterChange,
 }) => {
   const handleViewModeChange = (mode: "grid" | "list") => {
-    onViewChange({
-      ...viewSettings,
-      view_mode: mode
-    });
+    onViewChange({ ...viewSettings, view_mode: mode });
   };
 
   return (
@@ -26,13 +30,13 @@ export const FilterSection: React.FC<FilterSectionProps> = ({
             onViewChange={handleViewModeChange}
             sortOption={{
               field: viewSettings.sort_by,
-              direction: viewSettings.sort_direction
+              direction: viewSettings.sort_direction,
             }}
-            onSortChange={(sort) => 
+            onSortChange={(sort) =>
               onViewChange({
                 ...viewSettings,
                 sort_by: sort.field,
-                sort_direction: sort.direction
+                sort_direction: sort.direction,
               })
             }
           />
