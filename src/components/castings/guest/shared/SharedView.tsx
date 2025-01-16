@@ -16,30 +16,43 @@ export function SharedView({ token }: SharedViewProps) {
   const { data: shareLink, isLoading: isLoadingShare } = useQuery({
     queryKey: ['share-link', token],
     queryFn: async () => {
-      const { data, error } = await supabase
+      // First get the share link data
+      const { data: linkData, error: linkError } = await supabase
         .from('share_links')
-        .select(`
-          *,
-          casting:castings (
-            id,
-            name
-          ),
-          guest:casting_guests!casting_guests_id_fkey (
-            id,
-            name
-          )
-        `)
+        .select('*')
         .eq('token', token)
         .maybeSingle();
 
-      if (error) throw error;
-      if (!data) throw new Error('Share link not found');
+      if (linkError) throw linkError;
+      if (!linkData) throw new Error('Share link not found');
 
-      if (new Date(data.expires_at) < new Date()) {
+      if (new Date(linkData.expires_at) < new Date()) {
         throw new Error('Share link has expired');
       }
 
-      return data;
+      // Then get the casting and guest data
+      const { data: castingData, error: castingError } = await supabase
+        .from('castings')
+        .select('id, name')
+        .eq('id', linkData.casting_id)
+        .single();
+
+      if (castingError) throw castingError;
+
+      const { data: guestData, error: guestError } = await supabase
+        .from('casting_guests')
+        .select('id, name')
+        .eq('id', linkData.guest_id)
+        .single();
+
+      if (guestError) throw guestError;
+
+      // Combine the data
+      return {
+        ...linkData,
+        casting: castingData,
+        guest: guestData
+      };
     }
   });
 
