@@ -59,15 +59,29 @@ export const useAuthActions = (
   };
 
   const signIn = async (email: string, password: string, rememberMe: boolean) => {
-    console.log("Attempting sign in for:", email);
+    console.log("[Auth] Attempting sign in for:", email);
     try {
       setLoading(true);
+      
+      // Clear any existing session data first
+      console.log("[Auth] Clearing any existing session data");
+      localStorage.clear();
+      sessionStorage.clear();
+
       const { data, error } = await supabase.auth.signInWithPassword({
         email,
         password,
       });
 
-      if (error) throw error;
+      if (error) {
+        console.error("[Auth] Sign in error:", error);
+        throw error;
+      }
+
+      console.log("[Auth] Sign in successful, session established:", {
+        userId: data.user?.id,
+        email: data.user?.email
+      });
 
       if (rememberMe) {
         localStorage.setItem("rememberMe", "true");
@@ -76,10 +90,16 @@ export const useAuthActions = (
       }
 
       if (data.user) {
+        console.log("[Auth] Fetching user details for:", data.user.id);
         const userDetails = await fetchUserDetails(data.user.id);
         if (!userDetails) {
+          console.error("[Auth] Failed to fetch user details after login");
           throw new Error("Failed to fetch user details");
         }
+        console.log("[Auth] User details fetched successfully:", {
+          id: userDetails.id,
+          role: userDetails.role
+        });
       }
 
       toast({
@@ -87,7 +107,7 @@ export const useAuthActions = (
         description: "You have successfully logged in.",
       });
     } catch (error: any) {
-      console.error("Sign in error:", error);
+      console.error("[Auth] Sign in error:", error);
       toast({
         title: "Error",
         description: error.message,

@@ -1,36 +1,58 @@
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { Mail, Lock } from "lucide-react";
-import { useAuth } from "@/contexts/auth"; // Updated import path
+import { useAuth } from "@/contexts/auth";
 import { Card } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
 import { useToast } from "@/hooks/use-toast";
-import { useState } from "react";
+import { Loader2 } from "lucide-react";
 
 const Login = () => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [rememberMe, setRememberMe] = useState(false);
-  const { signIn, user } = useAuth();
+  const [isLoading, setIsLoading] = useState(false);
+  const { signIn, user, loading } = useAuth();
   const navigate = useNavigate();
   const { toast } = useToast();
 
   useEffect(() => {
+    console.log("[Login] Auth state changed:", { 
+      hasUser: !!user, 
+      isLoading: loading 
+    });
+    
     if (user) {
-      navigate("/dashboard");
+      console.log("[Login] User authenticated, redirecting to dashboard");
+      navigate("/dashboard", { replace: true });
     }
-  }, [user, navigate]);
+  }, [user, loading, navigate]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    setIsLoading(true);
+    
     try {
+      console.log("[Login] Attempting login for:", email);
       await signIn(email, password, rememberMe);
     } catch (error) {
-      console.error("Login error:", error);
+      console.error("[Login] Login error:", error);
+      setIsLoading(false);
     }
   };
+
+  if (loading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-[#F8F9FA]">
+        <div className="text-center">
+          <Loader2 className="h-8 w-8 animate-spin mx-auto" />
+          <p className="mt-4 text-sm text-muted-foreground">Loading...</p>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-[#F8F9FA] p-4">
@@ -52,6 +74,7 @@ const Login = () => {
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
                 required
+                disabled={isLoading}
               />
             </div>
 
@@ -64,6 +87,7 @@ const Login = () => {
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
                 required
+                disabled={isLoading}
               />
             </div>
           </div>
@@ -73,6 +97,7 @@ const Login = () => {
               <Checkbox
                 checked={rememberMe}
                 onCheckedChange={(checked) => setRememberMe(checked as boolean)}
+                disabled={isLoading}
               />
               <span className="text-sm text-gray-600">Remember me</span>
             </label>
@@ -86,6 +111,7 @@ const Login = () => {
                   description: "Password reset functionality coming soon",
                 })
               }
+              disabled={isLoading}
             >
               Forgot password?
             </button>
@@ -94,8 +120,16 @@ const Login = () => {
           <Button
             type="submit"
             className="w-full bg-[#0D6EFD] hover:bg-[#0B5ED7]"
+            disabled={isLoading}
           >
-            Login
+            {isLoading ? (
+              <>
+                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                Logging in...
+              </>
+            ) : (
+              'Login'
+            )}
           </Button>
         </form>
       </Card>
