@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { format } from "date-fns";
 import { toast } from "sonner";
@@ -20,7 +20,7 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { CheckIcon, CopyIcon, MoreVerticalIcon, TrashIcon, XIcon } from "lucide-react";
+import { MoreVerticalIcon, CopyIcon, TrashIcon } from "lucide-react";
 import type { ShareLink } from "@/types/guest-filters";
 
 interface ShareLinksListProps {
@@ -115,7 +115,7 @@ export const ShareLinksList: React.FC<ShareLinksListProps> = ({ castingId }) => 
                 {new Date(link.expires_at) < new Date() ? (
                   <Badge variant="destructive">Expired</Badge>
                 ) : (
-                  <Badge variant="success">Active</Badge>
+                  <Badge variant="secondary">Active</Badge>
                 )}
               </TableCell>
               <TableCell>
