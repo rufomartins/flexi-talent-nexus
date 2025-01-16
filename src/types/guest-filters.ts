@@ -24,6 +24,9 @@ export interface TalentDisplayProps {
   viewMode: 'grid' | 'list';
   selections: Record<string, GuestSelection>;
   onSelect: (talentId: string, update: Partial<GuestSelection>) => Promise<void>;
+  onMultipleSelect?: (updates: Record<string, Partial<GuestSelection>>) => Promise<void>;
+  onReorder?: (newOrder: Record<string, number>) => Promise<void>;
+  onRemove?: (talentId: string) => Promise<void>;
   isLoading: boolean;
   sort: {
     field: SortField;

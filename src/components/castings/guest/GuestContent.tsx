@@ -76,7 +76,6 @@ export const GuestContent: React.FC<GuestContentProps> = ({
           onMultipleSelect={onMultipleUpdate}
           onReorder={onReorder}
           onRemove={onRemove}
-          isUpdating={isUpdating}
           isLoading={isLoading}
           sort={{
             field: viewSettings.sort_by,
