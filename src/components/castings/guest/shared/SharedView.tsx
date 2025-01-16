@@ -24,7 +24,7 @@ export function SharedView({ token }: SharedViewProps) {
             id,
             name
           ),
-          guest:casting_guests (
+          guest:casting_guests!casting_guests_id_fkey (
             id,
             name
           )

@@ -1,4 +1,4 @@
-import { createBrowserRouter } from "react-router-dom";
+import { createBrowserRouter, useParams } from "react-router-dom";
 import { MainLayout } from "@/components/layout/MainLayout";
 import { SharedView } from "@/components/castings/guest/shared/SharedView";
 import Dashboard from "@/pages/dashboard";
