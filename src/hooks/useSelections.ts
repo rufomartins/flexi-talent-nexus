@@ -23,7 +23,7 @@ export function useSelections(castingId: string, guestId: string) {
           guest_id: selection.guest_id,
           preference_order: selection.preference_order,
           comments: selection.comments,
-          is_favorite: selection.liked || false,
+          liked: selection.liked || false,
           created_at: selection.created_at,
           updated_at: selection.updated_at,
           status: selection.status || 'shortlisted'

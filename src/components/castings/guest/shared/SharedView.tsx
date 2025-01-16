@@ -1,9 +1,12 @@
+import { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { formatDistanceToNow } from "date-fns";
-import { XCircle, Loader2 } from "lucide-react";
+import { XCircle } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { supabase } from "@/integrations/supabase/client";
 import { SharedTalentCard } from "./SharedTalentCard";
+import type { GuestSelection } from "@/types/supabase/guest-selection";
+import type { TalentProfile } from "@/types/talent";
 
 interface SharedViewProps {
   token: string;
@@ -17,8 +20,14 @@ export function SharedView({ token }: SharedViewProps) {
         .from('share_links')
         .select(`
           *,
-          casting:castings!inner (*),
-          guest:casting_guests!inner (*)
+          casting:castings!inner (
+            id,
+            name
+          ),
+          guest:casting_guests!inner (
+            id,
+            name
+          )
         `)
         .eq('token', token)
         .maybeSingle();
@@ -26,7 +35,6 @@ export function SharedView({ token }: SharedViewProps) {
       if (error) throw error;
       if (!data) throw new Error('Share link not found');
 
-      // Check if expired
       if (new Date(data.expires_at) < new Date()) {
         throw new Error('Share link has expired');
       }
@@ -65,7 +73,7 @@ export function SharedView({ token }: SharedViewProps) {
   if (isLoadingShare || isLoadingSelections) {
     return (
       <div className="flex items-center justify-center min-h-screen">
-        <Loader2 className="w-8 h-8 animate-spin" />
+        <XCircle className="w-8 h-8 animate-spin" />
         <span className="ml-2">Loading shared selections...</span>
       </div>
     );
@@ -103,7 +111,15 @@ export function SharedView({ token }: SharedViewProps) {
           {selections.map((selection) => (
             <SharedTalentCard
               key={selection.talent_id}
-              selection={selection}
+              selection={selection as GuestSelection & {
+                talent_profiles: TalentProfile & {
+                  users: {
+                    id: string;
+                    full_name: string;
+                    avatar_url?: string;
+                  }
+                }
+              }}
               readonly={shareLink.readonly}
               allowComments={shareLink.allow_comments}
             />

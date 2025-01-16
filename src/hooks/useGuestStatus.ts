@@ -6,7 +6,7 @@ export function useGuestStatus(talents?: TalentProfile[], selections?: Record<st
   return useMemo(() => ({
     total: talents?.length ?? 0,
     selected: Object.keys(selections ?? {}).length,
-    favorites: Object.values(selections ?? {}).filter(s => s.is_favorite).length,
+    favorites: Object.values(selections ?? {}).filter(s => s.liked).length,
     pending: Object.values(selections ?? {}).filter(s => s.status === 'pending').length
   }), [talents, selections]);
 }

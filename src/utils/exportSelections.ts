@@ -19,7 +19,7 @@ export async function exportSelections(
         'Country': talent?.country || '',
         'Native Language': talent?.native_language || '',
         'Comments': selection.comments || '',
-        'Favorite': selection.is_favorite ? 'Yes' : 'No',
+        'Favorite': selection.liked ? 'Yes' : 'No',
         ...(options.includeDetails ? {
           'Category': talent?.talent_category || '',
           'Selected Date': new Date(selection.created_at).toLocaleDateString(),
