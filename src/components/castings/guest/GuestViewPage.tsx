@@ -103,6 +103,20 @@ export function GuestViewPage({ castingId, guestId }: GuestViewPageProps) {
     }
   };
 
+  const [selectedTalents, setSelectedTalents] = useState<Set<string>>(new Set());
+
+  const handleTalentSelect = (talentId: string, selected: boolean) => {
+    setSelectedTalents(prev => {
+      const next = new Set(prev);
+      if (selected) {
+        next.add(talentId);
+      } else {
+        next.delete(talentId);
+      }
+      return next;
+    });
+  };
+
   return (
     <div className="container mx-auto px-4 py-6">
       {/* Header Section */}
@@ -148,6 +162,8 @@ export function GuestViewPage({ castingId, guestId }: GuestViewPageProps) {
           selections={selections}
           onSelect={handleSelect}
           isLoading={talentsLoading || selectionsLoading}
+          selectedTalents={selectedTalents}
+          onTalentSelect={handleTalentSelect}
         />
       )}
     </div>

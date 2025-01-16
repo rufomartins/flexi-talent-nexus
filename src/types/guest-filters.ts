@@ -1,6 +1,5 @@
 import type { TalentProfile } from "./talent";
 import type { GuestSelection } from "./supabase/guest-selection";
-import { Dispatch, SetStateAction } from "react";
 
 export type SortField = 'name' | 'favorite' | 'date_added';
 export type SortDirection = 'asc' | 'desc';
@@ -47,8 +46,4 @@ export interface TalentGridProps extends TalentDisplayProps {
 
 export interface TalentListProps extends TalentDisplayProps {
   viewMode: 'list';
-}
-
-export interface GuestFilters extends FilterState {
-  // Additional guest-specific filter properties can be added here
 }

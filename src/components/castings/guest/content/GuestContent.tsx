@@ -1,3 +1,4 @@
+import { useState } from "react";
 import { TalentDisplay } from "../talent-display/TalentDisplay";
 import type { TalentProfile } from "@/types/talent";
 import type { FilterState, GuestViewSettings } from "@/types/guest-filters";
@@ -37,6 +38,20 @@ export const GuestContent: React.FC<GuestContentProps> = ({
   onViewChange,
   isUpdating,
 }) => {
+  const [selectedTalents, setSelectedTalents] = useState<Set<string>>(new Set());
+
+  const handleTalentSelect = (talentId: string, selected: boolean) => {
+    setSelectedTalents(prev => {
+      const next = new Set(prev);
+      if (selected) {
+        next.add(talentId);
+      } else {
+        next.delete(talentId);
+      }
+      return next;
+    });
+  };
+
   return (
     <div className="space-y-6">
       <TalentDisplay
@@ -56,6 +71,8 @@ export const GuestContent: React.FC<GuestContentProps> = ({
         castingId={castingId}
         guestId={guestId}
         savingStatus={isUpdating}
+        selectedTalents={selectedTalents}
+        onTalentSelect={handleTalentSelect}
       />
     </div>
   );
