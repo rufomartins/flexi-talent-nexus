@@ -23,7 +23,7 @@ export const FilterSection: React.FC<FilterSectionProps> = ({
         <div className="grid gap-4">
           <ViewControls
             viewMode={viewSettings.view_mode}
-            onViewModeChange={handleViewModeChange}
+            onViewChange={handleViewModeChange}
             sortOption={{
               field: viewSettings.sort_by,
               direction: viewSettings.sort_direction

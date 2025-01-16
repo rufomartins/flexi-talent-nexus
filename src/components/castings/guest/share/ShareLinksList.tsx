@@ -44,7 +44,13 @@ export const ShareLinksList: React.FC<ShareLinksListProps> = ({ castingId }) => 
         .order('created_at', { ascending: false });
 
       if (error) throw error;
-      return data as ShareLink[];
+      
+      return data.map(link => ({
+        ...link,
+        guest: {
+          full_name: link.guest?.full_name || 'Unknown Guest'
+        }
+      })) as ShareLink[];
     }
   });
 
