@@ -175,16 +175,13 @@ export const GuestContent: React.FC<GuestContentProps> = ({
 
       <ExportDialog
         open={isExportDialogOpen}
-        onClose={() => setIsExportDialogOpen(false)}
+        onOpenChange={setIsExportDialogOpen}
         onExport={handleExport}
       />
 
       <ShareDialog
         open={isShareDialogOpen}
-        onClose={() => {
-          setIsShareDialogOpen(false);
-          setShareLink(null);
-        }}
+        onOpenChange={setIsShareDialogOpen}
         onShare={handleShare}
         isSharing={isSharing}
       />
