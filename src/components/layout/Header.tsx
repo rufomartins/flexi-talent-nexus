@@ -14,19 +14,33 @@ import { useToast } from "@/hooks/use-toast"
 import { useNavigate } from "react-router-dom"
 
 export const Header = () => {
-  const { signOut } = useAuth();
+  const { signOut, user } = useAuth();
   const { toast } = useToast();
   const navigate = useNavigate();
 
   const handleSignOut = async () => {
     try {
-      console.log("Header: Initiating sign out");
+      console.log("[Header] Initiating sign out process");
       await signOut();
-      console.log("Header: Sign out completed");
-    } catch (error) {
-      console.error("Header: Error signing out:", error);
+      console.log("[Header] Sign out completed successfully");
+      
+      // Clear all storage
+      console.log("[Header] Clearing local and session storage");
+      localStorage.clear();
+      sessionStorage.clear();
+      
+      // Force navigation to login
+      console.log("[Header] Redirecting to login page");
+      navigate("/login", { replace: true });
+      
       toast({
-        title: "Error",
+        title: "Signed out successfully",
+        description: "You have been logged out of your account.",
+      });
+    } catch (error) {
+      console.error("[Header] Error during sign out:", error);
+      toast({
+        title: "Error signing out",
         description: "Failed to sign out. Please try again.",
         variant: "destructive",
       });
@@ -66,7 +80,7 @@ export const Header = () => {
             <DropdownMenuTrigger asChild>
               <Button variant="ghost" className="h-8 w-8 rounded-full">
                 <Avatar className="h-8 w-8">
-                  <AvatarImage src="" alt="User" />
+                  <AvatarImage src={user?.user_metadata?.avatar_url || ""} alt={user?.email || "User"} />
                   <AvatarFallback>
                     <UserIcon className="h-4 w-4" />
                   </AvatarFallback>
@@ -74,6 +88,12 @@ export const Header = () => {
               </Button>
             </DropdownMenuTrigger>
             <DropdownMenuContent align="end" className="w-56 bg-white">
+              {user?.email && (
+                <div className="px-2 py-1.5 text-sm text-muted-foreground">
+                  {user.email}
+                </div>
+              )}
+              <DropdownMenuSeparator />
               <DropdownMenuItem onSelect={handleProfileClick} className="cursor-pointer hover:bg-gray-100">
                 Profile
               </DropdownMenuItem>
