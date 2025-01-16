@@ -73,7 +73,6 @@ export const useUserDetails = () => {
           // Create minimal user details from auth data
           const minimalUserData: DatabaseUser = {
             id: authUser.id,
-            email: authUser.email || '',
             full_name: authUser.user_metadata?.full_name || '',
             role: 'user',
             status: 'active',
@@ -81,7 +80,15 @@ export const useUserDetails = () => {
             last_login: authUser.last_sign_in_at,
             sms_notifications_enabled: false,
             phone_number_verified: false,
-            sms_notification_types: []
+            sms_notification_types: [],
+            // Initialize all nullable fields
+            avatar_url: null,
+            company_id: null,
+            first_name: null,
+            last_name: null,
+            gender: null,
+            mobile_phone: null,
+            nationality: null
           };
           console.log("[useUserDetails] Created minimal user data from auth:", minimalUserData);
           return minimalUserData;
