@@ -55,7 +55,7 @@ export const TalentListingSection: React.FC<TalentListingSectionProps> = ({
 
     const update: Partial<GuestSelection> = action === 'remove' 
       ? { status: 'removed' }
-      : { is_favorite: action === 'favorite' };
+      : { liked: action === 'favorite' };
 
     await onBatchUpdate({
       talentIds: Array.from(selectedTalents),

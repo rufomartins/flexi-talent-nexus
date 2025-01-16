@@ -20,11 +20,11 @@ export function SharedView({ token }: SharedViewProps) {
         .from('share_links')
         .select(`
           *,
-          casting:castings!inner (
+          casting:castings (
             id,
             name
           ),
-          guest:casting_guests!inner (
+          guest:casting_guests (
             id,
             name
           )
@@ -52,9 +52,9 @@ export function SharedView({ token }: SharedViewProps) {
         .from('guest_selections')
         .select(`
           *,
-          talent_profiles!inner (
+          talent_profiles:talent_profiles (
             *,
-            users!inner (
+            users:users (
               id,
               full_name,
               avatar_url
@@ -111,7 +111,7 @@ export function SharedView({ token }: SharedViewProps) {
           {selections.map((selection) => (
             <SharedTalentCard
               key={selection.talent_id}
-              selection={selection as GuestSelection & {
+              selection={selection as unknown as GuestSelection & {
                 talent_profiles: TalentProfile & {
                   users: {
                     id: string;
