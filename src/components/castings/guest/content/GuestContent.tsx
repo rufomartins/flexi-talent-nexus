@@ -14,8 +14,10 @@ interface GuestContentProps {
   guestId: string;
   onSelectionUpdate: (talentId: string, update: Partial<GuestSelection>) => Promise<void>;
   onMultipleUpdate: (updates: Record<string, Partial<GuestSelection>>) => Promise<void>;
+  onReorder: (newOrder: Record<string, number>) => Promise<void>;
   onFilterChange: Dispatch<SetStateAction<FilterState>>;
   onViewChange: Dispatch<SetStateAction<GuestViewSettings>>;
+  isUpdating: Record<string, boolean>;
 }
 
 export const GuestContent: React.FC<GuestContentProps> = ({
@@ -28,8 +30,10 @@ export const GuestContent: React.FC<GuestContentProps> = ({
   guestId,
   onSelectionUpdate,
   onMultipleUpdate,
+  onReorder,
   onFilterChange,
   onViewChange,
+  isUpdating,
 }) => {
   return (
     <div className="space-y-6">
@@ -39,6 +43,7 @@ export const GuestContent: React.FC<GuestContentProps> = ({
         selections={selections}
         onSelect={onSelectionUpdate}
         onMultipleSelect={onMultipleUpdate}
+        onReorder={onReorder}
         isLoading={isLoading}
         sort={{
           field: viewSettings.sort_by,
@@ -47,6 +52,7 @@ export const GuestContent: React.FC<GuestContentProps> = ({
         filters={filters}
         castingId={castingId}
         guestId={guestId}
+        savingStatus={isUpdating}
       />
     </div>
   );

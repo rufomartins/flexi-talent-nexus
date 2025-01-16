@@ -19,7 +19,7 @@ interface TalentListingSectionProps {
   guestId: string;
   onSelect: (talentId: string, selection: Partial<GuestSelection>) => Promise<void>;
   onMultipleSelect?: (selections: Record<string, Partial<GuestSelection>>) => Promise<void>;
-  onReorder?: (newOrder: Record<string, number>) => Promise<void>;
+  onReorder: (newOrder: Record<string, number>) => Promise<void>;
   onRemove?: (talentId: string) => Promise<void>;
 }
 
