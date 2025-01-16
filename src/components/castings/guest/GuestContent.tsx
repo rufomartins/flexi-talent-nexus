@@ -14,9 +14,13 @@ interface GuestContentProps {
   isLoading: boolean;
   castingId: string;
   guestId: string;
-  onFilterChange: (filters: FilterState) => void;
-  onViewChange: (settings: GuestViewSettings) => void;
   onSelectionUpdate: (talentId: string, update: Partial<GuestSelection>) => Promise<void>;
+  onMultipleUpdate: (updates: Record<string, Partial<GuestSelection>>) => Promise<void>;
+  onReorder: (newOrder: Record<string, number>) => Promise<void>;
+  onRemove: (talentId: string) => Promise<void>;
+  isUpdating: Record<string, boolean>;
+  onViewChange: (settings: GuestViewSettings) => void;
+  onFilterChange: (filters: FilterState) => void;
 }
 
 export const GuestContent: React.FC<GuestContentProps> = ({
@@ -27,9 +31,13 @@ export const GuestContent: React.FC<GuestContentProps> = ({
   isLoading,
   castingId,
   guestId,
+  onSelectionUpdate,
+  onMultipleUpdate,
+  onReorder,
+  onRemove,
+  isUpdating,
   onFilterChange,
   onViewChange,
-  onSelectionUpdate,
 }) => {
   if (isLoading) {
     return (
@@ -65,6 +73,10 @@ export const GuestContent: React.FC<GuestContentProps> = ({
           viewMode={viewSettings.view_mode}
           selections={selections}
           onSelect={onSelectionUpdate}
+          onMultipleSelect={onMultipleUpdate}
+          onReorder={onReorder}
+          onRemove={onRemove}
+          isUpdating={isUpdating}
           isLoading={isLoading}
           sort={{
             field: viewSettings.sort_by,

@@ -5,14 +5,13 @@ import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Loader2 } from "lucide-react";
 import type { GuestViewSettings } from "@/types/guest-filters";
 import type { FilterState } from "@/types/guest-filters";
-import type { GuestSelection } from "@/types/supabase/guest-selection";
 import { GuestHeader } from "./header/GuestHeader";
 import { StatusBar } from "./status/StatusBar";
 import { GuestContent } from "./content/GuestContent";
 import { useTalents } from "@/hooks/useTalents";
 import { useSelections } from "@/hooks/useSelections";
 import { useGuestStatus } from "@/hooks/useGuestStatus";
-import { supabase } from "@/integrations/supabase/client";
+import { useSelectionManagement } from "@/hooks/useSelectionManagement";
 
 export const GuestLanding = () => {
   const { castingId, guestId } = useParams();
@@ -35,37 +34,25 @@ export const GuestLanding = () => {
   const { data: selections, isLoading: selectionsLoading } = useSelections(castingId!, guestId!);
   const status = useGuestStatus(talents, selections);
 
-  const handleSelectionUpdate = async (talentId: string, selection: Partial<GuestSelection>) => {
-    try {
-      const { error } = await supabase
-        .from("guest_selections")
-        .upsert({
-          casting_id: castingId,
-          guest_id: guestId,
-          talent_id: talentId,
-          liked: selection.is_favorite,
-          comments: selection.comments,
-          preference_order: selection.preference_order,
-          status: selection.status || 'shortlisted'
-        });
-
-      if (error) {
-        console.error("Error updating selection:", error);
-        toast({
-          title: "Error",
-          description: "Failed to update selection",
-          variant: "destructive"
-        });
-      }
-    } catch (error) {
-      console.error("Error in handleSelectionUpdate:", error);
+  const {
+    updateSelection,
+    updateMultipleSelections,
+    reorderSelections,
+    removeSelection,
+    isUpdating,
+    error: selectionError
+  } = useSelectionManagement({
+    castingId: castingId!,
+    guestId: guestId!,
+    onError: (error) => {
+      console.error('Selection management error:', error);
       toast({
         title: "Error",
-        description: "An unexpected error occurred",
+        description: "Failed to update selection",
         variant: "destructive"
       });
     }
-  };
+  });
 
   const handleExport = () => {
     try {
@@ -134,7 +121,11 @@ export const GuestLanding = () => {
         isLoading={talentsLoading || selectionsLoading}
         castingId={castingId}
         guestId={guestId}
-        onSelectionUpdate={handleSelectionUpdate}
+        onSelectionUpdate={updateSelection}
+        onMultipleUpdate={updateMultipleSelections}
+        onReorder={reorderSelections}
+        onRemove={removeSelection}
+        isUpdating={isUpdating}
         onFilterChange={setFilters}
         onViewChange={setViewSettings}
       />
