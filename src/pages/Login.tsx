@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { Mail, Lock } from "lucide-react";
 import { useAuth } from "@/contexts/auth";
@@ -9,6 +9,7 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { useToast } from "@/hooks/use-toast";
 import { Loader2 } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
+import { runAuthDiagnostics } from "@/lib/diagnostics";
 
 const Login = () => {
   const [email, setEmail] = useState("");
@@ -36,6 +37,9 @@ const Login = () => {
     setIsLoading(true);
     
     try {
+      console.log("[Login] Running pre-login diagnostics");
+      await runAuthDiagnostics();
+      
       console.log("[Login] Attempting login for:", email);
       await signIn(email, password, rememberMe);
 
@@ -58,8 +62,14 @@ const Login = () => {
       }));
       console.log("[Login] Realtime connection status:", status);
 
+      console.log("[Login] Running post-login diagnostics");
+      await runAuthDiagnostics();
+
     } catch (error) {
       console.error("[Login] Login error:", error);
+      console.log("[Login] Running error diagnostics");
+      await runAuthDiagnostics();
+      
       toast({
         title: "Login failed",
         description: error instanceof Error ? error.message : "An error occurred during login",
