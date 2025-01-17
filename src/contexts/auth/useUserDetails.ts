@@ -23,15 +23,40 @@ export const useUserDetails = () => {
         throw new Error("Invalid user ID format");
       }
 
-      // Fetch only essential user data first
+      // First verify if session exists
+      const { data: { session } } = await supabase.auth.getSession();
+      console.log("[useUserDetails] Current session state:", {
+        hasSession: !!session,
+        sessionUser: session?.user?.id,
+        requestedUser: userId
+      });
+
+      if (!session) {
+        console.error("[useUserDetails] No active session found");
+        throw new Error("No active session");
+      }
+
+      // Fetch user data with detailed error logging
       const { data: userData, error: userError } = await supabase
-        .from('user_profiles')
+        .from('users')
         .select(`
           id,
           role,
           status,
           full_name,
-          email
+          email,
+          avatar_url,
+          company_id,
+          first_name,
+          last_name,
+          gender,
+          mobile_phone,
+          nationality,
+          created_at,
+          last_login,
+          phone_number_verified,
+          sms_notifications_enabled,
+          sms_notification_types
         `)
         .eq('id', userId)
         .maybeSingle();
@@ -52,34 +77,13 @@ export const useUserDetails = () => {
         return null;
       }
 
-      // Create minimal user details
-      const userDetails: DatabaseUser = {
-        id: userData.id,
-        role: userData.role,
-        status: userData.status,
-        full_name: userData.full_name,
-        email: userData.email,
-        avatar_url: null,
-        company_id: null,
-        first_name: null,
-        last_name: null,
-        gender: null,
-        mobile_phone: null,
-        nationality: null,
-        created_at: null,
-        last_login: null,
-        phone_number_verified: false,
-        sms_notifications_enabled: false,
-        sms_notification_types: []
-      };
-
       console.log("[useUserDetails] Successfully fetched user details:", {
-        id: userDetails.id,
-        email: userDetails.email,
-        role: userDetails.role
+        id: userData.id,
+        email: userData.email,
+        role: userData.role
       });
       
-      return userDetails;
+      return userData;
     } catch (error) {
       console.error("[useUserDetails] Exception in fetchUserDetails:", error);
       throw error;

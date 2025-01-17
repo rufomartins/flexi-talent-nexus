@@ -53,6 +53,13 @@ const ProtectedRoute = ({ children, allowedRoles }: ProtectedRouteProps) => {
           metadata: user.user_metadata
         });
         
+        // First verify session
+        const { data: { session } } = await supabase.auth.getSession();
+        if (!session) {
+          console.error("[ProtectedRoute] No active session found");
+          throw new Error("No active session");
+        }
+
         const { data: userData, error: userError } = await supabase
           .from("users")
           .select("*")
