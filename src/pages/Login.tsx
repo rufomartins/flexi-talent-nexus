@@ -8,6 +8,7 @@ import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
 import { useToast } from "@/hooks/use-toast";
 import { Loader2 } from "lucide-react";
+import { supabase } from "@/integrations/supabase/client";
 
 const Login = () => {
   const [email, setEmail] = useState("");
@@ -37,8 +38,33 @@ const Login = () => {
     try {
       console.log("[Login] Attempting login for:", email);
       await signIn(email, password, rememberMe);
+
+      // Verify session persistence
+      const { data: { session }, error: sessionError } = await supabase.auth.getSession();
+      if (sessionError) {
+        console.error("[Login] Session verification failed:", sessionError);
+        throw sessionError;
+      }
+      console.log("[Login] Session verified:", {
+        hasSession: !!session,
+        userId: session?.user?.id,
+        expiresAt: session?.expires_at
+      });
+
+      // Check WebSocket connection status
+      const status = supabase.realtime.getChannels().map(channel => ({
+        name: channel.topic,
+        state: channel.state
+      }));
+      console.log("[Login] Realtime connection status:", status);
+
     } catch (error) {
       console.error("[Login] Login error:", error);
+      toast({
+        title: "Login failed",
+        description: error instanceof Error ? error.message : "An error occurred during login",
+        variant: "destructive",
+      });
       setIsLoading(false);
     }
   };
