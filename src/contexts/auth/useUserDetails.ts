@@ -30,7 +30,7 @@ export const useUserDetails = () => {
 
       // Fetch only essential user data first
       const { data: userData, error: userError } = await supabase
-        .from('users')
+        .from('user_profiles')
         .select(`
           id,
           role,
