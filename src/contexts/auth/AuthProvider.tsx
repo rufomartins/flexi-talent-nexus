@@ -12,8 +12,6 @@ const MAX_RETRIES = 3;
 const RETRY_DELAY = 1000;
 
 export function AuthProvider({ children }: { children: React.ReactNode }) {
-  console.log("[AuthProvider] Initializing provider");
-  
   const navigate = useNavigate();
   const [retryCount, setRetryCount] = useState(0);
   const [initializationError, setInitializationError] = useState<Error | null>(null);
@@ -37,38 +35,8 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     fetchUserDetails
   );
 
-  const retryFetchSession = async () => {
-    try {
-      console.log(`[AuthProvider] Retrying session fetch attempt ${retryCount + 1}/${MAX_RETRIES}`);
-      const { data: { session: newSession }, error } = await supabase.auth.getSession();
-      
-      if (error) {
-        console.error("[AuthProvider] Error during retry:", error);
-        throw error;
-      }
-      
-      if (newSession) {
-        console.log("[AuthProvider] Session retrieved successfully on retry:", {
-          userId: newSession.user.id,
-          email: newSession.user.email,
-          metadata: newSession.user.user_metadata
-        });
-        setSession?.(newSession);
-        setUser?.(newSession.user);
-        return true;
-      }
-      
-      console.log("[AuthProvider] No session found during retry");
-      return false;
-    } catch (error) {
-      console.error("[AuthProvider] Error during retry:", error);
-      return false;
-    }
-  };
-
   // Initialize auth state
   useEffect(() => {
-    console.log("[AuthProvider] Setting up auth state listener");
     let mounted = true;
     let retryTimeout: NodeJS.Timeout;
 
@@ -76,122 +44,135 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       try {
         console.info("[Auth] Starting auth initialization...");
         
-        // Clear any stale data
+        // Clear any stale data first
         localStorage.clear();
         sessionStorage.clear();
         
+        // Get initial session with retry logic
         const { data: { session: initialSession }, error: sessionError } = await supabase.auth.getSession();
         
         if (sessionError) {
-          console.error("[AuthProvider] Session error during initialization:", sessionError);
+          console.error("[AuthProvider] Session error:", sessionError);
           throw sessionError;
         }
 
-        if (mounted) {
-          if (initialSession) {
-            console.log("[AuthProvider] Initial session found:", {
-              userId: initialSession.user.id,
-              email: initialSession.user.email,
-              metadata: initialSession.user.user_metadata,
-              lastSignIn: initialSession.user.last_sign_in_at
-            });
-            setSession?.(initialSession);
-            setUser?.(initialSession.user);
-            
+        if (!mounted) {
+          console.log("[AuthProvider] Component unmounted during initialization");
+          return;
+        }
+
+        if (initialSession) {
+          console.log("[AuthProvider] Initial session found:", {
+            userId: initialSession.user.id,
+            email: initialSession.user.email,
+            metadata: initialSession.user.user_metadata
+          });
+          
+          setSession?.(initialSession);
+          setUser?.(initialSession.user);
+          
+          // Fetch user details after session is confirmed
+          try {
             const details = await fetchUserDetails(initialSession.user.id);
-            if (details) {
+            if (details && mounted) {
               console.log("[AuthProvider] User details loaded:", details);
               setUserDetails(details);
               navigate("/dashboard");
-            } else {
-              console.warn("[AuthProvider] No user details found for user:", initialSession.user.id);
+            }
+          } catch (detailsError) {
+            console.error("[AuthProvider] Error fetching user details:", detailsError);
+            if (mounted) {
               navigate("/login");
             }
-          } else {
-            console.log("[AuthProvider] No initial session found");
+          }
+        } else {
+          console.log("[AuthProvider] No initial session");
+          if (mounted) {
             navigate("/login");
           }
+        }
+        
+        if (mounted) {
           setLoading?.(false);
         }
       } catch (error) {
-        console.error("[AuthProvider] Error during initialization:", error);
+        console.error("[AuthProvider] Initialization error:", error);
         
-        if (retryCount < MAX_RETRIES) {
-          retryTimeout = setTimeout(async () => {
+        if (retryCount < MAX_RETRIES && mounted) {
+          console.log(`[AuthProvider] Retrying initialization (${retryCount + 1}/${MAX_RETRIES})`);
+          retryTimeout = setTimeout(() => {
             setRetryCount(prev => prev + 1);
-            const success = await retryFetchSession();
-            if (!success && mounted) {
-              setInitializationError(error as Error);
-              toast({
-                title: "Authentication Error",
-                description: "Failed to initialize session. Please refresh the page.",
-                variant: "destructive",
-              });
-              navigate("/login");
-            }
           }, RETRY_DELAY);
-        } else {
+        } else if (mounted) {
           setInitializationError(error as Error);
           setLoading?.(false);
           navigate("/login");
+          toast({
+            title: "Authentication Error",
+            description: "Failed to initialize session. Please try again.",
+            variant: "destructive",
+          });
         }
       }
     };
 
-    // Set up realtime subscription
+    // Set up auth state subscription
     const { data: { subscription } } = supabase.auth.onAuthStateChange(async (event, session) => {
-      console.log("[AuthProvider] Auth state changed:", event, session ? {
-        userId: session.user.id,
-        email: session.user.email,
-        metadata: session.user.user_metadata
-      } : "No session");
+      console.log("[AuthProvider] Auth state changed:", event, session?.user?.email);
 
-      if (!mounted) {
-        console.log("[AuthProvider] Component unmounted, skipping state updates");
-        return;
-      }
+      if (!mounted) return;
 
       if (session?.user) {
-        console.log("[AuthProvider] Setting session and user state");
         setSession?.(session);
         setUser?.(session.user);
         
-        const details = await fetchUserDetails(session.user.id);
-        if (details) {
-          console.log("[AuthProvider] Updated user details after state change:", details);
-          setUserDetails(details);
-          navigate("/dashboard");
-        } else {
-          console.error("[AuthProvider] Failed to fetch user details after state change");
-          navigate("/login");
+        try {
+          const details = await fetchUserDetails(session.user.id);
+          if (details && mounted) {
+            setUserDetails(details);
+            navigate("/dashboard");
+          }
+        } catch (error) {
+          console.error("[AuthProvider] Error fetching user details after state change:", error);
+          if (mounted) navigate("/login");
         }
       } else {
-        console.log("[AuthProvider] Clearing session and user state");
         setSession?.(null);
         setUser?.(null);
         setUserDetails(null);
-        if (event === "SIGNED_OUT") {
-          console.log("[AuthProvider] User signed out, redirecting to login");
+        if (event === "SIGNED_OUT" && mounted) {
           navigate("/login", { replace: true });
         }
       }
       
-      if (mounted) {
-        console.log("[AuthProvider] Setting loading state to false");
-        setLoading?.(false);
-      }
+      if (mounted) setLoading?.(false);
     });
 
+    // Start initialization
     initializeAuth();
 
+    // Cleanup function
     return () => {
-      console.log("[AuthProvider] Cleaning up auth state subscription");
+      console.log("[AuthProvider] Cleaning up");
       mounted = false;
       if (retryTimeout) clearTimeout(retryTimeout);
       subscription.unsubscribe();
     };
   }, [navigate, setLoading, setSession, setUser, setUserDetails, fetchUserDetails, retryCount]);
 
+  // Loading state
+  if (sessionLoading) {
+    return (
+      <div className="flex flex-col items-center justify-center min-h-screen p-4">
+        <Loader2 className="w-8 h-8 animate-spin text-primary" />
+        <p className="mt-4 text-sm text-muted-foreground">
+          {retryCount > 0 ? `Retrying connection (${retryCount}/${MAX_RETRIES})...` : 'Initializing...'}
+        </p>
+      </div>
+    );
+  }
+
+  // Error state
   if (initializationError && !sessionLoading) {
     return (
       <div className="flex flex-col items-center justify-center min-h-screen p-4">
@@ -209,29 +190,18 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     );
   }
 
-  if (sessionLoading) {
-    return (
-      <div className="flex flex-col items-center justify-center min-h-screen p-4">
-        <Loader2 className="w-8 h-8 animate-spin text-primary" />
-        <p className="mt-4 text-sm text-muted-foreground">
-          {retryCount > 0 ? `Retrying connection (${retryCount}/${MAX_RETRIES})...` : 'Initializing...'}
-        </p>
-      </div>
-    );
-  }
-
-  const contextValue = {
-    session,
-    user,
-    userDetails,
-    setUserDetails,
-    signIn,
-    signOut,
-    loading: sessionLoading,
-  };
-
   return (
-    <AuthContext.Provider value={contextValue}>
+    <AuthContext.Provider 
+      value={{
+        session,
+        user,
+        userDetails,
+        setUserDetails,
+        signIn,
+        signOut,
+        loading: sessionLoading,
+      }}
+    >
       {children}
     </AuthContext.Provider>
   );
