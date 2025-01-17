@@ -15,17 +15,12 @@ export const useUserDetails = () => {
         userId,
         timestamp: new Date().toISOString()
       });
-      
+
       // Validate UUID format
       const uuidRegex = /^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
       if (!uuidRegex.test(userId)) {
         console.error("[useUserDetails] Invalid UUID format:", userId);
-        toast({
-          title: "Error",
-          description: "Invalid user ID format",
-          variant: "destructive",
-        });
-        return null;
+        throw new Error("Invalid user ID format");
       }
 
       // Fetch only essential user data first
@@ -49,13 +44,7 @@ export const useUserDetails = () => {
           hint: userError.hint,
           details: userError.details
         });
-        
-        toast({
-          title: "Error",
-          description: "Failed to load user details. Please try again.",
-          variant: "destructive",
-        });
-        return null;
+        throw userError;
       }
 
       if (!userData) {
@@ -93,12 +82,7 @@ export const useUserDetails = () => {
       return userDetails;
     } catch (error) {
       console.error("[useUserDetails] Exception in fetchUserDetails:", error);
-      toast({
-        title: "Error",
-        description: "An unexpected error occurred while loading user details",
-        variant: "destructive",
-      });
-      return null;
+      throw error;
     } finally {
       setIsLoading(false);
     }

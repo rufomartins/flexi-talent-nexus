@@ -138,6 +138,21 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       }
     };
 
+    // Set up realtime subscription
+    const channel = supabase.channel('auth-channel')
+      .on('presence', { event: 'sync' }, () => {
+        console.log('[AuthProvider] Presence state synchronized');
+      })
+      .on('presence', { event: 'join' }, ({ key }) => {
+        console.log('[AuthProvider] Client joined:', key);
+      })
+      .on('presence', { event: 'leave' }, ({ key }) => {
+        console.log('[AuthProvider] Client left:', key);
+      })
+      .subscribe(async (status) => {
+        console.log('[AuthProvider] Realtime subscription status:', status);
+      });
+
     const { data: { subscription } } = supabase.auth.onAuthStateChange(async (event, session) => {
       console.log("[AuthProvider] Auth state changed:", event, session ? {
         userId: session.user.id,
@@ -189,6 +204,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       mounted = false;
       if (retryTimeout) clearTimeout(retryTimeout);
       subscription.unsubscribe();
+      supabase.removeChannel(channel);
     };
   }, [navigate, setLoading, setSession, setUser, setUserDetails, fetchUserDetails, retryCount]);
 
