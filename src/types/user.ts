@@ -9,7 +9,7 @@ export interface DatabaseUser {
   avatar_url: string | null;
   company_id: string | null;
   created_at: string;
-  email?: string | null;  // Made email optional and nullable
+  email: string;  // Changed from optional to required since we now sync it
   first_name: string | null;
   full_name: string | null;
   gender: string | null;
