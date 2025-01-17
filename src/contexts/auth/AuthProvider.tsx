@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, useRef } from "react";
 import { useNavigate } from "react-router-dom";
 import { AuthContext } from "./AuthContext";
 import { useAuthSession } from "./useAuthSession";
@@ -13,6 +13,7 @@ const RETRY_DELAY = 1000;
 
 export function AuthProvider({ children }: { children: React.ReactNode }) {
   const navigate = useNavigate();
+  const sessionCheckRef = useRef(false);
   const [retryCount, setRetryCount] = useState(0);
   const [initializationError, setInitializationError] = useState<Error | null>(null);
   
@@ -42,6 +43,9 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
     const initializeAuth = async () => {
       try {
+        if (sessionCheckRef.current) return;
+        sessionCheckRef.current = true;
+        
         console.info("[Auth] Starting auth initialization...");
         
         // Clear any stale data first
@@ -64,8 +68,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         if (initialSession) {
           console.log("[AuthProvider] Initial session found:", {
             userId: initialSession.user.id,
-            email: initialSession.user.email,
-            metadata: initialSession.user.user_metadata
+            email: initialSession.user.email
           });
           
           setSession?.(initialSession);
@@ -102,7 +105,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
           console.log(`[AuthProvider] Retrying initialization (${retryCount + 1}/${MAX_RETRIES})`);
           retryTimeout = setTimeout(() => {
             setRetryCount(prev => prev + 1);
-          }, RETRY_DELAY);
+          }, RETRY_DELAY * Math.pow(2, retryCount));
         } else if (mounted) {
           setInitializationError(error as Error);
           setLoading?.(false);
