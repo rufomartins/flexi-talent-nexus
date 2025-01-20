@@ -14,11 +14,11 @@ const router = createBrowserRouter([
     element: <Login />,
   },
   {
-    path: "/onboarding/welcome-video",
+    path: "/onboarding/welcome-video/:candidateId",
     element: (
       <ProtectedRoute>
         <WelcomeVideoPage 
-          candidateId={/* This should be passed from the parent component or URL params */}
+          candidateId={useParams().candidateId || ''}
           videoUrl="https://example.com/welcome-video.mp4" // Replace with actual video URL
         />
       </ProtectedRoute>
