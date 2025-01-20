@@ -9,8 +9,11 @@ import Financial from "@/pages/Financial";
 import Onboarding from "@/pages/Onboarding";
 import ProtectedRoute from "@/components/ProtectedRoute";
 import Login from "@/pages/Login";
-import Index from "@/pages/Index";
+import WelcomePage from "@/pages/onboarding/WelcomePage";
 import WelcomeVideoPage from "@/pages/onboarding/WelcomeVideoPage";
+import ChatbotPage from "@/pages/onboarding/ChatbotPage";
+import SchedulePage from "@/pages/onboarding/SchedulePage";
+import CandidateProfile from "@/pages/onboarding/CandidateProfile";
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -29,23 +32,40 @@ function App() {
       <Router>
         <AuthProvider>
           <Routes>
-            {/* Public routes - no authentication required */}
-            <Route path="/" element={<Index />} />
+            {/* Public candidate-facing onboarding routes */}
+            <Route path="/onboarding">
+              <Route path="welcome" element={<WelcomePage />} />
+              <Route path="welcome-video/:candidateId" element={<WelcomeVideoPage />} />
+              <Route path="chatbot/:candidateId" element={<ChatbotPage />} />
+              <Route path="schedule/:candidateId" element={<SchedulePage />} />
+            </Route>
+
+            {/* Admin authentication */}
             <Route path="/login" element={<Login />} />
-            <Route path="/onboarding/welcome-video/:candidateId" element={<WelcomeVideoPage />} />
             
-            {/* Protected routes wrapped in MainLayout */}
+            {/* Protected admin routes wrapped in MainLayout */}
             <Route element={<ProtectedRoute><MainLayout /></ProtectedRoute>}>
+              <Route path="/" element={<Navigate to="/dashboard" replace />} />
               <Route path="/dashboard" element={<Dashboard />} />
               <Route path="/projects" element={<Projects />} />
               <Route path="/financial" element={<Financial />} />
               <Route 
-                path="/onboarding" 
+                path="/onboarding/admin" 
                 element={
                   <ProtectedRoute 
                     allowedRoles={['super_admin', 'super_user']}
                   >
                     <Onboarding />
+                  </ProtectedRoute>
+                } 
+              />
+              <Route 
+                path="/onboarding/admin/:id" 
+                element={
+                  <ProtectedRoute 
+                    allowedRoles={['super_admin', 'super_user']}
+                  >
+                    <CandidateProfile />
                   </ProtectedRoute>
                 } 
               />
