@@ -1,5 +1,5 @@
 import { useEffect, useState, useRef } from "react";
-import { useNavigate } from "react-router-dom";
+import { useLocation, useNavigate } from "react-router-dom";
 import { AuthContext } from "./AuthContext";
 import { useAuthSession } from "./useAuthSession";
 import { useUserDetails } from "./useUserDetails";
@@ -11,8 +11,18 @@ import { Loader2 } from "lucide-react";
 const MAX_RETRIES = 3;
 const RETRY_DELAY = 1000;
 
+// Define public routes that don't require authentication
+const PUBLIC_ROUTES = [
+  '/onboarding/welcome',
+  '/onboarding/welcome-video',
+  '/onboarding/chatbot',
+  '/onboarding/schedule',
+  '/login'
+];
+
 export function AuthProvider({ children }: { children: React.ReactNode }) {
   const navigate = useNavigate();
+  const location = useLocation();
   const sessionCheckRef = useRef(false);
   const [retryCount, setRetryCount] = useState(0);
   const [initializationError, setInitializationError] = useState<Error | null>(null);
@@ -36,6 +46,11 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     fetchUserDetails
   );
 
+  // Check if current route is public
+  const isPublicRoute = () => {
+    return PUBLIC_ROUTES.some(route => location.pathname.startsWith(route));
+  };
+
   // Initialize auth state
   useEffect(() => {
     let mounted = true;
@@ -48,6 +63,13 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         
         console.info("[Auth] Starting auth initialization...");
         
+        // Skip auth check for public routes
+        if (isPublicRoute()) {
+          console.log("[Auth] Public route detected, skipping auth check");
+          if (mounted) setLoading?.(false);
+          return;
+        }
+
         // Clear any stale data first
         localStorage.clear();
         sessionStorage.clear();
@@ -84,13 +106,13 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
             }
           } catch (detailsError) {
             console.error("[AuthProvider] Error fetching user details:", detailsError);
-            if (mounted) {
+            if (mounted && !isPublicRoute()) {
               navigate("/login");
             }
           }
         } else {
           console.log("[AuthProvider] No initial session");
-          if (mounted) {
+          if (mounted && !isPublicRoute()) {
             navigate("/login");
           }
         }
@@ -109,12 +131,14 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         } else if (mounted) {
           setInitializationError(error as Error);
           setLoading?.(false);
-          navigate("/login");
-          toast({
-            title: "Authentication Error",
-            description: "Failed to initialize session. Please try again.",
-            variant: "destructive",
-          });
+          if (!isPublicRoute()) {
+            navigate("/login");
+            toast({
+              title: "Authentication Error",
+              description: "Failed to initialize session. Please try again.",
+              variant: "destructive",
+            });
+          }
         }
       }
     };
@@ -133,17 +157,19 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
           const details = await fetchUserDetails(session.user.id);
           if (details && mounted) {
             setUserDetails(details);
-            navigate("/dashboard");
+            if (!isPublicRoute()) {
+              navigate("/dashboard");
+            }
           }
         } catch (error) {
           console.error("[AuthProvider] Error fetching user details after state change:", error);
-          if (mounted) navigate("/login");
+          if (mounted && !isPublicRoute()) navigate("/login");
         }
       } else {
         setSession?.(null);
         setUser?.(null);
         setUserDetails(null);
-        if (event === "SIGNED_OUT" && mounted) {
+        if (event === "SIGNED_OUT" && mounted && !isPublicRoute()) {
           navigate("/login", { replace: true });
         }
       }
@@ -161,10 +187,10 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       if (retryTimeout) clearTimeout(retryTimeout);
       subscription.unsubscribe();
     };
-  }, [navigate, setLoading, setSession, setUser, setUserDetails, fetchUserDetails, retryCount]);
+  }, [navigate, setLoading, setSession, setUser, setUserDetails, fetchUserDetails, retryCount, location]);
 
   // Loading state
-  if (sessionLoading) {
+  if (sessionLoading && !isPublicRoute()) {
     return (
       <div className="flex flex-col items-center justify-center min-h-screen p-4">
         <Loader2 className="w-8 h-8 animate-spin text-primary" />
@@ -176,7 +202,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   }
 
   // Error state
-  if (initializationError && !sessionLoading) {
+  if (initializationError && !sessionLoading && !isPublicRoute()) {
     return (
       <div className="flex flex-col items-center justify-center min-h-screen p-4">
         <div className="text-center space-y-4">
