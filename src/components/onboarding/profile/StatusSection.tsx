@@ -5,14 +5,14 @@ import { supabase } from "@/integrations/supabase/client";
 
 interface StatusSectionProps {
   id: string;
-  status: 'new' | 'emailed' | 'interviewed' | 'approved';
-  onStatusChange: (newStatus: 'new' | 'emailed' | 'interviewed' | 'approved') => void;
+  status: 'new' | 'emailed' | 'interviewed' | 'approved' | 'not_interested';
+  onStatusChange: (newStatus: 'new' | 'emailed' | 'interviewed' | 'approved' | 'not_interested') => void;
 }
 
 export function StatusSection({ id, status, onStatusChange }: StatusSectionProps) {
   const { toast } = useToast();
 
-  const handleStatusChange = async (newStatus: 'new' | 'emailed' | 'interviewed' | 'approved') => {
+  const handleStatusChange = async (newStatus: 'new' | 'emailed' | 'interviewed' | 'approved' | 'not_interested') => {
     const { error } = await supabase
       .from("onboarding_candidates")
       .update({ status: newStatus })
@@ -42,6 +42,8 @@ export function StatusSection({ id, status, onStatusChange }: StatusSectionProps
         return "bg-blue-100 text-blue-800";
       case "emailed":
         return "bg-yellow-100 text-yellow-800";
+      case "not_interested":
+        return "bg-red-100 text-red-800";
       default:
         return "bg-gray-100 text-gray-800";
     }
@@ -67,6 +69,14 @@ export function StatusSection({ id, status, onStatusChange }: StatusSectionProps
           className="bg-green-600 hover:bg-green-700"
         >
           Approve Candidate
+        </Button>
+        <Button 
+          onClick={() => handleStatusChange('not_interested')}
+          variant="outline"
+          size="sm"
+          className="text-red-600 hover:bg-red-50"
+        >
+          Not Interested
         </Button>
       </div>
     </div>

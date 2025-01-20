@@ -10,7 +10,7 @@ interface Candidate {
   name: string;
   email: string;
   phone: string;
-  status: 'new' | 'emailed' | 'interviewed' | 'approved';
+  status: 'new' | 'emailed' | 'interviewed' | 'approved' | 'not_interested';
   scout: {
     id: string;
     full_name: string;
@@ -45,6 +45,8 @@ export function CandidateList({ candidates, isLoading, error }: CandidateListPro
         return "bg-blue-100 text-blue-800";
       case "emailed":
         return "bg-yellow-100 text-yellow-800";
+      case "not_interested":
+        return "bg-red-100 text-red-800";
       default:
         return "bg-gray-100 text-gray-800";
     }

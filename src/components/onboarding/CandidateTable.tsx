@@ -13,7 +13,7 @@ interface Candidate {
   name: string;
   email: string;
   phone: string;
-  status: 'new' | 'emailed' | 'interviewed' | 'approved';
+  status: 'new' | 'emailed' | 'interviewed' | 'approved' | 'not_interested';
   scout: {
     id: string;
     full_name: string;
