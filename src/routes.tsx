@@ -9,9 +9,12 @@ import Projects from "@/pages/Projects";
 import Financial from "@/pages/Financial";
 import Onboarding from "@/pages/Onboarding";
 import CandidateProfile from "@/pages/onboarding/CandidateProfile";
+import WelcomePage from "@/pages/onboarding/WelcomePage";
+import ChatbotPage from "@/pages/onboarding/ChatbotPage";
+import SchedulePage from "@/pages/onboarding/SchedulePage";
 
 const router = createBrowserRouter([
-  // Public routes (candidate-facing)
+  // Public routes (no authentication required)
   {
     path: "/",
     element: <Index />,
@@ -20,9 +23,27 @@ const router = createBrowserRouter([
     path: "/login",
     element: <Login />,
   },
+  // Public candidate-facing onboarding routes
   {
-    path: "/onboarding/welcome-video/:candidateId",
-    element: <WelcomeVideoPage />,
+    path: "/onboarding",
+    children: [
+      {
+        path: "welcome",
+        element: <WelcomePage />,
+      },
+      {
+        path: "welcome-video/:candidateId",
+        element: <WelcomeVideoPage />,
+      },
+      {
+        path: "chatbot/:candidateId",
+        element: <ChatbotPage />,
+      },
+      {
+        path: "schedule/:candidateId",
+        element: <SchedulePage />,
+      },
+    ],
   },
   
   // Protected routes (admin-facing) wrapped in MainLayout
@@ -49,8 +70,9 @@ const router = createBrowserRouter([
           </ProtectedRoute>
         ),
       },
+      // Protected admin onboarding routes
       {
-        path: "/onboarding",
+        path: "/onboarding/admin",
         element: (
           <ProtectedRoute allowedRoles={['super_admin', 'super_user']}>
             <Onboarding />
@@ -58,7 +80,7 @@ const router = createBrowserRouter([
         ),
       },
       {
-        path: "/onboarding/:id",
+        path: "/onboarding/admin/:id",
         element: (
           <ProtectedRoute allowedRoles={['super_admin', 'super_user']}>
             <CandidateProfile />
