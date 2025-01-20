@@ -41,18 +41,6 @@ const WelcomePage = () => {
             Get Started
           </Button>
         </div>
-
-        <footer className="text-center text-sm text-muted-foreground pt-4 border-t">
-          <p>
-            Need help? Contact our support team at{" "}
-            <a 
-              href="mailto:support@gtmd.studio" 
-              className="text-primary hover:underline"
-            >
-              support@gtmd.studio
-            </a>
-          </p>
-        </footer>
       </Card>
     </div>
   );
