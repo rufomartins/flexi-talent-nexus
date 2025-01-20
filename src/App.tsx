@@ -1,5 +1,6 @@
 import { Routes, Route, Navigate } from "react-router-dom";
 import ProtectedRoute from "@/components/ProtectedRoute";
+import PublicRoute from "@/components/PublicRoute";
 import { MainLayout } from "@/components/layout/MainLayout";
 import Index from "@/pages/Index";
 import Login from "@/pages/Login";
@@ -12,22 +13,48 @@ import CandidateProfile from "@/pages/onboarding/CandidateProfile";
 import WelcomePage from "@/pages/onboarding/WelcomePage";
 import ChatbotPage from "@/pages/onboarding/ChatbotPage";
 import SchedulePage from "@/pages/onboarding/SchedulePage";
+import { useAuth } from "@/contexts/auth";
 
 function App() {
+  const { user } = useAuth();
   console.log("[App] Rendering App component");
   
   return (
     <Routes>
+      {/* Root redirect based on auth status */}
+      <Route 
+        path="/" 
+        element={user ? <Navigate to="/dashboard" replace /> : <Navigate to="/login" replace />} 
+      />
+      
       {/* Public routes (no authentication required) */}
-      <Route path="/" element={<Index />} />
-      <Route path="/login" element={<Login />} />
+      <Route 
+        path="/login" 
+        element={
+          <PublicRoute>
+            <Login />
+          </PublicRoute>
+        } 
+      />
       
       {/* Public candidate-facing onboarding routes */}
       <Route path="/onboarding">
-        <Route path="welcome" element={<WelcomePage />} />
-        <Route path="welcome-video/:candidateId" element={<WelcomeVideoPage />} />
-        <Route path="chatbot/:candidateId" element={<ChatbotPage />} />
-        <Route path="schedule/:candidateId" element={<SchedulePage />} />
+        <Route 
+          path="welcome" 
+          element={<WelcomePage />} 
+        />
+        <Route 
+          path="welcome-video/:candidateId" 
+          element={<WelcomeVideoPage />} 
+        />
+        <Route 
+          path="chatbot/:candidateId" 
+          element={<ChatbotPage />} 
+        />
+        <Route 
+          path="schedule/:candidateId" 
+          element={<SchedulePage />} 
+        />
       </Route>
       
       {/* Protected routes (admin-facing) wrapped in MainLayout */}
@@ -57,7 +84,7 @@ function App() {
         } />
       </Route>
       
-      {/* Catch all route - redirect to dashboard if authenticated, login if not */}
+      {/* Catch all route - redirect to login if not authenticated */}
       <Route path="*" element={<Navigate to="/login" replace />} />
     </Routes>
   );
