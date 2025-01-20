@@ -41,19 +41,35 @@ function App() {
       <Route path="/onboarding">
         <Route 
           path="welcome" 
-          element={<WelcomePage />} 
+          element={
+            <PublicRoute>
+              <WelcomePage />
+            </PublicRoute>
+          } 
         />
         <Route 
           path="welcome-video/:candidateId" 
-          element={<WelcomeVideoPage />} 
+          element={
+            <PublicRoute>
+              <WelcomeVideoPage />
+            </PublicRoute>
+          } 
         />
         <Route 
           path="chatbot/:candidateId" 
-          element={<ChatbotPage />} 
+          element={
+            <PublicRoute>
+              <ChatbotPage />
+            </PublicRoute>
+          } 
         />
         <Route 
           path="schedule/:candidateId" 
-          element={<SchedulePage />} 
+          element={
+            <PublicRoute>
+              <SchedulePage />
+            </PublicRoute>
+          } 
         />
       </Route>
       
