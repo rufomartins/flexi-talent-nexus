@@ -1277,6 +1277,7 @@ export type Database = {
           notes: string | null
           phone: string | null
           scout_id: string | null
+          source: string | null
           status: Database["public"]["Enums"]["candidate_status"] | null
           updated_at: string
           video_demo_url: string | null
@@ -1291,6 +1292,7 @@ export type Database = {
           notes?: string | null
           phone?: string | null
           scout_id?: string | null
+          source?: string | null
           status?: Database["public"]["Enums"]["candidate_status"] | null
           updated_at?: string
           video_demo_url?: string | null
@@ -1305,6 +1307,7 @@ export type Database = {
           notes?: string | null
           phone?: string | null
           scout_id?: string | null
+          source?: string | null
           status?: Database["public"]["Enums"]["candidate_status"] | null
           updated_at?: string
           video_demo_url?: string | null
@@ -2883,7 +2886,12 @@ export type Database = {
         | "booking_created"
         | "booking_updated"
       booking_status: "pending" | "confirmed" | "cancelled" | "completed"
-      candidate_status: "new" | "emailed" | "interviewed" | "approved"
+      candidate_status:
+        | "new"
+        | "emailed"
+        | "interviewed"
+        | "approved"
+        | "not_interested"
       casting_status: "open" | "closed"
       casting_type: "internal" | "external"
       email_template_type:
