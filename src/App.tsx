@@ -1,28 +1,65 @@
-import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { RouterProvider } from "react-router-dom";
-import { AuthProvider } from "@/contexts/auth";
-import { Toaster } from "@/components/ui/toaster";
-import router from "./routes";
-
-const queryClient = new QueryClient({
-  defaultOptions: {
-    queries: {
-      retry: 1,
-      refetchOnWindowFocus: false,
-    },
-  },
-});
+import { Routes, Route, Navigate } from "react-router-dom";
+import ProtectedRoute from "@/components/ProtectedRoute";
+import { MainLayout } from "@/components/layout/MainLayout";
+import Index from "@/pages/Index";
+import Login from "@/pages/Login";
+import WelcomeVideoPage from "@/pages/onboarding/WelcomeVideoPage";
+import Dashboard from "@/pages/Dashboard";
+import Projects from "@/pages/Projects";
+import Financial from "@/pages/Financial";
+import Onboarding from "@/pages/Onboarding";
+import CandidateProfile from "@/pages/onboarding/CandidateProfile";
+import WelcomePage from "@/pages/onboarding/WelcomePage";
+import ChatbotPage from "@/pages/onboarding/ChatbotPage";
+import SchedulePage from "@/pages/onboarding/SchedulePage";
 
 function App() {
   console.log("[App] Rendering App component");
   
   return (
-    <QueryClientProvider client={queryClient}>
-      <AuthProvider>
-        <RouterProvider router={router} />
-        <Toaster />
-      </AuthProvider>
-    </QueryClientProvider>
+    <Routes>
+      {/* Public routes (no authentication required) */}
+      <Route path="/" element={<Index />} />
+      <Route path="/login" element={<Login />} />
+      
+      {/* Public candidate-facing onboarding routes */}
+      <Route path="/onboarding">
+        <Route path="welcome" element={<WelcomePage />} />
+        <Route path="welcome-video/:candidateId" element={<WelcomeVideoPage />} />
+        <Route path="chatbot/:candidateId" element={<ChatbotPage />} />
+        <Route path="schedule/:candidateId" element={<SchedulePage />} />
+      </Route>
+      
+      {/* Protected routes (admin-facing) wrapped in MainLayout */}
+      <Route element={
+        <ProtectedRoute allowedRoles={['super_admin', 'admin', 'super_user']}>
+          <MainLayout />
+        </ProtectedRoute>
+      }>
+        <Route path="/dashboard" element={<Dashboard />} />
+        <Route path="/projects" element={<Projects />} />
+        <Route path="/financial" element={
+          <ProtectedRoute allowedRoles={['super_admin', 'admin']}>
+            <Financial />
+          </ProtectedRoute>
+        } />
+        
+        {/* Protected admin onboarding routes */}
+        <Route path="/onboarding/admin" element={
+          <ProtectedRoute allowedRoles={['super_admin', 'super_user']}>
+            <Onboarding />
+          </ProtectedRoute>
+        } />
+        <Route path="/onboarding/admin/:id" element={
+          <ProtectedRoute allowedRoles={['super_admin', 'super_user']}>
+            <CandidateProfile />
+          </ProtectedRoute>
+        } />
+      </Route>
+      
+      {/* Catch all route - redirect to dashboard if authenticated, login if not */}
+      <Route path="*" element={<Navigate to="/login" replace />} />
+    </Routes>
   );
 }
 
