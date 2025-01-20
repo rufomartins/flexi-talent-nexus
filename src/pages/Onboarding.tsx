@@ -8,10 +8,12 @@ const Onboarding = () => {
   const { user, userDetails } = useAuth();
   const { toast } = useToast();
 
-  console.log("[Onboarding] Initializing with auth state:", {
+  console.log("[Onboarding] Component mounted with auth state:", {
     userId: user?.id,
-    userRole: userDetails?.role || user?.user_metadata?.role,
-    hasUserDetails: !!userDetails
+    email: user?.email,
+    userRole: userDetails?.role,
+    hasUserDetails: !!userDetails,
+    metadata: user?.user_metadata
   });
 
   const { data: candidates, isLoading, error } = useQuery({
