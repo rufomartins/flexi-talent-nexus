@@ -1,23 +1,55 @@
 import { useState, useRef, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useParams } from 'react-router-dom';
 import { Button } from "@/components/ui/button";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from '@/integrations/supabase/client';
+import { Loader2 } from "lucide-react";
 
-interface WelcomeVideoPageProps {
-  candidateId: string;
-  videoUrl: string;
-}
-
-const WelcomeVideoPage = ({ candidateId, videoUrl }: WelcomeVideoPageProps) => {
+const WelcomeVideoPage = () => {
+  const { candidateId } = useParams();
+  const [videoUrl, setVideoUrl] = useState<string | null>(null);
+  const [loading, setLoading] = useState(true);
   const [progress, setProgress] = useState(0);
   const [canProceed, setCanProceed] = useState(false);
   const videoRef = useRef<HTMLVideoElement>(null);
   const navigate = useNavigate();
   const { toast } = useToast();
 
+  useEffect(() => {
+    const fetchCandidateData = async () => {
+      if (!candidateId) return;
+
+      try {
+        const { data: candidate, error } = await supabase
+          .from('onboarding_candidates')
+          .select('video_demo_url')
+          .eq('id', candidateId)
+          .single();
+
+        if (error) {
+          throw error;
+        }
+
+        if (candidate?.video_demo_url) {
+          setVideoUrl(candidate.video_demo_url);
+        }
+      } catch (error) {
+        console.error('Error fetching candidate data:', error);
+        toast({
+          title: "Error",
+          description: "Could not load welcome video",
+          variant: "destructive",
+        });
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchCandidateData();
+  }, [candidateId, toast]);
+
   const handleTimeUpdate = async () => {
-    if (!videoRef.current) return;
+    if (!videoRef.current || !candidateId) return;
 
     const currentProgress = (videoRef.current.currentTime / videoRef.current.duration) * 100;
     setProgress(currentProgress);
@@ -46,6 +78,25 @@ const WelcomeVideoPage = ({ candidateId, videoUrl }: WelcomeVideoPageProps) => {
   const handleNext = () => {
     navigate('/onboarding/chatbot');
   };
+
+  if (loading) {
+    return (
+      <div className="flex items-center justify-center min-h-screen">
+        <Loader2 className="h-8 w-8 animate-spin" />
+      </div>
+    );
+  }
+
+  if (!videoUrl) {
+    return (
+      <div className="container mx-auto px-4 py-8 max-w-4xl">
+        <div className="text-center">
+          <h1 className="text-2xl font-bold mb-4">Welcome Video Not Found</h1>
+          <p className="text-muted-foreground">The welcome video is not available at this time.</p>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="container mx-auto px-4 py-8 max-w-4xl">
