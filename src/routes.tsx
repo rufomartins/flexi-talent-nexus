@@ -1,27 +1,29 @@
-import { Navigate } from "react-router-dom";
+import { createBrowserRouter } from "react-router-dom";
 import ProtectedRoute from "@/components/ProtectedRoute";
-import Onboarding from "@/pages/Onboarding";
-import CandidateProfile from "@/pages/onboarding/CandidateProfile";
+import Index from "@/pages/Index";
+import Login from "@/pages/Login";
+import WelcomeVideoPage from "@/pages/onboarding/WelcomeVideoPage";
 
-export const routes = [
+const router = createBrowserRouter([
   {
-    path: "/onboarding",
+    path: "/",
+    element: <Index />,
+  },
+  {
+    path: "/login",
+    element: <Login />,
+  },
+  {
+    path: "/onboarding/welcome-video",
     element: (
       <ProtectedRoute>
-        <Onboarding />
+        <WelcomeVideoPage 
+          candidateId={/* This should be passed from the parent component or URL params */}
+          videoUrl="https://example.com/welcome-video.mp4" // Replace with actual video URL
+        />
       </ProtectedRoute>
     ),
   },
-  {
-    path: "/onboarding/:id",
-    element: (
-      <ProtectedRoute>
-        <CandidateProfile />
-      </ProtectedRoute>
-    ),
-  },
-  {
-    path: "*",
-    element: <Navigate to="/onboarding" replace />,
-  },
-];
+]);
+
+export default router;

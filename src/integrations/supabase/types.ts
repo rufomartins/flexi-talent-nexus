@@ -1280,6 +1280,8 @@ export type Database = {
           status: Database["public"]["Enums"]["candidate_status"] | null
           updated_at: string
           video_demo_url: string | null
+          video_progress: number | null
+          video_watched: boolean | null
         }
         Insert: {
           created_at?: string
@@ -1292,6 +1294,8 @@ export type Database = {
           status?: Database["public"]["Enums"]["candidate_status"] | null
           updated_at?: string
           video_demo_url?: string | null
+          video_progress?: number | null
+          video_watched?: boolean | null
         }
         Update: {
           created_at?: string
@@ -1304,6 +1308,8 @@ export type Database = {
           status?: Database["public"]["Enums"]["candidate_status"] | null
           updated_at?: string
           video_demo_url?: string | null
+          video_progress?: number | null
+          video_watched?: boolean | null
         }
         Relationships: [
           {
