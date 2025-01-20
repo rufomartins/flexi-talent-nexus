@@ -9,6 +9,8 @@ import Financial from "@/pages/Financial";
 import Onboarding from "@/pages/Onboarding";
 import ProtectedRoute from "@/components/ProtectedRoute";
 import Login from "@/pages/Login";
+import Index from "@/pages/Index";
+import WelcomeVideoPage from "@/pages/onboarding/WelcomeVideoPage";
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -27,13 +29,13 @@ function App() {
       <Router>
         <AuthProvider>
           <Routes>
-            {/* Public routes */}
+            {/* Public routes - no authentication required */}
+            <Route path="/" element={<Index />} />
             <Route path="/login" element={<Login />} />
+            <Route path="/onboarding/welcome-video/:candidateId" element={<WelcomeVideoPage />} />
             
             {/* Protected routes wrapped in MainLayout */}
             <Route element={<ProtectedRoute><MainLayout /></ProtectedRoute>}>
-              {/* Redirect root to dashboard */}
-              <Route index element={<Navigate to="/dashboard" replace />} />
               <Route path="/dashboard" element={<Dashboard />} />
               <Route path="/projects" element={<Projects />} />
               <Route path="/financial" element={<Financial />} />
@@ -48,7 +50,7 @@ function App() {
                 } 
               />
               
-              {/* Catch all route - redirect to dashboard */}
+              {/* Catch protected routes - redirect to dashboard */}
               <Route path="*" element={<Navigate to="/dashboard" replace />} />
             </Route>
           </Routes>
