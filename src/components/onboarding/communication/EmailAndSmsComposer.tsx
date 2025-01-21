@@ -4,18 +4,14 @@ import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
-import { Loader2 } from "lucide-react";
-import { smsService } from "@/services/smsService";
 import { NotificationType } from "@/types/notifications";
-import { Progress } from "@/components/ui/progress";
 
 interface EmailAndSmsComposerProps {
+  open: boolean;
+  onOpenChange: (open: boolean) => void;
   candidateId: string;
   candidateName: string;
   phone?: string;
-  email?: string;
-  open: boolean;
-  onOpenChange: (open: boolean) => void;
   mode?: 'email' | 'sms';
   selectedCandidates?: Array<{
     id: string;
@@ -25,26 +21,17 @@ interface EmailAndSmsComposerProps {
 }
 
 export function EmailAndSmsComposer({
+  open,
+  onOpenChange,
   candidateId,
   candidateName,
   phone,
-  email,
-  open,
-  onOpenChange,
   mode = 'sms',
   selectedCandidates = []
 }: EmailAndSmsComposerProps) {
-  const { toast } = useToast();
-  const [message, setMessage] = useState("");
+  const [message, setMessage] = useState('');
   const [isSending, setIsSending] = useState(false);
-  const [progress, setProgress] = useState(0);
-  const maxSmsLength = 160;
-
-  const processMessageTemplate = (msg: string, candidateData: any) => {
-    let processedMessage = msg;
-    processedMessage = processedMessage.replace(/{name}/g, candidateData.name || '');
-    return processedMessage;
-  };
+  const { toast } = useToast();
 
   const handleSend = async () => {
     if (!message.trim()) {
@@ -57,127 +44,92 @@ export function EmailAndSmsComposer({
     }
 
     setIsSending(true);
-    const failures: string[] = [];
-    const totalCandidates = selectedCandidates.length;
-    let processed = 0;
-
     try {
-      if (mode === 'sms') {
-        const candidates = selectedCandidates.length > 0 ? selectedCandidates : [{ id: candidateId, name: candidateName, phone }];
-        
-        for (const candidate of candidates) {
-          if (!candidate.phone) {
-            console.warn(`Skipping SMS for candidate ${candidate.id} - no phone number`);
-            failures.push(`${candidate.name} (no phone number)`);
-            processed++;
-            setProgress((processed / totalCandidates) * 100);
-            continue;
-          }
-
-          try {
-            const processedMessage = processMessageTemplate(message, candidate);
-            
-            await smsService.sendSMS(
-              candidate.phone,
-              processedMessage,
-              NotificationType.SMS,
-              {
-                candidateId: candidate.id,
-                communicationType: 'sms'
-              }
-            );
-
-            // Update communication status
-            await supabase
-              .from('onboarding_candidates')
-              .update({ communication_status: 'sms_sent' })
-              .eq('id', candidate.id);
-
-          } catch (error) {
-            console.error(`Failed to send SMS to ${candidate.name}:`, error);
-            failures.push(candidate.name);
-          }
-
-          processed++;
-          setProgress((processed / totalCandidates) * 100);
-        }
-
-        if (failures.length === 0) {
+      const candidates = selectedCandidates.length > 0 ? selectedCandidates : [{ id: candidateId, name: candidateName, phone }];
+      
+      for (const candidate of candidates) {
+        if (mode === 'sms' && !candidate.phone) {
           toast({
-            title: "Success",
-            description: `SMS sent to ${candidates.length} candidate(s)`,
-          });
-        } else {
-          toast({
-            title: "Partial Success",
-            description: `Failed to send SMS to: ${failures.join(', ')}`,
+            title: "Error",
+            description: `No phone number available for ${candidate.name}`,
             variant: "destructive",
           });
+          continue;
         }
+
+        // Send the message
+        const { error } = await supabase.functions.invoke('send-communication', {
+          body: {
+            type: mode === 'sms' ? NotificationType.SMS : NotificationType.EMAIL,
+            recipientId: candidate.id,
+            message,
+            phone: candidate.phone
+          }
+        });
+
+        if (error) throw error;
+
+        // Update communication status
+        const { error: updateError } = await supabase
+          .from('onboarding_candidates')
+          .update({
+            communication_status: mode === 'sms' ? 'sms_sent' : 'email_sent'
+          })
+          .eq('id', candidate.id);
+
+        if (updateError) throw updateError;
       }
 
-      if (failures.length === 0) {
-        onOpenChange(false);
-      }
-    } catch (error: any) {
-      console.error('Error sending messages:', error);
       toast({
-        title: "Error sending messages",
-        description: error.message,
+        title: "Success",
+        description: `${mode.toUpperCase()} sent successfully`,
+      });
+
+      onOpenChange(false);
+      setMessage('');
+    } catch (error: any) {
+      console.error(`Error sending ${mode}:`, error);
+      toast({
+        title: "Error",
+        description: error.message || `Failed to send ${mode}`,
         variant: "destructive",
       });
     } finally {
       setIsSending(false);
-      setProgress(0);
     }
   };
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="sm:max-w-[425px]">
+      <DialogContent>
         <DialogHeader>
-          <DialogTitle>Send {mode.toUpperCase()}</DialogTitle>
+          <DialogTitle>
+            Send {mode === 'sms' ? 'SMS' : 'Email'} to {selectedCandidates.length > 0 ? `${selectedCandidates.length} candidates` : candidateName}
+          </DialogTitle>
         </DialogHeader>
-        <div className="grid gap-4 py-4">
-          <div className="space-y-2">
-            <Textarea
-              placeholder={`Type your ${mode} message here...`}
-              value={message}
-              onChange={(e) => setMessage(e.target.value)}
-              className="min-h-[100px]"
-            />
-            {mode === 'sms' && (
-              <div className="text-sm text-muted-foreground">
-                {message.length}/{maxSmsLength} characters
-              </div>
-            )}
-            {selectedCandidates.length > 1 && (
-              <div className="text-sm text-muted-foreground">
-                Sending to {selectedCandidates.length} recipients
-              </div>
-            )}
+
+        <div className="space-y-4 py-4">
+          <Textarea
+            placeholder={`Type your ${mode} message here...`}
+            value={message}
+            onChange={(e) => setMessage(e.target.value)}
+            className="min-h-[100px]"
+          />
+
+          <div className="flex justify-end space-x-2">
+            <Button
+              variant="outline"
+              onClick={() => onOpenChange(false)}
+            >
+              Cancel
+            </Button>
+            <Button
+              onClick={handleSend}
+              disabled={isSending}
+            >
+              {isSending ? 'Sending...' : 'Send'}
+            </Button>
           </div>
-          {isSending && progress > 0 && (
-            <div className="space-y-2">
-              <Progress value={progress} className="w-full" />
-              <p className="text-sm text-muted-foreground text-center">
-                Sending messages... {Math.round(progress)}%
-              </p>
-            </div>
-          )}
-          <Button 
-            onClick={handleSend} 
-            disabled={isSending || !message.trim() || (mode === 'sms' && message.length > maxSmsLength)}
-          >
-            {isSending ? (
-              <>
-                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                Sending...
-              </>
-            ) : (
-              `Send ${mode.toUpperCase()}`
-            )}
-          </Button>
         </div>
       </DialogContent>
     </Dialog>

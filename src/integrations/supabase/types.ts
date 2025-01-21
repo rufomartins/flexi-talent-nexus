@@ -1271,6 +1271,7 @@ export type Database = {
       onboarding_candidates: {
         Row: {
           biography: string | null
+          communication_status: string | null
           created_at: string
           email: string
           external_url: string | null
@@ -1292,6 +1293,7 @@ export type Database = {
         }
         Insert: {
           biography?: string | null
+          communication_status?: string | null
           created_at?: string
           email: string
           external_url?: string | null
@@ -1313,6 +1315,7 @@ export type Database = {
         }
         Update: {
           biography?: string | null
+          communication_status?: string | null
           created_at?: string
           email?: string
           external_url?: string | null
@@ -3116,6 +3119,8 @@ export type Database = {
         | "TALENT_APPLICATION"
         | "PROJECT_UPDATE"
         | "PAYMENT_REMINDER"
+        | "EMAIL"
+        | "SMS"
       onboarding_template_type:
         | "welcome"
         | "interview_scheduled"
