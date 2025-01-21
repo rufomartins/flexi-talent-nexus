@@ -1,10 +1,10 @@
 import { useState, useEffect } from "react";
-import { useQuery } from "@tanstack/react-query";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
-import { StatusBadge } from "./status/StatusBadge";
-import { StatusTransitionButton } from "./status/StatusTransitionButton";
-import { StatusConfirmationDialog } from "./status/StatusConfirmationDialog";
+import { StatusBadge } from "../bookings/status/StatusBadge";
+import { StatusTransitionButton } from "../bookings/status/StatusTransitionButton";
+import { StatusConfirmationDialog } from "../bookings/status/StatusConfirmationDialog";
 import { OnboardingEmailComposer } from "./email/OnboardingEmailComposer";
 import { EmailAndSmsComposer } from "./communication/EmailAndSmsComposer";
 import { Button } from "@/components/ui/button";
@@ -41,6 +41,7 @@ export function CandidateList({ candidates, isLoading, error }: CandidateListPro
   const [isSmsComposerOpen, setIsSmsComposerOpen] = useState(false);
   const [communicationFilter, setCommunicationFilter] = useState<string>("all");
   const { toast } = useToast();
+  const queryClient = useQueryClient();
 
   // Add real-time subscription for communication status updates
   useEffect(() => {
@@ -65,7 +66,7 @@ export function CandidateList({ candidates, isLoading, error }: CandidateListPro
     return () => {
       supabase.removeChannel(channel);
     };
-  }, []);
+  }, [queryClient]);
 
   // Query for communication metrics with proper typing
   const { data: metrics } = useQuery({
