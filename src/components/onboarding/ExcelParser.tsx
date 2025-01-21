@@ -4,6 +4,7 @@ import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { useToast } from "@/hooks/use-toast";
 import { validateExcelData, type ValidationError, type ExcelRowData } from "@/utils/excelValidation";
+import { DataPreview } from "./DataPreview";
 
 interface ExcelParserProps {
   file: File;
@@ -13,6 +14,8 @@ interface ExcelParserProps {
 
 export const ExcelParser = ({ file, onValidDataReceived, onError }: ExcelParserProps) => {
   const [validationErrors, setValidationErrors] = useState<ValidationError[]>([]);
+  const [parsedData, setParsedData] = useState<ExcelRowData[]>([]);
+  const [showPreview, setShowPreview] = useState(false);
   const { toast } = useToast();
 
   const parseExcel = async () => {
@@ -23,7 +26,8 @@ export const ExcelParser = ({ file, onValidDataReceived, onError }: ExcelParserP
       const jsonData = XLSX.utils.sheet_to_json(worksheet);
 
       const { validRows, errors } = validateExcelData(jsonData);
-
+      setParsedData(validRows);
+      
       if (errors.length > 0) {
         setValidationErrors(errors);
         toast({
@@ -31,17 +35,22 @@ export const ExcelParser = ({ file, onValidDataReceived, onError }: ExcelParserP
           description: `Found ${errors.length} rows with errors. Please review and fix the issues.`,
           variant: "destructive",
         });
-      } else {
-        onValidDataReceived(validRows);
-        toast({
-          title: "Success",
-          description: `Successfully parsed ${validRows.length} rows of data.`,
-        });
       }
+      
+      setShowPreview(true);
     } catch (error) {
       console.error("Error parsing Excel file:", error);
       onError("Failed to parse Excel file. Please ensure it's in the correct format.");
     }
+  };
+
+  const handleConfirmImport = (selectedData: ExcelRowData[]) => {
+    onValidDataReceived(selectedData);
+    setShowPreview(false);
+    toast({
+      title: "Success",
+      description: `Successfully processed ${selectedData.length} rows of data.`,
+    });
   };
 
   const downloadErrorReport = () => {
@@ -59,6 +68,17 @@ export const ExcelParser = ({ file, onValidDataReceived, onError }: ExcelParserP
     
     XLSX.writeFile(workbook, "validation-errors.xlsx");
   };
+
+  if (showPreview) {
+    return (
+      <DataPreview
+        data={parsedData}
+        errors={validationErrors}
+        onConfirm={handleConfirmImport}
+        onCancel={() => setShowPreview(false)}
+      />
+    );
+  }
 
   return (
     <div className="space-y-4">
