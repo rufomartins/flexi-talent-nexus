@@ -58,7 +58,7 @@ export function CandidateList({ candidates, isLoading, error }: CandidateListPro
         (payload) => {
           console.log('Communication status updated:', payload);
           // Trigger a refetch of the candidates data
-          queryClient.invalidateQueries(['candidates']);
+          queryClient.invalidateQueries({ queryKey: ['candidates'] });
         }
       )
       .subscribe();
