@@ -8,6 +8,7 @@ import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
 import { Loader2 } from "lucide-react";
 import { smsService } from "@/services/smsService";
+import { NotificationType } from "@/types/notifications";
 
 interface EmailAndSmsComposerProps {
   candidateId: string;
@@ -93,7 +94,7 @@ export function EmailAndSmsComposer({
         await smsService.sendSMS(
           phone!,
           processedMessage,
-          'STATUS_CHANGE',
+          NotificationType.STATUS_CHANGE,
           {
             candidateId,
             communicationType: 'sms'
