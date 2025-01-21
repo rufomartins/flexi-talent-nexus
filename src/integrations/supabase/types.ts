@@ -1278,7 +1278,7 @@ export type Database = {
           phone: string | null
           scout_id: string | null
           source: string | null
-          status: Database["public"]["Enums"]["candidate_status"] | null
+          status: Database["public"]["Enums"]["candidate_status"]
           updated_at: string
           video_demo_url: string | null
           video_progress: number | null
@@ -1293,7 +1293,7 @@ export type Database = {
           phone?: string | null
           scout_id?: string | null
           source?: string | null
-          status?: Database["public"]["Enums"]["candidate_status"] | null
+          status?: Database["public"]["Enums"]["candidate_status"]
           updated_at?: string
           video_demo_url?: string | null
           video_progress?: number | null
@@ -1308,7 +1308,7 @@ export type Database = {
           phone?: string | null
           scout_id?: string | null
           source?: string | null
-          status?: Database["public"]["Enums"]["candidate_status"] | null
+          status?: Database["public"]["Enums"]["candidate_status"]
           updated_at?: string
           video_demo_url?: string | null
           video_progress?: number | null
