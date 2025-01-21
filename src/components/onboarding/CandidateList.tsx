@@ -128,6 +128,7 @@ export function CandidateList({ candidates, isLoading, error }: CandidateListPro
       {isSmsComposerOpen && selectedCandidates.length > 0 && (
         <EmailAndSmsComposer
           candidateId={selectedCandidates[0].id}
+          candidateName={selectedCandidates[0].name}
           phone={selectedCandidates[0].phone}
           open={isSmsComposerOpen}
           onOpenChange={setIsSmsComposerOpen}
