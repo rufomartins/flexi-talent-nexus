@@ -10,7 +10,9 @@ import { NotificationType } from "@/types/notifications";
 
 interface EmailAndSmsComposerProps {
   candidateId: string;
+  candidateName: string; // Added this prop
   phone?: string;
+  email?: string;
   open: boolean;
   onOpenChange: (open: boolean) => void;
   mode?: 'email' | 'sms';
@@ -22,7 +24,9 @@ interface EmailAndSmsComposerProps {
 
 export function EmailAndSmsComposer({
   candidateId,
+  candidateName,
   phone,
+  email,
   open,
   onOpenChange,
   mode = 'sms',
