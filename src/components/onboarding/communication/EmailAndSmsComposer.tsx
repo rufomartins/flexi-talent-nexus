@@ -42,7 +42,6 @@ export function EmailAndSmsComposer({
 
   const processMessageTemplate = (msg: string, candidateData: any) => {
     let processedMessage = msg;
-    // Replace template variables
     processedMessage = processedMessage.replace(/{name}/g, candidateData.name || '');
     return processedMessage;
   };
@@ -81,7 +80,7 @@ export function EmailAndSmsComposer({
             await smsService.sendSMS(
               candidate.phone,
               processedMessage,
-              NotificationType.STATUS_CHANGE,
+              NotificationType.SMS,
               {
                 candidateId: candidate.id,
                 communicationType: 'sms'

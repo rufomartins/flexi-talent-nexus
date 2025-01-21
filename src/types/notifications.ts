@@ -13,7 +13,9 @@ export type DatabaseNotificationType =
   'NEW_ASSIGNMENT' |
   'DEADLINE_WARNING' |
   'DEADLINE_APPROACHING' |
-  'DEADLINE_OVERDUE';
+  'DEADLINE_OVERDUE' |
+  'EMAIL' |
+  'SMS';
 
 export enum NotificationType {
   STATUS_CHANGE = 'STATUS_CHANGE',
@@ -29,7 +31,9 @@ export enum NotificationType {
   NEW_ASSIGNMENT = 'NEW_ASSIGNMENT',
   DEADLINE_WARNING = 'DEADLINE_WARNING',
   DEADLINE_APPROACHING = 'DEADLINE_APPROACHING',
-  DEADLINE_OVERDUE = 'DEADLINE_OVERDUE'
+  DEADLINE_OVERDUE = 'DEADLINE_OVERDUE',
+  EMAIL = 'EMAIL',
+  SMS = 'SMS'
 }
 
 export type EmailFrequency = 'realtime' | 'daily' | 'weekly';

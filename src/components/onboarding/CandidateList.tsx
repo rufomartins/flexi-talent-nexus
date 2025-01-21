@@ -23,7 +23,7 @@ interface Candidate {
   phone: string;
   status: string;
   created_at: string;
-  communication_status?: string;
+  communication_status?: 'email_sent' | 'sms_sent' | 'no_response';
 }
 
 interface CandidateListProps {
