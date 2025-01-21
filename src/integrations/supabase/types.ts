@@ -1331,6 +1331,45 @@ export type Database = {
           },
         ]
       }
+      onboarding_import_sessions: {
+        Row: {
+          created_at: string | null
+          created_by: string | null
+          error_message: string | null
+          file_name: string
+          file_path: string
+          id: string
+          imported_count: number | null
+          status: string
+          total_rows: number | null
+          updated_at: string | null
+        }
+        Insert: {
+          created_at?: string | null
+          created_by?: string | null
+          error_message?: string | null
+          file_name: string
+          file_path: string
+          id?: string
+          imported_count?: number | null
+          status?: string
+          total_rows?: number | null
+          updated_at?: string | null
+        }
+        Update: {
+          created_at?: string | null
+          created_by?: string | null
+          error_message?: string | null
+          file_name?: string
+          file_path?: string
+          id?: string
+          imported_count?: number | null
+          status?: string
+          total_rows?: number | null
+          updated_at?: string | null
+        }
+        Relationships: []
+      }
       project_countries: {
         Row: {
           country_name: string
