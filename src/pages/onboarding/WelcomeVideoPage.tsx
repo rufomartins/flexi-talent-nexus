@@ -76,7 +76,15 @@ const WelcomeVideoPage = () => {
   };
 
   const handleNext = () => {
-    navigate('/onboarding/chatbot');
+    if (!canProceed) {
+      toast({
+        title: "Cannot proceed",
+        description: "Please watch at least 50% of the video before continuing",
+        variant: "destructive",
+      });
+      return;
+    }
+    navigate(`/onboarding/chatbot/${candidateId}`);
   };
 
   if (loading) {
