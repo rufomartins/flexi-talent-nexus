@@ -1,4 +1,5 @@
 project_id = "uqanisnpgfgrxnlvpqss"
-
-[functions.send-sms]
+[handle-inbound-email]
+verify_jwt = false
+[test-inbound-email]
 verify_jwt = true

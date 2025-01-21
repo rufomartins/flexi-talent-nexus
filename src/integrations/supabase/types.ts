@@ -1427,6 +1427,48 @@ export type Database = {
         }
         Relationships: []
       }
+      onboarding_inbox: {
+        Row: {
+          attachments: Json | null
+          body: string | null
+          error: string | null
+          headers: Json | null
+          id: string
+          metadata: Json | null
+          processed: boolean | null
+          received_at: string | null
+          recipient: string
+          sender: string
+          subject: string | null
+        }
+        Insert: {
+          attachments?: Json | null
+          body?: string | null
+          error?: string | null
+          headers?: Json | null
+          id?: string
+          metadata?: Json | null
+          processed?: boolean | null
+          received_at?: string | null
+          recipient: string
+          sender: string
+          subject?: string | null
+        }
+        Update: {
+          attachments?: Json | null
+          body?: string | null
+          error?: string | null
+          headers?: Json | null
+          id?: string
+          metadata?: Json | null
+          processed?: boolean | null
+          received_at?: string | null
+          recipient?: string
+          sender?: string
+          subject?: string | null
+        }
+        Relationships: []
+      }
       project_countries: {
         Row: {
           country_name: string
