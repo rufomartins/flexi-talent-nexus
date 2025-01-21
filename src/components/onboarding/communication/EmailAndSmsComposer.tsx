@@ -7,6 +7,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
 import { Loader2 } from "lucide-react";
+import { smsService } from "@/services/smsService";
 
 interface EmailAndSmsComposerProps {
   candidateId: string;
@@ -73,20 +74,32 @@ export function EmailAndSmsComposer({
     try {
       const processedMessage = message.replace(/{candidateName}/g, candidateName);
 
-      const { error } = await supabase.functions.invoke('send-communication', {
-        body: {
-          type: activeTab,
-          to: activeTab === 'email' ? email : phone,
-          subject: activeTab === 'email' ? subject : undefined,
-          message: processedMessage,
-          candidateId,
-          metadata: {
-            communicationType: activeTab
+      if (activeTab === 'email') {
+        const { error } = await supabase.functions.invoke('send-communication', {
+          body: {
+            type: 'email',
+            to: email,
+            subject,
+            message: processedMessage,
+            candidateId,
+            metadata: {
+              communicationType: 'email'
+            }
           }
-        }
-      });
+        });
 
-      if (error) throw error;
+        if (error) throw error;
+      } else {
+        await smsService.sendSMS(
+          phone!,
+          processedMessage,
+          'STATUS_CHANGE',
+          {
+            candidateId,
+            communicationType: 'sms'
+          }
+        );
+      }
 
       toast({
         title: "Success",
@@ -95,7 +108,7 @@ export function EmailAndSmsComposer({
 
       onOpenChange(false);
     } catch (error) {
-      console.error('Error sending communication:', error);
+      console.error(`Error sending ${activeTab}:`, error);
       toast({
         title: "Error",
         description: `Failed to send ${activeTab === 'email' ? 'email' : 'SMS'}`,
@@ -140,6 +153,9 @@ export function EmailAndSmsComposer({
               onChange={(e) => setMessage(e.target.value)}
               rows={6}
             />
+            <div className="text-sm text-muted-foreground">
+              Characters: {message.length} ({Math.ceil(message.length / 160)} SMS segments)
+            </div>
           </TabsContent>
         </Tabs>
 
