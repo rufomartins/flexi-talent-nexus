@@ -1270,46 +1270,64 @@ export type Database = {
       }
       onboarding_candidates: {
         Row: {
+          biography: string | null
           created_at: string
           email: string
+          external_url: string | null
+          followers_count: number | null
+          following_count: number | null
           id: string
           name: string
           notes: string | null
           phone: string | null
+          profile_url: string | null
           scout_id: string | null
           source: string | null
           status: Database["public"]["Enums"]["candidate_status"]
           updated_at: string
+          username: string | null
           video_demo_url: string | null
           video_progress: number | null
           video_watched: boolean | null
         }
         Insert: {
+          biography?: string | null
           created_at?: string
           email: string
+          external_url?: string | null
+          followers_count?: number | null
+          following_count?: number | null
           id?: string
           name: string
           notes?: string | null
           phone?: string | null
+          profile_url?: string | null
           scout_id?: string | null
           source?: string | null
           status?: Database["public"]["Enums"]["candidate_status"]
           updated_at?: string
+          username?: string | null
           video_demo_url?: string | null
           video_progress?: number | null
           video_watched?: boolean | null
         }
         Update: {
+          biography?: string | null
           created_at?: string
           email?: string
+          external_url?: string | null
+          followers_count?: number | null
+          following_count?: number | null
           id?: string
           name?: string
           notes?: string | null
           phone?: string | null
+          profile_url?: string | null
           scout_id?: string | null
           source?: string | null
           status?: Database["public"]["Enums"]["candidate_status"]
           updated_at?: string
+          username?: string | null
           video_demo_url?: string | null
           video_progress?: number | null
           video_watched?: boolean | null

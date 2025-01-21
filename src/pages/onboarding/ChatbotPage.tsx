@@ -1,12 +1,13 @@
 import { useParams } from "react-router-dom";
 import { Card } from "@/components/ui/card";
+import { MessageSquare } from "lucide-react";
 
 const ChatbotPage = () => {
   const { candidateId } = useParams();
 
   return (
     <div className="min-h-screen bg-gradient-to-b from-primary/5 to-primary/10 flex items-center justify-center p-4">
-      <Card className="max-w-3xl w-full p-8 space-y-6">
+      <Card className="max-w-3xl w-full p-8 space-y-6 animate-fade-in">
         <div className="space-y-4 text-center">
           <h1 className="text-3xl font-semibold tracking-tight">
             Let's Get to Know You Better
@@ -16,9 +17,10 @@ const ChatbotPage = () => {
           </p>
         </div>
         
-        {/* Chatbot interface will be implemented here */}
-        <div className="h-[400px] bg-secondary/20 rounded-lg flex items-center justify-center">
+        <div className="h-[400px] bg-secondary/20 rounded-lg flex flex-col items-center justify-center gap-4">
+          <MessageSquare className="h-12 w-12 text-muted-foreground/50" />
           <p className="text-muted-foreground">Chatbot interface coming soon...</p>
+          <p className="text-sm text-muted-foreground/75">We're preparing an interactive chat experience to learn more about you.</p>
         </div>
       </Card>
     </div>
