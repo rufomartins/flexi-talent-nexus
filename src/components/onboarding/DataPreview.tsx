@@ -236,17 +236,27 @@ export function DataPreview({ data, errors, onConfirm, onCancel }: DataPreviewPr
       <Pagination>
         <PaginationContent>
           <PaginationItem>
-            <PaginationPrevious 
+            <Button 
+              variant="outline" 
+              size="icon"
               onClick={() => setCurrentPage(p => Math.max(1, p - 1))}
               disabled={currentPage === 1}
-            />
+              className="h-9 w-9"
+            >
+              <PaginationPrevious className="h-4 w-4" />
+            </Button>
           </PaginationItem>
           {renderPaginationItems()}
           <PaginationItem>
-            <PaginationNext
+            <Button 
+              variant="outline"
+              size="icon"
               onClick={() => setCurrentPage(p => Math.min(totalPages, p + 1))}
               disabled={currentPage === totalPages}
-            />
+              className="h-9 w-9"
+            >
+              <PaginationNext className="h-4 w-4" />
+            </Button>
           </PaginationItem>
         </PaginationContent>
       </Pagination>
