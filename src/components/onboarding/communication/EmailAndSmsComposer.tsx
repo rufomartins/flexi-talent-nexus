@@ -11,12 +11,14 @@ interface EmailAndSmsComposerProps {
   onOpenChange: (open: boolean) => void;
   candidateId: string;
   candidateName: string;
+  email?: string;
   phone?: string;
   mode?: 'email' | 'sms';
   selectedCandidates?: Array<{
     id: string;
     name: string;
     phone?: string;
+    email?: string;
   }>;
 }
 
@@ -25,6 +27,7 @@ export function EmailAndSmsComposer({
   onOpenChange,
   candidateId,
   candidateName,
+  email,
   phone,
   mode = 'sms',
   selectedCandidates = []
@@ -45,7 +48,9 @@ export function EmailAndSmsComposer({
 
     setIsSending(true);
     try {
-      const candidates = selectedCandidates.length > 0 ? selectedCandidates : [{ id: candidateId, name: candidateName, phone }];
+      const candidates = selectedCandidates.length > 0 
+        ? selectedCandidates 
+        : [{ id: candidateId, name: candidateName, phone, email }];
       
       for (const candidate of candidates) {
         if (mode === 'sms' && !candidate.phone) {
@@ -57,13 +62,23 @@ export function EmailAndSmsComposer({
           continue;
         }
 
+        if (mode === 'email' && !candidate.email) {
+          toast({
+            title: "Error",
+            description: `No email available for ${candidate.name}`,
+            variant: "destructive",
+          });
+          continue;
+        }
+
         // Send the message
         const { error } = await supabase.functions.invoke('send-communication', {
           body: {
             type: mode === 'sms' ? NotificationType.SMS : NotificationType.EMAIL,
             recipientId: candidate.id,
             message,
-            phone: candidate.phone
+            phone: candidate.phone,
+            email: candidate.email
           }
         });
 

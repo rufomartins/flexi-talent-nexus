@@ -3,18 +3,11 @@ import { useAuth } from "@/contexts/auth";
 import { useToast } from "@/hooks/use-toast";
 import { CandidateList } from "@/components/onboarding/CandidateList";
 import { supabase } from "@/integrations/supabase/client";
+import type { Candidate } from "@/types/onboarding";
 
 const Onboarding = () => {
   const { user, userDetails } = useAuth();
   const { toast } = useToast();
-
-  console.log("[Onboarding] Component mounted with auth state:", {
-    userId: user?.id,
-    email: user?.email,
-    userRole: userDetails?.role,
-    hasUserDetails: !!userDetails,
-    metadata: user?.user_metadata
-  });
 
   const { data: candidates, isLoading, error } = useQuery({
     queryKey: ["onboarding-candidates"],
@@ -43,17 +36,28 @@ const Onboarding = () => {
       }
 
       console.log("[Onboarding] Fetched candidates:", data?.length || 0);
-      return data || [];
+      
+      // Transform the data to match the Candidate type
+      const transformedData: Candidate[] = (data || []).map(item => ({
+        id: item.id,
+        name: item.name,
+        email: item.email,
+        phone: item.phone || '',
+        status: item.status,
+        created_at: item.created_at,
+        communication_status: item.communication_status as 'email_sent' | 'sms_sent' | 'no_response' | undefined,
+        scout: item.scout ? {
+          id: item.scout.id,
+          full_name: item.scout.full_name
+        } : undefined
+      }));
+
+      return transformedData;
     },
     enabled: !!user && (userDetails?.role === 'super_admin' || userDetails?.role === 'super_user')
   });
 
-  // If not authorized, show message
   if (!user || !(userDetails?.role === 'super_admin' || userDetails?.role === 'super_user')) {
-    console.log("[Onboarding] User not authorized:", {
-      hasUser: !!user,
-      userRole: userDetails?.role
-    });
     return (
       <div className="container mx-auto py-6">
         <div className="bg-destructive/15 text-destructive px-4 py-2 rounded-md">
