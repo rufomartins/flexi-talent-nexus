@@ -2102,6 +2102,50 @@ export type Database = {
           },
         ]
       }
+      sms_logs: {
+        Row: {
+          candidate_id: string | null
+          created_at: string | null
+          created_by: string | null
+          error_message: string | null
+          id: string
+          message: string
+          phone_number: string
+          sent_at: string | null
+          status: Database["public"]["Enums"]["sms_status"] | null
+        }
+        Insert: {
+          candidate_id?: string | null
+          created_at?: string | null
+          created_by?: string | null
+          error_message?: string | null
+          id?: string
+          message: string
+          phone_number: string
+          sent_at?: string | null
+          status?: Database["public"]["Enums"]["sms_status"] | null
+        }
+        Update: {
+          candidate_id?: string | null
+          created_at?: string | null
+          created_by?: string | null
+          error_message?: string | null
+          id?: string
+          message?: string
+          phone_number?: string
+          sent_at?: string | null
+          status?: Database["public"]["Enums"]["sms_status"] | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "sms_logs_candidate_id_fkey"
+            columns: ["candidate_id"]
+            isOneToOne: false
+            referencedRelation: "onboarding_candidates"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       talent_calendar: {
         Row: {
           casting_id: string | null
@@ -3089,6 +3133,7 @@ export type Database = {
         | "Approved"
       project_translation_status: "Pending" | "In Progress" | "Approved"
       shot_status: "Pending" | "In Progress" | "Completed"
+      sms_status: "pending" | "sent" | "failed"
       talent_category: "UGC" | "TRANSLATOR" | "REVIEWER" | "VOICE_OVER"
       talent_type: "individual" | "duo" | "agent"
       user_role:
