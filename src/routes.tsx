@@ -12,6 +12,7 @@ import CandidateProfile from "@/pages/onboarding/CandidateProfile";
 import WelcomePage from "@/pages/onboarding/WelcomePage";
 import ChatbotPage from "@/pages/onboarding/ChatbotPage";
 import SchedulePage from "@/pages/onboarding/SchedulePage";
+import InboxPage from "@/pages/InboxPage";
 
 const router = createBrowserRouter([
   // Public routes (no authentication required)
@@ -84,6 +85,14 @@ const router = createBrowserRouter([
         element: (
           <ProtectedRoute allowedRoles={['super_admin', 'super_user']}>
             <CandidateProfile />
+          </ProtectedRoute>
+        ),
+      },
+      {
+        path: "/inbox",
+        element: (
+          <ProtectedRoute allowedRoles={['super_admin', 'super_user']}>
+            <InboxPage />
           </ProtectedRoute>
         ),
       },
