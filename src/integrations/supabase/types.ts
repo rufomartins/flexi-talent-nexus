@@ -1349,6 +1349,45 @@ export type Database = {
           },
         ]
       }
+      onboarding_email_templates: {
+        Row: {
+          body: string
+          created_at: string | null
+          created_by: string | null
+          id: string
+          is_active: boolean | null
+          name: string
+          subject: string
+          type: Database["public"]["Enums"]["onboarding_template_type"]
+          updated_at: string | null
+          variables: Json | null
+        }
+        Insert: {
+          body: string
+          created_at?: string | null
+          created_by?: string | null
+          id?: string
+          is_active?: boolean | null
+          name: string
+          subject: string
+          type: Database["public"]["Enums"]["onboarding_template_type"]
+          updated_at?: string | null
+          variables?: Json | null
+        }
+        Update: {
+          body?: string
+          created_at?: string | null
+          created_by?: string | null
+          id?: string
+          is_active?: boolean | null
+          name?: string
+          subject?: string
+          type?: Database["public"]["Enums"]["onboarding_template_type"]
+          updated_at?: string | null
+          variables?: Json | null
+        }
+        Relationships: []
+      }
       onboarding_import_sessions: {
         Row: {
           created_at: string | null
@@ -2991,6 +3030,12 @@ export type Database = {
         | "TALENT_APPLICATION"
         | "PROJECT_UPDATE"
         | "PAYMENT_REMINDER"
+      onboarding_template_type:
+        | "welcome"
+        | "interview_scheduled"
+        | "interview_reminder"
+        | "approval"
+        | "rejection"
       project_delivery_status: "Pending" | "Delivered" | "R Pending"
       project_review_status: "Internal Review" | "Client Review" | "Approved"
       project_script_status: "Pending" | "In Progress" | "Approved"

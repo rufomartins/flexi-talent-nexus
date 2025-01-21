@@ -1,100 +1,113 @@
 import { useState } from "react";
-import { Card } from "@/components/ui/card";
-import { Loader2 } from "lucide-react";
-import { Alert, AlertDescription } from "@/components/ui/alert";
-import { CandidateFilters } from "./CandidateFilters";
-import { CandidateTable } from "./CandidateTable";
+import { useQuery } from "@tanstack/react-query";
+import { Button } from "@/components/ui/button";
+import { Checkbox } from "@/components/ui/checkbox";
+import { Mail } from "lucide-react";
+import { OnboardingEmailComposer } from "./email/OnboardingEmailComposer";
+import { supabase } from "@/integrations/supabase/client";
 
 interface Candidate {
   id: string;
   name: string;
   email: string;
-  phone: string;
-  status: 'new' | 'emailed' | 'interviewed' | 'approved' | 'not_interested';
-  scout: {
-    id: string;
-    full_name: string;
-  } | null;
+  status: string;
   created_at: string;
 }
 
 interface CandidateListProps {
   candidates: Candidate[];
   isLoading: boolean;
-  error?: Error | null;
+  error: Error | null;
 }
 
 export function CandidateList({ candidates, isLoading, error }: CandidateListProps) {
-  const [statusFilter, setStatusFilter] = useState<string>("");
-  const [searchQuery, setSearchQuery] = useState("");
+  const [selectedCandidates, setSelectedCandidates] = useState<Candidate[]>([]);
+  const [isEmailComposerOpen, setIsEmailComposerOpen] = useState(false);
 
-  const filteredCandidates = candidates.filter((candidate) => {
-    const matchesStatus = statusFilter ? candidate.status === statusFilter : true;
-    const matchesSearch = searchQuery
-      ? candidate.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        candidate.email.toLowerCase().includes(searchQuery.toLowerCase())
-      : true;
-    return matchesStatus && matchesSearch;
-  });
-
-  const getStatusColor = (status: string) => {
-    switch (status) {
-      case "approved":
-        return "bg-green-100 text-green-800";
-      case "interviewed":
-        return "bg-blue-100 text-blue-800";
-      case "emailed":
-        return "bg-yellow-100 text-yellow-800";
-      case "not_interested":
-        return "bg-red-100 text-red-800";
-      default:
-        return "bg-gray-100 text-gray-800";
+  const handleSelectCandidate = (candidate: Candidate) => {
+    if (selectedCandidates.find(c => c.id === candidate.id)) {
+      setSelectedCandidates(selectedCandidates.filter(c => c.id !== candidate.id));
+    } else {
+      setSelectedCandidates([...selectedCandidates, candidate]);
     }
   };
 
-  if (error) {
-    return (
-      <Alert variant="destructive" className="mb-4">
-        <AlertDescription>
-          Error loading candidates: {error.message}
-        </AlertDescription>
-      </Alert>
-    );
-  }
-
   if (isLoading) {
-    return (
-      <div className="flex items-center justify-center h-64">
-        <Loader2 className="h-8 w-8 animate-spin" />
-      </div>
-    );
+    return <div>Loading candidates...</div>;
   }
 
-  if (!candidates.length) {
-    return (
-      <Card className="p-6">
-        <div className="text-center text-muted-foreground">
-          No candidates found
-        </div>
-      </Card>
-    );
+  if (error) {
+    return <div>Error loading candidates: {error.message}</div>;
   }
 
   return (
-    <Card>
-      <div className="p-4 space-y-4">
-        <CandidateFilters
-          statusFilter={statusFilter}
-          onStatusFilterChange={setStatusFilter}
-          searchQuery={searchQuery}
-          onSearchQueryChange={setSearchQuery}
-        />
+    <div className="space-y-4">
+      {selectedCandidates.length > 0 && (
+        <div className="flex items-center justify-between bg-muted p-4 rounded-lg">
+          <span>{selectedCandidates.length} candidate(s) selected</span>
+          <Button
+            onClick={() => setIsEmailComposerOpen(true)}
+            size="sm"
+            className="flex items-center gap-2"
+          >
+            <Mail className="h-4 w-4" />
+            Send Email
+          </Button>
+        </div>
+      )}
 
-        <CandidateTable 
-          candidates={filteredCandidates}
-          getStatusColor={getStatusColor}
-        />
+      <div className="rounded-md border">
+        <table className="min-w-full divide-y divide-gray-200">
+          <thead className="bg-gray-50">
+            <tr>
+              <th className="w-12 px-4 py-3">
+                <Checkbox
+                  checked={selectedCandidates.length === candidates.length}
+                  onCheckedChange={(checked) => {
+                    if (checked) {
+                      setSelectedCandidates(candidates);
+                    } else {
+                      setSelectedCandidates([]);
+                    }
+                  }}
+                />
+              </th>
+              <th className="px-4 py-3 text-left text-sm font-medium text-gray-500">Name</th>
+              <th className="px-4 py-3 text-left text-sm font-medium text-gray-500">Email</th>
+              <th className="px-4 py-3 text-left text-sm font-medium text-gray-500">Status</th>
+              <th className="px-4 py-3 text-left text-sm font-medium text-gray-500">Created At</th>
+            </tr>
+          </thead>
+          <tbody className="divide-y divide-gray-200 bg-white">
+            {candidates.map((candidate) => (
+              <tr key={candidate.id}>
+                <td className="px-4 py-3">
+                  <Checkbox
+                    checked={selectedCandidates.some(c => c.id === candidate.id)}
+                    onCheckedChange={() => handleSelectCandidate(candidate)}
+                  />
+                </td>
+                <td className="px-4 py-3">{candidate.name}</td>
+                <td className="px-4 py-3">{candidate.email}</td>
+                <td className="px-4 py-3">{candidate.status}</td>
+                <td className="px-4 py-3">
+                  {new Date(candidate.created_at).toLocaleDateString()}
+                </td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
       </div>
-    </Card>
+
+      <OnboardingEmailComposer
+        open={isEmailComposerOpen}
+        onOpenChange={setIsEmailComposerOpen}
+        selectedCandidates={selectedCandidates.map(c => ({
+          id: c.id,
+          name: c.name,
+          email: c.email
+        }))}
+      />
+    </div>
   );
 }
