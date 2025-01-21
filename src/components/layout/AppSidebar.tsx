@@ -1,195 +1,160 @@
-import { Link } from "react-router-dom"
+import { useAuth } from "@/contexts/auth";
+import { cn } from "@/lib/utils";
+import { Link, useLocation } from "react-router-dom";
 import { 
   LayoutDashboard, 
   Users, 
-  Search, 
-  UserPlus, 
-  FileSpreadsheet, 
-  Briefcase, 
-  MessageSquare, 
-  Calendar, 
-  DollarSign, 
-  Settings, 
-  UserCheck 
-} from "lucide-react"
-import { cn } from "@/lib/utils"
-import { buttonVariants } from "@/components/ui/button"
-import { 
-  Sidebar, 
-  SidebarContent, 
-  SidebarGroup, 
-  SidebarGroupContent 
-} from "@/components/ui/sidebar"
-import { useAuth } from "@/contexts/auth"
-import { useMemo } from "react"
+  FileText, 
+  Briefcase,
+  MessageSquare,
+  DollarSign,
+  Calendar,
+  Settings,
+  Search,
+  UserPlus,
+  Inbox
+} from "lucide-react";
 
-export function AppSidebar() {
+export const AppSidebar = () => {
+  const location = useLocation();
   const { user, userDetails } = useAuth();
   
-  // Log current auth state
-  console.log("[AppSidebar] Rendering with auth state:", {
-    userId: user?.id,
-    userMetadata: user?.user_metadata,
-    userDetailsRole: userDetails?.role,
-    userMetadataRole: user?.user_metadata?.role
-  });
-  
-  // Memoize role-based visibility to prevent unnecessary recalculations
-  const { 
-    isOnboardingVisible, 
-    isSettingsVisible, 
-    isDashboardVisible, 
-    isTalentsVisible, 
-    isCastingsVisible,
-    isFinancialVisible 
-  } = useMemo(() => {
-    const role = userDetails?.role || user?.user_metadata?.role;
-    
-    const visibility = {
-      isOnboardingVisible: ['super_admin', 'super_user'].includes(role),
-      isSettingsVisible: role === 'super_admin',
-      isDashboardVisible: true, // Dashboard visible to all authenticated users
-      isTalentsVisible: ['super_admin', 'admin', 'super_user'].includes(role),
-      isCastingsVisible: ['super_admin', 'admin', 'super_user'].includes(role),
-      isFinancialVisible: ['super_admin', 'admin'].includes(role)
-    };
+  const isAdmin = userDetails?.role === 'admin' || userDetails?.role === 'super_admin';
+  const isSuperUser = userDetails?.role === 'super_user';
+  const isSuperAdmin = userDetails?.role === 'super_admin';
 
-    console.log("[AppSidebar] Calculated visibility:", { role, ...visibility });
-    
-    return visibility;
-  }, [userDetails?.role, user?.user_metadata?.role]);
+  const isActive = (path: string) => {
+    return location.pathname === path;
+  };
 
   return (
-    <Sidebar>
-      <SidebarContent>
-        <SidebarGroup>
-          <SidebarGroupContent className="flex flex-col gap-2 p-4 pt-6">
-            {isDashboardVisible && (
-              <Link
-                to="/dashboard"
-                className={cn(
-                  buttonVariants({ variant: "ghost" }),
-                  "justify-start"
-                )}
-              >
-                <LayoutDashboard className="mr-2 h-4 w-4" />
-                Dashboard
-              </Link>
+    <div className="h-full py-4">
+      <nav className="space-y-2 px-4">
+        <Link
+          to="/dashboard"
+          className={cn(
+            "flex items-center gap-3 rounded-lg px-3 py-2 text-gray-500 transition-all hover:text-gray-900",
+            isActive('/dashboard') ? "bg-gray-100 text-gray-900" : ""
+          )}
+        >
+          <LayoutDashboard className="h-4 w-4" />
+          <span>Dashboard</span>
+        </Link>
+
+        <Link
+          to="/talents"
+          className={cn(
+            "flex items-center gap-3 rounded-lg px-3 py-2 text-gray-500 transition-all hover:text-gray-900",
+            isActive('/talents') ? "bg-gray-100 text-gray-900" : ""
+          )}
+        >
+          <Users className="h-4 w-4" />
+          <span>Talents</span>
+        </Link>
+
+        <Link
+          to="/search"
+          className={cn(
+            "flex items-center gap-3 rounded-lg px-3 py-2 text-gray-500 transition-all hover:text-gray-900",
+            isActive('/search') ? "bg-gray-100 text-gray-900" : ""
+          )}
+        >
+          <Search className="h-4 w-4" />
+          <span>Search</span>
+        </Link>
+
+        <Link
+          to="/add-talent"
+          className={cn(
+            "flex items-center gap-3 rounded-lg px-3 py-2 text-gray-500 transition-all hover:text-gray-900",
+            isActive('/add-talent') ? "bg-gray-100 text-gray-900" : ""
+          )}
+        >
+          <UserPlus className="h-4 w-4" />
+          <span>Add new talent</span>
+        </Link>
+
+        <Link
+          to="/castings"
+          className={cn(
+            "flex items-center gap-3 rounded-lg px-3 py-2 text-gray-500 transition-all hover:text-gray-900",
+            isActive('/castings') ? "bg-gray-100 text-gray-900" : ""
+          )}
+        >
+          <FileText className="h-4 w-4" />
+          <span>Castings</span>
+        </Link>
+
+        <Link
+          to="/projects"
+          className={cn(
+            "flex items-center gap-3 rounded-lg px-3 py-2 text-gray-500 transition-all hover:text-gray-900",
+            isActive('/projects') ? "bg-gray-100 text-gray-900" : ""
+          )}
+        >
+          <Briefcase className="h-4 w-4" />
+          <span>Projects</span>
+        </Link>
+
+        <Link
+          to="/messages"
+          className={cn(
+            "flex items-center gap-3 rounded-lg px-3 py-2 text-gray-500 transition-all hover:text-gray-900",
+            isActive('/messages') ? "bg-gray-100 text-gray-900" : ""
+          )}
+        >
+          <MessageSquare className="h-4 w-4" />
+          <span>Messages</span>
+        </Link>
+
+        {(isSuperAdmin || isSuperUser) && (
+          <Link
+            to="/inbox"
+            className={cn(
+              "flex items-center gap-3 rounded-lg px-3 py-2 text-gray-500 transition-all hover:text-gray-900",
+              isActive('/inbox') ? "bg-gray-100 text-gray-900" : ""
             )}
+          >
+            <Inbox className="h-4 w-4" />
+            <span>Inbox</span>
+          </Link>
+        )}
 
-            {isTalentsVisible && (
-              <>
-                <Link
-                  to="/talents"
-                  className={cn(
-                    buttonVariants({ variant: "ghost" }),
-                    "justify-start"
-                  )}
-                >
-                  <Users className="mr-2 h-4 w-4" />
-                  Talents
-                </Link>
-
-                <Link
-                  to="/search"
-                  className={cn(
-                    buttonVariants({ variant: "ghost" }),
-                    "justify-start"
-                  )}
-                >
-                  <Search className="mr-2 h-4 w-4" />
-                  Search
-                </Link>
-
-                <Link
-                  to="/talents/new"
-                  className={cn(
-                    buttonVariants({ variant: "ghost" }),
-                    "justify-start"
-                  )}
-                >
-                  <UserPlus className="mr-2 h-4 w-4" />
-                  Add New Talent
-                </Link>
-              </>
+        {isAdmin && (
+          <Link
+            to="/financial"
+            className={cn(
+              "flex items-center gap-3 rounded-lg px-3 py-2 text-gray-500 transition-all hover:text-gray-900",
+              isActive('/financial') ? "bg-gray-100 text-gray-900" : ""
             )}
+          >
+            <DollarSign className="h-4 w-4" />
+            <span>Financial</span>
+          </Link>
+        )}
 
-            {isCastingsVisible && (
-              <Link
-                to="/castings"
-                className={cn(
-                  buttonVariants({ variant: "ghost" }),
-                  "justify-start"
-                )}
-              >
-                <FileSpreadsheet className="mr-2 h-4 w-4" />
-                Castings
-              </Link>
-            )}
+        <Link
+          to="/calendar"
+          className={cn(
+            "flex items-center gap-3 rounded-lg px-3 py-2 text-gray-500 transition-all hover:text-gray-900",
+            isActive('/calendar') ? "bg-gray-100 text-gray-900" : ""
+          )}
+        >
+          <Calendar className="h-4 w-4" />
+          <span>Calendar</span>
+        </Link>
 
-            <Link
-              to="/projects"
-              className={cn(
-                buttonVariants({ variant: "ghost" }),
-                "justify-start"
-              )}
-            >
-              <Briefcase className="mr-2 h-4 w-4" />
-              Projects
-            </Link>
-
-            {isFinancialVisible && (
-              <Link
-                to="/financial"
-                className={cn(
-                  buttonVariants({ variant: "ghost" }),
-                  "justify-start"
-                )}
-              >
-                <DollarSign className="mr-2 h-4 w-4" />
-                Financial
-              </Link>
-            )}
-
-            <Link
-              to="/calendar"
-              className={cn(
-                buttonVariants({ variant: "ghost" }),
-                "justify-start"
-              )}
-            >
-              <Calendar className="mr-2 h-4 w-4" />
-              Calendar
-            </Link>
-
-            {isOnboardingVisible && (
-              <Link
-                to="/onboarding"
-                className={cn(
-                  buttonVariants({ variant: "ghost" }),
-                  "justify-start"
-                )}
-              >
-                <UserCheck className="mr-2 h-4 w-4" />
-                Onboarding
-              </Link>
-            )}
-
-            {isSettingsVisible && (
-              <Link
-                to="/settings"
-                className={cn(
-                  buttonVariants({ variant: "ghost" }),
-                  "justify-start"
-                )}
-              >
-                <Settings className="mr-2 h-4 w-4" />
-                Settings
-              </Link>
-            )}
-          </SidebarGroupContent>
-        </SidebarGroup>
-      </SidebarContent>
-    </Sidebar>
+        <Link
+          to="/settings"
+          className={cn(
+            "flex items-center gap-3 rounded-lg px-3 py-2 text-gray-500 transition-all hover:text-gray-900",
+            isActive('/settings') ? "bg-gray-100 text-gray-900" : ""
+          )}
+        >
+          <Settings className="h-4 w-4" />
+          <span>Settings</span>
+        </Link>
+      </nav>
+    </div>
   );
-}
+};

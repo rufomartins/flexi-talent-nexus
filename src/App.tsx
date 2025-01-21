@@ -13,6 +13,7 @@ import CandidateProfile from "@/pages/onboarding/CandidateProfile";
 import WelcomePage from "@/pages/onboarding/WelcomePage";
 import ChatbotPage from "@/pages/onboarding/ChatbotPage";
 import SchedulePage from "@/pages/onboarding/SchedulePage";
+import InboxPage from "@/pages/InboxPage";
 import { useAuth } from "@/contexts/auth";
 
 function App() {
@@ -68,6 +69,11 @@ function App() {
         <Route path="/financial" element={
           <ProtectedRoute allowedRoles={['super_admin', 'admin']}>
             <Financial />
+          </ProtectedRoute>
+        } />
+        <Route path="/inbox" element={
+          <ProtectedRoute allowedRoles={['super_admin', 'super_user']}>
+            <InboxPage />
           </ProtectedRoute>
         } />
         
