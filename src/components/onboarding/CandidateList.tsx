@@ -1,11 +1,15 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useQuery } from "@tanstack/react-query";
+import { supabase } from "@/integrations/supabase/client";
+import { useToast } from "@/hooks/use-toast";
+import { StatusBadge } from "./status/StatusBadge";
+import { StatusTransitionButton } from "./status/StatusTransitionButton";
+import { StatusConfirmationDialog } from "./status/StatusConfirmationDialog";
+import { OnboardingEmailComposer } from "./email/OnboardingEmailComposer";
+import { EmailAndSmsComposer } from "./communication/EmailAndSmsComposer";
 import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Mail, MessageSquare, Filter } from "lucide-react";
-import { OnboardingEmailComposer } from "./email/OnboardingEmailComposer";
-import { EmailAndSmsComposer } from "./communication/EmailAndSmsComposer";
-import { supabase } from "@/integrations/supabase/client";
 import { Badge } from "@/components/ui/badge";
 import {
   Select,
@@ -14,7 +18,6 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { toast } from "@/hooks/use-toast";
 
 interface Candidate {
   id: string;
@@ -37,8 +40,34 @@ export function CandidateList({ candidates, isLoading, error }: CandidateListPro
   const [isEmailComposerOpen, setIsEmailComposerOpen] = useState(false);
   const [isSmsComposerOpen, setIsSmsComposerOpen] = useState(false);
   const [communicationFilter, setCommunicationFilter] = useState<string>("all");
+  const { toast } = useToast();
 
-  // Query for communication metrics
+  // Add real-time subscription for communication status updates
+  useEffect(() => {
+    const channel = supabase
+      .channel('communication-updates')
+      .on(
+        'postgres_changes',
+        {
+          event: 'UPDATE',
+          schema: 'public',
+          table: 'onboarding_candidates',
+          filter: 'communication_status=neq.null'
+        },
+        (payload) => {
+          console.log('Communication status updated:', payload);
+          // Trigger a refetch of the candidates data
+          queryClient.invalidateQueries(['candidates']);
+        }
+      )
+      .subscribe();
+
+    return () => {
+      supabase.removeChannel(channel);
+    };
+  }, []);
+
+  // Query for communication metrics with proper typing
   const { data: metrics } = useQuery({
     queryKey: ['communication-metrics'],
     queryFn: async () => {
