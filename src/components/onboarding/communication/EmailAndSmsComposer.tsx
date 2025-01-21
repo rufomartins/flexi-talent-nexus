@@ -1,8 +1,6 @@
 import { useState } from "react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
@@ -12,46 +10,36 @@ import { NotificationType } from "@/types/notifications";
 
 interface EmailAndSmsComposerProps {
   candidateId: string;
-  candidateName: string;
-  email?: string;
   phone?: string;
   open: boolean;
   onOpenChange: (open: boolean) => void;
+  mode?: 'email' | 'sms';
+  selectedCandidates?: Array<{
+    id: string;
+    phone?: string;
+  }>;
 }
 
 export function EmailAndSmsComposer({
   candidateId,
-  candidateName,
-  email,
   phone,
   open,
   onOpenChange,
+  mode = 'sms',
+  selectedCandidates = []
 }: EmailAndSmsComposerProps) {
-  const [activeTab, setActiveTab] = useState<'email' | 'sms'>('email');
-  const [subject, setSubject] = useState('');
-  const [message, setMessage] = useState('');
-  const [loading, setLoading] = useState(false);
   const { toast } = useToast();
+  const [message, setMessage] = useState("");
+  const [isSending, setIsSending] = useState(false);
+  const maxSmsLength = 160;
+
+  const processMessageTemplate = (msg: string, candidateData: any) => {
+    let processedMessage = msg;
+    // Add any template processing logic here
+    return processedMessage;
+  };
 
   const handleSend = async () => {
-    if (activeTab === 'email' && !email) {
-      toast({
-        title: "Error",
-        description: "No email address available for this candidate",
-        variant: "destructive",
-      });
-      return;
-    }
-
-    if (activeTab === 'sms' && !phone) {
-      toast({
-        title: "Error",
-        description: "No phone number available for this candidate",
-        variant: "destructive",
-      });
-      return;
-    }
-
     if (!message.trim()) {
       toast({
         title: "Error",
@@ -61,112 +49,82 @@ export function EmailAndSmsComposer({
       return;
     }
 
-    if (activeTab === 'email' && !subject.trim()) {
-      toast({
-        title: "Error",
-        description: "Please enter a subject",
-        variant: "destructive",
-      });
-      return;
-    }
-
-    setLoading(true);
-
+    setIsSending(true);
     try {
-      const processedMessage = message.replace(/{candidateName}/g, candidateName);
+      if (mode === 'sms') {
+        // Handle bulk SMS sending
+        const candidates = selectedCandidates.length > 0 ? selectedCandidates : [{ id: candidateId, phone }];
+        
+        for (const candidate of candidates) {
+          if (!candidate.phone) {
+            console.warn(`Skipping SMS for candidate ${candidate.id} - no phone number`);
+            continue;
+          }
 
-      if (activeTab === 'email') {
-        const { error } = await supabase.functions.invoke('send-communication', {
-          body: {
-            type: 'email',
-            to: email,
-            subject,
-            message: processedMessage,
-            candidateId,
-            metadata: {
-              communicationType: 'email'
+          const processedMessage = processMessageTemplate(message, candidate);
+          
+          await smsService.sendSMS(
+            candidate.phone,
+            processedMessage,
+            NotificationType.STATUS_CHANGE,
+            {
+              candidateId: candidate.id,
+              communicationType: 'sms'
             }
-          }
-        });
+          );
+        }
 
-        if (error) throw error;
-      } else {
-        await smsService.sendSMS(
-          phone!,
-          processedMessage,
-          NotificationType.STATUS_CHANGE,
-          {
-            candidateId,
-            communicationType: 'sms'
-          }
-        );
+        toast({
+          title: "Success",
+          description: `SMS sent to ${candidates.length} candidate(s)`,
+        });
       }
 
-      toast({
-        title: "Success",
-        description: `${activeTab === 'email' ? 'Email' : 'SMS'} sent successfully`,
-      });
-
       onOpenChange(false);
-    } catch (error) {
-      console.error(`Error sending ${activeTab}:`, error);
+    } catch (error: any) {
+      console.error('Error sending message:', error);
       toast({
-        title: "Error",
-        description: `Failed to send ${activeTab === 'email' ? 'email' : 'SMS'}`,
+        title: "Error sending message",
+        description: error.message,
         variant: "destructive",
       });
     } finally {
-      setLoading(false);
+      setIsSending(false);
     }
   };
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="sm:max-w-[500px]">
+      <DialogContent className="sm:max-w-[425px]">
         <DialogHeader>
-          <DialogTitle>Send Communication</DialogTitle>
+          <DialogTitle>Send {mode.toUpperCase()}</DialogTitle>
         </DialogHeader>
-
-        <Tabs value={activeTab} onValueChange={(value) => setActiveTab(value as 'email' | 'sms')}>
-          <TabsList className="grid w-full grid-cols-2">
-            <TabsTrigger value="email" disabled={!email}>Email</TabsTrigger>
-            <TabsTrigger value="sms" disabled={!phone}>SMS</TabsTrigger>
-          </TabsList>
-
-          <TabsContent value="email" className="space-y-4">
-            <Input
-              placeholder="Subject"
-              value={subject}
-              onChange={(e) => setSubject(e.target.value)}
-            />
+        <div className="grid gap-4 py-4">
+          <div className="space-y-2">
             <Textarea
-              placeholder="Message (use {candidateName} for candidate's name)"
+              placeholder={`Type your ${mode} message here...`}
               value={message}
               onChange={(e) => setMessage(e.target.value)}
-              rows={6}
+              className="min-h-[100px]"
             />
-          </TabsContent>
-
-          <TabsContent value="sms" className="space-y-4">
-            <Textarea
-              placeholder="Message (use {candidateName} for candidate's name)"
-              value={message}
-              onChange={(e) => setMessage(e.target.value)}
-              rows={6}
-            />
-            <div className="text-sm text-muted-foreground">
-              Characters: {message.length} ({Math.ceil(message.length / 160)} SMS segments)
-            </div>
-          </TabsContent>
-        </Tabs>
-
-        <div className="flex justify-end space-x-2">
-          <Button variant="outline" onClick={() => onOpenChange(false)}>
-            Cancel
-          </Button>
-          <Button onClick={handleSend} disabled={loading}>
-            {loading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-            Send {activeTab === 'email' ? 'Email' : 'SMS'}
+            {mode === 'sms' && (
+              <div className="text-sm text-muted-foreground">
+                {message.length}/{maxSmsLength} characters
+              </div>
+            )}
+          </div>
+          <Button 
+            onClick={handleSend} 
+            disabled={isSending || !message.trim() || (mode === 'sms' && message.length > maxSmsLength)}
+          >
+            {isSending ? (
+              <>
+                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                Sending...
+              </>
+            ) : (
+              `Send ${mode.toUpperCase()}`
+            )}
           </Button>
         </div>
       </DialogContent>

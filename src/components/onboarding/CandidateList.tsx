@@ -2,14 +2,16 @@ import { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
-import { Mail } from "lucide-react";
+import { Mail, MessageSquare } from "lucide-react";
 import { OnboardingEmailComposer } from "./email/OnboardingEmailComposer";
+import { EmailAndSmsComposer } from "./communication/EmailAndSmsComposer";
 import { supabase } from "@/integrations/supabase/client";
 
 interface Candidate {
   id: string;
   name: string;
   email: string;
+  phone: string;
   status: string;
   created_at: string;
 }
@@ -23,6 +25,7 @@ interface CandidateListProps {
 export function CandidateList({ candidates, isLoading, error }: CandidateListProps) {
   const [selectedCandidates, setSelectedCandidates] = useState<Candidate[]>([]);
   const [isEmailComposerOpen, setIsEmailComposerOpen] = useState(false);
+  const [isSmsComposerOpen, setIsSmsComposerOpen] = useState(false);
 
   const handleSelectCandidate = (candidate: Candidate) => {
     if (selectedCandidates.find(c => c.id === candidate.id)) {
@@ -45,14 +48,25 @@ export function CandidateList({ candidates, isLoading, error }: CandidateListPro
       {selectedCandidates.length > 0 && (
         <div className="flex items-center justify-between bg-muted p-4 rounded-lg">
           <span>{selectedCandidates.length} candidate(s) selected</span>
-          <Button
-            onClick={() => setIsEmailComposerOpen(true)}
-            size="sm"
-            className="flex items-center gap-2"
-          >
-            <Mail className="h-4 w-4" />
-            Send Email
-          </Button>
+          <div className="flex gap-2">
+            <Button
+              onClick={() => setIsEmailComposerOpen(true)}
+              size="sm"
+              className="flex items-center gap-2"
+            >
+              <Mail className="h-4 w-4" />
+              Send Email
+            </Button>
+            <Button
+              onClick={() => setIsSmsComposerOpen(true)}
+              size="sm"
+              variant="secondary"
+              className="flex items-center gap-2"
+            >
+              <MessageSquare className="h-4 w-4" />
+              Send SMS
+            </Button>
+          </div>
         </div>
       )}
 
@@ -74,6 +88,7 @@ export function CandidateList({ candidates, isLoading, error }: CandidateListPro
               </th>
               <th className="px-4 py-3 text-left text-sm font-medium text-gray-500">Name</th>
               <th className="px-4 py-3 text-left text-sm font-medium text-gray-500">Email</th>
+              <th className="px-4 py-3 text-left text-sm font-medium text-gray-500">Phone</th>
               <th className="px-4 py-3 text-left text-sm font-medium text-gray-500">Status</th>
               <th className="px-4 py-3 text-left text-sm font-medium text-gray-500">Created At</th>
             </tr>
@@ -89,6 +104,7 @@ export function CandidateList({ candidates, isLoading, error }: CandidateListPro
                 </td>
                 <td className="px-4 py-3">{candidate.name}</td>
                 <td className="px-4 py-3">{candidate.email}</td>
+                <td className="px-4 py-3">{candidate.phone}</td>
                 <td className="px-4 py-3">{candidate.status}</td>
                 <td className="px-4 py-3">
                   {new Date(candidate.created_at).toLocaleDateString()}
@@ -108,6 +124,17 @@ export function CandidateList({ candidates, isLoading, error }: CandidateListPro
           email: c.email
         }))}
       />
+
+      {isSmsComposerOpen && selectedCandidates.length > 0 && (
+        <EmailAndSmsComposer
+          candidateId={selectedCandidates[0].id}
+          phone={selectedCandidates[0].phone}
+          open={isSmsComposerOpen}
+          onOpenChange={setIsSmsComposerOpen}
+          mode="sms"
+          selectedCandidates={selectedCandidates}
+        />
+      )}
     </div>
   );
 }
