@@ -24,7 +24,7 @@ export function useLocations(shotListId: string): UseLocationsResult {
     }
   );
 
-  const { data, isLoading, error, refetch } = useQuery({
+  const { data, isLoading, error, refetch: queryRefetch } = useQuery({
     queryKey: ["locations", shotListId],
     queryFn: async () => {
       const { data, error } = await supabase
@@ -79,6 +79,10 @@ export function useLocations(shotListId: string): UseLocationsResult {
       console.error('Error deleting location:', error);
       throw error;
     }
+  };
+
+  const refetch = async () => {
+    await queryRefetch();
   };
 
   return {

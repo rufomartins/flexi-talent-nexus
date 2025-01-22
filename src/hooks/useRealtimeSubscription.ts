@@ -17,21 +17,12 @@ export const useRealtimeSubscription = <T>(
           'postgres_changes',
           {
             event: event,
-            schema: 'public'
+            schema: 'public',
+            table: channel
           },
           callback
         )
-        .subscribe((status) => {
-          if (status === 'SUBSCRIBED') {
-            console.log(`Subscribed to ${channel}`);
-          }
-          if (status === 'CLOSED') {
-            console.log(`Subscription to ${channel} closed`);
-          }
-          if (status === 'CHANNEL_ERROR') {
-            console.error(`Error in channel ${channel}`);
-          }
-        });
+        .subscribe();
     };
 
     setupSubscription();

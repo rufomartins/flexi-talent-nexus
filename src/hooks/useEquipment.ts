@@ -15,7 +15,7 @@ export function useEquipment(shotListId: string) {
   // Set up realtime subscription
   useRealtimeSubscription<{ type: string; record: Equipment }>(
     "equipment",
-    shotListId,
+    'UPDATE',
     (payload) => {
       // Invalidate and refetch equipment when changes occur
       console.log("Equipment updated:", payload);

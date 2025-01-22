@@ -8,7 +8,7 @@ export function useShots(shotListId: string) {
   // Set up realtime subscription
   useRealtimeSubscription<{ type: string; record: Shot }>(
     "shots", 
-    shotListId,
+    'UPDATE',
     (payload) => {
       // Invalidate and refetch shots when changes occur
       console.log("Shot updated:", payload);
