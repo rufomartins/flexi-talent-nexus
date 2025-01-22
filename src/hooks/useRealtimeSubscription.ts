@@ -1,28 +1,29 @@
-import { useEffect } from "react";
-import { RealtimePostgresChangesPayload } from '@supabase/supabase-js';
-import { supabase } from "@/integrations/supabase/client";
+import { useEffect } from 'react';
+import { supabase } from '@/integrations/supabase/client';
+import type { RealtimePostgresChangesPayload } from '@supabase/supabase-js';
 
-export const useRealtimeSubscription = <T extends Record<string, any>>(
-  tableName: string,
-  eventType: 'INSERT' | 'UPDATE' | 'DELETE',
-  onData: (payload: RealtimePostgresChangesPayload<T>) => void
+export const useRealtimeSubscription = (
+  table: string,
+  onUpdate: () => void
 ) => {
   useEffect(() => {
-    const channel = supabase
-      .channel(`realtime:${tableName}`)
+    const channel = supabase.channel('db-changes')
       .on(
         'postgres_changes' as const,
-        { 
-          event: eventType,
+        {
+          event: '*',
           schema: 'public',
-          table: tableName 
+          table: table,
         },
-        (payload) => onData(payload as RealtimePostgresChangesPayload<T>)
+        (payload: RealtimePostgresChangesPayload<Record<string, any>>) => {
+          console.log('Change received!', payload);
+          onUpdate();
+        }
       )
       .subscribe();
 
     return () => {
       supabase.removeChannel(channel);
     };
-  }, [tableName, eventType, onData]);
+  }, [table, onUpdate]);
 };
