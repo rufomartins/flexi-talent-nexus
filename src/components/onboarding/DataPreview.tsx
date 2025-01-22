@@ -1,25 +1,8 @@
-import { useState } from "react";
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from "@/components/ui/table";
-import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
-import { Checkbox } from "@/components/ui/checkbox";
-import {
-  Pagination,
-  PaginationContent,
-  PaginationEllipsis,
-  PaginationItem,
-  PaginationLink,
-  PaginationNext,
-  PaginationPrevious,
-} from "@/components/ui/pagination";
 import { ExcelRowData, ValidationError } from "@/utils/excelValidation";
+import { PreviewHeader } from "./preview/PreviewHeader";
+import { PreviewTable } from "./preview/PreviewTable";
+import { PreviewPagination } from "./preview/PreviewPagination";
 
 interface DataPreviewProps {
   data: ExcelRowData[];
@@ -34,7 +17,7 @@ export function DataPreview({ data, errors, onConfirm, onCancel }: DataPreviewPr
   const rowsPerPage = 50;
 
   const errorsByRow = errors.reduce((acc, error) => {
-    acc[error.row - 2] = error.errors; // -2 to account for header and 0-based index
+    acc[error.row - 2] = error.errors;
     return acc;
   }, {} as Record<number, Record<string, string>>);
 
@@ -74,192 +57,28 @@ export function DataPreview({ data, errors, onConfirm, onCancel }: DataPreviewPr
     onConfirm(selectedData);
   };
 
-  const renderPaginationItems = () => {
-    const items = [];
-    const maxVisible = 5;
-    let start = Math.max(1, currentPage - Math.floor(maxVisible / 2));
-    let end = Math.min(totalPages, start + maxVisible - 1);
-
-    if (end - start + 1 < maxVisible) {
-      start = Math.max(1, end - maxVisible + 1);
-    }
-
-    if (start > 1) {
-      items.push(
-        <PaginationItem key="start">
-          <PaginationLink onClick={() => setCurrentPage(1)}>1</PaginationLink>
-        </PaginationItem>
-      );
-      if (start > 2) {
-        items.push(
-          <PaginationItem key="start-ellipsis">
-            <PaginationEllipsis />
-          </PaginationItem>
-        );
-      }
-    }
-
-    for (let i = start; i <= end; i++) {
-      items.push(
-        <PaginationItem key={i}>
-          <PaginationLink
-            isActive={currentPage === i}
-            onClick={() => setCurrentPage(i)}
-          >
-            {i}
-          </PaginationLink>
-        </PaginationItem>
-      );
-    }
-
-    if (end < totalPages) {
-      if (end < totalPages - 1) {
-        items.push(
-          <PaginationItem key="end-ellipsis">
-            <PaginationEllipsis />
-          </PaginationItem>
-        );
-      }
-      items.push(
-        <PaginationItem key="end">
-          <PaginationLink onClick={() => setCurrentPage(totalPages)}>
-            {totalPages}
-          </PaginationLink>
-        </PaginationItem>
-      );
-    }
-
-    return items;
-  };
-
   return (
     <Card className="p-6 space-y-6">
-      <div className="flex justify-between items-center">
-        <h2 className="text-2xl font-semibold">Preview Data</h2>
-        <div className="space-x-4">
-          <Button variant="outline" onClick={onCancel}>
-            Cancel
-          </Button>
-          <Button onClick={handleConfirm}>
-            Confirm Import ({selectedRows.size} rows)
-          </Button>
-        </div>
-      </div>
+      <PreviewHeader
+        selectedCount={selectedRows.size}
+        onCancel={onCancel}
+        onConfirm={handleConfirm}
+      />
 
-      <div className="rounded-md border">
-        <Table>
-          <TableHeader>
-            <TableRow>
-              <TableHead className="w-12">
-                <Checkbox
-                  checked={currentData.length > 0 && currentData.every((_, i) => 
-                    selectedRows.has(startIndex + i)
-                  )}
-                  onCheckedChange={toggleAll}
-                />
-              </TableHead>
-              <TableHead>Full Name</TableHead>
-              <TableHead>Email</TableHead>
-              <TableHead>Phone</TableHead>
-              <TableHead>Username</TableHead>
-              <TableHead>Followers</TableHead>
-              <TableHead>Following</TableHead>
-              <TableHead>Profile URL</TableHead>
-              <TableHead>Status</TableHead>
-            </TableRow>
-          </TableHeader>
-          <TableBody>
-            {currentData.map((row, index) => {
-              const actualIndex = startIndex + index;
-              const rowErrors = errorsByRow[actualIndex];
-              const hasErrors = !!rowErrors;
+      <PreviewTable
+        data={currentData}
+        selectedRows={selectedRows}
+        startIndex={startIndex}
+        errorsByRow={errorsByRow}
+        onToggleRow={toggleRow}
+        onToggleAll={toggleAll}
+      />
 
-              return (
-                <TableRow 
-                  key={index}
-                  className={hasErrors ? "bg-destructive/10" : undefined}
-                >
-                  <TableCell>
-                    <Checkbox
-                      checked={selectedRows.has(actualIndex)}
-                      onCheckedChange={() => toggleRow(index)}
-                    />
-                  </TableCell>
-                  <TableCell>
-                    <div className="space-y-1">
-                      <span>{row.full_name}</span>
-                      {rowErrors?.full_name && (
-                        <p className="text-xs text-destructive">
-                          {rowErrors.full_name}
-                        </p>
-                      )}
-                    </div>
-                  </TableCell>
-                  <TableCell>
-                    <div className="space-y-1">
-                      <span>{row.public_email}</span>
-                      {rowErrors?.public_email && (
-                        <p className="text-xs text-destructive">
-                          {rowErrors.public_email}
-                        </p>
-                      )}
-                    </div>
-                  </TableCell>
-                  <TableCell>{row.public_phone}</TableCell>
-                  <TableCell>{row.username}</TableCell>
-                  <TableCell>{row.followers_count}</TableCell>
-                  <TableCell>{row.following_count}</TableCell>
-                  <TableCell>
-                    <div className="space-y-1">
-                      <span>{row.profile_url}</span>
-                      {rowErrors?.profile_url && (
-                        <p className="text-xs text-destructive">
-                          {rowErrors.profile_url}
-                        </p>
-                      )}
-                    </div>
-                  </TableCell>
-                  <TableCell>
-                    {hasErrors ? (
-                      <span className="text-destructive font-medium">Error</span>
-                    ) : (
-                      <span className="text-muted-foreground">Ready</span>
-                    )}
-                  </TableCell>
-                </TableRow>
-              );
-            })}
-          </TableBody>
-        </Table>
-      </div>
-
-      <Pagination currentPage={currentPage} totalPages={totalPages} onPageChange={setCurrentPage}>
-        <PaginationContent>
-          <PaginationItem>
-            <Button 
-              variant="outline" 
-              size="icon"
-              onClick={() => setCurrentPage(p => Math.max(1, p - 1))}
-              disabled={currentPage === 1}
-              className="h-9 w-9"
-            >
-              <PaginationPrevious className="h-4 w-4" />
-            </Button>
-          </PaginationItem>
-          {renderPaginationItems()}
-          <PaginationItem>
-            <Button 
-              variant="outline"
-              size="icon"
-              onClick={() => setCurrentPage(p => Math.min(totalPages, p + 1))}
-              disabled={currentPage === totalPages}
-              className="h-9 w-9"
-            >
-              <PaginationNext className="h-4 w-4" />
-            </Button>
-          </PaginationItem>
-        </PaginationContent>
-      </Pagination>
+      <PreviewPagination
+        currentPage={currentPage}
+        totalPages={totalPages}
+        onPageChange={setCurrentPage}
+      />
     </Card>
   );
 }
