@@ -13,7 +13,7 @@ export const useRealtimeSubscription = <T>(
     const setupSubscription = async () => {
       subscription = supabase
         .channel(channel)
-        .on('presence', { event }, callback)
+        .on('broadcast', { event }, callback)
         .subscribe((status) => {
           if (status === 'SUBSCRIBED') {
             console.log(`Subscribed to ${channel}`);

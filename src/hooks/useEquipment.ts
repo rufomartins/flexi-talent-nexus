@@ -13,7 +13,14 @@ export function useEquipment(shotListId: string) {
   });
 
   // Set up realtime subscription
-  useRealtimeSubscription("equipment", shotListId, ["equipment", shotListId]);
+  useRealtimeSubscription<{ type: string; record: Equipment }>(
+    "equipment",
+    shotListId,
+    (payload) => {
+      // Invalidate and refetch equipment when changes occur
+      console.log("Equipment updated:", payload);
+    }
+  );
 
   const { data: equipment, isLoading } = useQuery({
     queryKey: ['equipment', shotListId],

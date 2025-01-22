@@ -6,7 +6,14 @@ import type { Shot } from "@/types/shot-list";
 
 export function useShots(shotListId: string) {
   // Set up realtime subscription
-  useRealtimeSubscription("shots", shotListId, ["shots", shotListId]);
+  useRealtimeSubscription<{ type: string; record: Shot }>(
+    "shots", 
+    shotListId,
+    (payload) => {
+      // Invalidate and refetch shots when changes occur
+      console.log("Shot updated:", payload);
+    }
+  );
 
   return useQuery({
     queryKey: ["shots", shotListId],

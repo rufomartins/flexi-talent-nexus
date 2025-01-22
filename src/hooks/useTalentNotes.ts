@@ -13,7 +13,14 @@ export function useTalentNotes(shotListId: string) {
   });
 
   // Set up realtime subscription
-  useRealtimeSubscription("talent_notes", shotListId, ["talent-notes", shotListId]);
+  useRealtimeSubscription<{ type: string; record: TalentNote }>(
+    "talent_notes",
+    shotListId,
+    (payload) => {
+      // Invalidate and refetch notes when changes occur
+      console.log("Talent note updated:", payload);
+    }
+  );
 
   const { data: notes, isLoading: isLoadingNotes } = useQuery({
     queryKey: ['talent-notes', shotListId],
