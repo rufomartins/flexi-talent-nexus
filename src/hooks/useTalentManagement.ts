@@ -1,134 +1,101 @@
-import { useState } from 'react'
-import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
-import { supabase } from '@/integrations/supabase/client'
-import { useToast } from '@/hooks/use-toast'
-import type { TalentProfile, TalentCategory } from '@/types/talent-management'
+import { supabase } from '@/integrations/supabase/client';
+import { TalentCategory } from '@/types/talent-management';
+import { notify } from '@/utils/notifications';
+import { useQuery } from '@tanstack/react-query';
+import { useLoadingState } from './useLoadingState';
 
-interface BulkActionParams {
-  ids: string[]
-  value?: string
-}
+export const useTalentManagement = () => {
+  const { loadingStates, startLoading, stopLoading } = useLoadingState();
 
-export function useTalentManagement() {
-  const queryClient = useQueryClient()
-  const { toast } = useToast()
-  const [selectedIds, setSelectedIds] = useState<string[]>([])
-
-  const bulkApproveMutation = useMutation({
-    mutationFn: async ({ ids }: BulkActionParams) => {
-      const { error } = await supabase
+  const { data: talents, isLoading, refetch } = useQuery({
+    queryKey: ['talents'],
+    queryFn: async () => {
+      const { data, error } = await supabase
         .from('talent_profiles')
-        .update({ evaluation_status: 'APPROVED' })
-        .in('id', ids)
-      
-      if (error) throw error
-    },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['talents'] })
-      toast({
-        title: 'Success',
-        description: 'Talents approved successfully',
-      })
-    },
-  })
+        .select(`
+          *,
+          users (
+            id,
+            full_name,
+            avatar_url
+          )
+        `)
+        .order('created_at', { ascending: false });
 
-  const bulkUpdateCategoryMutation = useMutation({
-    mutationFn: async ({ ids, value }: BulkActionParams) => {
-      if (!value) throw new Error('Category is required')
-      
-      const { error } = await supabase
-        .from('talent_profiles')
-        .update({ talent_category: value })
-        .in('id', ids)
-      
-      if (error) throw error
+      if (error) throw error;
+      return data;
     },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['talents'] })
-      toast({
-        title: 'Success',
-        description: 'Categories updated successfully',
-      })
-    },
-  })
+  });
 
-  const bulkUpdateStatusMutation = useMutation({
-    mutationFn: async ({ ids, value }: BulkActionParams) => {
-      if (!value) throw new Error('Status is required')
-      
-      const { error } = await supabase
-        .from('talent_profiles')
-        .update({ evaluation_status: value })
-        .in('id', ids)
-      
-      if (error) throw error
-    },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['talents'] })
-      toast({
-        title: 'Success',
-        description: 'Status updated successfully',
-      })
-    },
-  })
-
-  const bulkAssignAgentMutation = useMutation({
-    mutationFn: async ({ ids, value }: BulkActionParams) => {
-      if (!value) throw new Error('Agent ID is required')
-      
-      const { error } = await supabase
-        .from('talent_profiles')
-        .update({ agent_id: value })
-        .in('id', ids)
-      
-      if (error) throw error
-    },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['talents'] })
-      toast({
-        title: 'Success',
-        description: 'Agent assigned successfully',
-      })
-    },
-  })
-
-  const handleBulkAction = async (action: string, value?: string) => {
+  const bulkUpdateCategory = async (ids: string[], category: TalentCategory) => {
     try {
-      switch (action) {
-        case 'approve':
-          await bulkApproveMutation.mutateAsync({ ids: selectedIds })
-          break
-        case 'updateCategory':
-          await bulkUpdateCategoryMutation.mutateAsync({ ids: selectedIds, value })
-          break
-        case 'updateStatus':
-          await bulkUpdateStatusMutation.mutateAsync({ ids: selectedIds, value })
-          break
-        case 'assignAgent':
-          await bulkAssignAgentMutation.mutateAsync({ ids: selectedIds, value })
-          break
-        default:
-          throw new Error('Invalid action')
-      }
-      setSelectedIds([])
+      startLoading('updateCategory');
+      const { error } = await supabase
+        .from('talent_profiles')
+        .update({ talent_category: category })
+        .in('id', ids);
+      
+      if (error) throw error;
+      
+      notify.success('Categories updated successfully');
+      refetch();
+      return true;
     } catch (error) {
-      console.error('Bulk action failed:', error)
-      toast({
-        title: 'Error',
-        description: 'Failed to perform bulk action',
-        variant: 'destructive',
-      })
+      notify.error('Failed to update categories');
+      return false;
+    } finally {
+      stopLoading('updateCategory');
     }
-  }
+  };
+
+  const updateTalentStatus = async (id: string, status: string) => {
+    try {
+      startLoading('updateStatus');
+      const { error } = await supabase
+        .from('talent_profiles')
+        .update({ evaluation_status: status })
+        .eq('id', id);
+
+      if (error) throw error;
+
+      notify.success('Status updated successfully');
+      refetch();
+      return true;
+    } catch (error) {
+      notify.error('Failed to update status');
+      return false;
+    } finally {
+      stopLoading('updateStatus');
+    }
+  };
+
+  const deleteTalent = async (id: string) => {
+    try {
+      startLoading('delete');
+      const { error } = await supabase
+        .from('talent_profiles')
+        .delete()
+        .eq('id', id);
+
+      if (error) throw error;
+
+      notify.success('Talent deleted successfully');
+      refetch();
+      return true;
+    } catch (error) {
+      notify.error('Failed to delete talent');
+      return false;
+    } finally {
+      stopLoading('delete');
+    }
+  };
 
   return {
-    selectedIds,
-    setSelectedIds,
-    handleBulkAction,
-    isLoading: 
-      bulkApproveMutation.isPending || 
-      bulkUpdateCategoryMutation.isPending || 
-      bulkUpdateStatusMutation.isPending || 
-      bulkAssignAgentMutation.isPending
-  }
-}
+    talents,
+    isLoading,
+    loadingStates,
+    bulkUpdateCategory,
+    updateTalentStatus,
+    deleteTalent,
+  };
+};

@@ -1,6 +1,5 @@
-import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs"
-import { TalentCategory } from "@/types/talent-management"
-import { DatabaseUser } from "@/types/user"
+import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { TalentCategory } from "@/types/talent-management";
 
 interface TalentCategoryTabsProps {
   activeCategory: TalentCategory;

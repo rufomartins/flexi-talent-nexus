@@ -1,12 +1,12 @@
-import { useEffect } from 'react'
-import { supabase } from '@/integrations/supabase/client'
-import type { RealtimeChannel } from '@supabase/supabase-js'
+import { useEffect } from 'react';
+import { supabase } from '@/integrations/supabase/client';
+import type { RealtimeChannel } from '@supabase/supabase-js';
 
 interface RealtimeConfig {
-  event?: 'INSERT' | 'UPDATE' | 'DELETE' | '*'
-  schema?: string
-  table: string
-  filter?: string
+  event?: 'INSERT' | 'UPDATE' | 'DELETE' | '*';
+  schema?: string;
+  table: string;
+  filter?: string;
 }
 
 export function useRealtimeSubscription(
@@ -14,7 +14,7 @@ export function useRealtimeSubscription(
   callback: (payload: any) => void
 ) {
   useEffect(() => {
-    let channel: RealtimeChannel
+    let channel: RealtimeChannel;
 
     const setupSubscription = () => {
       channel = supabase
@@ -29,15 +29,15 @@ export function useRealtimeSubscription(
           },
           callback
         )
-        .subscribe()
-    }
+        .subscribe();
+    };
 
-    setupSubscription()
+    setupSubscription();
 
     return () => {
       if (channel) {
-        supabase.removeChannel(channel)
+        supabase.removeChannel(channel);
       }
-    }
-  }, [config, callback])
+    };
+  }, [config, callback]);
 }
