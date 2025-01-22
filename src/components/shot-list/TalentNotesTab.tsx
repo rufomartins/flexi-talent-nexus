@@ -21,18 +21,33 @@ export function TalentNotesTab() {
   } = useTalentNotes(shotListId!);
 
   const handleAdd = async (formData: Partial<TalentNote>) => {
-    const success = await addNote(formData);
-    if (success) setIsAddingNote(false);
+    try {
+      await addNote(formData);
+      setIsAddingNote(false);
+      return true;
+    } catch (error) {
+      return false;
+    }
   };
 
   const handleEdit = async (formData: Partial<TalentNote>) => {
-    if (!editingNote) return;
-    const success = await updateNote(editingNote.id, formData);
-    if (success) setEditingNote(null);
+    if (!editingNote) return false;
+    try {
+      await updateNote(editingNote.id, formData);
+      setEditingNote(null);
+      return true;
+    } catch (error) {
+      return false;
+    }
   };
 
   const handleDelete = async (id: string) => {
-    await deleteNote(id);
+    try {
+      await deleteNote(id);
+      return true;
+    } catch (error) {
+      return false;
+    }
   };
 
   if (isLoading) {

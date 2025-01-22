@@ -9,7 +9,7 @@ export function useShots(shotListId: string) {
     console.log("Shot updated");
   };
 
-  useRealtimeSubscription('shots', 'UPDATE', handleShotsUpdate);
+  useRealtimeSubscription('shots', handleShotsUpdate);
 
   return useQuery({
     queryKey: ['shots', shotListId],

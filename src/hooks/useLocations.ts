@@ -1,7 +1,7 @@
 import { useQuery } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { notify } from '@/utils/notifications';
-import type { Location } from '@/types/shot-list';
+import type { Location, Shot } from '@/types/shot-list';
 
 interface UseLocationsResult {
   data: Location[];
@@ -13,7 +13,7 @@ interface UseLocationsResult {
 }
 
 export function useLocations(shotListId: string): UseLocationsResult {
-  const { data, isLoading, error, refetch } = useQuery({
+  const { data, isLoading, error, refetch: queryRefetch } = useQuery({
     queryKey: ['locations', shotListId],
     queryFn: async () => {
       const { data, error } = await supabase
@@ -53,7 +53,11 @@ export function useLocations(shotListId: string): UseLocationsResult {
     }
 
     notify.success('Location deleted successfully');
-    await refetch();
+    await queryRefetch();
+  };
+
+  const refetch = async () => {
+    await queryRefetch();
   };
 
   return {
