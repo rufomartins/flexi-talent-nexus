@@ -4,7 +4,7 @@ import { RealtimeChannel } from "@supabase/supabase-js";
 
 export const useRealtimeSubscription = <T>(
   channel: string,
-  event: string,
+  event: 'INSERT' | 'UPDATE' | 'DELETE',
   callback: (payload: T) => void
 ) => {
   useEffect(() => {
@@ -13,7 +13,14 @@ export const useRealtimeSubscription = <T>(
     const setupSubscription = async () => {
       subscription = supabase
         .channel(channel)
-        .on('broadcast', { event }, callback)
+        .on(
+          'postgres_changes',
+          {
+            event: event,
+            schema: 'public'
+          },
+          callback
+        )
         .subscribe((status) => {
           if (status === 'SUBSCRIBED') {
             console.log(`Subscribed to ${channel}`);
