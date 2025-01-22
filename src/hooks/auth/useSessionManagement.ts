@@ -1,72 +1,48 @@
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect } from 'react';
 import { Session, User } from '@supabase/supabase-js';
 import { supabase } from '@/integrations/supabase/client';
-import { useToast } from '@/hooks/use-toast';
 
 export const useSessionManagement = () => {
   const [session, setSession] = useState<Session | null>(null);
   const [user, setUser] = useState<User | null>(null);
   const [loading, setLoading] = useState(true);
-  const { toast } = useToast();
-
-  const handleAuthStateChange = useCallback(async (event: string, newSession: Session | null) => {
-    console.log("[SessionManagement] Auth state changed:", event, newSession?.user?.email);
-    
-    if (newSession?.user) {
-      setSession(newSession);
-      setUser(newSession.user);
-    } else {
-      setSession(null);
-      setUser(null);
-    }
-    
-    setLoading(false);
-  }, []);
+  const [error, setError] = useState<Error | null>(null);
 
   useEffect(() => {
-    let mounted = true;
-
-    const initializeSession = async () => {
-      try {
-        const { data: { session: initialSession }, error } = await supabase.auth.getSession();
-        
-        if (error) {
-          console.error("[SessionManagement] Error getting session:", error);
-          throw error;
-        }
-
-        if (mounted) {
-          if (initialSession) {
-            console.log("[SessionManagement] Initial session found:", {
-              userId: initialSession.user.id,
-              email: initialSession.user.email
-            });
-            setSession(initialSession);
-            setUser(initialSession.user);
-          }
-          setLoading(false);
-        }
-      } catch (error) {
-        console.error("[SessionManagement] Session initialization error:", error);
-        if (mounted) {
-          toast({
-            title: "Error",
-            description: "Failed to initialize session. Please try again.",
-            variant: "destructive",
-          });
-          setLoading(false);
-        }
+    // Get initial session
+    supabase.auth.getSession().then(({ data: { session }, error }) => {
+      if (error) {
+        console.error('[SessionManagement] Error getting session:', error);
+        setError(error);
       }
-    };
+      setSession(session);
+      setUser(session?.user ?? null);
+      setLoading(false);
+    });
 
-    const { data: { subscription } } = supabase.auth.onAuthStateChange(handleAuthStateChange);
-    initializeSession();
+    // Listen for auth changes
+    const { data: { subscription } } = supabase.auth.onAuthStateChange(
+      (event, session) => {
+        console.log('[SessionManagement] Auth state changed:', event);
+        setSession(session);
+        setUser(session?.user ?? null);
+        setLoading(false);
+      }
+    );
 
     return () => {
-      mounted = false;
       subscription.unsubscribe();
     };
-  }, [handleAuthStateChange, toast]);
+  }, []);
 
-  return { session, user, loading, setSession, setUser, setLoading };
+  return {
+    session,
+    user,
+    loading,
+    error,
+    setSession,
+    setUser,
+    setLoading,
+    setError
+  };
 };

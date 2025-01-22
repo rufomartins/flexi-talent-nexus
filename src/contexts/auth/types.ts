@@ -8,7 +8,9 @@ export interface AuthContextType {
   signIn: (email: string, password: string, rememberMe: boolean) => Promise<void>;
   signOut: () => Promise<void>;
   loading: boolean;
+  error: Error | null;
   setSession?: (session: Session | null) => void;
   setUser?: (user: User | null) => void;
   setLoading?: (loading: boolean) => void;
+  setError?: (error: Error | null) => void;
 }

@@ -22,9 +22,11 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     session, 
     user, 
     loading: sessionLoading, 
+    error,
     setSession, 
     setUser, 
-    setLoading 
+    setLoading,
+    setError 
   } = useSessionManagement();
   
   const { userDetails, setUserDetails, fetchUserDetails } = useUserManagement();
@@ -34,6 +36,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     setSession,
     setUser,
     setUserDetails,
+    setError,
     fetchUserDetails
   });
 
@@ -64,6 +67,11 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         signIn,
         signOut,
         loading: sessionLoading,
+        error,
+        setSession,
+        setUser,
+        setLoading,
+        setError
       }}
     >
       {children}
