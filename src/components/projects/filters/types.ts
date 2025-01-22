@@ -1,23 +1,30 @@
 import { DateRange } from "react-day-picker";
 
-export interface ProjectFilters {
-  projectManager?: string;
-  country?: string;
-  language?: string;
-  scriptStatus?: string;
-  reviewStatus?: string;
-  talentStatus?: string;
-  startDate?: Date;
-  endDate?: Date;
+export type ProjectStatus = 'pending' | 'active' | 'completed' | 'cancelled';
+export type ProjectCategory = 'translation' | 'review' | 'ugc' | 'voice_over';
+
+export interface FilterState {
+  dateRange: DateRange | undefined;
+  status: ProjectStatus[];
+  search: string;
+  category: ProjectCategory[];
+  projectManagers: string[];
+  countries: string[];
+}
+
+export interface FilterContextType {
+  filters: FilterState;
+  updateFilter: (key: keyof FilterState, value: any) => void;
 }
 
 export interface FilterProps {
-  onApplyFilters: (filters: ProjectFilters) => void;
-  onClose: () => void;
-  initialFilters?: ProjectFilters;
+  onChange?: (filters: FilterState) => void;
+  initialFilters?: Partial<FilterState>;
+  children?: React.ReactNode;
 }
 
-export interface FilterSectionProps {
-  label: string;
-  children: React.ReactNode;
+export interface FilterComponentProps<T> {
+  value: T;
+  onChange: (value: T) => void;
+  className?: string;
 }
