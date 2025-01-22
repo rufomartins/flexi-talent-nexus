@@ -38,7 +38,7 @@ const logError = async (error: AppError) => {
       .insert({
         message: error.message,
         code: error.code,
-        details: error.details,
+        details: JSON.stringify(error.details),
         stack: error.stack,
         timestamp: new Date().toISOString()
       });
