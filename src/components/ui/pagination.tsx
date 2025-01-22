@@ -1,7 +1,7 @@
 import * as React from "react"
-import { ChevronLeft, ChevronRight } from "lucide-react"
+import { ChevronLeft, ChevronRight, MoreHorizontal } from "lucide-react"
 import { cn } from "@/lib/utils"
-import { Button } from "@/components/ui/button"
+import { ButtonProps, buttonVariants } from "@/components/ui/button"
 
 export interface PaginationProps {
   currentPage: number
@@ -10,35 +10,97 @@ export interface PaginationProps {
   isLoading?: boolean
 }
 
-export function Pagination({ currentPage, totalPages, onPageChange, isLoading }: PaginationProps) {
-  const canGoPrevious = currentPage > 1
-  const canGoNext = currentPage < totalPages
+const Pagination = React.forwardRef<HTMLDivElement, PaginationProps>(
+  ({ currentPage, totalPages, onPageChange, isLoading, ...props }, ref) => {
+    const pages = React.useMemo(() => {
+      const items: (number | string)[] = []
+      if (totalPages <= 7) {
+        for (let i = 1; i <= totalPages; i++) {
+          items.push(i)
+        }
+      } else {
+        items.push(1)
+        if (currentPage > 3) {
+          items.push('...')
+        }
+        const start = Math.max(2, currentPage - 2)
+        const end = Math.min(totalPages - 1, currentPage + 2)
+        for (let i = start; i <= end; i++) {
+          items.push(i)
+        }
+        if (currentPage < totalPages - 2) {
+          items.push('...')
+        }
+        items.push(totalPages)
+      }
+      return items
+    }, [currentPage, totalPages])
 
-  return (
-    <div className="flex w-full items-center justify-center space-x-6 lg:space-x-8">
-      <div className="flex w-[100px] items-center justify-center text-sm font-medium">
-        Page {currentPage} of {totalPages}
-      </div>
-      <div className="flex items-center space-x-2">
-        <Button
-          variant="outline"
-          className="h-8 w-8 p-0"
-          onClick={() => onPageChange(currentPage - 1)}
-          disabled={!canGoPrevious || isLoading}
-        >
-          <ChevronLeft className="h-4 w-4" />
-          <span className="sr-only">Previous page</span>
-        </Button>
-        <Button
-          variant="outline"
-          className="h-8 w-8 p-0"
-          onClick={() => onPageChange(currentPage + 1)}
-          disabled={!canGoNext || isLoading}
-        >
-          <ChevronRight className="h-4 w-4" />
-          <span className="sr-only">Next page</span>
-        </Button>
-      </div>
-    </div>
-  )
+    return (
+      <nav
+        ref={ref}
+        className="mx-auto flex w-full justify-center"
+        {...props}
+      >
+        <ul className="flex flex-row items-center gap-1">
+          <PaginationItem
+            disabled={currentPage === 1 || isLoading}
+            onClick={() => onPageChange(currentPage - 1)}
+          >
+            <ChevronLeft className="h-4 w-4" />
+            <span className="sr-only">Previous page</span>
+          </PaginationItem>
+          
+          {pages.map((page, i) => (
+            <PaginationItem
+              key={i}
+              isActive={page === currentPage}
+              disabled={isLoading || page === '...'}
+              onClick={() => typeof page === 'number' && onPageChange(page)}
+            >
+              {page === '...' ? (
+                <MoreHorizontal className="h-4 w-4" />
+              ) : (
+                page
+              )}
+            </PaginationItem>
+          ))}
+
+          <PaginationItem
+            disabled={currentPage === totalPages || isLoading}
+            onClick={() => onPageChange(currentPage + 1)}
+          >
+            <ChevronRight className="h-4 w-4" />
+            <span className="sr-only">Next page</span>
+          </PaginationItem>
+        </ul>
+      </nav>
+    )
+  }
+)
+
+Pagination.displayName = "Pagination"
+
+interface PaginationItemProps extends ButtonProps {
+  isActive?: boolean
 }
+
+const PaginationItem = React.forwardRef<HTMLButtonElement, PaginationItemProps>(
+  ({ className, isActive, ...props }, ref) => (
+    <button
+      ref={ref}
+      className={cn(
+        buttonVariants({
+          variant: isActive ? "default" : "outline",
+          size: "icon",
+        }),
+        className
+      )}
+      {...props}
+    />
+  )
+)
+
+PaginationItem.displayName = "PaginationItem"
+
+export { Pagination, PaginationItem }

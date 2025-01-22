@@ -1,17 +1,18 @@
-import { useQuery } from "@tanstack/react-query";
-import { supabase } from "@/integrations/supabase/client";
+import { useQuery } from '@tanstack/react-query'
+import { supabase } from '@/integrations/supabase/client'
 
-export const useLocations = (shotListId: string) => {
+export function useLocations(shotListId: string) {
   return useQuery({
     queryKey: ['locations', shotListId],
     queryFn: async () => {
       const { data, error } = await supabase
         .from('locations')
         .select('*')
-        .eq('shot_list_id', shotListId);
+        .eq('shot_list_id', shotListId)
+        .order('created_at', { ascending: false })
 
-      if (error) throw error;
-      return data;
-    },
-  });
-};
+      if (error) throw error
+      return data
+    }
+  })
+}

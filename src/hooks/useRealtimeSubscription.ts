@@ -1,36 +1,43 @@
-import { useEffect } from 'react';
-import { supabase } from "@/integrations/supabase/client";
-import { RealtimeChannel } from '@supabase/supabase-js';
+import { useEffect } from 'react'
+import { supabase } from '@/integrations/supabase/client'
+import type { RealtimeChannel } from '@supabase/supabase-js'
+
+interface RealtimeConfig {
+  event?: 'INSERT' | 'UPDATE' | 'DELETE' | '*'
+  schema?: string
+  table: string
+  filter?: string
+}
 
 export function useRealtimeSubscription(
-  table: string,
-  event: 'INSERT' | 'UPDATE' | 'DELETE',
+  config: RealtimeConfig,
   callback: (payload: any) => void
 ) {
   useEffect(() => {
-    let channel: RealtimeChannel;
+    let channel: RealtimeChannel
 
-    try {
+    const setupSubscription = () => {
       channel = supabase
         .channel('db-changes')
         .on(
           'postgres_changes',
           {
-            event: event,
-            schema: 'public',
-            table: table
+            event: config.event || '*',
+            schema: config.schema || 'public',
+            table: config.table,
+            filter: config.filter,
           },
           callback
         )
-        .subscribe();
-    } catch (error) {
-      console.error('Error subscribing to realtime changes:', error);
+        .subscribe()
     }
+
+    setupSubscription()
 
     return () => {
       if (channel) {
-        supabase.removeChannel(channel);
+        supabase.removeChannel(channel)
       }
-    };
-  }, [table, event, callback]);
+    }
+  }, [config, callback])
 }
