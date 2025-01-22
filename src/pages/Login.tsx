@@ -4,21 +4,35 @@ import { Auth } from "@supabase/auth-ui-react";
 import { ThemeSupa } from "@supabase/auth-ui-shared";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/auth";
-import { RouteErrorBoundary } from "@/components/error/RouteErrorBoundary";
+import { FeatureErrorBoundary } from "@/components/error-boundary/FeatureErrorBoundary";
 import { Card } from "@/components/common/Card";
+import { useErrorHandler } from "@/utils/errorHandling";
 
 export default function Login() {
   const navigate = useNavigate();
   const { user } = useAuth();
+  const { handleError } = useErrorHandler("login");
 
   useEffect(() => {
-    if (user) {
-      navigate("/dashboard");
-    }
-  }, [user, navigate]);
+    const checkSession = async () => {
+      try {
+        if (user) {
+          navigate("/dashboard");
+        }
+      } catch (error) {
+        await handleError(error, {
+          showNotification: true,
+          logToServer: true,
+          retryable: true
+        });
+      }
+    };
+
+    checkSession();
+  }, [user, navigate, handleError]);
 
   return (
-    <RouteErrorBoundary>
+    <FeatureErrorBoundary feature="Login">
       <div className="min-h-screen flex items-center justify-center bg-gray-50">
         <div className="max-w-md w-full px-6">
           <div className="text-center mb-8">
@@ -52,6 +66,6 @@ export default function Login() {
           </Card>
         </div>
       </div>
-    </RouteErrorBoundary>
+    </FeatureErrorBoundary>
   );
 }
