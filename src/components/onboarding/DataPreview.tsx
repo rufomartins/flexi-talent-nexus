@@ -1,3 +1,4 @@
+import React, { useState } from 'react';
 import { Card } from "@/components/ui/card";
 import { ExcelRowData, ValidationError } from "@/utils/excelValidation";
 import { PreviewHeader } from "./preview/PreviewHeader";
