@@ -19,6 +19,8 @@ export interface FilterContextType {
 
 export interface FilterProps {
   onChange?: (filters: FilterState) => void;
+  onApplyFilters?: (filters: FilterState) => void;
+  onClose?: () => void;
   initialFilters?: Partial<FilterState>;
   children?: React.ReactNode;
 }
@@ -28,3 +30,5 @@ export interface FilterComponentProps<T> {
   onChange: (value: T) => void;
   className?: string;
 }
+
+export type ProjectFilters = Partial<FilterState>;

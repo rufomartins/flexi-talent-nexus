@@ -9,11 +9,11 @@ import {
 } from "@/components/ui/popover";
 import { ProjectFilterPanel } from "./ProjectFilterPanel";
 import { useDebounce } from "@/hooks/useDebounce";
-import type { ProjectFilters } from "./types";
+import type { FilterState } from "./filters/types";
 
 interface ProjectSearchProps {
   onSearch: (query: string) => void;
-  onFilter: (filters: ProjectFilters) => void;
+  onFilter: (filters: Partial<FilterState>) => void;
 }
 
 export function ProjectSearch({ onSearch, onFilter }: ProjectSearchProps) {
@@ -25,7 +25,7 @@ export function ProjectSearch({ onSearch, onFilter }: ProjectSearchProps) {
     setSearchQuery(value);
   };
 
-  const handleFilter = (filters: ProjectFilters) => {
+  const handleFilter = (filters: Partial<FilterState>) => {
     onFilter(filters);
     setIsFilterOpen(false);
   };

@@ -21,24 +21,23 @@ const talentStatusOptions = ["Booked", "Shooting", "Delivered", "Reshoot", "Appr
 export function ProjectFilterPanel({ onApplyFilters, onClose, initialFilters = {} }: FilterProps) {
   const { filters, updateFilter, clearFilters } = useProjectFilters(initialFilters);
   const [dateRange, setDateRange] = useState<DateRange | undefined>({
-    from: initialFilters.startDate || undefined,
-    to: initialFilters.endDate || undefined,
+    from: undefined,
+    to: undefined,
   });
 
   const handleApplyFilters = () => {
-    onApplyFilters({
+    onApplyFilters?.({
       ...filters,
-      startDate: dateRange?.from,
-      endDate: dateRange?.to,
+      dateRange
     });
-    onClose();
+    onClose?.();
   };
 
   const handleClearFilters = () => {
     clearFilters();
     setDateRange(undefined);
-    onApplyFilters({});
-    onClose();
+    onApplyFilters?.({});
+    onClose?.();
   };
 
   return (
