@@ -6,7 +6,7 @@ import type { Shot } from "@/types/shot-list";
 
 export function useShots(shotListId: string) {
   // Set up realtime subscription
-  useRealtimeSubscription<{ type: string; record: Shot }>(
+  useRealtimeSubscription(
     "shots", 
     'UPDATE',
     (payload) => {
