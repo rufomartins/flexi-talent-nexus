@@ -77,12 +77,12 @@ export const uploadMedia = async (
         .upload(fileName, processedFile, {
           cacheControl: '3600',
           upsert: false,
-          onUploadProgress: config.onProgress 
-            ? (progress) => {
-                const percentage = (progress.loaded / progress.total) * 100;
-                config.onProgress!(percentage);
-              }
-            : undefined
+          ...(config.onProgress && {
+            onUploadProgress: (progress) => {
+              const percentage = (progress.loaded / progress.total) * 100;
+              config.onProgress!(percentage);
+            }
+          })
         });
 
       if (error) throw error;
