@@ -11,7 +11,7 @@ export const useRealtimeSubscription = <T>(
     const channel = supabase
       .channel(`realtime:${tableName}`)
       .on(
-        'postgres_changes',
+        'postgres_changes' as const,
         {
           event: event,
           schema: 'public',
