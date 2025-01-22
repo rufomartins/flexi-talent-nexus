@@ -2,7 +2,6 @@ import { Button } from "@/components/ui/button";
 import {
   Pagination,
   PaginationContent,
-  PaginationItem,
   PaginationNext,
   PaginationPrevious,
 } from "@/components/ui/pagination";
@@ -30,60 +29,53 @@ export function PreviewPagination({
 
     if (start > 1) {
       items.push(
-        <PaginationItem key="start">
-          <Button 
-            variant="outline" 
-            size="icon"
-            onClick={() => onPageChange(1)}
-            className="h-9 w-9"
-          >
-            1
-          </Button>
-        </PaginationItem>
+        <Button 
+          key="start"
+          variant="outline" 
+          size="icon"
+          onClick={() => onPageChange(1)}
+          className="h-9 w-9"
+        >
+          1
+        </Button>
       );
       if (start > 2) {
         items.push(
-          <PaginationItem key="start-ellipsis">
-            <span className="px-4">...</span>
-          </PaginationItem>
+          <span key="start-ellipsis" className="px-4">...</span>
         );
       }
     }
 
     for (let i = start; i <= end; i++) {
       items.push(
-        <PaginationItem key={i}>
-          <Button
-            variant={currentPage === i ? "default" : "outline"}
-            size="icon"
-            onClick={() => onPageChange(i)}
-            className="h-9 w-9"
-          >
-            {i}
-          </Button>
-        </PaginationItem>
+        <Button
+          key={i}
+          variant={currentPage === i ? "default" : "outline"}
+          size="icon"
+          onClick={() => onPageChange(i)}
+          className="h-9 w-9"
+        >
+          {i}
+        </Button>
       );
     }
 
     if (end < totalPages) {
       if (end < totalPages - 1) {
         items.push(
-          <PaginationItem key="end-ellipsis">
-            <span className="px-4">...</span>
-          </PaginationItem>
+          <span key="end-ellipsis" className="px-4">...</span>
         );
       }
       items.push(
-        <PaginationItem key="end">
-          <Button
-            variant="outline"
-            size="icon"
-            onClick={() => onPageChange(totalPages)}
-            className="h-9 w-9"
-          >
-            {totalPages}
-          </Button>
-        </PaginationItem>
+        <Button
+          key="end"
+          variant="outline"
+          size="icon"
+          onClick={() => onPageChange(totalPages)}
+          className="h-9 w-9"
+        >
+          {totalPages}
+        </Button>
       );
     }
 
@@ -91,9 +83,9 @@ export function PreviewPagination({
   };
 
   return (
-    <Pagination>
-      <PaginationContent>
-        <PaginationItem>
+    <div className="flex justify-center mt-4">
+      <Pagination>
+        <PaginationContent>
           <Button 
             variant="outline" 
             size="icon"
@@ -103,9 +95,7 @@ export function PreviewPagination({
           >
             <PaginationPrevious className="h-4 w-4" />
           </Button>
-        </PaginationItem>
-        {renderPaginationItems()}
-        <PaginationItem>
+          {renderPaginationItems()}
           <Button 
             variant="outline"
             size="icon"
@@ -115,8 +105,8 @@ export function PreviewPagination({
           >
             <PaginationNext className="h-4 w-4" />
           </Button>
-        </PaginationItem>
-      </PaginationContent>
-    </Pagination>
+        </PaginationContent>
+      </Pagination>
+    </div>
   );
 }

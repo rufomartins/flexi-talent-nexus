@@ -24,29 +24,26 @@ export function TalentNotesTab() {
     try {
       await addNote(formData);
       setIsAddingNote(false);
-      return true;
     } catch (error) {
-      return false;
+      console.error('Failed to add note:', error);
     }
   };
 
   const handleEdit = async (formData: Partial<TalentNote>) => {
-    if (!editingNote) return false;
+    if (!editingNote) return;
     try {
       await updateNote(editingNote.id, formData);
       setEditingNote(null);
-      return true;
     } catch (error) {
-      return false;
+      console.error('Failed to update note:', error);
     }
   };
 
   const handleDelete = async (id: string) => {
     try {
       await deleteNote(id);
-      return true;
     } catch (error) {
-      return false;
+      console.error('Failed to delete note:', error);
     }
   };
 
