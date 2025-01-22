@@ -5,7 +5,8 @@ import { ProjectStats } from "@/components/projects/ProjectStats";
 import { ProjectSearch } from "@/components/projects/ProjectSearch";
 import { ProjectTree } from "@/components/projects/ProjectTree";
 import { useState } from "react";
-import type { Project, ProjectFilters } from "@/components/projects/types";
+import type { Project } from "@/components/projects/types";
+import type { FilterState } from "@/components/projects/filters/types";
 
 const statsCards = [
   { title: "Active Tasks", value: 12 },
