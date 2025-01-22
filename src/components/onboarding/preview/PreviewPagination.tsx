@@ -84,29 +84,27 @@ export function PreviewPagination({
 
   return (
     <div className="flex justify-center mt-4">
-      <Pagination>
-        <PaginationContent>
-          <Button 
-            variant="outline" 
-            size="icon"
-            onClick={() => onPageChange(Math.max(1, currentPage - 1))}
-            disabled={currentPage === 1}
-            className="h-9 w-9"
-          >
-            <PaginationPrevious className="h-4 w-4" />
-          </Button>
-          {renderPaginationItems()}
-          <Button 
-            variant="outline"
-            size="icon"
-            onClick={() => onPageChange(Math.min(totalPages, currentPage + 1))}
-            disabled={currentPage === totalPages}
-            className="h-9 w-9"
-          >
-            <PaginationNext className="h-4 w-4" />
-          </Button>
-        </PaginationContent>
-      </Pagination>
+      <div className="flex items-center gap-2">
+        <Button 
+          variant="outline" 
+          size="icon"
+          onClick={() => onPageChange(Math.max(1, currentPage - 1))}
+          disabled={currentPage === 1}
+          className="h-9 w-9"
+        >
+          <PaginationPrevious className="h-4 w-4" />
+        </Button>
+        {renderPaginationItems()}
+        <Button 
+          variant="outline"
+          size="icon"
+          onClick={() => onPageChange(Math.min(totalPages, currentPage + 1))}
+          disabled={currentPage === totalPages}
+          className="h-9 w-9"
+        >
+          <PaginationNext className="h-4 w-4" />
+        </Button>
+      </div>
     </div>
   );
 }
