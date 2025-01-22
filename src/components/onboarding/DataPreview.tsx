@@ -233,7 +233,7 @@ export function DataPreview({ data, errors, onConfirm, onCancel }: DataPreviewPr
         </Table>
       </div>
 
-      <Pagination>
+      <Pagination currentPage={currentPage} totalPages={totalPages} onPageChange={setCurrentPage}>
         <PaginationContent>
           <PaginationItem>
             <Button 

@@ -965,6 +965,36 @@ export type Database = {
           },
         ]
       }
+      error_logs: {
+        Row: {
+          code: string | null
+          details: Json | null
+          id: string
+          message: string
+          stack: string | null
+          timestamp: string | null
+          user_id: string | null
+        }
+        Insert: {
+          code?: string | null
+          details?: Json | null
+          id?: string
+          message: string
+          stack?: string | null
+          timestamp?: string | null
+          user_id?: string | null
+        }
+        Update: {
+          code?: string | null
+          details?: Json | null
+          id?: string
+          message?: string
+          stack?: string | null
+          timestamp?: string | null
+          user_id?: string | null
+        }
+        Relationships: []
+      }
       guest_selections: {
         Row: {
           casting_id: string | null
