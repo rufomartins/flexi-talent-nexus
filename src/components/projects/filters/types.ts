@@ -10,6 +10,9 @@ export interface FilterState {
   category: ProjectCategory[];
   projectManagers: string[];
   countries: string[];
+  scriptStatus?: string;
+  reviewStatus?: string;
+  talentStatus?: string;
 }
 
 export interface FilterContextType {
@@ -19,7 +22,7 @@ export interface FilterContextType {
 
 export interface FilterProps {
   onChange?: (filters: FilterState) => void;
-  onApplyFilters?: (filters: FilterState) => void;
+  onApplyFilters?: (filters: Partial<FilterState>) => void;
   onClose?: () => void;
   initialFilters?: Partial<FilterState>;
   children?: React.ReactNode;

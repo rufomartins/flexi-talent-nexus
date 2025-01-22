@@ -1,3 +1,10 @@
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import { useFilterContext } from "../context";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
@@ -10,15 +17,13 @@ export function CountryFilter({ className }: { className?: string }) {
     queryFn: async () => {
       const { data, error } = await supabase
         .from("project_countries")
-        .select("country_name")
-        .then(result => {
-          // Remove duplicates
-          const uniqueCountries = Array.from(new Set(result.data?.map(c => c.country_name)));
-          return uniqueCountries.map(country_name => ({ country_name }));
-        });
+        .select("country_name");
 
       if (error) throw error;
-      return data;
+      
+      // Remove duplicates
+      const uniqueCountries = Array.from(new Set(data?.map(c => c.country_name)));
+      return uniqueCountries.map(country_name => ({ country_name }));
     },
   });
 

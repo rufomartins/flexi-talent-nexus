@@ -4,7 +4,7 @@ import { DateRangeFilter } from "./filters/DateRangeFilter";
 import { StatusFilter } from "./filters/StatusFilter";
 import { FilterSection } from "./filters/FilterSection";
 import { useProjectFilters } from "./filters/useProjectFilters";
-import type { FilterProps } from "./filters/types";
+import type { FilterProps, FilterState } from "./filters/types";
 import {
   Select,
   SelectContent,
@@ -26,17 +26,25 @@ export function ProjectFilterPanel({ onApplyFilters, onClose, initialFilters = {
   });
 
   const handleApplyFilters = () => {
-    onApplyFilters?.({
+    const updatedFilters: Partial<FilterState> = {
       ...filters,
       dateRange
-    });
+    };
+    onApplyFilters?.(updatedFilters);
     onClose?.();
   };
 
   const handleClearFilters = () => {
     clearFilters();
     setDateRange(undefined);
-    onApplyFilters?.({});
+    onApplyFilters?.({
+      dateRange: undefined,
+      status: [],
+      search: "",
+      category: [],
+      projectManagers: [],
+      countries: []
+    });
     onClose?.();
   };
 
@@ -44,8 +52,8 @@ export function ProjectFilterPanel({ onApplyFilters, onClose, initialFilters = {
     <div className="w-[320px] p-4 space-y-4">
       <FilterSection label="Project Manager">
         <Select
-          value={filters.projectManager}
-          onValueChange={(value) => updateFilter("projectManager", value)}
+          value={filters.projectManagers?.[0] || ""}
+          onValueChange={(value) => updateFilter("projectManagers", [value])}
         >
           <SelectTrigger>
             <SelectValue placeholder="Select project manager" />
@@ -59,8 +67,8 @@ export function ProjectFilterPanel({ onApplyFilters, onClose, initialFilters = {
 
       <FilterSection label="Country">
         <Select
-          value={filters.country}
-          onValueChange={(value) => updateFilter("country", value)}
+          value={filters.countries?.[0] || ""}
+          onValueChange={(value) => updateFilter("countries", [value])}
         >
           <SelectTrigger>
             <SelectValue placeholder="Select country" />
@@ -74,21 +82,21 @@ export function ProjectFilterPanel({ onApplyFilters, onClose, initialFilters = {
 
       <StatusFilter
         label="Script Status"
-        value={filters.scriptStatus}
+        value={filters.scriptStatus || ""}
         options={scriptStatusOptions}
         onChange={(value) => updateFilter("scriptStatus", value)}
       />
 
       <StatusFilter
         label="Review Status"
-        value={filters.reviewStatus}
+        value={filters.reviewStatus || ""}
         options={reviewStatusOptions}
         onChange={(value) => updateFilter("reviewStatus", value)}
       />
 
       <StatusFilter
         label="Talent Status"
-        value={filters.talentStatus}
+        value={filters.talentStatus || ""}
         options={talentStatusOptions}
         onChange={(value) => updateFilter("talentStatus", value)}
       />

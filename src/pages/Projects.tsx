@@ -129,7 +129,7 @@ const dummyProjects: Project[] = [
 
 export default function Projects() {
   const [searchQuery, setSearchQuery] = useState("");
-  const [filters, setFilters] = useState<ProjectFilters>({});
+  const [filters, setFilters] = useState<Partial<FilterState>>({});
 
   const { data: projects, isLoading } = useQuery({
     queryKey: ['projects', searchQuery, filters],
@@ -138,6 +138,10 @@ export default function Projects() {
       return dummyProjects;
     },
   });
+
+  const handleFilter = (newFilters: Partial<FilterState>) => {
+    setFilters(newFilters);
+  };
 
   if (isLoading) {
     return (
@@ -153,7 +157,7 @@ export default function Projects() {
       <ProjectStats stats={statsCards} />
       <ProjectSearch 
         onSearch={setSearchQuery} 
-        onFilter={setFilters}
+        onFilter={handleFilter}
       />
       <ProjectTree projects={projects || []} statusColors={statusColors} />
     </div>
