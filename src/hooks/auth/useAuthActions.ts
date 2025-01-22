@@ -9,6 +9,7 @@ interface AuthActionsProps {
   setSession: (session: any) => void;
   setUser: (user: any) => void;
   setUserDetails: (details: DatabaseUser | null) => void;
+  setError: (error: Error | null) => void;
   fetchUserDetails: (userId: string) => Promise<DatabaseUser | null>;
 }
 
@@ -17,6 +18,7 @@ export const useAuthActions = ({
   setSession,
   setUser,
   setUserDetails,
+  setError,
   fetchUserDetails
 }: AuthActionsProps) => {
   const navigate = useNavigate();
@@ -26,6 +28,7 @@ export const useAuthActions = ({
     console.log("[Auth] Attempting sign in for:", email);
     try {
       setLoading(true);
+      setError(null);
       
       // Clear any existing session data first
       console.log("[Auth] Clearing any existing session data");
@@ -39,6 +42,7 @@ export const useAuthActions = ({
 
       if (error) {
         console.error("[Auth] Sign in error:", error);
+        setError(error);
         throw error;
       }
 
@@ -71,6 +75,7 @@ export const useAuthActions = ({
       });
     } catch (error: any) {
       console.error("[Auth] Sign in error:", error);
+      setError(error);
       toast({
         title: "Error",
         description: error.message,
@@ -80,7 +85,7 @@ export const useAuthActions = ({
     } finally {
       setLoading(false);
     }
-  }, [setLoading, fetchUserDetails, navigate, toast]);
+  }, [setLoading, setError, fetchUserDetails, navigate, toast]);
 
   const signOut = useCallback(async () => {
     console.log("[Auth] Starting sign out process");
@@ -91,6 +96,7 @@ export const useAuthActions = ({
       setSession(null);
       setUser(null);
       setUserDetails(null);
+      setError(null);
       
       // Clear all local storage
       console.log("[Auth] Clearing local storage");
@@ -102,6 +108,7 @@ export const useAuthActions = ({
       const { error } = await supabase.auth.signOut({ scope: 'global' });
       if (error) {
         console.error("[Auth] Supabase signOut error:", error);
+        setError(error);
         throw error;
       }
       
@@ -117,6 +124,7 @@ export const useAuthActions = ({
       navigate('/login', { replace: true });
     } catch (error: any) {
       console.error("[Auth] Sign out error:", error);
+      setError(error);
       toast({
         title: "Error",
         description: "There was an error signing out. Please try again.",
@@ -126,7 +134,7 @@ export const useAuthActions = ({
     } finally {
       setLoading(false);
     }
-  }, [setLoading, setSession, setUser, setUserDetails, navigate, toast]);
+  }, [setLoading, setSession, setUser, setUserDetails, setError, navigate, toast]);
 
   return { signIn, signOut };
 };
