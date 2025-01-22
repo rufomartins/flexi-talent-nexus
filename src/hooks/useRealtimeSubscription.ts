@@ -1,5 +1,5 @@
 import { useEffect } from "react";
-import { RealtimePostgresChangesPayload, RealtimeChannel } from '@supabase/supabase-js';
+import { RealtimePostgresChangesPayload } from '@supabase/supabase-js';
 import { supabase } from "@/integrations/supabase/client";
 
 export const useRealtimeSubscription = <T extends Record<string, any>>(
