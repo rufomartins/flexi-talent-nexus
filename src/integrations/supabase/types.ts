@@ -1753,6 +1753,36 @@ export type Database = {
           },
         ]
       }
+      project_templates: {
+        Row: {
+          content: Json | null
+          created_at: string | null
+          created_by: string | null
+          description: string | null
+          id: string
+          name: string
+          updated_at: string | null
+        }
+        Insert: {
+          content?: Json | null
+          created_at?: string | null
+          created_by?: string | null
+          description?: string | null
+          id?: string
+          name: string
+          updated_at?: string | null
+        }
+        Update: {
+          content?: Json | null
+          created_at?: string | null
+          created_by?: string | null
+          description?: string | null
+          id?: string
+          name?: string
+          updated_at?: string | null
+        }
+        Relationships: []
+      }
       project_videos: {
         Row: {
           client_approval_status: string | null
@@ -1841,12 +1871,14 @@ export type Database = {
         Row: {
           active_tasks_count: number | null
           client_id: string | null
+          color_code: string | null
           completion_percentage: number | null
           created_at: string | null
           description: string | null
           end_date: string | null
           id: string
           name: string
+          progress_percentage: number | null
           project_manager_id: string | null
           start_date: string | null
           status: string | null
@@ -1857,12 +1889,14 @@ export type Database = {
         Insert: {
           active_tasks_count?: number | null
           client_id?: string | null
+          color_code?: string | null
           completion_percentage?: number | null
           created_at?: string | null
           description?: string | null
           end_date?: string | null
           id?: string
           name: string
+          progress_percentage?: number | null
           project_manager_id?: string | null
           start_date?: string | null
           status?: string | null
@@ -1873,12 +1907,14 @@ export type Database = {
         Update: {
           active_tasks_count?: number | null
           client_id?: string | null
+          color_code?: string | null
           completion_percentage?: number | null
           created_at?: string | null
           description?: string | null
           end_date?: string | null
           id?: string
           name?: string
+          progress_percentage?: number | null
           project_manager_id?: string | null
           start_date?: string | null
           status?: string | null
@@ -2053,20 +2089,29 @@ export type Database = {
         Row: {
           created_at: string | null
           id: string
+          shared_with: Json | null
           task_id: string | null
+          template_id: string | null
           updated_at: string | null
+          version: number | null
         }
         Insert: {
           created_at?: string | null
           id?: string
+          shared_with?: Json | null
           task_id?: string | null
+          template_id?: string | null
           updated_at?: string | null
+          version?: number | null
         }
         Update: {
           created_at?: string | null
           id?: string
+          shared_with?: Json | null
           task_id?: string | null
+          template_id?: string | null
           updated_at?: string | null
+          version?: number | null
         }
         Relationships: [
           {
@@ -2074,6 +2119,13 @@ export type Database = {
             columns: ["task_id"]
             isOneToOne: false
             referencedRelation: "project_tasks"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "shot_lists_template_id_fkey"
+            columns: ["template_id"]
+            isOneToOne: false
+            referencedRelation: "shot_lists"
             referencedColumns: ["id"]
           },
         ]
