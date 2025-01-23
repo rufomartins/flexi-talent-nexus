@@ -74,6 +74,7 @@ export function BookingDialog({ open, onOpenChange, talentId }: BookingDialogPro
         .select(`
           id,
           users:user_id (
+            id,
             email,
             full_name
           )
