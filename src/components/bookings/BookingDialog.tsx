@@ -73,7 +73,7 @@ export function BookingDialog({ open, onOpenChange, talentId }: BookingDialogPro
         .from('talent_profiles')
         .select(`
           id,
-          users:user_id (
+          users!user_id (
             id,
             email,
             full_name
