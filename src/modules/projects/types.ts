@@ -1,11 +1,13 @@
 import type { Json } from '@/integrations/supabase/types';
 
-export type ProjectStatusType = 'Notified' | 'Working' | 'Reshooting' | 'Approved';
+export type ProjectStatusType = 'Delivered' | 'Approved' | 'Booked' | 'Shooting' | 'Reshoot' | 'Notified';
 
 export const PROJECT_STATUS_COLORS = {
   Notified: 'bg-red-500',
-  Working: 'bg-blue-500',
-  Reshooting: 'bg-yellow-500',
+  Delivered: 'bg-purple-500',
+  Booked: 'bg-blue-500',
+  Shooting: 'bg-yellow-500',
+  Reshoot: 'bg-orange-500',
   Approved: 'bg-green-500'
 } as const;
 

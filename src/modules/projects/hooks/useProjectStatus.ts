@@ -8,8 +8,10 @@ export const useProjectStatus = (projectId: string) => {
 
   const calculateOverallStatus = useCallback((tasks: { talent_status: string }[]): ProjectStatusType => {
     if (tasks.every(task => task.talent_status === 'Approved')) return 'Approved';
-    if (tasks.some(task => task.talent_status === 'Reshoot')) return 'Reshooting';
-    if (tasks.some(task => task.talent_status === 'Shooting')) return 'Working';
+    if (tasks.some(task => task.talent_status === 'Reshoot')) return 'Reshoot';
+    if (tasks.some(task => task.talent_status === 'Shooting')) return 'Shooting';
+    if (tasks.some(task => task.talent_status === 'Delivered')) return 'Delivered';
+    if (tasks.some(task => task.talent_status === 'Booked')) return 'Booked';
     return 'Notified';
   }, []);
 
