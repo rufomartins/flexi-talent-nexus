@@ -6,19 +6,15 @@ const corsHeaders = {
   'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
 }
 
-interface BookingEmailData {
+interface EmailData {
   template_id: string;
   recipient: {
     email: string;
     name: string;
   };
-  booking: {
-    projectName: string;
-    startDate: string;
-    endDate: string;
-    details: string;
-    fee?: number;
-  };
+  subject?: string;
+  body?: string;
+  metadata?: Record<string, any>;
 }
 
 serve(async (req) => {
@@ -32,7 +28,7 @@ serve(async (req) => {
       Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') ?? ''
     )
 
-    const { emailData } = await req.json() as { emailData: BookingEmailData }
+    const { emailData } = await req.json() as { emailData: EmailData }
 
     // Get email template
     const { data: template, error: templateError } = await supabaseClient
@@ -44,15 +40,12 @@ serve(async (req) => {
     if (templateError) throw templateError
 
     // Replace variables in template
-    let emailBody = template.body
+    let emailBody = emailData.body || template.body
+    let emailSubject = emailData.subject || template.subject
+
+    // Replace basic variables
     emailBody = emailBody.replace('{{name}}', emailData.recipient.name)
-    emailBody = emailBody.replace('{{projectName}}', emailData.booking.projectName)
-    emailBody = emailBody.replace('{{startDate}}', emailData.booking.startDate)
-    emailBody = emailBody.replace('{{endDate}}', emailData.booking.endDate)
-    emailBody = emailBody.replace('{{details}}', emailData.booking.details)
-    if (emailData.booking.fee) {
-      emailBody = emailBody.replace('{{fee}}', emailData.booking.fee.toString())
-    }
+    emailSubject = emailSubject.replace('{{name}}', emailData.recipient.name)
 
     // Log email attempt
     const { data: logData, error: logError } = await supabaseClient
@@ -60,10 +53,10 @@ serve(async (req) => {
       .insert({
         template_id: emailData.template_id,
         recipient: emailData.recipient.email,
-        subject: template.subject,
+        subject: emailSubject,
         body: emailBody,
         status: 'pending',
-        metadata: emailData.booking
+        metadata: emailData.metadata
       })
       .select()
       .single()
@@ -80,7 +73,7 @@ serve(async (req) => {
       body: JSON.stringify({
         from: 'Booking Confirmation <no-reply@yourdomain.com>',
         to: [emailData.recipient.email],
-        subject: template.subject,
+        subject: emailSubject,
         html: emailBody
       })
     })

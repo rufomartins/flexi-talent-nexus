@@ -3204,6 +3204,12 @@ export type Database = {
       [_ in never]: never
     }
     Enums: {
+      booking_email_template_type:
+        | "casting_availability"
+        | "booking_confirmation"
+        | "talent_application"
+        | "project_update"
+        | "talent_invitation"
       booking_event_type:
         | "status_change"
         | "file_upload"

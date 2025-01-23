@@ -21,6 +21,8 @@ import { AvailabilityWarning } from "./AvailabilityWarning";
 import { BookingFormData, BookingFile, bookingFormSchema } from "./types";
 import { TalentAvailability } from "@/utils/availability";
 import { useBookingMutation } from "@/hooks/useBookingMutation";
+import { useEmailSender } from "@/hooks/useEmailSender";
+import { useQuery } from "@tanstack/react-query";
 
 interface BookingDialogProps {
   open: boolean;
@@ -38,10 +40,27 @@ export function BookingDialog({ open, onOpenChange, talentId }: BookingDialogPro
     defaultValues: {
       talent_fee: 0,
       final_fee: 0,
+      email_template_id: "",
     },
   });
 
   const { createBooking, isLoading } = useBookingMutation(talentId, () => onOpenChange(false));
+  const { mutateAsync: sendEmail } = useEmailSender();
+
+  // Fetch email templates
+  const { data: emailTemplates } = useQuery({
+    queryKey: ['emailTemplates', 'booking_confirmation'],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from('email_templates')
+        .select('*')
+        .eq('type', 'booking_confirmation')
+        .eq('is_active', true);
+
+      if (error) throw error;
+      return data;
+    },
+  });
 
   const handleAvailabilityChange = (newAvailability: TalentAvailability) => {
     setAvailability(newAvailability);
@@ -55,6 +74,7 @@ export function BookingDialog({ open, onOpenChange, talentId }: BookingDialogPro
     
     const booking = await createBooking(data);
 
+    // Handle file uploads
     if (uploadedFiles.length > 0) {
       for (const file of uploadedFiles) {
         const filePath = `bookings/${booking.id}/${file.file.name}`;
@@ -75,6 +95,36 @@ export function BookingDialog({ open, onOpenChange, talentId }: BookingDialogPro
           file_size: file.file.size,
           uploaded_by: (await supabase.auth.getUser()).data.user?.id,
         });
+      }
+    }
+
+    // Send confirmation email if template is selected
+    if (data.email_template_id) {
+      try {
+        const { data: talentData } = await supabase
+          .from('talent_profiles')
+          .select('users (email, full_name)')
+          .eq('id', talentId)
+          .single();
+
+        if (talentData?.users) {
+          await sendEmail({
+            template_id: data.email_template_id,
+            recipient: {
+              email: talentData.users.email,
+              name: talentData.users.full_name,
+            },
+            metadata: {
+              booking_id: booking.id,
+              project_details: data.project_details,
+              start_date: data.start_date,
+              end_date: data.end_date,
+              fee: data.final_fee,
+            },
+          });
+        }
+      } catch (error) {
+        console.error('Error sending confirmation email:', error);
       }
     }
   };
@@ -103,7 +153,7 @@ export function BookingDialog({ open, onOpenChange, talentId }: BookingDialogPro
                 files={uploadedFiles}
                 onFilesChange={setUploadedFiles}
               />
-
+              <BookingEmailPreview form={form} />
               <BookingDialogFooter 
                 onCancel={() => onOpenChange(false)}
                 isSubmitting={isLoading}
