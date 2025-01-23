@@ -6,9 +6,9 @@ import type { Project, ShotList, ProjectTask } from '../types';
 interface UseProjectManagement {
   createProject: (data: Omit<Project, 'id'>) => Promise<string>;
   updateProject: (id: string, data: Partial<Project>) => Promise<void>;
-  addShotList: (projectId: string, data: Omit<ShotList, 'id' | 'projectId'>) => Promise<string>;
+  addShotList: (taskId: string, data: Omit<ShotList, 'id' | 'task_id'>) => Promise<string>;
   updateShotList: (id: string, data: Partial<ShotList>) => Promise<void>;
-  addTask: (projectId: string, data: Omit<ProjectTask, 'id' | 'projectId'>) => Promise<string>;
+  addTask: (languageId: string, data: Omit<ProjectTask, 'id' | 'language_id'>) => Promise<string>;
   updateTask: (id: string, data: Partial<ProjectTask>) => Promise<void>;
 }
 
@@ -19,7 +19,13 @@ export const useProjectManagement = (): UseProjectManagement => {
     try {
       const { data: project, error } = await supabase
         .from('projects')
-        .insert(data)
+        .insert({
+          name: data.name,
+          client_id: data.client_id,
+          status: data.status,
+          start_date: data.start_date,
+          end_date: data.end_date
+        })
         .select('id')
         .single();
 
@@ -67,13 +73,18 @@ export const useProjectManagement = (): UseProjectManagement => {
   }, [toast]);
 
   const addShotList = useCallback(async (
-    projectId: string, 
-    data: Omit<ShotList, 'id' | 'projectId'>
+    taskId: string, 
+    data: Omit<ShotList, 'id' | 'task_id'>
   ): Promise<string> => {
     try {
       const { data: shotList, error } = await supabase
         .from('shot_lists')
-        .insert({ ...data, project_id: projectId })
+        .insert({
+          task_id: taskId,
+          name: data.name,
+          shared_with: data.shared_with,
+          version: 1
+        })
         .select('id')
         .single();
 
@@ -121,13 +132,21 @@ export const useProjectManagement = (): UseProjectManagement => {
   }, [toast]);
 
   const addTask = useCallback(async (
-    projectId: string,
-    data: Omit<ProjectTask, 'id' | 'projectId'>
+    languageId: string,
+    data: Omit<ProjectTask, 'id' | 'language_id'>
   ): Promise<string> => {
     try {
       const { data: task, error } = await supabase
         .from('project_tasks')
-        .insert({ ...data, project_id: projectId })
+        .insert({
+          language_id: languageId,
+          name: data.name,
+          priority: data.priority,
+          script_status: data.script_status,
+          review_status: data.review_status,
+          talent_status: data.talent_status,
+          delivery_status: data.delivery_status
+        })
         .select('id')
         .single();
 
