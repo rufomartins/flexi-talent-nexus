@@ -1,3 +1,5 @@
+import type { Json } from '@/integrations/supabase/types';
+
 export interface Equipment {
   id: string;
   shot_list_id: string;
