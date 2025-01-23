@@ -1,12 +1,12 @@
 import type { Json } from '@/integrations/supabase/types';
 
-export type ProjectStatusType = 'notified' | 'working' | 'reshooting' | 'approved';
+export type ProjectStatusType = 'Notified' | 'Working' | 'Reshooting' | 'Approved';
 
 export const PROJECT_STATUS_COLORS = {
-  notified: 'bg-red-500',
-  working: 'bg-blue-500',
-  reshooting: 'bg-yellow-500',
-  approved: 'bg-green-500'
+  Notified: 'bg-red-500',
+  Working: 'bg-blue-500',
+  Reshooting: 'bg-yellow-500',
+  Approved: 'bg-green-500'
 } as const;
 
 export interface ProjectProgress {

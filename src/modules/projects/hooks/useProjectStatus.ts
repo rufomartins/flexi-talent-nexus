@@ -7,10 +7,10 @@ export const useProjectStatus = (projectId: string) => {
   const { toast } = useToast();
 
   const calculateOverallStatus = useCallback((tasks: { talent_status: string }[]): ProjectStatusType => {
-    if (tasks.every(task => task.talent_status === 'Approved')) return 'approved';
-    if (tasks.some(task => task.talent_status === 'Reshoot')) return 'reshooting';
-    if (tasks.some(task => task.talent_status === 'Shooting')) return 'working';
-    return 'notified';
+    if (tasks.every(task => task.talent_status === 'Approved')) return 'Approved';
+    if (tasks.some(task => task.talent_status === 'Reshoot')) return 'Reshooting';
+    if (tasks.some(task => task.talent_status === 'Shooting')) return 'Working';
+    return 'Notified';
   }, []);
 
   const updateTaskStatus = useCallback(async (taskId: string, status: ProjectStatusType) => {

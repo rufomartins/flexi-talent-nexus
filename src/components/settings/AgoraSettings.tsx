@@ -7,12 +7,32 @@ import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
+import type { Json } from "@/integrations/supabase/types";
 
 interface AgoraSettings {
   app_id: string;
   token_url: string;
   enabled: boolean;
 }
+
+const isAgoraSettings = (value: unknown): value is AgoraSettings => {
+  return (
+    typeof value === 'object' &&
+    value !== null &&
+    'app_id' in value &&
+    'token_url' in value &&
+    'enabled' in value &&
+    typeof (value as AgoraSettings).app_id === 'string' &&
+    typeof (value as AgoraSettings).token_url === 'string' &&
+    typeof (value as AgoraSettings).enabled === 'boolean'
+  );
+};
+
+const DEFAULT_SETTINGS: AgoraSettings = {
+  app_id: '',
+  token_url: '',
+  enabled: true,
+};
 
 export function AgoraSettings() {
   const queryClient = useQueryClient();
@@ -29,18 +49,26 @@ export function AgoraSettings() {
         .single();
 
       if (error) throw error;
-      return data?.value as AgoraSettings;
+      
+      const value = data?.value;
+      return isAgoraSettings(value) ? value : DEFAULT_SETTINGS;
     },
   });
 
   const updateSettings = useMutation({
     mutationFn: async (newSettings: AgoraSettings) => {
       setIsSubmitting(true);
+      const settingsJson: Json = {
+        app_id: newSettings.app_id,
+        token_url: newSettings.token_url,
+        enabled: newSettings.enabled
+      };
+
       const { error } = await supabase
         .from("api_settings")
         .upsert({ 
           name: "agora_settings",
-          value: newSettings,
+          value: settingsJson,
         });
 
       if (error) throw error;
@@ -115,7 +143,7 @@ export function AgoraSettings() {
             <Label htmlFor="enabled">Enable Agora Integration</Label>
             <Switch
               id="enabled"
-              checked={settings?.enabled}
+              checked={settings?.enabled ?? true}
               onCheckedChange={(checked) =>
                 updateSettings.mutate({
                   ...settings,
