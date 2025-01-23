@@ -6,10 +6,10 @@ import type { ProjectProgress, ProjectStatusType } from '../types';
 export const useProjectStatus = (projectId: string) => {
   const { toast } = useToast();
 
-  const calculateOverallStatus = useCallback((tasks: { status: string }[]): ProjectStatusType => {
-    if (tasks.every(task => task.status === 'approved')) return 'approved';
-    if (tasks.some(task => task.status === 'reshooting')) return 'reshooting';
-    if (tasks.some(task => task.status === 'working')) return 'working';
+  const calculateOverallStatus = useCallback((tasks: { talent_status: string }[]): ProjectStatusType => {
+    if (tasks.every(task => task.talent_status === 'Approved')) return 'approved';
+    if (tasks.some(task => task.talent_status === 'Reshoot')) return 'reshooting';
+    if (tasks.some(task => task.talent_status === 'Shooting')) return 'working';
     return 'notified';
   }, []);
 
@@ -17,7 +17,7 @@ export const useProjectStatus = (projectId: string) => {
     try {
       const { error } = await supabase
         .from('project_tasks')
-        .update({ status, updated_at: new Date().toISOString() })
+        .update({ talent_status: status, updated_at: new Date().toISOString() })
         .eq('id', taskId);
 
       if (error) throw error;
@@ -40,13 +40,13 @@ export const useProjectStatus = (projectId: string) => {
     try {
       const { data, error } = await supabase
         .from('project_tasks')
-        .select('status')
+        .select('talent_status')
         .eq('project_id', projectId);
 
       if (error) throw error;
 
       const totalTasks = data.length;
-      const completedTasks = data.filter(task => task.status === 'approved').length;
+      const completedTasks = data.filter(task => task.talent_status === 'Approved').length;
       const status = calculateOverallStatus(data);
 
       return {
