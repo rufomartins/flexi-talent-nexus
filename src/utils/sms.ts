@@ -1,5 +1,4 @@
 import { supabase } from "@/integrations/supabase/client";
-import { NotificationType } from "@/types/notifications";
 
 export type SmsModule = 'onboarding' | 'casting' | 'booking';
 
@@ -16,6 +15,20 @@ interface SendSmsParams {
   metadata?: Record<string, unknown>;
 }
 
+// Type guard for TwilioCredentials
+const isTwilioCredentials = (value: unknown): value is TwilioCredentials => {
+  return (
+    typeof value === 'object' &&
+    value !== null &&
+    'accountSid' in (value as any) &&
+    'authToken' in (value as any) &&
+    'phoneNumber' in (value as any) &&
+    typeof (value as any).accountSid === 'string' &&
+    typeof (value as any).authToken === 'string' &&
+    typeof (value as any).phoneNumber === 'string'
+  );
+};
+
 export async function getModuleCredentials(module: SmsModule): Promise<TwilioCredentials> {
   const { data: settings, error } = await supabase
     .from('api_settings')
@@ -28,7 +41,11 @@ export async function getModuleCredentials(module: SmsModule): Promise<TwilioCre
     throw new Error(`Failed to fetch ${module} Twilio credentials`);
   }
 
-  return settings.value as TwilioCredentials;
+  if (!settings?.value || !isTwilioCredentials(settings.value)) {
+    throw new Error(`Invalid or missing Twilio credentials for ${module}`);
+  }
+
+  return settings.value;
 }
 
 export async function sendSMS({ to, message, module, metadata }: SendSmsParams) {
