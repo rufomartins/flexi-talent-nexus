@@ -15,7 +15,7 @@ export const useProjectStatus = (projectId: string) => {
     return 'Notified';
   }, []);
 
-  const updateTaskStatus = useCallback(async (taskId: string, status: ProjectStatusType) => {
+  const updateTaskStatus = useCallback(async (taskId: string, status: Exclude<ProjectStatusType, 'Notified'>) => {
     try {
       const { error } = await supabase
         .from('project_tasks')
