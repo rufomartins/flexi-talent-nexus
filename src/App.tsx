@@ -14,6 +14,9 @@ import WelcomePage from "@/pages/onboarding/WelcomePage";
 import ChatbotPage from "@/pages/onboarding/ChatbotPage";
 import SchedulePage from "@/pages/onboarding/SchedulePage";
 import InboxPage from "@/pages/InboxPage";
+import Settings from "@/pages/settings";
+import Calendar from "@/pages/Calendar";
+import TalentList from "@/pages/talents/TalentList";
 import { useAuth } from "@/contexts/auth";
 
 function App() {
@@ -65,7 +68,10 @@ function App() {
         </ProtectedRoute>
       }>
         <Route path="/dashboard" element={<Dashboard />} />
+        <Route path="/talents" element={<TalentList />} />
         <Route path="/projects" element={<Projects />} />
+        <Route path="/calendar" element={<Calendar />} />
+        <Route path="/settings" element={<Settings />} />
         <Route path="/financial" element={
           <ProtectedRoute allowedRoles={['super_admin', 'admin']}>
             <Financial />

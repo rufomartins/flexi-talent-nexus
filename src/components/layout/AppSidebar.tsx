@@ -12,7 +12,8 @@ import {
   Settings,
   Search,
   UserPlus,
-  Inbox
+  Inbox,
+  UserCog
 } from "lucide-react";
 
 export const AppSidebar = () => {
@@ -108,16 +109,29 @@ export const AppSidebar = () => {
         </Link>
 
         {(isSuperAdmin || isSuperUser) && (
-          <Link
-            to="/inbox"
-            className={cn(
-              "flex items-center gap-3 rounded-lg px-3 py-2 text-gray-500 transition-all hover:text-gray-900",
-              isActive('/inbox') ? "bg-gray-100 text-gray-900" : ""
-            )}
-          >
-            <Inbox className="h-4 w-4" />
-            <span>Inbox</span>
-          </Link>
+          <>
+            <Link
+              to="/onboarding/admin"
+              className={cn(
+                "flex items-center gap-3 rounded-lg px-3 py-2 text-gray-500 transition-all hover:text-gray-900",
+                isActive('/onboarding/admin') ? "bg-gray-100 text-gray-900" : ""
+              )}
+            >
+              <UserCog className="h-4 w-4" />
+              <span>Onboarding</span>
+            </Link>
+
+            <Link
+              to="/inbox"
+              className={cn(
+                "flex items-center gap-3 rounded-lg px-3 py-2 text-gray-500 transition-all hover:text-gray-900 ml-6",
+                isActive('/inbox') ? "bg-gray-100 text-gray-900" : ""
+              )}
+            >
+              <Inbox className="h-4 w-4" />
+              <span>Inbox</span>
+            </Link>
+          </>
         )}
 
         {isAdmin && (
