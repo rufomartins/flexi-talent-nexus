@@ -1,0 +1,68 @@
+import { useCallback } from 'react';
+import { supabase } from '@/integrations/supabase/client';
+import { useToast } from '@/hooks/use-toast';
+import type { ProjectProgress, ProjectStatusType } from '../types';
+
+export const useProjectStatus = (projectId: string) => {
+  const { toast } = useToast();
+
+  const calculateOverallStatus = useCallback((tasks: { status: string }[]): ProjectStatusType => {
+    if (tasks.every(task => task.status === 'approved')) return 'approved';
+    if (tasks.some(task => task.status === 'reshooting')) return 'reshooting';
+    if (tasks.some(task => task.status === 'working')) return 'working';
+    return 'notified';
+  }, []);
+
+  const updateTaskStatus = useCallback(async (taskId: string, status: ProjectStatusType) => {
+    try {
+      const { error } = await supabase
+        .from('project_tasks')
+        .update({ status, updated_at: new Date().toISOString() })
+        .eq('id', taskId);
+
+      if (error) throw error;
+
+      toast({
+        title: 'Status Updated',
+        description: `Task status has been updated to ${status}`,
+      });
+    } catch (error) {
+      console.error('Error updating task status:', error);
+      toast({
+        title: 'Error',
+        description: 'Failed to update task status',
+        variant: 'destructive',
+      });
+    }
+  }, [toast]);
+
+  const getProjectProgress = useCallback(async (): Promise<ProjectProgress> => {
+    try {
+      const { data, error } = await supabase
+        .from('project_tasks')
+        .select('status')
+        .eq('project_id', projectId);
+
+      if (error) throw error;
+
+      const totalTasks = data.length;
+      const completedTasks = data.filter(task => task.status === 'approved').length;
+      const status = calculateOverallStatus(data);
+
+      return {
+        totalTasks,
+        completedTasks,
+        status,
+        lastUpdate: new Date().toISOString()
+      };
+    } catch (error) {
+      console.error('Error fetching project progress:', error);
+      throw error;
+    }
+  }, [projectId, calculateOverallStatus]);
+
+  return {
+    updateTaskStatus,
+    getProjectProgress
+  };
+};
