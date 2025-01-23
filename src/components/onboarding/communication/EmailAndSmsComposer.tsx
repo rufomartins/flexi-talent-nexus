@@ -1,11 +1,10 @@
 import { useState } from "react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
-import { Button } from "@/components/ui/button";
-import { Textarea } from "@/components/ui/textarea";
 import { useToast } from "@/hooks/use-toast";
 import { sendSMS } from "@/utils/sms";
 import { supabase } from "@/integrations/supabase/client";
-import { NotificationType } from "@/types/notifications";
+import { SmsComposer } from "./SmsComposer";
+import { CandidateList } from "./CandidateList";
 
 interface EmailAndSmsComposerProps {
   open: boolean;
@@ -84,7 +83,6 @@ export function EmailAndSmsComposer({
           });
         }
 
-        // Update communication status
         const { error: updateError } = await supabase
           .from('onboarding_candidates')
           .update({
@@ -123,29 +121,15 @@ export function EmailAndSmsComposer({
           </DialogTitle>
         </DialogHeader>
 
-        <div className="space-y-4 py-4">
-          <Textarea
-            placeholder={`Type your ${mode} message here...`}
-            value={message}
-            onChange={(e) => setMessage(e.target.value)}
-            className="min-h-[100px]"
-          />
+        <CandidateList selectedCandidates={selectedCandidates} />
 
-          <div className="flex justify-end space-x-2">
-            <Button
-              variant="outline"
-              onClick={() => onOpenChange(false)}
-            >
-              Cancel
-            </Button>
-            <Button
-              onClick={handleSend}
-              disabled={isSending}
-            >
-              {isSending ? 'Sending...' : 'Send'}
-            </Button>
-          </div>
-        </div>
+        <SmsComposer
+          message={message}
+          onMessageChange={setMessage}
+          onSend={handleSend}
+          isSending={isSending}
+          onCancel={() => onOpenChange(false)}
+        />
       </DialogContent>
     </Dialog>
   );
