@@ -783,22 +783,28 @@ export type Database = {
         Row: {
           created_at: string | null
           id: string
+          metadata: Json | null
           project_id: string | null
           title: string | null
+          type: string | null
           updated_at: string | null
         }
         Insert: {
           created_at?: string | null
           id?: string
+          metadata?: Json | null
           project_id?: string | null
           title?: string | null
+          type?: string | null
           updated_at?: string | null
         }
         Update: {
           created_at?: string | null
           id?: string
+          metadata?: Json | null
           project_id?: string | null
           title?: string | null
+          type?: string | null
           updated_at?: string | null
         }
         Relationships: [
@@ -1151,6 +1157,35 @@ export type Database = {
             columns: ["shot_list_id"]
             isOneToOne: false
             referencedRelation: "shot_lists"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      message_reads: {
+        Row: {
+          id: string
+          message_id: string
+          read_at: string | null
+          user_id: string
+        }
+        Insert: {
+          id?: string
+          message_id: string
+          read_at?: string | null
+          user_id: string
+        }
+        Update: {
+          id?: string
+          message_id?: string
+          read_at?: string | null
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "message_reads_message_id_fkey"
+            columns: ["message_id"]
+            isOneToOne: false
+            referencedRelation: "messages"
             referencedColumns: ["id"]
           },
         ]
