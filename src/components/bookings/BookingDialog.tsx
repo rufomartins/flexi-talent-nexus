@@ -16,6 +16,7 @@ import { BookingProjectDetails } from "./sections/BookingProjectDetails";
 import { BookingDateSelection } from "./sections/BookingDateSelection";
 import { BookingFeeSection } from "./sections/BookingFeeSection";
 import { FileUploadSection } from "./sections/FileUploadSection";
+import { BookingEmailPreview } from "./sections/BookingEmailPreview";
 import { BookingDialogFooter } from "./BookingDialogFooter";
 import { AvailabilityWarning } from "./AvailabilityWarning";
 import { BookingFormData, BookingFile, bookingFormSchema } from "./types";
@@ -38,6 +39,8 @@ export function BookingDialog({ open, onOpenChange, talentId }: BookingDialogPro
   const form = useForm<BookingFormData>({
     resolver: zodResolver(bookingFormSchema),
     defaultValues: {
+      project_name: "",
+      project_details: "",
       talent_fee: 0,
       final_fee: 0,
       email_template_id: "",
@@ -56,6 +59,27 @@ export function BookingDialog({ open, onOpenChange, talentId }: BookingDialogPro
         .select('*')
         .eq('type', 'booking_confirmation')
         .eq('is_active', true);
+
+      if (error) throw error;
+      return data;
+    },
+  });
+
+  // Fetch talent profile with user details
+  const { data: talentData } = useQuery({
+    queryKey: ['talent', talentId],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from('talent_profiles')
+        .select(`
+          id,
+          users:user_id (
+            email,
+            full_name
+          )
+        `)
+        .eq('id', talentId)
+        .single();
 
       if (error) throw error;
       return data;
@@ -98,31 +122,24 @@ export function BookingDialog({ open, onOpenChange, talentId }: BookingDialogPro
       }
     }
 
-    // Send confirmation email if template is selected
-    if (data.email_template_id) {
+    // Send confirmation email if template is selected and talent data is available
+    if (data.email_template_id && talentData?.users) {
       try {
-        const { data: talentData } = await supabase
-          .from('talent_profiles')
-          .select('users (email, full_name)')
-          .eq('id', talentId)
-          .single();
-
-        if (talentData?.users) {
-          await sendEmail({
-            template_id: data.email_template_id,
-            recipient: {
-              email: talentData.users.email,
-              name: talentData.users.full_name,
-            },
-            metadata: {
-              booking_id: booking.id,
-              project_details: data.project_details,
-              start_date: data.start_date,
-              end_date: data.end_date,
-              fee: data.final_fee,
-            },
-          });
-        }
+        await sendEmail({
+          template_id: data.email_template_id,
+          recipient: {
+            email: talentData.users.email,
+            name: talentData.users.full_name,
+          },
+          metadata: {
+            booking_id: booking.id,
+            project_name: data.project_name,
+            project_details: data.project_details,
+            start_date: data.start_date,
+            end_date: data.end_date,
+            fee: data.final_fee,
+          },
+        });
       } catch (error) {
         console.error('Error sending confirmation email:', error);
       }
@@ -153,7 +170,10 @@ export function BookingDialog({ open, onOpenChange, talentId }: BookingDialogPro
                 files={uploadedFiles}
                 onFilesChange={setUploadedFiles}
               />
-              <BookingEmailPreview form={form} />
+              <BookingEmailPreview 
+                form={form} 
+                emailTemplates={emailTemplates}
+              />
               <BookingDialogFooter 
                 onCancel={() => onOpenChange(false)}
                 isSubmitting={isLoading}

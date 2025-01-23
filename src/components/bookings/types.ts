@@ -1,3 +1,5 @@
+import { z } from 'zod';
+
 export type BookingStatus = 'pending' | 'confirmed' | 'completed' | 'cancelled';
 
 export interface BookingFile {
@@ -6,6 +8,7 @@ export interface BookingFile {
 }
 
 export interface BookingFormData {
+  project_name: string;
   project_details: string;
   start_date: Date;
   end_date: Date;
@@ -15,6 +18,7 @@ export interface BookingFormData {
 }
 
 export const bookingFormSchema = z.object({
+  project_name: z.string().min(1, "Project name is required"),
   project_details: z.string().min(1, "Project details are required"),
   start_date: z.date(),
   end_date: z.date(),
