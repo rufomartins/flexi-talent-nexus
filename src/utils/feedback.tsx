@@ -1,4 +1,6 @@
+import React from 'react';
 import { toast } from "@/hooks/use-toast";
+import { ToastAction } from "@/components/ui/toast";
 
 export interface FeedbackConfig {
   loading?: {
@@ -39,10 +41,11 @@ export const useFeedback = () => {
       title: config?.title || "Error",
       description: error.message,
       variant: "destructive",
-      action: config?.retryable && config.onRetry ? {
-        label: "Retry",
-        onClick: config.onRetry
-      } : undefined,
+      action: config?.retryable && config.onRetry ? (
+        <ToastAction altText="Retry" onClick={config.onRetry}>
+          Retry
+        </ToastAction>
+      ) : undefined,
     });
   };
 
