@@ -1,4 +1,3 @@
-import React from 'react';
 import { toast } from "@/hooks/use-toast";
 
 export interface FeedbackConfig {
@@ -54,20 +53,12 @@ export const useFeedback = () => {
   };
 };
 
-export interface LoadingStateProps {
+export const LoadingState: React.FC<{
   loading: boolean;
   children: React.ReactNode;
   message?: string;
-}
-
-export const LoadingState: React.FC<LoadingStateProps> = ({ 
-  loading, 
-  children, 
-  message = 'Loading...' 
-}) => {
-  if (!loading) {
-    return <>{children}</>;
-  }
+}> = ({ loading, children, message = 'Loading...' }) => {
+  if (!loading) return <>{children}</>;
   
   return (
     <div className="flex items-center justify-center p-4">
