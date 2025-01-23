@@ -10,8 +10,7 @@ const corsHeaders = {
 interface SMSPayload {
   to: string;
   message: string;
-  notificationType: string;
-  recipientId: string;
+  module: 'onboarding' | 'casting' | 'booking';
   metadata?: Record<string, unknown>;
 }
 
@@ -21,38 +20,48 @@ serve(async (req) => {
   }
 
   try {
-    const accountSid = Deno.env.get('TWILIO_ACCOUNT_SID')
-    const authToken = Deno.env.get('TWILIO_AUTH_TOKEN')
-    const fromNumber = Deno.env.get('TWILIO_PHONE_NUMBER')
-
-    if (!accountSid || !authToken || !fromNumber) {
-      throw new Error('Missing Twilio credentials')
-    }
-
-    const client = new Twilio(accountSid, authToken)
-    const { to, message: smsMessage, notificationType, recipientId, metadata } = await req.json() as SMSPayload
-
-    // Create notification log entry
     const supabaseClient = createClient(
       Deno.env.get('SUPABASE_URL') ?? '',
       Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') ?? ''
     )
 
+    const payload = await req.json() as SMSPayload
+    const { to, message: smsMessage, module, metadata } = payload
+
+    // Fetch module-specific Twilio credentials
+    const { data: settings, error: settingsError } = await supabaseClient
+      .from('api_settings')
+      .select('value')
+      .eq('name', `${module}_twilio_credentials`)
+      .single()
+
+    if (settingsError) {
+      throw new Error(`Failed to fetch ${module} Twilio credentials`)
+    }
+
+    const credentials = settings.value as {
+      accountSid: string;
+      authToken: string;
+      phoneNumber: string;
+    }
+
+    const client = new Twilio(credentials.accountSid, credentials.authToken)
+
+    // Create notification log entry
     const logEntry = {
-      notification_type: notificationType,
-      recipient_id: recipientId,
       phone_number: to,
       message: smsMessage,
       status: 'pending',
+      module,
       metadata
     }
 
     const { error: logError } = await supabaseClient
-      .from('notification_logs')
+      .from('sms_logs')
       .insert(logEntry)
 
     if (logError) {
-      console.error('Error creating notification log:', logError)
+      console.error('Error creating SMS log:', logError)
       throw logError
     }
 
@@ -60,22 +69,22 @@ serve(async (req) => {
     const twilioMessage = await client.messages.create({
       body: smsMessage,
       to,
-      from: fromNumber,
+      from: credentials.phoneNumber,
     })
 
-    // Update notification log with success
+    // Update log with success status
     const { error: updateError } = await supabaseClient
-      .from('notification_logs')
+      .from('sms_logs')
       .update({
         status: 'sent',
         sent_at: new Date().toISOString()
       })
-      .eq('recipient_id', recipientId)
-      .eq('notification_type', notificationType)
+      .eq('phone_number', to)
       .eq('status', 'pending')
+      .eq('module', module)
 
     if (updateError) {
-      console.error('Error updating notification log:', updateError)
+      console.error('Error updating SMS log:', updateError)
     }
 
     return new Response(

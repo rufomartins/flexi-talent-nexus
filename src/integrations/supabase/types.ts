@@ -2254,6 +2254,7 @@ export type Database = {
           error_message: string | null
           id: string
           message: string
+          module: string | null
           phone_number: string
           sent_at: string | null
           status: Database["public"]["Enums"]["sms_status"] | null
@@ -2265,6 +2266,7 @@ export type Database = {
           error_message?: string | null
           id?: string
           message: string
+          module?: string | null
           phone_number: string
           sent_at?: string | null
           status?: Database["public"]["Enums"]["sms_status"] | null
@@ -2276,6 +2278,7 @@ export type Database = {
           error_message?: string | null
           id?: string
           message?: string
+          module?: string | null
           phone_number?: string
           sent_at?: string | null
           status?: Database["public"]["Enums"]["sms_status"] | null

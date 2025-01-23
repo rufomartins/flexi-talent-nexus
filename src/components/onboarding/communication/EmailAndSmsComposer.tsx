@@ -3,7 +3,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/u
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { useToast } from "@/hooks/use-toast";
-import { supabase } from "@/integrations/supabase/client";
+import { sendSMS } from "@/utils/sms";
 import { NotificationType } from "@/types/notifications";
 
 interface EmailAndSmsComposerProps {
@@ -71,18 +71,17 @@ export function EmailAndSmsComposer({
           continue;
         }
 
-        // Send the message
-        const { error } = await supabase.functions.invoke('send-communication', {
-          body: {
-            type: mode === 'sms' ? NotificationType.SMS : NotificationType.EMAIL,
-            recipientId: candidate.id,
+        if (mode === 'sms') {
+          await sendSMS({
+            to: candidate.phone!,
             message,
-            phone: candidate.phone,
-            email: candidate.email
-          }
-        });
-
-        if (error) throw error;
+            module: 'onboarding',
+            metadata: {
+              candidateId: candidate.id,
+              candidateName: candidate.name
+            }
+          });
+        }
 
         // Update communication status
         const { error: updateError } = await supabase
