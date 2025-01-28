@@ -1,13 +1,13 @@
-import type { Database } from "@/integrations/supabase/types";
-
-export type TalentCategory = Database["public"]["Enums"]["talent_category"];
-export type TalentStatus = "approved" | "under_evaluation" | "rejected";
-
-// Break down into smaller interfaces for better maintainability
 export interface TalentUser {
   id: string;
   full_name: string;
   avatar_url?: string | null;
+}
+
+export interface DuoPartner {
+  id: string;
+  user_id: string;
+  users: TalentUser;
 }
 
 export interface CastingReference {
@@ -18,18 +18,12 @@ export interface CastingReference {
   } | null;
 }
 
-export interface DuoPartner {
-  id: string;
-  user_id: string;
-  users: TalentUser;
-}
-
 export interface TalentProfile {
   id: string;
   user_id: string;
-  talent_category: TalentCategory;
+  talent_category: string;
   country: string;
-  evaluation_status: TalentStatus;
+  evaluation_status: string;
   is_duo: boolean;
   duo_name?: string | null;
   created_at: string;

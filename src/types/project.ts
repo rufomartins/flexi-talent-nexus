@@ -18,6 +18,11 @@ export interface Country {
   languages: Language[];
 }
 
+export interface Client {
+  id: string;
+  name: string;
+}
+
 export interface Project {
   id: string;
   name: string;
@@ -31,9 +36,7 @@ export interface Project {
   completion_percentage?: number;
   active_tasks_count?: number;
   upcoming_deadlines_count?: number;
-  client?: {
-    name: string;
-  };
+  client?: Client;
   project_manager?: {
     full_name: string;
   };

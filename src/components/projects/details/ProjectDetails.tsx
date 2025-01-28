@@ -3,7 +3,7 @@ import { ProjectHeader } from "./ProjectHeader";
 import { ProjectItems } from "./ProjectItems";
 import { supabase } from "@/integrations/supabase/client";
 import { ProjectStats } from "../ProjectStats";
-import type { Project, ProjectItem } from "../types";
+import type { Project, ProjectTask } from "@/types/project";
 
 interface ProjectDetailsProps {
   projectId: string;
@@ -20,6 +20,15 @@ export const ProjectDetails = ({ projectId }: ProjectDetailsProps) => {
           client:clients (
             id,
             name
+          ),
+          countries (
+            id,
+            country_name,
+            languages (
+              id,
+              language_name,
+              tasks: project_tasks (*)
+            )
           )
         `)
         .eq('id', projectId)
@@ -30,8 +39,8 @@ export const ProjectDetails = ({ projectId }: ProjectDetailsProps) => {
     },
   });
 
-  const { data: items = [], isLoading: isLoadingItems } = useQuery({
-    queryKey: ['project-items', projectId],
+  const { data: tasks = [], isLoading: isLoadingTasks } = useQuery({
+    queryKey: ['project-tasks', projectId],
     queryFn: async () => {
       const { data, error } = await supabase
         .from('project_tasks')
@@ -40,18 +49,11 @@ export const ProjectDetails = ({ projectId }: ProjectDetailsProps) => {
         .order('created_at', { ascending: false });
 
       if (error) throw error;
-
-      return data.map(item => ({
-        ...item,
-        script_status: item.script_status || 'Pending',
-        review_status: item.review_status || 'Internal Review',
-        talent_status: item.talent_status || 'Booked',
-        delivery_status: item.delivery_status || 'Pending'
-      })) as ProjectItem[];
+      return data as ProjectTask[];
     },
   });
 
-  if (isLoadingProject || isLoadingItems) {
+  if (isLoadingProject || isLoadingTasks) {
     return <div>Loading...</div>;
   }
 
@@ -61,9 +63,9 @@ export const ProjectDetails = ({ projectId }: ProjectDetailsProps) => {
 
   return (
     <div className="space-y-6">
-      <ProjectHeader project={project} />
-      <ProjectStats project={project} />
-      <ProjectItems items={items} />
+      <ProjectHeader project={project} onEdit={() => {}} onStatusChange={() => {}} />
+      <ProjectStats stats={[]} />
+      <ProjectItems items={tasks} projectId={projectId} onItemStatusUpdate={async () => {}} />
     </div>
   );
 };
