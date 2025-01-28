@@ -1,64 +1,204 @@
-import { useCallback } from "react";
-import { useProjectTasks } from "./project/useProjectTasks";
-import { useProjectActivities } from "./project/useProjectActivities";
-import { useProjectRealtime } from "./project/useProjectRealtime";
-import { useQuery } from "@tanstack/react-query";
-import { supabase } from "@/integrations/supabase/client";
-import type { Project } from "@/components/projects/types";
+import { useCallback } from 'react';
+import { useToast } from '@/hooks/use-toast';
+import { supabase } from '@/integrations/supabase/client';
+import type { Project, ShotList, ProjectTask } from '../types';
 
-export const useProjectManagement = (projectId: string) => {
-  const {
-    data: project,
-    isLoading: projectLoading,
-    error: projectError,
-  } = useQuery({
-    queryKey: ["project", projectId],
-    queryFn: async () => {
-      const { data, error } = await supabase
-        .from("projects")
-        .select(`
-          *,
-          client:clients(name),
-          project_manager:users(full_name)
-        `)
-        .eq("id", projectId)
+interface UseProjectManagement {
+  createProject: (data: Omit<Project, 'id'>) => Promise<string>;
+  updateProject: (id: string, data: Partial<Project>) => Promise<void>;
+  addShotList: (taskId: string, data: Omit<ShotList, 'id' | 'task_id'>) => Promise<string>;
+  updateShotList: (id: string, data: Partial<ShotList>) => Promise<void>;
+  addTask: (languageId: string, data: Omit<ProjectTask, 'id' | 'language_id'>) => Promise<string>;
+  updateTask: (id: string, data: Partial<ProjectTask>) => Promise<void>;
+}
+
+export const useProjectManagement = (): UseProjectManagement => {
+  const { toast } = useToast();
+
+  const createProject = useCallback(async (data: Omit<Project, 'id'>): Promise<string> => {
+    try {
+      const { data: project, error } = await supabase
+        .from('projects')
+        .insert({
+          name: data.name,
+          client_id: data.client_id,
+          status: data.status,
+          start_date: data.start_date,
+          end_date: data.end_date
+        })
+        .select('id')
         .single();
 
       if (error) throw error;
-      return data as Project;
-    },
-  });
+      
+      toast({
+        title: "Project Created",
+        description: "Project has been created successfully"
+      });
 
-  const { 
-    tasks, 
-    isLoading: tasksLoading, 
-    error: tasksError, 
-    filterTasks 
-  } = useProjectTasks(projectId);
+      return project.id;
+    } catch (error) {
+      console.error('Error creating project:', error);
+      toast({
+        title: "Error",
+        description: "Failed to create project",
+        variant: "destructive"
+      });
+      throw error;
+    }
+  }, [toast]);
 
-  const { 
-    data: activities, 
-    isLoading: activitiesLoading, 
-    error: activitiesError,
-    refetch: refetchActivities 
-  } = useProjectActivities(projectId);
+  const updateProject = useCallback(async (id: string, data: Partial<Project>): Promise<void> => {
+    try {
+      const { error } = await supabase
+        .from('projects')
+        .update(data)
+        .eq('id', id);
 
-  useProjectRealtime(projectId);
+      if (error) throw error;
+      
+      toast({
+        title: "Project Updated",
+        description: "Project has been updated successfully"
+      });
+    } catch (error) {
+      console.error('Error updating project:', error);
+      toast({
+        title: "Error",
+        description: "Failed to update project",
+        variant: "destructive"
+      });
+      throw error;
+    }
+  }, [toast]);
 
-  const refreshData = useCallback(async () => {
-    await Promise.all([
-      filterTasks({}),
-      refetchActivities(),
-    ]);
-  }, [filterTasks, refetchActivities]);
+  const addShotList = useCallback(async (
+    taskId: string, 
+    data: Omit<ShotList, 'id' | 'task_id'>
+  ): Promise<string> => {
+    try {
+      const { data: shotList, error } = await supabase
+        .from('shot_lists')
+        .insert({
+          task_id: taskId,
+          name: data.name,
+          shared_with: data.shared_with,
+          version: 1
+        })
+        .select('id')
+        .single();
+
+      if (error) throw error;
+      
+      toast({
+        title: "Shot List Added",
+        description: "Shot list has been added successfully"
+      });
+
+      return shotList.id;
+    } catch (error) {
+      console.error('Error adding shot list:', error);
+      toast({
+        title: "Error",
+        description: "Failed to add shot list",
+        variant: "destructive"
+      });
+      throw error;
+    }
+  }, [toast]);
+
+  const updateShotList = useCallback(async (id: string, data: Partial<ShotList>): Promise<void> => {
+    try {
+      const { error } = await supabase
+        .from('shot_lists')
+        .update(data)
+        .eq('id', id);
+
+      if (error) throw error;
+      
+      toast({
+        title: "Shot List Updated",
+        description: "Shot list has been updated successfully"
+      });
+    } catch (error) {
+      console.error('Error updating shot list:', error);
+      toast({
+        title: "Error",
+        description: "Failed to update shot list",
+        variant: "destructive"
+      });
+      throw error;
+    }
+  }, [toast]);
+
+  const addTask = useCallback(async (
+    languageId: string,
+    data: Omit<ProjectTask, 'id' | 'language_id'>
+  ): Promise<string> => {
+    try {
+      const { data: task, error } = await supabase
+        .from('project_tasks')
+        .insert({
+          language_id: languageId,
+          name: data.name,
+          priority: data.priority,
+          script_status: data.script_status,
+          review_status: data.review_status,
+          talent_status: data.talent_status,
+          delivery_status: data.delivery_status
+        })
+        .select('id')
+        .single();
+
+      if (error) throw error;
+      
+      toast({
+        title: "Task Added",
+        description: "Task has been added successfully"
+      });
+
+      return task.id;
+    } catch (error) {
+      console.error('Error adding task:', error);
+      toast({
+        title: "Error",
+        description: "Failed to add task",
+        variant: "destructive"
+      });
+      throw error;
+    }
+  }, [toast]);
+
+  const updateTask = useCallback(async (id: string, data: Partial<ProjectTask>): Promise<void> => {
+    try {
+      const { error } = await supabase
+        .from('project_tasks')
+        .update(data)
+        .eq('id', id);
+
+      if (error) throw error;
+      
+      toast({
+        title: "Task Updated",
+        description: "Task has been updated successfully"
+      });
+    } catch (error) {
+      console.error('Error updating task:', error);
+      toast({
+        title: "Error",
+        description: "Failed to update task",
+        variant: "destructive"
+      });
+      throw error;
+    }
+  }, [toast]);
 
   return {
-    project,
-    tasks,
-    activities: activities || [],
-    loading: projectLoading || tasksLoading || activitiesLoading,
-    error: projectError || tasksError || activitiesError,
-    refreshData,
-    filterTasks,
+    createProject,
+    updateProject,
+    addShotList,
+    updateShotList,
+    addTask,
+    updateTask
   };
 };
