@@ -49,7 +49,8 @@ export function useTalents(castingId?: string) {
           full_name: 'Unknown',
           avatar_url: undefined
         },
-        casting_talents: talent.casting_talents || []
+        casting_talents: talent.casting_talents || [],
+        partner: talent.partner || null
       })) as SimplifiedTalent[];
     }
   });

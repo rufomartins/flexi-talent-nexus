@@ -3,6 +3,16 @@ import type { Database } from "@/integrations/supabase/types";
 export type TalentCategory = Database["public"]["Enums"]["talent_category"];
 export type TalentStatus = "approved" | "under_evaluation" | "rejected";
 
+export interface DuoPartner {
+  id: string;
+  user_id: string;
+  first_name: string;
+  last_name: string;
+  full_name: string;
+  email?: string;
+  avatar_url?: string;
+}
+
 export interface TalentProfile {
   id: string;
   user_id: string;
@@ -19,7 +29,7 @@ export interface TalentProfile {
   fee_range?: Record<string, any>;
   duo_name?: string;
   partner_id?: string;
-  partner?: DuoPartner;
+  partner?: DuoPartner | null;
   casting_talents?: Array<{
     id: string;
     casting_id: string;
@@ -52,14 +62,4 @@ export interface SimplifiedTalent {
     full_name: string;
     avatar_url?: string;
   };
-}
-
-export interface DuoPartner {
-  id: string;
-  user_id: string;
-  first_name: string;
-  last_name: string;
-  full_name: string;
-  email?: string;
-  avatar_url?: string;
 }

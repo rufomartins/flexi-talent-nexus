@@ -64,7 +64,8 @@ const TalentList = () => {
       return data.map(talent => ({
         ...talent,
         users: talent.users || { id: '', full_name: '', avatar_url: '' },
-        casting_talents: talent.casting_talents || []
+        casting_talents: talent.casting_talents || [],
+        partner: talent.partner || null
       })) as TalentProfile[];
     },
   });
