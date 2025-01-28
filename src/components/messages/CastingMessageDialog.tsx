@@ -42,7 +42,7 @@ export function CastingMessageDialog({
         </div>
 
         <div className="p-4 border-t">
-          <MessageInput onSend={sendMessage} />
+          <MessageInput onSendMessage={sendMessage} />
         </div>
       </DialogContent>
     </Dialog>

@@ -10,12 +10,19 @@ interface Message {
   content_type: string;
 }
 
-export function useMessaging(conversationId: string | null) {
+interface SendMessageParams {
+  talentId: string;
+  castingId: string;
+  content: string;
+}
+
+export function useMessaging({ talentId, castingId }: { talentId: string; castingId: string }) {
   const [messages, setMessages] = useState<Message[]>([]);
+  const [isLoading, setIsLoading] = useState(false);
   const { toast } = useToast();
 
   const sendMessage = async (content: string) => {
-    if (!conversationId) return;
+    if (!talentId || !castingId) return;
 
     try {
       const { data: { user } } = await supabase.auth.getUser();
@@ -24,7 +31,7 @@ export function useMessaging(conversationId: string | null) {
       const { error } = await supabase
         .from('messages')
         .insert({
-          conversation_id: conversationId,
+          conversation_id: `${talentId}-${castingId}`,
           content,
           content_type: 'text',
           sender_id: user.id
@@ -41,12 +48,13 @@ export function useMessaging(conversationId: string | null) {
     }
   };
 
-  const loadMessages = async (convId: string) => {
+  const loadMessages = async () => {
+    setIsLoading(true);
     try {
       const { data, error } = await supabase
         .from('messages')
         .select('*')
-        .eq('conversation_id', convId)
+        .eq('conversation_id', `${talentId}-${castingId}`)
         .order('created_at', { ascending: true });
 
       if (error) throw error;
@@ -58,6 +66,8 @@ export function useMessaging(conversationId: string | null) {
         description: "Failed to load messages",
         variant: "destructive",
       });
+    } finally {
+      setIsLoading(false);
     }
   };
 
@@ -65,6 +75,7 @@ export function useMessaging(conversationId: string | null) {
     messages,
     sendMessage,
     loadMessages,
-    setMessages
+    setMessages,
+    isLoading
   };
 }
