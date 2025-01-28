@@ -5,46 +5,22 @@ import { ProjectItems } from "./ProjectItems";
 import { supabase } from "@/integrations/supabase/client";
 import { ProjectStats } from "../ProjectStats";
 import type { Database } from "@/integrations/supabase/types";
+import type { Project, ProjectItem } from "../types";
 
 type ProjectScriptStatus = Database["public"]["Enums"]["project_script_status"];
 type ProjectReviewStatus = Database["public"]["Enums"]["project_review_status"];
 type ProjectTalentStatus = Database["public"]["Enums"]["project_talent_status"];
 type ProjectDeliveryStatus = Database["public"]["Enums"]["project_delivery_status"];
 
-interface SimplifiedProject {
-  id: string;
-  name: string;
-  description?: string;
-  client_id?: string;
-  status?: string;
-  client?: { 
-    name: string 
-  };
-  created_at: string;
-  updated_at: string;
-}
-
-interface SimplifiedProjectItem {
-  id: string;
-  language_id: string;
-  name: string;
-  script_status: ProjectScriptStatus;
-  review_status: ProjectReviewStatus;
-  talent_status: ProjectTalentStatus;
-  delivery_status: ProjectDeliveryStatus;
-  priority: string;
-  created_at: string;
-}
-
 interface ProjectDetailsProps {
   projectId: string;
   onStatusUpdate: (status: string) => Promise<void>;
-  onItemAdd: (item: Omit<SimplifiedProjectItem, 'id' | 'created_at'>) => Promise<void>;
+  onItemAdd: (item: Omit<ProjectItem, 'id' | 'created_at'>) => Promise<void>;
 }
 
 export function ProjectDetails({ projectId, onStatusUpdate, onItemAdd }: ProjectDetailsProps) {
-  const [project, setProject] = useState<SimplifiedProject | null>(null);
-  const [items, setItems] = useState<SimplifiedProjectItem[]>([]);
+  const [project, setProject] = useState<Project | null>(null);
+  const [items, setItems] = useState<ProjectItem[]>([]);
   const [loading, setLoading] = useState(true);
   const { toast } = useToast();
 

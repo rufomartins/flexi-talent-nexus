@@ -31,7 +31,7 @@ interface SimplifiedTalent {
 }
 
 export function useTalents(castingId?: string) {
-  return useQuery({
+  return useQuery<SimplifiedTalent[]>({
     queryKey: ['talents', castingId],
     queryFn: async () => {
       const query = supabase
@@ -50,7 +50,7 @@ export function useTalents(castingId?: string) {
           native_language,
           experience_level,
           fee_range,
-          users!talent_profiles_user_id_fkey (
+          users (
             id,
             full_name,
             avatar_url
@@ -73,7 +73,7 @@ export function useTalents(castingId?: string) {
         throw error;
       }
 
-      return (data || []) as SimplifiedTalent[];
+      return data as SimplifiedTalent[];
     }
   });
 }
