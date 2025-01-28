@@ -47,10 +47,19 @@ export const TalentListItem: React.FC<TalentListItemProps> = ({
       </div>
       <div className="flex-1">
         <h3 className="font-medium">
-          {talent.users?.full_name}
+          {talent.is_duo && talent.duo_name ? (
+            <div>
+              <span>{talent.duo_name}</span>
+              <span className="text-sm text-muted-foreground ml-2">
+                ({talent.users?.full_name} {talent.partner && `& ${talent.partner.full_name}`})
+              </span>
+            </div>
+          ) : (
+            talent.users?.full_name
+          )}
         </h3>
         <div className="text-sm text-muted-foreground">
-          {talent.casting_talents?.slice(0, 3).map(ct => ct.castings.name).join(', ')}
+          {talent.casting_talents?.slice(0, 3).map(ct => ct.castings?.name).join(', ')}
         </div>
         <div className="flex gap-2 mt-1">
           <Badge variant="outline">{talent.talent_category}</Badge>
