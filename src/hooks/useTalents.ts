@@ -1,6 +1,31 @@
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
-import type { TalentProfile } from "@/types/talent";
+
+type SimplifiedTalent = {
+  id: string;
+  user_id: string;
+  talent_category: string;
+  country: string;
+  evaluation_status: string;
+  is_duo: boolean;
+  created_at: string;
+  updated_at: string;
+  agent_id?: string;
+  availability?: Record<string, any>;
+  native_language?: string;
+  experience_level: string;
+  fee_range?: Record<string, any>;
+  users: {
+    id: string;
+    full_name: string;
+    avatar_url?: string;
+  };
+  casting_talents?: Array<{
+    castings: {
+      name: string;
+    };
+  }>;
+};
 
 export function useTalents(castingId?: string) {
   return useQuery({
@@ -69,7 +94,7 @@ export function useTalents(castingId?: string) {
             name: ct.castings?.name || ''
           }
         })) || []
-      })) as TalentProfile[];
+      })) as SimplifiedTalent[];
     }
   });
 }

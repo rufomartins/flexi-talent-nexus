@@ -1,18 +1,26 @@
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
-import type { ProjectItem } from "@/components/projects/types";
 
-type TaskStatus = 'Pending' | 'Approved' | 'In Progress';
-type ReviewStatus = 'Internal Review' | 'Client Review' | 'Approved';
-type TalentStatus = 'Delivered' | 'Approved' | 'Booked' | 'Shooting' | 'Reshoot';
+type SimplifiedTask = {
+  id: string;
+  language_id?: string;
+  name: string;
+  script_status: string;
+  review_status: string;
+  talent_status: string;
+  delivery_status: string;
+  priority?: string;
+  created_at: string;
+  updated_at: string;
+};
 
-interface TaskFilters {
+type TaskFilters = {
   languageId?: string;
-  scriptStatus?: TaskStatus;
-  reviewStatus?: ReviewStatus;
-  talentStatus?: TalentStatus;
+  scriptStatus?: string;
+  reviewStatus?: string;
+  talentStatus?: string;
   dateRange?: { from: Date; to: Date };
-}
+};
 
 export const useProjectTasks = (projectId: string) => {
   const {
@@ -32,7 +40,7 @@ export const useProjectTasks = (projectId: string) => {
         .order("created_at", { ascending: false });
 
       if (error) throw error;
-      return data as ProjectItem[];
+      return (data || []) as SimplifiedTask[];
     },
   });
 
@@ -67,7 +75,7 @@ export const useProjectTasks = (projectId: string) => {
     const { data, error } = await query;
     if (error) throw error;
 
-    return data as ProjectItem[];
+    return data as SimplifiedTask[];
   };
 
   return {
