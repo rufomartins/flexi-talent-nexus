@@ -1,10 +1,13 @@
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
+import type { Database } from "@/integrations/supabase/types";
+
+type TalentCategory = Database["public"]["Enums"]["talent_category"];
 
 interface SimplifiedTalent {
   id: string;
   user_id: string;
-  talent_category: 'UGC' | 'TRANSLATOR' | 'REVIEWER' | 'VOICE_OVER';
+  talent_category: TalentCategory;
   country: string;
   evaluation_status: string;
   is_duo: boolean;
@@ -70,39 +73,7 @@ export function useTalents(castingId?: string) {
         throw error;
       }
 
-      return (data || []).map(talent => ({
-        id: talent.id,
-        user_id: talent.user_id,
-        talent_category: validateTalentCategory(talent.talent_category),
-        country: talent.country || '',
-        evaluation_status: talent.evaluation_status || 'under_evaluation',
-        is_duo: talent.is_duo || false,
-        created_at: talent.created_at,
-        updated_at: talent.updated_at,
-        agent_id: talent.agent_id,
-        availability: talent.availability || {},
-        native_language: talent.native_language || '',
-        experience_level: talent.experience_level || 'beginner',
-        fee_range: talent.fee_range || null,
-        users: {
-          id: talent.users?.id || '',
-          full_name: talent.users?.full_name || '',
-          avatar_url: talent.users?.avatar_url
-        },
-        casting_talents: talent.casting_talents?.map(ct => ({
-          castings: {
-            name: ct.castings?.name || ''
-          }
-        })) || []
-      })) as SimplifiedTalent[];
+      return (data || []) as SimplifiedTalent[];
     }
   });
 }
-
-const validateTalentCategory = (category: string | null): 'UGC' | 'TRANSLATOR' | 'REVIEWER' | 'VOICE_OVER' => {
-  const validCategories = ['UGC', 'TRANSLATOR', 'REVIEWER', 'VOICE_OVER'] as const;
-  if (!category || !validCategories.includes(category as typeof validCategories[number])) {
-    return 'UGC';
-  }
-  return category as typeof validCategories[number];
-};

@@ -39,7 +39,7 @@ interface SimplifiedProjectItem {
 interface ProjectDetailsProps {
   projectId: string;
   onStatusUpdate: (status: string) => Promise<void>;
-  onItemAdd: (item: Omit<SimplifiedProjectItem, 'id'>) => Promise<void>;
+  onItemAdd: (item: Omit<SimplifiedProjectItem, 'id' | 'created_at'>) => Promise<void>;
 }
 
 export function ProjectDetails({ projectId, onStatusUpdate, onItemAdd }: ProjectDetailsProps) {
