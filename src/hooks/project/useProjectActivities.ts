@@ -1,14 +1,6 @@
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
-
-interface ProjectActivity {
-  id: string;
-  project_id: string;
-  action_type: string;
-  details: Record<string, any>;
-  created_at: string;
-  user_id: string;
-}
+import type { ProjectActivity } from "@/types/activity";
 
 export function useProjectActivities(projectId: string) {
   return useQuery({
@@ -16,7 +8,14 @@ export function useProjectActivities(projectId: string) {
     queryFn: async () => {
       const { data, error } = await supabase
         .from('user_activity_logs')
-        .select('*')
+        .select(`
+          id,
+          action_type,
+          details,
+          created_at,
+          user_id,
+          project_id
+        `)
         .eq('project_id', projectId)
         .order('created_at', { ascending: false });
 
@@ -24,7 +23,7 @@ export function useProjectActivities(projectId: string) {
 
       return data.map(activity => ({
         id: activity.id,
-        project_id: activity.project_id,
+        project_id: projectId,
         action_type: activity.action_type,
         details: activity.details || {},
         created_at: activity.created_at,

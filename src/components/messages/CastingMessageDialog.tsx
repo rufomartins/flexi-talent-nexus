@@ -48,8 +48,8 @@ export function CastingMessageDialog({
             table: 'messages',
             filter: `conversation_id=eq.${conversationId}`,
           },
-          (payload) => {
-            setMessages((current) => [...current, payload.new as any]);
+          (payload: any) => {
+            setMessages((current) => [...current, payload.new]);
           }
         )
         .subscribe();
