@@ -4,13 +4,7 @@ import { ProjectHeader } from "./ProjectHeader";
 import { ProjectItems } from "./ProjectItems";
 import { supabase } from "@/integrations/supabase/client";
 import { ProjectStats } from "../ProjectStats";
-import type { Database } from "@/integrations/supabase/types";
 import type { Project, ProjectItem } from "../types";
-
-type ProjectScriptStatus = Database["public"]["Enums"]["project_script_status"];
-type ProjectReviewStatus = Database["public"]["Enums"]["project_review_status"];
-type ProjectTalentStatus = Database["public"]["Enums"]["project_talent_status"];
-type ProjectDeliveryStatus = Database["public"]["Enums"]["project_delivery_status"];
 
 interface ProjectDetailsProps {
   projectId: string;

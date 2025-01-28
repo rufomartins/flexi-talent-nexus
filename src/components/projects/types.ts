@@ -41,21 +41,9 @@ export interface Project {
   completion_percentage?: number;
   active_tasks_count?: number;
   upcoming_deadlines_count?: number;
-  client?: { name: string };
-  project_manager?: { full_name: string };
-  countries?: Country[];
+  client?: {
+    name: string;
+  };
   created_at: string;
   updated_at: string;
-}
-
-export interface Country {
-  id: string;
-  country_name: string;
-  languages: Language[];
-}
-
-export interface Language {
-  id: string;
-  language_name: string;
-  tasks: ProjectItem[];
 }

@@ -55,7 +55,7 @@ export function useTalents(castingId?: string) {
             full_name,
             avatar_url
           ),
-          casting_talents!inner (
+          casting_talents (
             castings (
               name
             )
@@ -73,7 +73,7 @@ export function useTalents(castingId?: string) {
         throw error;
       }
 
-      return data as SimplifiedTalent[];
+      return (data || []) as SimplifiedTalent[];
     }
   });
 }
