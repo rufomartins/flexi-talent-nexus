@@ -20,11 +20,15 @@ const transformTalentData = (data: any[]): TalentProfile[] => {
     experience_level: item.experience_level || 'beginner',
     fee_range: item.fee_range || null,
     users: {
-      id: item.users.id,
-      full_name: item.users.full_name,
-      avatar_url: item.users.avatar_url
+      id: item.users?.id,
+      full_name: item.users?.full_name,
+      avatar_url: item.users?.avatar_url
     },
-    casting_talents: item.casting_talents || []
+    casting_talents: item.casting_talents?.map((ct: any) => ({
+      castings: {
+        name: ct.castings?.name || ''
+      }
+    })) || []
   }));
 };
 
@@ -37,7 +41,7 @@ export function useTalents(castingId: string) {
           .from('talent_profiles')
           .select(`
             *,
-            users!inner (
+            users (
               id,
               full_name,
               avatar_url
@@ -53,6 +57,7 @@ export function useTalents(castingId: string) {
         if (error) throw error;
         return transformTalentData(data || []);
       } catch (error) {
+        console.error('Error fetching talents:', error);
         toast.error('Failed to fetch talents');
         throw error;
       }
