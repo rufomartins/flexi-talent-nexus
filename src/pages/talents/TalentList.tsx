@@ -40,14 +40,14 @@ const TalentList = () => {
               name
             )
           ),
-          partner:partner_id (
+          partner:talent_profiles!talent_profiles_partner_id_fkey (
             id,
             user_id,
-            first_name,
-            last_name,
-            full_name,
-            email,
-            avatar_url
+            users (
+              id,
+              full_name,
+              avatar_url
+            )
           )
         `)
         .order(sortBy === "name" ? "users(full_name)" : sortBy, { ascending: true });
@@ -63,9 +63,20 @@ const TalentList = () => {
 
       return data.map(talent => ({
         ...talent,
-        users: talent.users || { id: '', full_name: '', avatar_url: '' },
+        users: talent.users || { 
+          id: talent.user_id,
+          full_name: 'Unknown',
+          avatar_url: null
+        },
         casting_talents: talent.casting_talents || [],
-        partner: talent.partner || null
+        partner: talent.partner ? {
+          ...talent.partner,
+          users: talent.partner.users || {
+            id: talent.partner.user_id,
+            full_name: 'Unknown Partner',
+            avatar_url: null
+          }
+        } : null
       })) as TalentProfile[];
     },
   });

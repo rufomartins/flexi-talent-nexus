@@ -38,7 +38,13 @@ export function useTalents(castingId?: string) {
               full_name,
               avatar_url
             )
-          )
+          ),
+          native_language,
+          experience_level,
+          fee_range,
+          availability,
+          category,
+          whatsapp_number
         `);
 
       if (error) {
@@ -51,7 +57,7 @@ export function useTalents(castingId?: string) {
         users: talent.users || { 
           id: talent.user_id,
           full_name: 'Unknown',
-          avatar_url: undefined
+          avatar_url: null
         },
         casting_talents: talent.casting_talents || [],
         partner: talent.partner ? {
@@ -59,7 +65,7 @@ export function useTalents(castingId?: string) {
           users: talent.partner.users || {
             id: talent.partner.user_id,
             full_name: 'Unknown Partner',
-            avatar_url: undefined
+            avatar_url: null
           }
         } : null
       })) as TalentProfile[];
