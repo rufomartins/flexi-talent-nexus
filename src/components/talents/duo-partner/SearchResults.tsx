@@ -33,12 +33,12 @@ export function SearchResults({ results, isLoading, onSelect }: SearchResultsPro
         >
           <div className="flex items-center gap-2">
             <Avatar className="h-8 w-8">
-              <AvatarImage src={result.avatar_url} alt={result.first_name} />
-              <AvatarFallback>{result.first_name[0]}</AvatarFallback>
+              <AvatarImage src={result.users.avatar_url || ''} alt={result.users.full_name} />
+              <AvatarFallback>{result.users.full_name[0]}</AvatarFallback>
             </Avatar>
             <div className="flex flex-col items-start">
               <span className="font-medium">
-                {`${result.first_name} ${result.last_name}`}
+                {result.users.full_name}
               </span>
             </div>
           </div>

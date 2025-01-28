@@ -6,36 +6,11 @@ export type TalentStatus = "approved" | "under_evaluation" | "rejected";
 export interface DuoPartner {
   id: string;
   user_id: string;
-  users?: {
-    id: string;
-    full_name: string;
-    avatar_url?: string;
-  };
-}
-
-export interface SimplifiedTalent {
-  id: string;
-  user_id: string;
-  talent_category: TalentCategory;
-  country: string;
-  evaluation_status: TalentStatus;
-  is_duo: boolean;
-  created_at: string;
-  updated_at: string;
-  casting_talents: Array<{
-    id: string;
-    casting_id: string;
-    castings?: {
-      name: string;
-    };
-  }>;
   users: {
     id: string;
     full_name: string;
-    avatar_url?: string;
+    avatar_url?: string | null;
   };
-  partner: DuoPartner | null;
-  duo_name?: string;
 }
 
 export interface TalentProfile {

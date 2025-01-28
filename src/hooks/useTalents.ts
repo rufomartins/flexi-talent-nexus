@@ -25,7 +25,7 @@ export function useTalents(castingId?: string) {
               name
             )
           ),
-          users!inner (
+          users!talent_profiles_user_id_fkey (
             id,
             full_name,
             avatar_url
