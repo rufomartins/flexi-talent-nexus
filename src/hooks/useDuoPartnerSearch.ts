@@ -31,20 +31,18 @@ export function useDuoPartnerSearch(query: string, currentTalentId?: string) {
 
       try {
         const { data, error } = await supabase
-          .from('users')
-          .select<string, UserWithProfile>(`
+          .from('talent_profiles')
+          .select(`
             id,
-            first_name,
-            last_name,
-            email,
-            avatar_url,
-            talent_profiles!inner (
+            user_id,
+            users!talent_profiles_user_id_fkey (
               id,
-              user_id
+              full_name,
+              avatar_url
             )
           `)
-          .or(`first_name.ilike.%${query}%,last_name.ilike.%${query}%,email.ilike.%${query}%`)
-          .not('talent_profiles.id', 'eq', currentTalentId)
+          .or(`users.full_name.ilike.%${query}%,users.email.ilike.%${query}%`)
+          .not('id', 'eq', currentTalentId)
           .limit(5);
 
         if (error) throw error;
@@ -54,14 +52,14 @@ export function useDuoPartnerSearch(query: string, currentTalentId?: string) {
           return;
         }
 
-        const partners: DuoPartner[] = data.map(user => ({
-          id: user.talent_profiles[0].id,
-          user_id: user.id,
-          first_name: user.first_name || '',
-          last_name: user.last_name || '',
-          full_name: `${user.first_name || ''} ${user.last_name || ''}`.trim(),
-          email: user.email || '',
-          avatar_url: user.avatar_url || undefined
+        const partners: DuoPartner[] = data.map(profile => ({
+          id: profile.id,
+          user_id: profile.user_id,
+          users: {
+            id: profile.users.id,
+            full_name: profile.users.full_name || '',
+            avatar_url: profile.users.avatar_url
+          }
         }));
 
         setData(partners);

@@ -1,9 +1,9 @@
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
-import type { SimplifiedTalent } from "@/types/talent";
+import type { TalentProfile } from "@/types/talent";
 
 export function useTalents(castingId?: string) {
-  return useQuery<SimplifiedTalent[]>({
+  return useQuery<TalentProfile[]>({
     queryKey: ['talents', castingId],
     queryFn: async () => {
       const { data, error } = await supabase
@@ -62,7 +62,7 @@ export function useTalents(castingId?: string) {
             avatar_url: undefined
           }
         } : null
-      })) as SimplifiedTalent[];
+      })) as TalentProfile[];
     }
   });
 }
