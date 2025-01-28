@@ -4,6 +4,12 @@ import { ProjectHeader } from "./ProjectHeader";
 import { ProjectItems } from "./ProjectItems";
 import { supabase } from "@/integrations/supabase/client";
 import { ProjectStats } from "../ProjectStats";
+import type { Database } from "@/integrations/supabase/types";
+
+type ProjectScriptStatus = Database["public"]["Enums"]["project_script_status"];
+type ProjectReviewStatus = Database["public"]["Enums"]["project_review_status"];
+type ProjectTalentStatus = Database["public"]["Enums"]["project_talent_status"];
+type ProjectDeliveryStatus = Database["public"]["Enums"]["project_delivery_status"];
 
 interface SimplifiedProject {
   id: string;
@@ -14,12 +20,20 @@ interface SimplifiedProject {
   client?: { 
     name: string 
   };
+  created_at: string;
+  updated_at: string;
 }
 
 interface SimplifiedProjectItem {
   id: string;
-  script_status: string;
-  delivery_status: string;
+  language_id: string;
+  name: string;
+  script_status: ProjectScriptStatus;
+  review_status: ProjectReviewStatus;
+  talent_status: ProjectTalentStatus;
+  delivery_status: ProjectDeliveryStatus;
+  priority: string;
+  created_at: string;
 }
 
 interface ProjectDetailsProps {
@@ -45,6 +59,8 @@ export function ProjectDetails({ projectId, onStatusUpdate, onItemAdd }: Project
             description,
             client_id,
             status,
+            created_at,
+            updated_at,
             client:clients(name)
           `)
           .eq('id', projectId)
@@ -54,7 +70,17 @@ export function ProjectDetails({ projectId, onStatusUpdate, onItemAdd }: Project
 
         const { data: itemsData, error: itemsError } = await supabase
           .from('project_tasks')
-          .select('id, script_status, delivery_status')
+          .select(`
+            id,
+            language_id,
+            name,
+            script_status,
+            review_status,
+            talent_status,
+            delivery_status,
+            priority,
+            created_at
+          `)
           .eq('project_id', projectId);
 
         if (itemsError) throw itemsError;
