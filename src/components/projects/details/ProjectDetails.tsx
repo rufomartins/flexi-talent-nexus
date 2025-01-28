@@ -4,7 +4,34 @@ import { ProjectHeader } from "./ProjectHeader";
 import { ProjectItems } from "./ProjectItems";
 import { supabase } from "@/integrations/supabase/client";
 import { ProjectStats } from "../ProjectStats";
-import type { Project, ProjectItem } from "../types";
+
+// Break down complex types into simpler ones
+interface Client {
+  name: string;
+}
+
+interface Project {
+  id: string;
+  name: string;
+  description: string;
+  client_id: string;
+  status: string;
+  created_at: string;
+  updated_at: string;
+  client: Client;
+}
+
+interface ProjectItem {
+  id: string;
+  language_id: string;
+  name: string;
+  script_status: string;
+  review_status: string;
+  talent_status: string;
+  delivery_status: string;
+  priority: string;
+  created_at: string;
+}
 
 interface ProjectDetailsProps {
   projectId: string;
