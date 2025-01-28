@@ -63,7 +63,7 @@ export const ProjectDetails = ({ projectId }: ProjectDetailsProps) => {
 
   return (
     <div className="space-y-6">
-      <ProjectHeader project={project} onEdit={() => {}} onStatusChange={() => {}} />
+      <ProjectHeader project={project} onEdit={() => {}} onStatusChange={async () => {}} />
       <ProjectStats stats={[]} />
       <ProjectItems items={tasks} projectId={projectId} onItemStatusUpdate={async () => {}} />
     </div>
