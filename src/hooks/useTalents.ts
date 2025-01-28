@@ -18,17 +18,17 @@ export function useTalents(castingId?: string) {
           duo_name,
           created_at,
           updated_at,
-          casting_talents!left (
+          users!talent_profiles_user_id_fkey (
+            id,
+            full_name,
+            avatar_url
+          ),
+          casting_talents (
             id,
             casting_id,
             castings (
               name
             )
-          ),
-          users!talent_profiles_user_id_fkey (
-            id,
-            full_name,
-            avatar_url
           ),
           partner:talent_profiles!talent_profiles_partner_id_fkey (
             id,
@@ -59,7 +59,6 @@ export function useTalents(castingId?: string) {
           full_name: 'Unknown',
           avatar_url: null
         },
-        casting_talents: talent.casting_talents || [],
         partner: talent.partner ? {
           ...talent.partner,
           users: talent.partner.users || {
@@ -67,8 +66,9 @@ export function useTalents(castingId?: string) {
             full_name: 'Unknown Partner',
             avatar_url: null
           }
-        } : null
-      })) as TalentProfile[];
+        } : null,
+        casting_talents: talent.casting_talents || []
+      }));
     }
   });
 }

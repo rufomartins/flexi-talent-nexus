@@ -1,4 +1,3 @@
-import { useState } from "react";
 import { ChevronRight, MoreVertical } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
@@ -13,6 +12,7 @@ interface ProjectTreeItemProps {
   hasChildren: boolean;
   statuses?: {
     script_status?: string;
+    translation_status?: string;
     review_status?: string;
     talent_status?: string;
     delivery_status?: string;
@@ -68,6 +68,13 @@ export function ProjectTreeItem({
               )}
             </div>
             <div className="col-span-2">
+              {statuses.translation_status && (
+                <span className={cn("px-2 py-1 rounded-full text-xs", statusColors.translation[statuses.translation_status])}>
+                  {statuses.translation_status}
+                </span>
+              )}
+            </div>
+            <div className="col-span-1">
               {statuses.review_status && (
                 <span className={cn("px-2 py-1 rounded-full text-xs", statusColors.review[statuses.review_status])}>
                   {statuses.review_status}
@@ -81,7 +88,7 @@ export function ProjectTreeItem({
                 </span>
               )}
             </div>
-            <div className="col-span-2">
+            <div className="col-span-1">
               {statuses.delivery_status && (
                 <span className={cn("px-2 py-1 rounded-full text-xs", statusColors.delivery[statuses.delivery_status])}>
                   {statuses.delivery_status}
@@ -148,11 +155,11 @@ export function ProjectTree({ projects, statusColors }: ProjectTreeProps) {
                   level={2}
                   isExpanded={expandedNodes[`language-${language.id}`]}
                   onToggle={() => toggleNode(`language-${language.id}`)}
-                  hasChildren={language.tasks.length > 0}
+                  hasChildren={language.tasks?.length > 0}
                   statusColors={statusColors}
                 />
                 
-                {expandedNodes[`language-${language.id}`] && language.tasks.map(task => (
+                {expandedNodes[`language-${language.id}`] && language.tasks?.map(task => (
                   <ProjectTreeItem
                     key={task.id}
                     name={task.name}
