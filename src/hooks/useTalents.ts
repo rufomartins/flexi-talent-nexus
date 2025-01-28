@@ -56,7 +56,11 @@ export function useTalents(castingId?: string) {
         casting_talents: talent.casting_talents || [],
         partner: talent.partner ? {
           ...talent.partner,
-          full_name: talent.partner.users?.full_name || 'Unknown Partner',
+          users: talent.partner.users || {
+            id: talent.partner.user_id,
+            full_name: 'Unknown Partner',
+            avatar_url: undefined
+          }
         } : null
       })) as SimplifiedTalent[];
     }
