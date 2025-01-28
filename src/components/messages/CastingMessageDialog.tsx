@@ -17,6 +17,11 @@ interface CastingMessageDialogProps {
   talentName: string;
 }
 
+type ConversationData = {
+  id: string;
+  title: string;
+};
+
 export function CastingMessageDialog({
   open,
   onOpenChange,
@@ -68,7 +73,7 @@ export function CastingMessageDialog({
         .from('conversations')
         .select('id')
         .eq('casting_id', castingId)
-        .single();
+        .maybeSingle();
 
       if (existingConversation) {
         setConversationId(existingConversation.id);

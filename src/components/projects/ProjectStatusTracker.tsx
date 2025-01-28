@@ -1,69 +1,49 @@
-import { useEffect, useState } from 'react';
-import { useProjectStatus } from '@/modules/projects/hooks/useProjectStatus';
-import { PROJECT_STATUS_COLORS } from '@/modules/projects/types';
-import type { ProjectProgress } from '@/modules/projects/types';
-import { Card } from '@/components/ui/card';
-import { Progress } from '@/components/ui/progress';
-import { Loader2 } from 'lucide-react';
+import { useQuery } from "@tanstack/react-query";
+import { supabase } from "@/integrations/supabase/client";
 
-export const ProjectStatusTracker: React.FC<{ projectId: string }> = ({ projectId }) => {
-  const { getProjectProgress } = useProjectStatus(projectId);
-  const [progress, setProgress] = useState<ProjectProgress>();
-  const [loading, setLoading] = useState(true);
+interface ProjectStatus {
+  id: string;
+  progress: number;
+  status: string;
+}
 
-  useEffect(() => {
-    const fetchProgress = async () => {
-      try {
-        const data = await getProjectProgress();
-        setProgress(data);
-      } catch (error) {
-        console.error('Error fetching progress:', error);
-      } finally {
-        setLoading(false);
-      }
-    };
+export function ProjectStatusTracker({ projectId }: { projectId: string }) {
+  const { data: projectStatus } = useQuery({
+    queryKey: ['project-status', projectId],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from('projects')
+        .select('id, completion_percentage, status')
+        .eq('id', projectId)
+        .single();
 
-    fetchProgress();
-    const interval = setInterval(fetchProgress, 30000); // Refresh every 30 seconds
+      if (error) throw error;
 
-    return () => clearInterval(interval);
-  }, [getProjectProgress]);
-
-  if (loading) {
-    return (
-      <div className="flex items-center justify-center p-4">
-        <Loader2 className="h-6 w-6 animate-spin" />
-      </div>
-    );
-  }
+      return {
+        id: data.id,
+        progress: data.completion_percentage || 0,
+        status: data.status || 'pending'
+      } as ProjectStatus;
+    }
+  });
 
   return (
-    <Card className="p-4">
-      <div className="space-y-4">
-        <div className="flex items-center justify-between">
-          <h3 className="text-lg font-semibold">Project Progress</h3>
-          {progress && (
-            <div className={`px-2 py-1 rounded-full text-white text-sm ${PROJECT_STATUS_COLORS[progress.status]}`}>
-              {progress.status}
-            </div>
-          )}
+    <div className="space-y-4">
+      <h3 className="text-lg font-medium">Project Status</h3>
+      <div className="flex items-center gap-4">
+        <div className="flex-1 bg-gray-200 rounded-full h-2">
+          <div 
+            className="bg-primary h-2 rounded-full" 
+            style={{ width: `${projectStatus?.progress || 0}%` }}
+          />
         </div>
-
-        {progress && (
-          <>
-            <Progress 
-              value={(progress.completedTasks / progress.totalTasks) * 100} 
-              className="h-2"
-            />
-            <div className="text-sm text-muted-foreground">
-              {progress.completedTasks} of {progress.totalTasks} tasks completed
-            </div>
-            <div className="text-xs text-muted-foreground">
-              Last updated: {new Date(progress.lastUpdate).toLocaleString()}
-            </div>
-          </>
-        )}
+        <span className="text-sm text-muted-foreground">
+          {projectStatus?.progress || 0}%
+        </span>
       </div>
-    </Card>
+      <div className="text-sm text-muted-foreground">
+        Status: {projectStatus?.status || 'Pending'}
+      </div>
+    </div>
   );
-};
+}

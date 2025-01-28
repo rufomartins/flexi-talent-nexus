@@ -9,8 +9,20 @@ export function useTalents(castingId: string) {
       const { data, error } = await supabase
         .from('talent_profiles')
         .select(`
-          *,
-          users:user_id (
+          id,
+          user_id,
+          talent_category,
+          country,
+          evaluation_status,
+          is_duo,
+          created_at,
+          updated_at,
+          agent_id,
+          availability,
+          native_language,
+          experience_level,
+          fee_range,
+          users!talent_profiles_user_id_fkey (
             id,
             full_name,
             avatar_url
@@ -25,7 +37,7 @@ export function useTalents(castingId: string) {
 
       if (error) throw error;
 
-      return data.map(talent => ({
+      return (data || []).map(talent => ({
         id: talent.id,
         user_id: talent.user_id,
         talent_category: talent.talent_category || 'UGC',
@@ -36,13 +48,14 @@ export function useTalents(castingId: string) {
         updated_at: talent.updated_at,
         agent_id: talent.agent_id,
         availability: talent.availability || {},
-        category: talent.category,
+        native_language: talent.native_language || '',
         experience_level: talent.experience_level || 'beginner',
         fee_range: talent.fee_range || null,
-        native_language: talent.native_language || '',
-        duo_name: talent.duo_name,
-        partner_id: talent.partner_id,
-        users: talent.users || { id: '', full_name: '', avatar_url: null },
+        users: {
+          id: talent.users?.id || '',
+          full_name: talent.users?.full_name || '',
+          avatar_url: talent.users?.avatar_url
+        },
         casting_talents: talent.casting_talents?.map(ct => ({
           castings: {
             name: ct.castings?.name || ''
