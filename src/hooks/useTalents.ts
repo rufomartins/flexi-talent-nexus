@@ -1,34 +1,9 @@
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import type { Database } from "@/integrations/supabase/types";
+import type { SimplifiedTalent } from "@/types/talent";
 
 type TalentCategory = Database["public"]["Enums"]["talent_category"];
-
-interface SimplifiedTalent {
-  id: string;
-  user_id: string;
-  talent_category: TalentCategory;
-  country: string;
-  evaluation_status: string;
-  is_duo: boolean;
-  created_at: string;
-  updated_at: string;
-  agent_id?: string;
-  availability: Record<string, any>;
-  native_language: string;
-  experience_level: string;
-  fee_range: Record<string, any> | null;
-  users: {
-    id: string;
-    full_name: string;
-    avatar_url: string | null;
-  };
-  casting_talents: Array<{
-    castings: {
-      name: string;
-    };
-  }>;
-}
 
 export function useTalents(castingId?: string) {
   return useQuery<SimplifiedTalent[]>({
@@ -73,7 +48,7 @@ export function useTalents(castingId?: string) {
         throw error;
       }
 
-      return (data || []) as SimplifiedTalent[];
+      return data as SimplifiedTalent[];
     }
   });
 }
