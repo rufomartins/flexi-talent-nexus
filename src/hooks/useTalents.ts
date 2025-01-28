@@ -68,7 +68,7 @@ export function useTalents(castingId?: string) {
           }
         } : null,
         casting_talents: talent.casting_talents || []
-      }));
+      })) as TalentProfile[];
     }
   });
 }

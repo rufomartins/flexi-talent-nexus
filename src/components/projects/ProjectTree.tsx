@@ -1,8 +1,9 @@
+import { useState } from "react";
 import { ChevronRight, MoreVertical } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import { useNavigate } from "react-router-dom";
-import type { Project } from "./types";
+import type { Project } from "@/types/project";
 
 interface ProjectTreeItemProps {
   name: string;
@@ -190,9 +191,10 @@ export function ProjectTree({ projects, statusColors }: ProjectTreeProps) {
       <div className="grid grid-cols-12 gap-4 p-4 border-b font-medium text-sm">
         <div className="col-span-3">Name</div>
         <div className="col-span-2">Script</div>
-        <div className="col-span-2">Review</div>
+        <div className="col-span-2">Translation</div>
+        <div className="col-span-1">Review</div>
         <div className="col-span-2">Talent</div>
-        <div className="col-span-2">Delivery</div>
+        <div className="col-span-1">Delivery</div>
         <div className="col-span-1">Actions</div>
       </div>
       <div className="divide-y">
