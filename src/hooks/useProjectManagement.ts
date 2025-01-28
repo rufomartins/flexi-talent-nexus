@@ -7,7 +7,7 @@ import { supabase } from "@/integrations/supabase/client";
 import type { Project } from "@/components/projects/types";
 
 export const useProjectManagement = (projectId: string) => {
-  // Fetch project details
+  // Fetch project details with proper type annotations
   const {
     data: project,
     isLoading: projectLoading,
@@ -30,8 +30,13 @@ export const useProjectManagement = (projectId: string) => {
     },
   });
 
-  // Initialize tasks management
-  const { tasks, isLoading: tasksLoading, error: tasksError, filterTasks } = useProjectTasks(projectId);
+  // Initialize tasks management with status field
+  const { 
+    tasks, 
+    isLoading: tasksLoading, 
+    error: tasksError, 
+    filterTasks 
+  } = useProjectTasks(projectId);
 
   // Initialize activities management
   const { 

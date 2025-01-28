@@ -1748,6 +1748,7 @@ export type Database = {
           script_status:
             | Database["public"]["Enums"]["project_script_status"]
             | null
+          status: string | null
           talent_status:
             | Database["public"]["Enums"]["project_talent_status"]
             | null
@@ -1771,6 +1772,7 @@ export type Database = {
           script_status?:
             | Database["public"]["Enums"]["project_script_status"]
             | null
+          status?: string | null
           talent_status?:
             | Database["public"]["Enums"]["project_talent_status"]
             | null
@@ -1794,6 +1796,7 @@ export type Database = {
           script_status?:
             | Database["public"]["Enums"]["project_script_status"]
             | null
+          status?: string | null
           talent_status?:
             | Database["public"]["Enums"]["project_talent_status"]
             | null
