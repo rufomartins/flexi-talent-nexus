@@ -1,8 +1,8 @@
 import { useQuery } from "@tanstack/react-query";
-import { ProjectHeader } from "./ProjectHeader";
-import { ProjectItems } from "./ProjectItems";
 import { supabase } from "@/integrations/supabase/client";
+import { ProjectHeader } from "./ProjectHeader";
 import { ProjectStats } from "../ProjectStats";
+import { ProjectItems } from "./ProjectItems";
 import type { Project, ProjectTask } from "@/types/project";
 
 interface ProjectDetailsProps {

@@ -5,10 +5,16 @@ type ProjectReviewStatus = Database["public"]["Enums"]["project_review_status"];
 type ProjectTalentStatus = Database["public"]["Enums"]["project_talent_status"];
 type ProjectDeliveryStatus = Database["public"]["Enums"]["project_delivery_status"];
 
+export type ProjectStatus = 'active' | 'completed' | 'on_hold';
+
+export interface Client {
+  id: string;
+  name: string;
+}
+
 export interface Language {
   id: string;
   language_name: string;
-  country_id: string;
   tasks?: ProjectTask[];
 }
 
@@ -16,11 +22,6 @@ export interface Country {
   id: string;
   country_name: string;
   languages: Language[];
-}
-
-export interface Client {
-  id: string;
-  name: string;
 }
 
 export interface Project {
@@ -31,7 +32,7 @@ export interface Project {
   project_manager_id?: string;
   start_date?: string;
   end_date?: string;
-  status?: string;
+  status?: ProjectStatus;
   type?: string;
   completion_percentage?: number;
   active_tasks_count?: number;
