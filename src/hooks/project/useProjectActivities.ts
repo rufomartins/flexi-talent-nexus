@@ -1,27 +1,18 @@
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 
-interface Activity {
+interface ProjectActivity {
   id: string;
+  project_id: string;
   action_type: string;
+  details: Record<string, any>;
   created_at: string;
-  details?: {
-    status?: string;
-    name?: string;
-    project?: string;
-    [key: string]: any;
-  } | null;
 }
 
 export const useProjectActivities = (projectId: string) => {
-  const {
-    data: activities,
-    isLoading,
-    error,
-    refetch,
-  } = useQuery({
+  return useQuery({
     queryKey: ["project-activities", projectId],
-    queryFn: async () => {
+    queryFn: async (): Promise<ProjectActivity[]> => {
       const { data, error } = await supabase
         .from("user_activity_logs")
         .select("*")
@@ -30,14 +21,7 @@ export const useProjectActivities = (projectId: string) => {
         .limit(10);
 
       if (error) throw error;
-      return data as Activity[];
+      return data as ProjectActivity[];
     },
   });
-
-  return {
-    activities,
-    isLoading,
-    error,
-    refetch,
-  };
 };

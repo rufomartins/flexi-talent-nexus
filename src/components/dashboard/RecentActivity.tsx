@@ -6,9 +6,7 @@ import { AlertCircle, Loader2 } from "lucide-react";
 import { useInView } from "react-intersection-observer";
 import { useActivityQuery } from "@/hooks/useActivityQuery";
 import { ActivityRealtime } from "./activity/ActivityRealtime";
-
-type SortOrder = 'desc' | 'asc';
-type SortField = 'created_at' | 'action_type';
+import type { SortOrder, SortField } from "@/types/guest-filters";
 
 export const RecentActivity = () => {
   const [activityType, setActivityType] = useState<string | null>(null);
@@ -17,7 +15,6 @@ export const RecentActivity = () => {
   const [sortOrder, setSortOrder] = useState<SortOrder>('desc');
   const itemsPerPage = 10;
 
-  // Infinite scroll setup
   const { ref, inView } = useInView({
     threshold: 0.5,
     delay: 100,
@@ -39,7 +36,6 @@ export const RecentActivity = () => {
     itemsPerPage
   });
 
-  // Handle infinite scroll
   useEffect(() => {
     if (inView && hasNextPage && !isLoading && !isFetchingNextPage) {
       fetchNextPage();

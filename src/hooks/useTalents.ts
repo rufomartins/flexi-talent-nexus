@@ -1,36 +1,6 @@
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import type { TalentProfile } from "@/types/talent";
-import { toast } from "sonner";
-
-const transformTalentData = (data: any[]): TalentProfile[] => {
-  return data.map(item => ({
-    id: item.id,
-    user_id: item.user_id,
-    talent_category: item.talent_category,
-    country: item.country,
-    native_language: item.native_language,
-    evaluation_status: item.evaluation_status || 'under_evaluation',
-    is_duo: item.is_duo || false,
-    created_at: item.created_at,
-    updated_at: item.updated_at,
-    agent_id: item.agent_id,
-    availability: item.availability || null,
-    category: item.category,
-    experience_level: item.experience_level || 'beginner',
-    fee_range: item.fee_range || null,
-    users: {
-      id: item.users?.id,
-      full_name: item.users?.full_name,
-      avatar_url: item.users?.avatar_url
-    },
-    casting_talents: item.casting_talents?.map((ct: any) => ({
-      castings: {
-        name: ct.castings?.name || ''
-      }
-    })) || []
-  }));
-};
 
 export function useTalents(castingId: string) {
   return useQuery({
@@ -41,12 +11,12 @@ export function useTalents(castingId: string) {
           .from('talent_profiles')
           .select(`
             *,
-            users (
+            users:user_id (
               id,
               full_name,
               avatar_url
             ),
-            casting_talents (
+            casting_talents!talent_id (
               castings (
                 name
               )
@@ -55,14 +25,38 @@ export function useTalents(castingId: string) {
           .eq('casting_id', castingId);
 
         if (error) throw error;
-        return transformTalentData(data || []);
+
+        const transformedData: TalentProfile[] = (data || []).map(talent => ({
+          id: talent.id,
+          user_id: talent.user_id,
+          talent_category: talent.talent_category,
+          country: talent.country,
+          evaluation_status: talent.evaluation_status || 'under_evaluation',
+          is_duo: talent.is_duo || false,
+          created_at: talent.created_at,
+          updated_at: talent.updated_at,
+          agent_id: talent.agent_id,
+          availability: talent.availability || null,
+          category: talent.category,
+          experience_level: talent.experience_level || 'beginner',
+          fee_range: talent.fee_range || null,
+          users: {
+            id: talent.users.id,
+            full_name: talent.users.full_name,
+            avatar_url: talent.users.avatar_url
+          },
+          casting_talents: talent.casting_talents?.map(ct => ({
+            castings: {
+              name: ct.castings?.name || ''
+            }
+          })) || []
+        }));
+
+        return transformedData;
       } catch (error) {
         console.error('Error fetching talents:', error);
-        toast.error('Failed to fetch talents');
         throw error;
       }
-    },
-    retry: 2,
-    retryDelay: attemptIndex => Math.min(1000 * 2 ** attemptIndex, 30000)
+    }
   });
 }

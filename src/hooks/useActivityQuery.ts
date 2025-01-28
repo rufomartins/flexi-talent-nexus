@@ -1,20 +1,13 @@
 import { useInfiniteQuery } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
+import type { ActivityQueryOptions, ActivityQueryResponse } from '@/types/activity';
 
-export interface ActivityQueryOptions {
-  activityType: string | null;
-  dateRange?: Date;
-  sortField?: 'created_at' | 'action_type';
-  sortOrder?: 'desc' | 'asc';
-  itemsPerPage?: number;
-}
-
-export function useActivityQuery(options: ActivityQueryOptions = {}) {
+export function useActivityQuery(options: ActivityQueryOptions) {
   const { activityType, dateRange, sortField = 'created_at', sortOrder = 'desc', itemsPerPage = 10 } = options;
 
   return useInfiniteQuery({
     queryKey: ['activities', { activityType, dateRange, sortField, sortOrder }],
-    queryFn: async ({ pageParam = 0 }) => {
+    queryFn: async ({ pageParam = 0 }): Promise<ActivityQueryResponse> => {
       let query = supabase
         .from('user_activity_logs')
         .select('*', { count: 'exact' });
@@ -27,9 +20,12 @@ export function useActivityQuery(options: ActivityQueryOptions = {}) {
         query = query.gte('created_at', dateRange.toISOString());
       }
 
+      const start = pageParam * itemsPerPage;
+      const end = start + itemsPerPage - 1;
+
       query = query
         .order(sortField, { ascending: sortOrder === 'asc' })
-        .range(pageParam * itemsPerPage, (pageParam + 1) * itemsPerPage - 1);
+        .range(start, end);
 
       const { data: activities, error, count } = await query;
 
@@ -41,7 +37,6 @@ export function useActivityQuery(options: ActivityQueryOptions = {}) {
         nextPage: activities?.length === itemsPerPage ? pageParam + 1 : undefined
       };
     },
-    getNextPageParam: (lastPage, pages) => lastPage.nextPage,
-    initialPageSize: itemsPerPage
+    getNextPageParam: (lastPage) => lastPage.nextPage,
   });
 }
