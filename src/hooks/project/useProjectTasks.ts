@@ -1,13 +1,17 @@
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 
+type TaskStatus = 'Pending' | 'Approved' | 'In Progress';
+type ReviewStatus = 'Internal Review' | 'Client Review' | 'Approved';
+type TalentStatus = 'Delivered' | 'Approved' | 'Booked' | 'Shooting' | 'Reshoot';
+
 type SimplifiedTask = {
   id: string;
   language_id?: string;
   name: string;
-  script_status: string;
-  review_status: string;
-  talent_status: string;
+  script_status: TaskStatus;
+  review_status: ReviewStatus;
+  talent_status: TalentStatus;
   delivery_status: string;
   priority?: string;
   created_at: string;
@@ -16,9 +20,9 @@ type SimplifiedTask = {
 
 type TaskFilters = {
   languageId?: string;
-  scriptStatus?: string;
-  reviewStatus?: string;
-  talentStatus?: string;
+  scriptStatus?: TaskStatus;
+  reviewStatus?: ReviewStatus;
+  talentStatus?: TalentStatus;
   dateRange?: { from: Date; to: Date };
 };
 
@@ -40,7 +44,13 @@ export const useProjectTasks = (projectId: string) => {
         .order("created_at", { ascending: false });
 
       if (error) throw error;
-      return (data || []) as SimplifiedTask[];
+
+      return (data || []).map(task => ({
+        ...task,
+        script_status: validateStatus(task.script_status, 'Pending') as TaskStatus,
+        review_status: validateStatus(task.review_status, 'Internal Review') as ReviewStatus,
+        talent_status: validateStatus(task.talent_status, 'Booked') as TalentStatus
+      })) as SimplifiedTask[];
     },
   });
 
@@ -75,7 +85,12 @@ export const useProjectTasks = (projectId: string) => {
     const { data, error } = await query;
     if (error) throw error;
 
-    return data as SimplifiedTask[];
+    return (data || []).map(task => ({
+      ...task,
+      script_status: validateStatus(task.script_status, 'Pending') as TaskStatus,
+      review_status: validateStatus(task.review_status, 'Internal Review') as ReviewStatus,
+      talent_status: validateStatus(task.talent_status, 'Booked') as TalentStatus
+    })) as SimplifiedTask[];
   };
 
   return {
@@ -84,4 +99,9 @@ export const useProjectTasks = (projectId: string) => {
     error,
     filterTasks,
   };
+};
+
+const validateStatus = (status: string | null, defaultValue: string): string => {
+  if (!status) return defaultValue;
+  return status;
 };
