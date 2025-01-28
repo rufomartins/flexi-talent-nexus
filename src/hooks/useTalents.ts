@@ -1,8 +1,31 @@
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
-import type { TalentProfile } from "@/types/talent";
 
-type TalentCategory = 'UGC' | 'TRANSLATOR' | 'REVIEWER' | 'VOICE_OVER';
+interface SimplifiedTalent {
+  id: string;
+  user_id: string;
+  talent_category: 'UGC' | 'TRANSLATOR' | 'REVIEWER' | 'VOICE_OVER';
+  country: string;
+  evaluation_status: string;
+  is_duo: boolean;
+  created_at: string;
+  updated_at: string;
+  agent_id?: string;
+  availability: Record<string, any>;
+  native_language: string;
+  experience_level: string;
+  fee_range: Record<string, any> | null;
+  users: {
+    id: string;
+    full_name: string;
+    avatar_url: string | null;
+  };
+  casting_talents: Array<{
+    castings: {
+      name: string;
+    };
+  }>;
+}
 
 export function useTalents(castingId?: string) {
   return useQuery({
@@ -71,15 +94,15 @@ export function useTalents(castingId?: string) {
             name: ct.castings?.name || ''
           }
         })) || []
-      })) as TalentProfile[];
+      })) as SimplifiedTalent[];
     }
   });
 }
 
-const validateTalentCategory = (category: string | null): TalentCategory => {
-  const validCategories: TalentCategory[] = ['UGC', 'TRANSLATOR', 'REVIEWER', 'VOICE_OVER'];
-  if (!category || !validCategories.includes(category as TalentCategory)) {
+const validateTalentCategory = (category: string | null): 'UGC' | 'TRANSLATOR' | 'REVIEWER' | 'VOICE_OVER' => {
+  const validCategories = ['UGC', 'TRANSLATOR', 'REVIEWER', 'VOICE_OVER'] as const;
+  if (!category || !validCategories.includes(category as typeof validCategories[number])) {
     return 'UGC';
   }
-  return category as TalentCategory;
+  return category as typeof validCategories[number];
 };

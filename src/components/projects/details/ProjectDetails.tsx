@@ -1,20 +1,36 @@
 import { useEffect, useState } from "react";
 import { useToast } from "@/hooks/use-toast";
-import { Project, ProjectItem } from "../types";
 import { ProjectHeader } from "./ProjectHeader";
 import { ProjectItems } from "./ProjectItems";
 import { supabase } from "@/integrations/supabase/client";
 import { ProjectStats } from "../ProjectStats";
 
+interface SimplifiedProject {
+  id: string;
+  name: string;
+  description?: string;
+  client_id?: string;
+  status?: string;
+  client?: { 
+    name: string 
+  };
+}
+
+interface SimplifiedProjectItem {
+  id: string;
+  script_status: string;
+  delivery_status: string;
+}
+
 interface ProjectDetailsProps {
   projectId: string;
-  onStatusUpdate: (status: Project['status']) => Promise<void>;
-  onItemAdd: (item: Omit<ProjectItem, 'id'>) => Promise<void>;
+  onStatusUpdate: (status: string) => Promise<void>;
+  onItemAdd: (item: Omit<SimplifiedProjectItem, 'id'>) => Promise<void>;
 }
 
 export function ProjectDetails({ projectId, onStatusUpdate, onItemAdd }: ProjectDetailsProps) {
-  const [project, setProject] = useState<Project | null>(null);
-  const [items, setItems] = useState<ProjectItem[]>([]);
+  const [project, setProject] = useState<SimplifiedProject | null>(null);
+  const [items, setItems] = useState<SimplifiedProjectItem[]>([]);
   const [loading, setLoading] = useState(true);
   const { toast } = useToast();
 
@@ -24,7 +40,11 @@ export function ProjectDetails({ projectId, onStatusUpdate, onItemAdd }: Project
         const { data: projectData, error: projectError } = await supabase
           .from('projects')
           .select(`
-            *,
+            id,
+            name,
+            description,
+            client_id,
+            status,
             client:clients(name)
           `)
           .eq('id', projectId)
@@ -34,13 +54,13 @@ export function ProjectDetails({ projectId, onStatusUpdate, onItemAdd }: Project
 
         const { data: itemsData, error: itemsError } = await supabase
           .from('project_tasks')
-          .select('*')
+          .select('id, script_status, delivery_status')
           .eq('project_id', projectId);
 
         if (itemsError) throw itemsError;
 
         setProject(projectData);
-        setItems(itemsData);
+        setItems(itemsData || []);
       } catch (error) {
         console.error('Error fetching project details:', error);
         toast({
