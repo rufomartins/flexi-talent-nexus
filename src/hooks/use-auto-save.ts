@@ -1,55 +1,39 @@
-import { useState, useCallback, useEffect } from "react";
-import { debounce } from "lodash";
-import { supabase } from "@/integrations/supabase/client";
-import { useToast } from "@/hooks/use-toast";
-import { Database } from "@/integrations/supabase/types";
+import { useState, useEffect, useRef } from 'react';
+import type { DeepPartial } from '@/types/shared';
 
-type TableNames = keyof Database['public']['Tables'];
-
-export interface AutoSaveConfig {
-  debounceTime: number;
-  tableName: TableNames;
-  idField: string;
-}
-
-export const useAutoSave = (formData: any, config: AutoSaveConfig) => {
-  const [saving, setSaving] = useState(false);
-  const [lastSaved, setLastSaved] = useState<Date | null>(null);
-  const { toast } = useToast();
-
-  const debouncedSave = useCallback(
-    debounce(async (data) => {
-      if (!data[config.idField]) return;
-      
-      setSaving(true);
-      try {
-        const { error } = await supabase
-          .from(config.tableName)
-          .update(data)
-          .eq(config.idField, data[config.idField]);
-
-        if (error) throw error;
-        
-        setLastSaved(new Date());
-      } catch (error) {
-        console.error("Auto-save error:", error);
-        toast({
-          title: "Auto-save failed",
-          description: "Your changes couldn't be saved automatically. Please try saving manually.",
-          variant: "destructive",
-        });
-      } finally {
-        setSaving(false);
-      }
-    }, config.debounceTime),
-    [config.tableName, config.idField, config.debounceTime]
-  );
+export function useAutoSave<T extends object>(
+  initialData: T,
+  onSave: (data: DeepPartial<T>) => Promise<void>,
+  delay = 1000
+) {
+  const [data, setData] = useState<T>(initialData);
+  const [isSaving, setIsSaving] = useState(false);
+  const timeoutRef = useRef<NodeJS.Timeout>();
 
   useEffect(() => {
-    if (formData.isDirty) {
-      debouncedSave(formData.values);
+    if (timeoutRef.current) {
+      clearTimeout(timeoutRef.current);
     }
-  }, [formData.values, debouncedSave, formData.isDirty]);
 
-  return { saving, lastSaved };
-};
+    timeoutRef.current = setTimeout(async () => {
+      try {
+        setIsSaving(true);
+        await onSave(data);
+      } finally {
+        setIsSaving(false);
+      }
+    }, delay);
+
+    return () => {
+      if (timeoutRef.current) {
+        clearTimeout(timeoutRef.current);
+      }
+    };
+  }, [data, delay, onSave]);
+
+  return {
+    data,
+    setData,
+    isSaving
+  };
+}

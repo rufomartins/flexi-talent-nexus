@@ -1,102 +1,23 @@
-import { useInfiniteQuery } from "@tanstack/react-query";
-import { useCallback } from "react";
-import { supabase } from "@/integrations/supabase/client";
+import { useQuery } from '@tanstack/react-query';
+import type { QueryConfig } from '@/types/shared';
 
-type SortOrder = 'desc' | 'asc';
-type SortField = 'created_at' | 'action_type';
-
-export interface ActivityLog {
-  id: string;
-  action_type: string;
-  created_at: string;
-  details?: {
-    status?: string;
-    name?: string;
-    project?: string;
-    [key: string]: any;
-  } | null;
-  user_id?: string;
+interface ActivityQueryOptions extends QueryConfig {
+  type?: string;
+  limit?: number;
 }
 
-interface ActivityPageData {
-  activities: ActivityLog[];
-  totalCount: number;
-  hasMore: boolean;
-  nextPage: number | undefined;
-}
+export function useActivityQuery(options: ActivityQueryOptions = {}) {
+  const { type, limit = 10, ...queryConfig } = options;
 
-interface UseActivityQueryParams {
-  activityType: string | null;
-  dateRange: Date | undefined;
-  sortField: SortField;
-  sortOrder: SortOrder;
-  itemsPerPage: number;
-}
-
-export const useActivityQuery = ({
-  activityType,
-  dateRange,
-  sortField,
-  sortOrder,
-  itemsPerPage
-}: UseActivityQueryParams) => {
-  const buildQuery = useCallback((pageParam: number) => {
-    const from = pageParam * itemsPerPage;
-    const to = from + itemsPerPage - 1;
-
-    let query = supabase
-      .from('user_activity_logs')
-      .select('*', { count: 'exact' })
-      .order(sortField, { ascending: sortOrder === 'asc' })
-      .range(from, to);
-
-    if (activityType) {
-      if (activityType.startsWith('new_registration_')) {
-        query = query
-          .eq('action_type', 'registration')
-          .eq('details->status', activityType.replace('new_registration_', ''));
-      } else if (activityType.startsWith('project_')) {
-        query = query
-          .eq('action_type', 'project')
-          .eq('details->status', activityType.replace('project_', ''));
+  return useQuery({
+    queryKey: ['activities', { type, limit }],
+    queryFn: async () => {
+      const response = await fetch(`/api/activities?type=${type}&limit=${limit}`);
+      if (!response.ok) {
+        throw new Error('Failed to fetch activities');
       }
-    }
-
-    if (dateRange) {
-      const startOfDay = new Date(dateRange);
-      startOfDay.setHours(0, 0, 0, 0);
-      const endOfDay = new Date(dateRange);
-      endOfDay.setHours(23, 59, 59, 999);
-
-      query = query
-        .gte('created_at', startOfDay.toISOString())
-        .lte('created_at', endOfDay.toISOString());
-    }
-
-    return query;
-  }, [activityType, dateRange, sortField, sortOrder, itemsPerPage]);
-
-  return useInfiniteQuery<ActivityPageData, Error>({
-    queryKey: ['recent-activities', activityType, dateRange, sortField, sortOrder],
-    queryFn: async ({ pageParam = 0 }) => {
-      const query = buildQuery(pageParam as number);
-      const { data: activities, error, count } = await query;
-
-      if (error) {
-        console.error('Error fetching activities:', error);
-        throw new Error(error.message);
-      }
-
-      return {
-        activities: activities as ActivityLog[],
-        totalCount: count || 0,
-        hasMore: activities?.length === itemsPerPage,
-        nextPage: activities?.length === itemsPerPage ? (pageParam as number) + 1 : undefined
-      };
+      return response.json();
     },
-    initialPageParam: 0,
-    getNextPageParam: (lastPage) => lastPage.nextPage,
-    staleTime: 30000,
-    retry: 2,
+    ...queryConfig
   });
-};
+}
