@@ -27,4 +27,9 @@ export interface TalentProfile {
     full_name: string;
     avatar_url?: string;
   };
+  casting_talents?: Array<{
+    castings: {
+      name: string;
+    };
+  }>;
 }

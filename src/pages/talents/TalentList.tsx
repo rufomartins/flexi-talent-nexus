@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
-import { Loader2, Search, Plus, Filter, MoreHorizontal } from "lucide-react";
+import { Loader2, Search, Plus, Filter } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { TalentSearchDialog } from "@/components/talents/TalentSearchDialog";
 import { AddTalentModal } from "@/components/talents/AddTalentModal";
@@ -34,8 +34,7 @@ const TalentList = () => {
           *,
           users (
             id,
-            first_name,
-            last_name,
+            full_name,
             avatar_url
           ),
           casting_talents (
@@ -44,7 +43,7 @@ const TalentList = () => {
             )
           )
         `)
-        .order(sortBy === "name" ? "users(first_name)" : sortBy, { ascending: true });
+        .order(sortBy === "name" ? "users(full_name)" : sortBy, { ascending: true });
 
       if (error) {
         console.error("Error fetching talents:", error);
@@ -56,14 +55,12 @@ const TalentList = () => {
         throw error;
       }
 
-      console.log("Fetched talents:", data);
       return data as TalentProfile[];
     },
   });
 
   const handleSearch = async (searchValues: any) => {
     console.log("Search values:", searchValues);
-    // Implement search logic here
   };
 
   const handleSelectAll = () => {
@@ -84,7 +81,6 @@ const TalentList = () => {
   };
 
   const handleAction = async (action: string) => {
-    // Implement action handling (add to casting, email, delete)
     console.log("Action:", action, "Selected IDs:", Array.from(selectedIds));
   };
 
@@ -176,7 +172,7 @@ const TalentList = () => {
                     />
                   ) : (
                     <AvatarFallback>
-                      {talent.users?.first_name?.[0]}
+                      {talent.users?.full_name?.[0]}
                     </AvatarFallback>
                   )}
                 </Avatar>

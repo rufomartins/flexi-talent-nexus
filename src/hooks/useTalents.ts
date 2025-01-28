@@ -23,7 +23,8 @@ const transformTalentData = (data: any[]): TalentProfile[] => {
       id: item.talent_profiles.user.id,
       full_name: item.talent_profiles.user.full_name,
       avatar_url: item.talent_profiles.user.avatar_url
-    }
+    },
+    casting_talents: item.casting_talents || []
   }));
 };
 
@@ -55,6 +56,9 @@ export function useTalents(castingId: string) {
                 full_name,
                 avatar_url
               )
+            ),
+            castings (
+              name
             )
           `)
           .eq('casting_id', castingId);
