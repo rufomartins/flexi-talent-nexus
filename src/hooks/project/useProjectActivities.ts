@@ -7,21 +7,29 @@ interface ProjectActivity {
   action_type: string;
   details: Record<string, any>;
   created_at: string;
+  user_id: string;
 }
 
-export const useProjectActivities = (projectId: string) => {
+export function useProjectActivities(projectId: string) {
   return useQuery({
     queryKey: ["project-activities", projectId],
-    queryFn: async (): Promise<ProjectActivity[]> => {
+    queryFn: async () => {
       const { data, error } = await supabase
         .from("user_activity_logs")
         .select("*")
-        .eq("details->project_id", projectId)
-        .order("created_at", { ascending: false })
-        .limit(10);
+        .eq("project_id", projectId)
+        .order("created_at", { ascending: false });
 
       if (error) throw error;
-      return data as ProjectActivity[];
-    },
+
+      return (data || []).map(activity => ({
+        id: activity.id,
+        project_id: projectId,
+        action_type: activity.action_type,
+        details: activity.details as Record<string, any>,
+        created_at: activity.created_at,
+        user_id: activity.user_id
+      })) as ProjectActivity[];
+    }
   });
-};
+}
