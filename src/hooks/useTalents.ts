@@ -2,11 +2,13 @@ import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import type { TalentProfile } from "@/types/talent";
 
-export function useTalents(castingId: string) {
+export function useTalents(castingId?: string) {
   return useQuery({
-    queryKey: ['casting-talents', castingId],
+    queryKey: ['talents', castingId],
     queryFn: async () => {
-      const { data, error } = await supabase
+      console.log('Fetching talents with castingId:', castingId);
+      
+      const query = supabase
         .from('talent_profiles')
         .select(`
           id,
@@ -32,10 +34,18 @@ export function useTalents(castingId: string) {
               name
             )
           )
-        `)
-        .eq('casting_id', castingId);
+        `);
 
-      if (error) throw error;
+      if (castingId) {
+        query.eq('casting_id', castingId);
+      }
+
+      const { data, error } = await query;
+
+      if (error) {
+        console.error('Error loading talents:', error.message);
+        throw error;
+      }
 
       return (data || []).map(talent => ({
         id: talent.id,
