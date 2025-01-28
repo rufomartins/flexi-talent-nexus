@@ -11,7 +11,7 @@ export function useTalents(castingId: string) {
           .from('talent_profiles')
           .select(`
             *,
-            users:user_id (
+            users!user_id (
               id,
               full_name,
               avatar_url
@@ -40,6 +40,7 @@ export function useTalents(castingId: string) {
           category: talent.category,
           experience_level: talent.experience_level || 'beginner',
           fee_range: talent.fee_range || null,
+          native_language: talent.native_language || '',
           users: {
             id: talent.users.id,
             full_name: talent.users.full_name,

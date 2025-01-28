@@ -37,6 +37,7 @@ export function useActivityQuery(options: ActivityQueryOptions) {
         nextPage: activities?.length === itemsPerPage ? pageParam + 1 : undefined
       };
     },
+    initialPageParam: 0,
     getNextPageParam: (lastPage) => lastPage.nextPage,
   });
 }

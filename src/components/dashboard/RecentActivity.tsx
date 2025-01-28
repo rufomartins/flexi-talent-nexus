@@ -6,7 +6,7 @@ import { AlertCircle, Loader2 } from "lucide-react";
 import { useInView } from "react-intersection-observer";
 import { useActivityQuery } from "@/hooks/useActivityQuery";
 import { ActivityRealtime } from "./activity/ActivityRealtime";
-import type { SortOrder, SortField } from "@/types/guest-filters";
+import type { SortField, SortOrder } from "@/types/activity";
 
 export const RecentActivity = () => {
   const [activityType, setActivityType] = useState<string | null>(null);

@@ -9,11 +9,14 @@ export interface ActivityData {
   totalCount: number;
 }
 
+export type SortField = 'created_at' | 'action_type';
+export type SortOrder = 'asc' | 'desc';
+
 export interface ActivityQueryOptions {
   activityType: string | null;
   dateRange?: Date;
-  sortField?: 'created_at' | 'action_type';
-  sortOrder?: 'desc' | 'asc';
+  sortField?: SortField;
+  sortOrder?: SortOrder;
   itemsPerPage?: number;
 }
 
