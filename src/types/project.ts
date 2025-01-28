@@ -1,3 +1,10 @@
+import type { Database } from "@/integrations/supabase/types";
+
+type ProjectScriptStatus = Database["public"]["Enums"]["project_script_status"];
+type ProjectReviewStatus = Database["public"]["Enums"]["project_review_status"];
+type ProjectTalentStatus = Database["public"]["Enums"]["project_talent_status"];
+type ProjectDeliveryStatus = Database["public"]["Enums"]["project_delivery_status"];
+
 export interface Language {
   id: string;
   language_name: string;
@@ -24,15 +31,13 @@ export interface Project {
   completion_percentage?: number;
   active_tasks_count?: number;
   upcoming_deadlines_count?: number;
-  progress_percentage?: number;
-  color_code?: string;
-  countries?: Country[];
   client?: {
     name: string;
   };
   project_manager?: {
     full_name: string;
   };
+  countries?: Country[];
   created_at: string;
   updated_at: string;
 }
@@ -41,10 +46,10 @@ export interface ProjectTask {
   id: string;
   language_id: string;
   name: string;
-  script_status: 'Pending' | 'In Progress' | 'Approved';
-  review_status: 'Internal Review' | 'Client Review' | 'Approved';
-  talent_status: 'Booked' | 'Shooting' | 'Delivered' | 'Reshoot' | 'Approved';
-  delivery_status: 'Pending' | 'Delivered' | 'R Pending';
+  script_status: ProjectScriptStatus;
+  review_status: ProjectReviewStatus;
+  talent_status: ProjectTalentStatus;
+  delivery_status: ProjectDeliveryStatus;
   priority?: string;
   created_at?: string;
   updated_at?: string;
