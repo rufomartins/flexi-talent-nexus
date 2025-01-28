@@ -2,11 +2,15 @@ import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import type { ProjectItem } from "@/components/projects/types";
 
+type TaskStatus = 'Pending' | 'Approved' | 'In Progress';
+type ReviewStatus = 'Internal Review' | 'Client Review' | 'Approved';
+type TalentStatus = 'Delivered' | 'Approved' | 'Booked' | 'Shooting' | 'Reshoot';
+
 interface TaskFilters {
   languageId?: string;
-  scriptStatus?: string;
-  reviewStatus?: string;
-  talentStatus?: string;
+  scriptStatus?: TaskStatus;
+  reviewStatus?: ReviewStatus;
+  talentStatus?: TalentStatus;
   dateRange?: { from: Date; to: Date };
 }
 
@@ -61,7 +65,6 @@ export const useProjectTasks = (projectId: string) => {
     }
 
     const { data, error } = await query;
-
     if (error) throw error;
 
     return data as ProjectItem[];

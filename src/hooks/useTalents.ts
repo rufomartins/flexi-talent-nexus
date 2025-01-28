@@ -6,8 +6,6 @@ export function useTalents(castingId?: string) {
   return useQuery({
     queryKey: ['talents', castingId],
     queryFn: async () => {
-      console.log('Fetching talents with castingId:', castingId);
-      
       const query = supabase
         .from('talent_profiles')
         .select(`

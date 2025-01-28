@@ -7,7 +7,6 @@ import { supabase } from "@/integrations/supabase/client";
 import type { Project } from "@/components/projects/types";
 
 export const useProjectManagement = (projectId: string) => {
-  // Fetch project details with proper type annotations
   const {
     data: project,
     isLoading: projectLoading,
@@ -30,7 +29,6 @@ export const useProjectManagement = (projectId: string) => {
     },
   });
 
-  // Initialize tasks management with status field
   const { 
     tasks, 
     isLoading: tasksLoading, 
@@ -38,18 +36,15 @@ export const useProjectManagement = (projectId: string) => {
     filterTasks 
   } = useProjectTasks(projectId);
 
-  // Initialize activities management
   const { 
-    activities, 
+    data: activities, 
     isLoading: activitiesLoading, 
     error: activitiesError,
     refetch: refetchActivities 
   } = useProjectActivities(projectId);
 
-  // Initialize realtime subscriptions
   useProjectRealtime(projectId);
 
-  // Refresh all data
   const refreshData = useCallback(async () => {
     await Promise.all([
       filterTasks({}),
@@ -60,7 +55,7 @@ export const useProjectManagement = (projectId: string) => {
   return {
     project,
     tasks,
-    activities,
+    activities: activities || [],
     loading: projectLoading || tasksLoading || activitiesLoading,
     error: projectError || tasksError || activitiesError,
     refreshData,
