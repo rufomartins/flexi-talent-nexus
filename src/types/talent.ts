@@ -3,6 +3,7 @@ import type { Database } from "@/integrations/supabase/types";
 export type TalentCategory = Database["public"]["Enums"]["talent_category"];
 export type TalentStatus = "approved" | "under_evaluation" | "rejected";
 
+// Break down into smaller interfaces for better maintainability
 export interface TalentUser {
   id: string;
   full_name: string;
