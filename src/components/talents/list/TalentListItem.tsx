@@ -51,7 +51,7 @@ export const TalentListItem: React.FC<TalentListItemProps> = ({
             <div>
               <span>{talent.duo_name}</span>
               <span className="text-sm text-muted-foreground ml-2">
-                ({talent.users?.full_name} {talent.partner && `& ${talent.partner.full_name}`})
+                ({talent.users?.full_name} {talent.partner?.users?.full_name && `& ${talent.partner.users.full_name}`})
               </span>
             </div>
           ) : (

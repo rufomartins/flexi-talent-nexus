@@ -15,25 +15,29 @@ export function useTalents(castingId?: string) {
           country,
           evaluation_status,
           is_duo,
+          duo_name,
           created_at,
           updated_at,
           casting_talents!left (
             id,
-            casting_id
+            casting_id,
+            castings (
+              name
+            )
           ),
           users!inner (
             id,
             full_name,
             avatar_url
           ),
-          partner:partner_id (
+          partner:talent_profiles!talent_profiles_partner_id_fkey (
             id,
             user_id,
-            first_name,
-            last_name,
-            full_name,
-            email,
-            avatar_url
+            users (
+              id,
+              full_name,
+              avatar_url
+            )
           )
         `);
 
@@ -50,7 +54,10 @@ export function useTalents(castingId?: string) {
           avatar_url: undefined
         },
         casting_talents: talent.casting_talents || [],
-        partner: talent.partner || null
+        partner: talent.partner ? {
+          ...talent.partner,
+          full_name: talent.partner.users?.full_name || 'Unknown Partner',
+        } : null
       })) as SimplifiedTalent[];
     }
   });
