@@ -32,7 +32,7 @@ export interface Project {
   project_manager_id?: string;
   start_date?: string;
   end_date?: string;
-  status?: ProjectStatus;
+  status: ProjectStatus;
   type?: string;
   completion_percentage?: number;
   active_tasks_count?: number;
@@ -54,7 +54,7 @@ export interface ProjectTask {
   review_status: ProjectReviewStatus;
   talent_status: ProjectTalentStatus;
   delivery_status: ProjectDeliveryStatus;
-  priority?: string;
+  priority: string;
   created_at?: string;
   updated_at?: string;
 }
