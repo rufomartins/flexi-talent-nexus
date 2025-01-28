@@ -25,6 +25,15 @@ export function useTalents(castingId?: string) {
             id,
             full_name,
             avatar_url
+          ),
+          partner:partner_id (
+            id,
+            user_id,
+            first_name,
+            last_name,
+            full_name,
+            email,
+            avatar_url
           )
         `);
 

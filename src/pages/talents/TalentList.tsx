@@ -28,15 +28,26 @@ const TalentList = () => {
         .from("talent_profiles")
         .select(`
           *,
-          users (
+          users!talent_profiles_user_id_fkey (
             id,
             full_name,
             avatar_url
           ),
           casting_talents (
+            id,
+            casting_id,
             castings (
               name
             )
+          ),
+          partner:partner_id (
+            id,
+            user_id,
+            first_name,
+            last_name,
+            full_name,
+            email,
+            avatar_url
           )
         `)
         .order(sortBy === "name" ? "users(full_name)" : sortBy, { ascending: true });

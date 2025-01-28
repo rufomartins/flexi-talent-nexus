@@ -19,6 +19,7 @@ export interface TalentProfile {
   fee_range?: Record<string, any>;
   duo_name?: string;
   partner_id?: string;
+  partner?: DuoPartner;
   casting_talents?: Array<{
     id: string;
     casting_id: string;

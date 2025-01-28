@@ -8,6 +8,9 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { TalentProfile } from "@/types/talent";
 import { DatabaseUser } from "@/types/user";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { Badge } from "@/components/ui/badge";
+import { Checkbox } from "@/components/ui/checkbox";
 
 interface TalentTableRowProps {
   talent: TalentProfile;
