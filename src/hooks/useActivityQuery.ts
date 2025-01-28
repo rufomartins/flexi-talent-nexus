@@ -1,38 +1,50 @@
 import { useInfiniteQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
-import type { ActivityQueryOptions } from "@/types/activity";
 
-export function useActivityQuery(options: ActivityQueryOptions) {
-  const itemsPerPage = options.itemsPerPage || 10;
+interface ActivityQueryParams {
+  activityType: string;
+  dateRange: Date;
+  sortField: 'created_at' | 'action_type';
+  sortOrder: 'desc' | 'asc';
+}
 
+interface ActivityResponse {
+  activities: Array<{
+    id: string;
+    action_type: string;
+    details: Record<string, any>;
+    created_at: string;
+    user_id: string;
+  }>;
+  nextPage: number;
+  totalCount: number;
+}
+
+export function useActivityQuery(params: ActivityQueryParams) {
   return useInfiniteQuery({
-    queryKey: ["activities", options],
+    queryKey: ['activities', params],
     queryFn: async ({ pageParam = 0 }) => {
-      const { data: activities, error } = await supabase
-        .from("user_activity_logs")
-        .select("*")
-        .order(options.sortField || "created_at", {
-          ascending: options.sortOrder === "asc",
-        })
-        .range(
-          pageParam * itemsPerPage,
-          (pageParam * itemsPerPage) + (itemsPerPage - 1)
-        );
+      const { data, error, count } = await supabase
+        .from('user_activity_logs')
+        .select('*', { count: 'exact' })
+        .order(params.sortField, { ascending: params.sortOrder === 'asc' })
+        .range(pageParam * 10, (pageParam + 1) * 10 - 1);
 
       if (error) throw error;
 
       return {
-        activities: activities.map(activity => ({
-          id: activity.id,
-          action_type: activity.action_type,
-          details: activity.details as Record<string, any>,
-          created_at: activity.created_at,
-          user_id: activity.user_id
+        activities: data.map(item => ({
+          id: item.id,
+          action_type: item.action_type,
+          details: item.details || {},
+          created_at: item.created_at,
+          user_id: item.user_id
         })),
-        nextPage: activities.length === itemsPerPage ? Number(pageParam) + 1 : undefined
-      };
+        nextPage: pageParam + 1,
+        totalCount: count || 0
+      } as ActivityResponse;
     },
     initialPageParam: 0,
-    getNextPageParam: (lastPage) => lastPage.nextPage,
+    getNextPageParam: (lastPage) => lastPage.nextPage
   });
 }

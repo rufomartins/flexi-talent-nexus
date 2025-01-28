@@ -12,21 +12,21 @@ interface ProjectActivity {
 
 export function useProjectActivities(projectId: string) {
   return useQuery({
-    queryKey: ["project-activities", projectId],
+    queryKey: ['project-activities', projectId],
     queryFn: async () => {
       const { data, error } = await supabase
-        .from("user_activity_logs")
-        .select("*")
-        .eq("project_id", projectId)
-        .order("created_at", { ascending: false });
+        .from('user_activity_logs')
+        .select('*')
+        .eq('project_id', projectId)
+        .order('created_at', { ascending: false });
 
       if (error) throw error;
 
-      return (data || []).map(activity => ({
+      return data.map(activity => ({
         id: activity.id,
-        project_id: projectId,
+        project_id: activity.project_id,
         action_type: activity.action_type,
-        details: activity.details as Record<string, any>,
+        details: activity.details || {},
         created_at: activity.created_at,
         user_id: activity.user_id
       })) as ProjectActivity[];
