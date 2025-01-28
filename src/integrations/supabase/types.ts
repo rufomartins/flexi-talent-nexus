@@ -2972,6 +2972,7 @@ export type Database = {
           created_at: string | null
           details: Json | null
           id: string
+          project_id: string | null
           user_id: string | null
         }
         Insert: {
@@ -2979,6 +2980,7 @@ export type Database = {
           created_at?: string | null
           details?: Json | null
           id?: string
+          project_id?: string | null
           user_id?: string | null
         }
         Update: {
@@ -2986,9 +2988,17 @@ export type Database = {
           created_at?: string | null
           details?: Json | null
           id?: string
+          project_id?: string | null
           user_id?: string | null
         }
         Relationships: [
+          {
+            foreignKeyName: "user_activity_logs_project_id_fkey"
+            columns: ["project_id"]
+            isOneToOne: false
+            referencedRelation: "projects"
+            referencedColumns: ["id"]
+          },
           {
             foreignKeyName: "user_activity_logs_user_id_fkey"
             columns: ["user_id"]
