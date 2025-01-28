@@ -1,44 +1,12 @@
-import type { Database } from "@/integrations/supabase/types";
+export type ProjectStatus = 'active' | 'completed' | 'on_hold';
+export type ScriptStatus = 'In Progress' | 'Pending' | 'Approved';
+export type ReviewStatus = 'Internal Review' | 'Client Review' | 'Approved';
+export type TalentStatus = 'Booked' | 'Shooting' | 'Delivered' | 'Reshoot' | 'Approved';
+export type DeliveryStatus = 'Pending' | 'Delivered' | 'R Pending';
 
-type ProjectScriptStatus = Database["public"]["Enums"]["project_script_status"];
-type ProjectReviewStatus = Database["public"]["Enums"]["project_review_status"];
-type ProjectTalentStatus = Database["public"]["Enums"]["project_talent_status"];
-type ProjectDeliveryStatus = Database["public"]["Enums"]["project_delivery_status"];
-
-export interface ProjectFilters {
-  projectManager?: string;
-  country?: string;
-  language?: string;
-  scriptStatus?: ProjectScriptStatus;
-  reviewStatus?: ProjectReviewStatus;
-  talentStatus?: ProjectTalentStatus;
-  startDate?: Date;
-  endDate?: Date;
-}
-
-export interface ProjectItem {
+export interface Client {
   id: string;
-  language_id: string;
   name: string;
-  script_status: ProjectScriptStatus;
-  review_status: ProjectReviewStatus;
-  talent_status: ProjectTalentStatus;
-  delivery_status: ProjectDeliveryStatus;
-  priority: string;
-  created_at: string;
-}
-
-export interface Language {
-  id: string;
-  language_name: string;
-  country_id: string;
-  tasks?: ProjectTask[];
-}
-
-export interface Country {
-  id: string;
-  country_name: string;
-  languages: Language[];
 }
 
 export interface Project {
@@ -46,34 +14,20 @@ export interface Project {
   name: string;
   description?: string;
   client_id?: string;
-  project_manager_id?: string;
-  start_date?: string;
-  end_date?: string;
-  status?: string;
-  type?: string;
-  completion_percentage?: number;
-  active_tasks_count?: number;
-  upcoming_deadlines_count?: number;
-  client?: {
-    name: string;
-  };
-  project_manager?: {
-    full_name: string;
-  };
-  countries?: Country[];
+  client?: Client;
+  status: ProjectStatus;
   created_at: string;
   updated_at: string;
 }
 
-export interface ProjectTask {
+export interface ProjectItem {
   id: string;
   language_id: string;
   name: string;
-  script_status: ProjectScriptStatus;
-  review_status: ProjectReviewStatus;
-  talent_status: ProjectTalentStatus;
-  delivery_status: ProjectDeliveryStatus;
-  priority?: string;
-  created_at?: string;
-  updated_at?: string;
+  script_status: ScriptStatus;
+  review_status: ReviewStatus;
+  talent_status: TalentStatus;
+  delivery_status: DeliveryStatus;
+  priority: string;
+  created_at: string;
 }

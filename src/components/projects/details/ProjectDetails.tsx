@@ -1,105 +1,57 @@
-import { useEffect, useState } from "react";
-import { useToast } from "@/hooks/use-toast";
+import { useQuery } from "@tanstack/react-query";
 import { ProjectHeader } from "./ProjectHeader";
 import { ProjectItems } from "./ProjectItems";
 import { supabase } from "@/integrations/supabase/client";
 import { ProjectStats } from "../ProjectStats";
-
-// Break down complex types into simpler ones
-interface Client {
-  name: string;
-}
-
-interface Project {
-  id: string;
-  name: string;
-  description: string;
-  client_id: string;
-  status: string;
-  created_at: string;
-  updated_at: string;
-  client: Client;
-}
-
-interface ProjectItem {
-  id: string;
-  language_id: string;
-  name: string;
-  script_status: string;
-  review_status: string;
-  talent_status: string;
-  delivery_status: string;
-  priority: string;
-  created_at: string;
-}
+import type { Project, ProjectItem } from "../types";
 
 interface ProjectDetailsProps {
   projectId: string;
-  onStatusUpdate: (status: string) => Promise<void>;
-  onItemAdd: (item: Omit<ProjectItem, 'id' | 'created_at'>) => Promise<void>;
 }
 
-export function ProjectDetails({ projectId, onStatusUpdate, onItemAdd }: ProjectDetailsProps) {
-  const [project, setProject] = useState<Project | null>(null);
-  const [items, setItems] = useState<ProjectItem[]>([]);
-  const [loading, setLoading] = useState(true);
-  const { toast } = useToast();
-
-  useEffect(() => {
-    const fetchProjectDetails = async () => {
-      try {
-        const { data: projectData, error: projectError } = await supabase
-          .from('projects')
-          .select(`
+export const ProjectDetails = ({ projectId }: ProjectDetailsProps) => {
+  const { data: project, isLoading: isLoadingProject } = useQuery({
+    queryKey: ['project', projectId],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from('projects')
+        .select(`
+          *,
+          client:clients (
             id,
-            name,
-            description,
-            client_id,
-            status,
-            created_at,
-            updated_at,
-            client:clients(name)
-          `)
-          .eq('id', projectId)
-          .single();
+            name
+          )
+        `)
+        .eq('id', projectId)
+        .single();
 
-        if (projectError) throw projectError;
+      if (error) throw error;
+      return data as Project;
+    },
+  });
 
-        const { data: itemsData, error: itemsError } = await supabase
-          .from('project_tasks')
-          .select(`
-            id,
-            language_id,
-            name,
-            script_status,
-            review_status,
-            talent_status,
-            delivery_status,
-            priority,
-            created_at
-          `)
-          .eq('project_id', projectId);
+  const { data: items = [], isLoading: isLoadingItems } = useQuery({
+    queryKey: ['project-items', projectId],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from('project_tasks')
+        .select('*')
+        .eq('project_id', projectId)
+        .order('created_at', { ascending: false });
 
-        if (itemsError) throw itemsError;
+      if (error) throw error;
 
-        setProject(projectData);
-        setItems(itemsData || []);
-      } catch (error) {
-        console.error('Error fetching project details:', error);
-        toast({
-          title: "Error",
-          description: "Failed to load project details",
-          variant: "destructive",
-        });
-      } finally {
-        setLoading(false);
-      }
-    };
+      return data.map(item => ({
+        ...item,
+        script_status: item.script_status || 'Pending',
+        review_status: item.review_status || 'Internal Review',
+        talent_status: item.talent_status || 'Booked',
+        delivery_status: item.delivery_status || 'Pending'
+      })) as ProjectItem[];
+    },
+  });
 
-    fetchProjectDetails();
-  }, [projectId, toast]);
-
-  if (loading) {
+  if (isLoadingProject || isLoadingItems) {
     return <div>Loading...</div>;
   }
 
@@ -107,57 +59,11 @@ export function ProjectDetails({ projectId, onStatusUpdate, onItemAdd }: Project
     return <div>Project not found</div>;
   }
 
-  const stats = [
-    {
-      title: "Total Items",
-      value: items.length
-    },
-    {
-      title: "In Progress",
-      value: items.filter(item => item.script_status === 'In Progress').length
-    },
-    {
-      title: "Completed",
-      value: items.filter(item => item.delivery_status === 'Delivered').length
-    }
-  ];
-
   return (
     <div className="space-y-6">
-      <ProjectHeader
-        project={project}
-        onEdit={() => {}}
-        onStatusChange={onStatusUpdate}
-      />
-      
-      <ProjectStats stats={stats} />
-      
-      <ProjectItems
-        projectId={projectId}
-        items={items}
-        onItemStatusUpdate={async (itemId, updates) => {
-          try {
-            const { error } = await supabase
-              .from('project_tasks')
-              .update(updates)
-              .eq('id', itemId);
-
-            if (error) throw error;
-
-            toast({
-              title: "Status updated",
-              description: "Item status has been updated successfully",
-            });
-          } catch (error) {
-            console.error('Error updating item status:', error);
-            toast({
-              title: "Error",
-              description: "Failed to update item status",
-              variant: "destructive",
-            });
-          }
-        }}
-      />
+      <ProjectHeader project={project} />
+      <ProjectStats project={project} />
+      <ProjectItems items={items} />
     </div>
   );
-}
+};
