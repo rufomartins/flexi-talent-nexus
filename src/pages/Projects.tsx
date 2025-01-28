@@ -5,7 +5,7 @@ import { ProjectStats } from "@/components/projects/ProjectStats";
 import { ProjectSearch } from "@/components/projects/ProjectSearch";
 import { ProjectTree } from "@/components/projects/ProjectTree";
 import { useState } from "react";
-import type { Project } from "@/components/projects/types";
+import type { Project } from "@/types/project";
 import type { FilterState } from "@/components/projects/filters/types";
 
 const statsCards = [
@@ -39,7 +39,7 @@ const statusColors = {
   },
 };
 
-// Dummy data for preview
+// Update dummyProjects with proper typing
 const dummyProjects: Project[] = [
   {
     id: "1",
@@ -52,6 +52,7 @@ const dummyProjects: Project[] = [
           {
             id: "l1",
             language_name: "Finnish",
+            country_id: "c1",
             tasks: [
               {
                 id: "t1",
@@ -62,29 +63,6 @@ const dummyProjects: Project[] = [
                 delivery_status: "Pending",
                 language_id: "l1",
                 priority: "Medium",
-                created_at: new Date().toISOString(),
-              },
-            ],
-          },
-        ],
-      },
-      {
-        id: "c2",
-        country_name: "Sweden",
-        languages: [
-          {
-            id: "l2",
-            language_name: "Swedish",
-            tasks: [
-              {
-                id: "t2",
-                name: "Delivery Showcase",
-                script_status: "In Progress",
-                review_status: "Client Review",
-                talent_status: "Shooting",
-                delivery_status: "R Pending",
-                language_id: "l2",
-                priority: "High",
                 created_at: new Date().toISOString(),
               },
             ],
@@ -106,6 +84,7 @@ const dummyProjects: Project[] = [
           {
             id: "l3",
             language_name: "German",
+            country_id: "c3",
             tasks: [
               {
                 id: "t3",

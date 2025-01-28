@@ -25,7 +25,7 @@ export function useTalents(castingId?: string) {
           native_language,
           experience_level,
           fee_range,
-          users (
+          users!inner (
             id,
             full_name,
             avatar_url
@@ -48,7 +48,14 @@ export function useTalents(castingId?: string) {
         throw error;
       }
 
-      return data as SimplifiedTalent[];
+      return data.map(talent => ({
+        ...talent,
+        users: talent.users || { 
+          id: talent.user_id,
+          full_name: 'Unknown',
+          avatar_url: undefined
+        }
+      })) as SimplifiedTalent[];
     }
   });
 }
