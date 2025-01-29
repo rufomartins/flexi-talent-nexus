@@ -18,7 +18,7 @@ export function useTalents(castingId?: string) {
           duo_name,
           created_at,
           updated_at,
-          users!talent_profiles_user_id_fkey (
+          users:user_id (
             id,
             full_name,
             avatar_url
@@ -30,7 +30,7 @@ export function useTalents(castingId?: string) {
               name
             )
           ),
-          partner:talent_profiles!talent_profiles_partner_id_fkey (
+          partner:partner_id (
             id,
             user_id,
             users (

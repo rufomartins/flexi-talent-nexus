@@ -6,30 +6,36 @@ import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 import { Button } from "@/components/ui/button";
 
+interface UserPermission {
+  id: string;
+  user_id: string;
+  permission_key: string;
+  created_at: string;
+}
+
 export function GeneralSettings() {
   const { toast } = useToast();
 
-  const { data: roles = [], isLoading } = useQuery({
-    queryKey: ['roles'],
+  const { data: permissions = [], isLoading } = useQuery({
+    queryKey: ['permissions'],
     queryFn: async () => {
       const { data, error } = await supabase
-        .from('user_roles')
+        .from('user_permissions')
         .select('*')
-        .order('role');
+        .order('permission_key');
       
       if (error) throw error;
-      return data;
+      return data as UserPermission[];
     }
   });
 
-  const handleTogglePermission = async (roleId: string, permission: string, enabled: boolean) => {
+  const handleTogglePermission = async (userId: string, permission: string, enabled: boolean) => {
     try {
       const { error } = await supabase
         .from('user_permissions')
         .upsert({
-          role_id: roleId,
+          user_id: userId,
           permission_key: permission,
-          enabled
         });
 
       if (error) throw error;
@@ -54,56 +60,6 @@ export function GeneralSettings() {
   return (
     <div className="space-y-6">
       <Card className="p-6">
-        <h3 className="text-lg font-medium mb-4">Role Permissions</h3>
-        
-        <div className="space-y-4">
-          {roles.map((role) => (
-            <div key={role.id} className="space-y-4">
-              <h4 className="font-medium capitalize">{role.role}</h4>
-              
-              <div className="grid gap-4">
-                <div className="flex items-center justify-between">
-                  <Label htmlFor={`${role.id}-view-dashboard`}>
-                    View Dashboard
-                  </Label>
-                  <Switch
-                    id={`${role.id}-view-dashboard`}
-                    onCheckedChange={(checked) => 
-                      handleTogglePermission(role.id, 'view_dashboard', checked)
-                    }
-                  />
-                </div>
-
-                <div className="flex items-center justify-between">
-                  <Label htmlFor={`${role.id}-manage-users`}>
-                    Manage Users
-                  </Label>
-                  <Switch
-                    id={`${role.id}-manage-users`}
-                    onCheckedChange={(checked) => 
-                      handleTogglePermission(role.id, 'manage_users', checked)
-                    }
-                  />
-                </div>
-
-                <div className="flex items-center justify-between">
-                  <Label htmlFor={`${role.id}-view-reports`}>
-                    View Reports
-                  </Label>
-                  <Switch
-                    id={`${role.id}-view-reports`}
-                    onCheckedChange={(checked) => 
-                      handleTogglePermission(role.id, 'view_reports', checked)
-                    }
-                  />
-                </div>
-              </div>
-            </div>
-          ))}
-        </div>
-      </Card>
-
-      <Card className="p-6">
         <h3 className="text-lg font-medium mb-4">Platform Settings</h3>
         
         <div className="space-y-4">
@@ -119,6 +75,26 @@ export function GeneralSettings() {
               Debug Mode
             </Label>
             <Switch id="debug-mode" />
+          </div>
+        </div>
+      </Card>
+
+      <Card className="p-6">
+        <h3 className="text-lg font-medium mb-4">Security Settings</h3>
+        
+        <div className="space-y-4">
+          <div className="flex items-center justify-between">
+            <Label htmlFor="two-factor">
+              Two-Factor Authentication
+            </Label>
+            <Switch id="two-factor" />
+          </div>
+
+          <div className="flex items-center justify-between">
+            <Label htmlFor="session-timeout">
+              Session Timeout
+            </Label>
+            <Switch id="session-timeout" />
           </div>
         </div>
       </Card>

@@ -41,7 +41,7 @@ export interface Project {
   project_manager?: {
     full_name: string;
   };
-  countries?: Country[];
+  countries: Country[];
   created_at: string;
   updated_at: string;
 }
@@ -55,6 +55,10 @@ export interface ProjectTask {
   talent_status: ProjectTalentStatus;
   delivery_status: ProjectDeliveryStatus;
   priority: string;
-  created_at?: string;
+  created_at: string;
   updated_at?: string;
+}
+
+export interface ProjectItem extends ProjectTask {
+  created_at: string;
 }
