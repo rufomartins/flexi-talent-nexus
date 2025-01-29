@@ -3,7 +3,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { ProjectHeader } from "./ProjectHeader";
 import { ProjectStats } from "../ProjectStats";
 import { ProjectItems } from "./ProjectItems";
-import type { Project, ProjectTask } from "@/types/project";
+import type { Project } from "@/types/project";
 
 interface ProjectDetailsProps {
   projectId: string;
@@ -26,19 +26,7 @@ export const ProjectDetails = ({ projectId }: ProjectDetailsProps) => {
             country_name,
             languages:project_languages (
               id,
-              language_name,
-              tasks:project_tasks (
-                id,
-                language_id,
-                name,
-                script_status,
-                review_status,
-                talent_status,
-                delivery_status,
-                priority,
-                created_at,
-                updated_at
-              )
+              language_name
             )
           )
         `)
@@ -60,7 +48,7 @@ export const ProjectDetails = ({ projectId }: ProjectDetailsProps) => {
         .order('created_at', { ascending: false });
 
       if (error) throw error;
-      return data as ProjectTask[];
+      return data;
     },
   });
 

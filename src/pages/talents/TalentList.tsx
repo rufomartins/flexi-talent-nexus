@@ -27,8 +27,16 @@ const TalentList = () => {
       const { data, error } = await supabase
         .from("talent_profiles")
         .select(`
-          *,
-          users!talent_profiles_user_id_fkey (
+          id,
+          user_id,
+          talent_category,
+          country,
+          evaluation_status,
+          is_duo,
+          duo_name,
+          created_at,
+          updated_at,
+          users:user_id (
             id,
             full_name,
             avatar_url
@@ -40,17 +48,22 @@ const TalentList = () => {
               name
             )
           ),
-          partner:talent_profiles!talent_profiles_partner_id_fkey (
+          partner:partner_id (
             id,
             user_id,
-            users (
+            users:user_id (
               id,
               full_name,
               avatar_url
             )
-          )
-        `)
-        .order(sortBy === "name" ? "users(full_name)" : sortBy, { ascending: true });
+          ),
+          native_language,
+          experience_level,
+          fee_range,
+          availability,
+          category,
+          whatsapp_number
+        `);
 
       if (error) {
         toast({
@@ -61,23 +74,7 @@ const TalentList = () => {
         throw error;
       }
 
-      return data.map(talent => ({
-        ...talent,
-        users: talent.users || { 
-          id: talent.user_id,
-          full_name: 'Unknown',
-          avatar_url: null
-        },
-        casting_talents: talent.casting_talents || [],
-        partner: talent.partner ? {
-          ...talent.partner,
-          users: talent.partner.users || {
-            id: talent.partner.user_id,
-            full_name: 'Unknown Partner',
-            avatar_url: null
-          }
-        } : null
-      })) as TalentProfile[];
+      return data as TalentProfile[];
     },
   });
 
