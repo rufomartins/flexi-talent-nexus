@@ -4,7 +4,7 @@ import { ProjectHeader } from "./ProjectHeader";
 import { ProjectStats } from "../ProjectStats";
 import { ProjectItems } from "./ProjectItems";
 import type { Project } from "@/types/project";
-import type { ProjectTask } from "../types";
+import type { ProjectItem, ProjectTask } from "../types";
 
 interface ProjectDetailsProps {
   projectId: string;
@@ -55,7 +55,15 @@ export const ProjectDetails = ({ projectId }: ProjectDetailsProps) => {
         .order('created_at', { ascending: false });
 
       if (error) throw error;
-      return data as ProjectTask[];
+      
+      // Transform ProjectTask[] to ProjectItem[]
+      return (data as ProjectTask[]).map(task => ({
+        ...task,
+        language: task.language || {
+          id: task.language_id,
+          language_name: 'Unknown'
+        }
+      })) as ProjectItem[];
     },
   });
 

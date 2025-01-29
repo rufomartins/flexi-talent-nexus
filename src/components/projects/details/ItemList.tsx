@@ -1,4 +1,5 @@
 import { ProjectItem } from "../types";
+import { ItemCard } from "./ItemCard";
 
 interface ItemListProps {
   items: ProjectItem[];
