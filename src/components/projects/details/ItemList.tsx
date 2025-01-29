@@ -1,5 +1,4 @@
-import { ProjectItem } from "@/components/projects/types";
-import { ItemCard } from "./ItemCard";
+import { ProjectItem } from "../types";
 
 interface ItemListProps {
   items: ProjectItem[];

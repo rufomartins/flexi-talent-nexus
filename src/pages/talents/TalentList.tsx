@@ -74,7 +74,24 @@ const TalentList = () => {
         throw error;
       }
 
-      return data as TalentProfile[];
+      return data.map(talent => ({
+        ...talent,
+        users: talent.users || { 
+          id: talent.user_id,
+          full_name: 'Unknown',
+          avatar_url: null
+        },
+        casting_talents: talent.casting_talents || [],
+        partner: talent.partner ? {
+          id: talent.partner.id,
+          user_id: talent.partner.user_id,
+          users: talent.partner.users || {
+            id: talent.partner.user_id,
+            full_name: 'Unknown Partner',
+            avatar_url: null
+          }
+        } : null
+      })) as TalentProfile[];
     },
   });
 

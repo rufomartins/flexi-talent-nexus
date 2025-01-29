@@ -4,6 +4,7 @@ import { ProjectHeader } from "./ProjectHeader";
 import { ProjectStats } from "../ProjectStats";
 import { ProjectItems } from "./ProjectItems";
 import type { Project } from "@/types/project";
+import type { ProjectTask } from "../types";
 
 interface ProjectDetailsProps {
   projectId: string;
@@ -43,12 +44,18 @@ export const ProjectDetails = ({ projectId }: ProjectDetailsProps) => {
     queryFn: async () => {
       const { data, error } = await supabase
         .from('project_tasks')
-        .select('*')
+        .select(`
+          *,
+          language:project_languages (
+            id,
+            language_name
+          )
+        `)
         .eq('project_id', projectId)
         .order('created_at', { ascending: false });
 
       if (error) throw error;
-      return data;
+      return data as ProjectTask[];
     },
   });
 

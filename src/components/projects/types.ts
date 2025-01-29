@@ -16,3 +16,7 @@ export interface ProjectTask {
   created_at: string;
   updated_at?: string;
 }
+
+export interface ProjectItem extends ProjectTask {
+  language: Language;
+}
