@@ -62,3 +62,13 @@ export interface ProjectTask {
 export interface ProjectItem extends ProjectTask {
   created_at: string;
 }
+
+export interface ShotList {
+  id?: string;
+  task_id: string;
+  name: string;
+  shared_with?: any;
+  version?: number;
+  created_at?: string;
+  updated_at?: string;
+}

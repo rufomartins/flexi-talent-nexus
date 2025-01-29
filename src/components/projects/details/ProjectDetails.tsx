@@ -27,7 +27,18 @@ export const ProjectDetails = ({ projectId }: ProjectDetailsProps) => {
             languages:project_languages (
               id,
               language_name,
-              tasks:project_tasks (*)
+              tasks:project_tasks (
+                id,
+                language_id,
+                name,
+                script_status,
+                review_status,
+                talent_status,
+                delivery_status,
+                priority,
+                created_at,
+                updated_at
+              )
             )
           )
         `)
