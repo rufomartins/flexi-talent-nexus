@@ -1025,6 +1025,33 @@ export type Database = {
         }
         Relationships: []
       }
+      feature_toggles: {
+        Row: {
+          created_at: string | null
+          enabled: boolean | null
+          feature_key: string
+          id: string
+          role: string
+          updated_at: string | null
+        }
+        Insert: {
+          created_at?: string | null
+          enabled?: boolean | null
+          feature_key: string
+          id?: string
+          role: string
+          updated_at?: string | null
+        }
+        Update: {
+          created_at?: string | null
+          enabled?: boolean | null
+          feature_key?: string
+          id?: string
+          role?: string
+          updated_at?: string | null
+        }
+        Relationships: []
+      }
       guest_selections: {
         Row: {
           casting_id: string | null
