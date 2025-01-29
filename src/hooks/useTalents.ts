@@ -33,7 +33,7 @@ export function useTalents(castingId?: string) {
           partner:partner_id (
             id,
             user_id,
-            users (
+            users:user_id (
               id,
               full_name,
               avatar_url
@@ -60,7 +60,8 @@ export function useTalents(castingId?: string) {
           avatar_url: null
         },
         partner: talent.partner ? {
-          ...talent.partner,
+          id: talent.partner.id,
+          user_id: talent.partner.user_id,
           users: talent.partner.users || {
             id: talent.partner.user_id,
             full_name: 'Unknown Partner',

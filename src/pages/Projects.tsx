@@ -39,7 +39,6 @@ const statusColors = {
   },
 };
 
-// Update dummyProjects with proper typing
 const dummyProjects: Project[] = [
   {
     id: "1",
@@ -52,7 +51,6 @@ const dummyProjects: Project[] = [
           {
             id: "l1",
             language_name: "Finnish",
-            country_id: "c1",
             tasks: [
               {
                 id: "t1",
@@ -72,6 +70,7 @@ const dummyProjects: Project[] = [
     ],
     created_at: new Date().toISOString(),
     updated_at: new Date().toISOString(),
+    status: 'active'
   },
   {
     id: "2",

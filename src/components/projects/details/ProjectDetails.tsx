@@ -21,13 +21,13 @@ export const ProjectDetails = ({ projectId }: ProjectDetailsProps) => {
             id,
             name
           ),
-          countries (
+          countries:project_countries (
             id,
             country_name,
-            languages (
+            languages:project_languages (
               id,
               language_name,
-              tasks: project_tasks (*)
+              tasks:project_tasks (*)
             )
           )
         `)

@@ -4,7 +4,7 @@ export function CalendarSettings() {
   return (
     <Card className="p-6">
       <h3 className="text-lg font-medium mb-4">Calendar Settings</h3>
-      <p className="text-muted-foreground">Configure calendar and scheduling settings.</p>
+      {/* TODO: Implement calendar settings */}
     </Card>
   );
 }
