@@ -43,7 +43,6 @@ export function CandidateList({ candidates, isLoading, error, stage }: Candidate
     }
   };
 
-  // Add real-time subscription for status updates
   useEffect(() => {
     const channel = supabase
       .channel('status-updates')

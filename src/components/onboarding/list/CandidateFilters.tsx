@@ -25,18 +25,19 @@ export function CandidateFilters({
         />
       </div>
       <Select
-        value={statusFilter}
+        value={statusFilter || "all"}
         onValueChange={onStatusFilterChange}
       >
         <SelectTrigger className="w-[180px]">
           <SelectValue placeholder="Filter by status" />
         </SelectTrigger>
         <SelectContent>
-          <SelectItem value="">All statuses</SelectItem>
+          <SelectItem value="all">All statuses</SelectItem>
           <SelectItem value="new">New</SelectItem>
           <SelectItem value="emailed">Emailed</SelectItem>
           <SelectItem value="interviewed">Interviewed</SelectItem>
           <SelectItem value="approved">Approved</SelectItem>
+          <SelectItem value="not_interested">Not Interested</SelectItem>
         </SelectContent>
       </Select>
     </div>
