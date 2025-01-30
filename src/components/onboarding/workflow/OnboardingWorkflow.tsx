@@ -117,6 +117,7 @@ export function OnboardingWorkflow() {
             candidates={candidates?.filter(c => c.stage === "ingest") || []}
             isLoading={isLoading}
             error={error as Error}
+            stage="ingest"
           />
         </TabsContent>
 
@@ -125,6 +126,7 @@ export function OnboardingWorkflow() {
             candidates={candidates?.filter(c => c.stage === "process") || []}
             isLoading={isLoading}
             error={error as Error}
+            stage="process"
           />
         </TabsContent>
 
@@ -133,6 +135,7 @@ export function OnboardingWorkflow() {
             candidates={candidates?.filter(c => c.stage === "screening") || []}
             isLoading={isLoading}
             error={error as Error}
+            stage="screening"
           />
         </TabsContent>
 
@@ -141,6 +144,7 @@ export function OnboardingWorkflow() {
             candidates={candidates?.filter(c => c.stage === "results") || []}
             isLoading={isLoading}
             error={error as Error}
+            stage="results"
           />
         </TabsContent>
       </Tabs>

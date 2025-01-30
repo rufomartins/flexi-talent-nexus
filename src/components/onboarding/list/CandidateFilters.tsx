@@ -6,6 +6,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import { Input } from "@/components/ui/input";
 
 interface CandidateFiltersProps {
   statusFilter: string;
@@ -23,12 +24,11 @@ export function CandidateFilters({
   return (
     <div className="flex items-center gap-4">
       <div className="flex-1">
-        <input
-          type="text"
+        <Input
           placeholder="Search candidates..."
           value={searchQuery}
           onChange={(e) => onSearchQueryChange(e.target.value)}
-          className="w-full max-w-sm px-3 py-2 border rounded-md"
+          className="max-w-sm"
         />
       </div>
       <Select value={statusFilter} onValueChange={onStatusFilterChange}>
@@ -37,11 +37,12 @@ export function CandidateFilters({
           <SelectValue placeholder="Filter by status" />
         </SelectTrigger>
         <SelectContent>
-          <SelectItem value="all">All Candidates</SelectItem>
-          <SelectItem value="under_evaluation">Under Evaluation</SelectItem>
+          <SelectItem value="all">All Statuses</SelectItem>
+          <SelectItem value="new">New</SelectItem>
+          <SelectItem value="emailed">Emailed</SelectItem>
+          <SelectItem value="interviewed">Interviewed</SelectItem>
           <SelectItem value="approved">Approved</SelectItem>
-          <SelectItem value="rejected">Rejected</SelectItem>
-          <SelectItem value="archived">Archived</SelectItem>
+          <SelectItem value="not_interested">Not Interested</SelectItem>
         </SelectContent>
       </Select>
     </div>
