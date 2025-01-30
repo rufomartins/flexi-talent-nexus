@@ -11,6 +11,7 @@ import type { Candidate } from "@/types/onboarding";
 
 export function OnboardingWorkflow() {
   const [currentStage, setCurrentStage] = useState<string>("ingest");
+  const [selectedFile, setSelectedFile] = useState<File | null>(null);
   const { toast } = useToast();
 
   const { data: candidates, isLoading, error } = useQuery({
@@ -52,8 +53,8 @@ export function OnboardingWorkflow() {
           name: row.full_name,
           email: row.public_email,
           phone: row.public_phone,
-          status: "new",
-          stage: "ingest",
+          status: "new" as const, // Explicitly set as 'new' to match enum
+          stage: "ingest" as const,
           username: row.username,
           followers_count: row.followers_count,
           following_count: row.following_count,
@@ -69,6 +70,8 @@ export function OnboardingWorkflow() {
         title: "Success",
         description: `Successfully imported ${data.length} candidates`,
       });
+      
+      setSelectedFile(null);
     } catch (error: any) {
       console.error("Error importing candidates:", error);
       toast({
@@ -92,16 +95,37 @@ export function OnboardingWorkflow() {
         <TabsContent value="ingest" className="space-y-4">
           <div className="rounded-lg border p-4">
             <h3 className="text-lg font-medium mb-4">Import Candidates</h3>
-            <ExcelParser
-              onValidDataReceived={handleValidDataReceived}
-              onError={(error) => {
-                toast({
-                  title: "Error",
-                  description: error,
-                  variant: "destructive",
-                });
-              }}
-            />
+            {selectedFile && (
+              <ExcelParser
+                file={selectedFile}
+                onValidDataReceived={handleValidDataReceived}
+                onError={(error) => {
+                  toast({
+                    title: "Error",
+                    description: error,
+                    variant: "destructive",
+                  });
+                }}
+              />
+            )}
+            <div className="mt-4">
+              <input
+                type="file"
+                accept=".xlsx,.xls"
+                onChange={(e) => {
+                  const file = e.target.files?.[0];
+                  if (file) {
+                    setSelectedFile(file);
+                  }
+                }}
+                className="block w-full text-sm text-gray-500
+                  file:mr-4 file:py-2 file:px-4
+                  file:rounded-full file:border-0
+                  file:text-sm file:font-semibold
+                  file:bg-primary file:text-white
+                  hover:file:bg-primary/90"
+              />
+            </div>
           </div>
         </TabsContent>
 

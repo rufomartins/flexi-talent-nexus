@@ -3,7 +3,8 @@ export interface Candidate {
   name: string;
   email: string;
   phone: string;
-  status: string;
+  status: 'new' | 'emailed' | 'interviewed' | 'approved' | 'not_interested';
+  stage: 'ingest' | 'process' | 'screening' | 'results';
   created_at: string;
   communication_status?: 'email_sent' | 'sms_sent' | 'no_response';
   scout?: {
