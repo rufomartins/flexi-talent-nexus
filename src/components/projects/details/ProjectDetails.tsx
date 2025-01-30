@@ -17,7 +17,16 @@ export const ProjectDetails = ({ projectId }: ProjectDetailsProps) => {
       const { data, error } = await supabase
         .from('projects')
         .select(`
-          *,
+          id,
+          name,
+          description,
+          status,
+          type,
+          completion_percentage,
+          active_tasks_count,
+          upcoming_deadlines_count,
+          created_at,
+          updated_at,
           client:clients (
             id,
             name
@@ -45,7 +54,16 @@ export const ProjectDetails = ({ projectId }: ProjectDetailsProps) => {
       const { data, error } = await supabase
         .from('project_tasks')
         .select(`
-          *,
+          id,
+          language_id,
+          name,
+          script_status,
+          review_status,
+          talent_status,
+          delivery_status,
+          priority,
+          created_at,
+          updated_at,
           language:project_languages (
             id,
             language_name

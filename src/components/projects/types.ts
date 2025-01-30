@@ -1,7 +1,6 @@
 export interface Language {
   id: string;
   language_name: string;
-  tasks?: ProjectTask[];
 }
 
 export interface ProjectTask {
