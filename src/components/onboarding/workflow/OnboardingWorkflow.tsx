@@ -19,10 +19,15 @@ export function OnboardingWorkflow() {
         .select(`
           id,
           name,
+          first_name,
+          last_name,
           email,
           phone,
           status,
           stage,
+          language,
+          source,
+          remarks,
           created_at,
           communication_status,
           scout:scout_id (
@@ -41,17 +46,16 @@ export function OnboardingWorkflow() {
     try {
       const { error } = await supabase.from("onboarding_candidates").insert(
         data.map(row => ({
-          name: row.full_name,
+          name: `${row.first_name} ${row.last_name}`,
+          first_name: row.first_name,
+          last_name: row.last_name,
           email: row.public_email,
           phone: row.public_phone,
           status: "new" as const,
           stage: "ingest" as const,
-          username: row.username,
-          followers_count: row.followers_count,
-          following_count: row.following_count,
-          profile_url: row.profile_url,
-          external_url: row.external_url,
-          biography: row.biography
+          language: row.native_language,
+          source: "excel_import",
+          remarks: ""
         }))
       );
 
@@ -65,7 +69,18 @@ export function OnboardingWorkflow() {
   return (
     <div className="space-y-6">
       {/* Communication Metrics - Always visible at top */}
-      <CommunicationMetrics />
+      <div className="grid grid-cols-4 gap-4">
+        <CommunicationMetrics 
+          ingestCount={candidates?.filter(c => c.stage === "ingest").length || 0}
+          processCount={candidates?.filter(c => c.stage === "process").length || 0}
+          emailsSent={0} // TODO: Add real metrics
+          emailsFailed={0}
+          interviewsScheduled={0}
+          chatbotConfirmed={0}
+          chatbotDeclined={0}
+          preScreeningPending={0}
+        />
+      </div>
 
       <Tabs value={currentStage} onValueChange={setCurrentStage}>
         <TabsList className="grid w-full grid-cols-4">
@@ -125,6 +140,15 @@ export function OnboardingWorkflow() {
         </TabsContent>
 
         <TabsContent value="screening">
+          <div className="border-b mb-4">
+            <nav className="flex space-x-4">
+              <a href="#pre-screening" className="px-3 py-2 text-sm font-medium text-muted-foreground hover:text-foreground">Pre-Screening</a>
+              <a href="#interviews" className="px-3 py-2 text-sm font-medium text-muted-foreground hover:text-foreground">Interviews</a>
+              <a href="#inbox" className="px-3 py-2 text-sm font-medium text-muted-foreground hover:text-foreground">Inbox</a>
+              <a href="#chat" className="px-3 py-2 text-sm font-medium text-muted-foreground hover:text-foreground">Chat</a>
+              <a href="#calendar" className="px-3 py-2 text-sm font-medium text-muted-foreground hover:text-foreground">Calendar</a>
+            </nav>
+          </div>
           <CandidateList
             candidates={candidates?.filter(c => c.stage === "screening") || []}
             isLoading={isLoading}
