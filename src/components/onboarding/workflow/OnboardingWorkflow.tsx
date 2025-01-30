@@ -1,18 +1,15 @@
 import { useState } from "react";
-import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { ExcelParser } from "../ExcelParser";
 import { CandidateList } from "../CandidateList";
+import { CommunicationMetrics } from "../list/CommunicationMetrics";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
-import { useToast } from "@/hooks/use-toast";
-import type { ExcelRowData } from "@/utils/excelValidation";
-import type { Candidate } from "@/types/onboarding";
+import type { Candidate, ExcelRowData } from "@/types/onboarding";
 
 export function OnboardingWorkflow() {
   const [currentStage, setCurrentStage] = useState<string>("ingest");
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
-  const { toast } = useToast();
 
   const { data: candidates, isLoading, error } = useQuery({
     queryKey: ["onboarding-candidates"],
@@ -65,25 +62,17 @@ export function OnboardingWorkflow() {
       );
 
       if (error) throw error;
-
-      toast({
-        title: "Success",
-        description: `Successfully imported ${data.length} candidates`,
-      });
-      
       setSelectedFile(null);
     } catch (error: any) {
       console.error("Error importing candidates:", error);
-      toast({
-        title: "Error",
-        description: "Failed to import candidates",
-        variant: "destructive",
-      });
     }
   };
 
   return (
     <div className="space-y-6">
+      {/* Communication Metrics - Always visible at top */}
+      <CommunicationMetrics />
+
       <Tabs value={currentStage} onValueChange={setCurrentStage}>
         <TabsList className="grid w-full grid-cols-4">
           <TabsTrigger value="ingest">Ingest</TabsTrigger>
@@ -100,11 +89,7 @@ export function OnboardingWorkflow() {
                 file={selectedFile}
                 onValidDataReceived={handleValidDataReceived}
                 onError={(error) => {
-                  toast({
-                    title: "Error",
-                    description: error,
-                    variant: "destructive",
-                  });
+                  console.error("Excel parsing error:", error);
                 }}
               />
             )}
@@ -127,6 +112,12 @@ export function OnboardingWorkflow() {
               />
             </div>
           </div>
+
+          <CandidateList
+            candidates={candidates?.filter(c => c.stage === "ingest") || []}
+            isLoading={isLoading}
+            error={error as Error}
+          />
         </TabsContent>
 
         <TabsContent value="process">
