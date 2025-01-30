@@ -4,7 +4,7 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { Badge } from "@/components/ui/badge";
 import type { Candidate } from "@/types/onboarding";
 
-interface CandidateTableProps {
+export interface CandidateTableProps {
   candidates: Candidate[];
   selectedCandidates: Candidate[];
   onSelectCandidate: (candidate: Candidate) => void;

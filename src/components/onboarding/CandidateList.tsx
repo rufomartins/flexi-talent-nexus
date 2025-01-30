@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
@@ -123,7 +123,6 @@ export function CandidateList({ candidates, isLoading, error, stage }: Candidate
         case 'contact':
           setIsEmailComposerOpen(true);
           return;
-        // Add other actions as needed
       }
 
       toast({

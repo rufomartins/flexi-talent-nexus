@@ -1,8 +1,7 @@
 import { Mail, MessageSquare } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import type { Candidate } from "@/types/onboarding";
 
-interface BulkActionsProps {
+export interface BulkActionsProps {
   selectedCount: number;
   onEmailClick: () => void;
   onSmsClick: () => void;
