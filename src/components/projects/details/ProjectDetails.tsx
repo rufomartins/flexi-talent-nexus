@@ -3,7 +3,6 @@ import { supabase } from "@/integrations/supabase/client";
 import { ProjectHeader } from "./ProjectHeader";
 import { ProjectStats } from "../ProjectStats";
 import { ProjectItems } from "./ProjectItems";
-import type { Project } from "@/types/project";
 
 interface ProjectDetailsProps {
   projectId: string;

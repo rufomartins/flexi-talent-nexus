@@ -7,30 +7,38 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { CandidateActions } from "./CandidateActions";
-
-interface Candidate {
-  id: string;
-  name: string;
-  email: string;
-  phone: string;
-  status: 'new' | 'emailed' | 'interviewed' | 'approved' | 'not_interested';
-  scout: {
-    id: string;
-    full_name: string;
-  } | null;
-}
+import type { Candidate } from "@/types/onboarding";
 
 interface CandidateTableProps {
   candidates: Candidate[];
+  selectedCandidates: Candidate[];
+  onSelectCandidate: (candidate: Candidate) => void;
+  onSelectAll: (checked: boolean) => void;
+  stage: "ingest" | "process" | "screening" | "results";
   getStatusColor: (status: string) => string;
 }
 
-export function CandidateTable({ candidates, getStatusColor }: CandidateTableProps) {
+export function CandidateTable({ 
+  candidates, 
+  selectedCandidates,
+  onSelectCandidate,
+  onSelectAll,
+  stage,
+  getStatusColor 
+}: CandidateTableProps) {
   return (
     <div className="rounded-md border">
       <Table>
         <TableHeader>
           <TableRow>
+            <TableHead className="w-12">
+              <input
+                type="checkbox"
+                checked={selectedCandidates.length === candidates.length}
+                onChange={(e) => onSelectAll(e.target.checked)}
+                className="h-4 w-4 rounded border-gray-300"
+              />
+            </TableHead>
             <TableHead>Name</TableHead>
             <TableHead>Email</TableHead>
             <TableHead>Phone</TableHead>
@@ -42,6 +50,14 @@ export function CandidateTable({ candidates, getStatusColor }: CandidateTablePro
         <TableBody>
           {candidates.map((candidate) => (
             <TableRow key={candidate.id}>
+              <TableCell>
+                <input
+                  type="checkbox"
+                  checked={selectedCandidates.some(c => c.id === candidate.id)}
+                  onChange={() => onSelectCandidate(candidate)}
+                  className="h-4 w-4 rounded border-gray-300"
+                />
+              </TableCell>
               <TableCell className="font-medium">{candidate.name}</TableCell>
               <TableCell>{candidate.email}</TableCell>
               <TableCell>{candidate.phone}</TableCell>
