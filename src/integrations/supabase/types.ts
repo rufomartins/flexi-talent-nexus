@@ -1409,15 +1409,19 @@ export type Database = {
         Row: {
           archive_status: boolean | null
           biography: string | null
+          chatbot_status: string | null
           communication_status: string | null
           created_at: string
+          date_added_to_screening: string | null
           email: string
           external_url: string | null
           first_name: string | null
           followers_count: number | null
           following_count: number | null
           id: string
+          interview_date: string | null
           language: string | null
+          last_activity_date: string | null
           last_name: string | null
           name: string
           notes: string | null
@@ -1437,15 +1441,19 @@ export type Database = {
         Insert: {
           archive_status?: boolean | null
           biography?: string | null
+          chatbot_status?: string | null
           communication_status?: string | null
           created_at?: string
+          date_added_to_screening?: string | null
           email: string
           external_url?: string | null
           first_name?: string | null
           followers_count?: number | null
           following_count?: number | null
           id?: string
+          interview_date?: string | null
           language?: string | null
+          last_activity_date?: string | null
           last_name?: string | null
           name: string
           notes?: string | null
@@ -1465,15 +1473,19 @@ export type Database = {
         Update: {
           archive_status?: boolean | null
           biography?: string | null
+          chatbot_status?: string | null
           communication_status?: string | null
           created_at?: string
+          date_added_to_screening?: string | null
           email?: string
           external_url?: string | null
           first_name?: string | null
           followers_count?: number | null
           following_count?: number | null
           id?: string
+          interview_date?: string | null
           language?: string | null
+          last_activity_date?: string | null
           last_name?: string | null
           name?: string
           notes?: string | null
@@ -1503,6 +1515,38 @@ export type Database = {
             columns: ["scout_id"]
             isOneToOne: false
             referencedRelation: "users"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      onboarding_chat_messages: {
+        Row: {
+          candidate_id: string | null
+          created_at: string | null
+          id: string
+          message: string
+          sender_type: string
+        }
+        Insert: {
+          candidate_id?: string | null
+          created_at?: string | null
+          id?: string
+          message: string
+          sender_type: string
+        }
+        Update: {
+          candidate_id?: string | null
+          created_at?: string | null
+          id?: string
+          message?: string
+          sender_type?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "onboarding_chat_messages_candidate_id_fkey"
+            columns: ["candidate_id"]
+            isOneToOne: false
+            referencedRelation: "onboarding_candidates"
             referencedColumns: ["id"]
           },
         ]
@@ -1624,6 +1668,71 @@ export type Database = {
           recipient?: string
           sender?: string
           subject?: string | null
+        }
+        Relationships: []
+      }
+      onboarding_interviews: {
+        Row: {
+          candidate_id: string | null
+          created_at: string | null
+          id: string
+          notes: string | null
+          scheduled_at: string
+          status: string | null
+          updated_at: string | null
+        }
+        Insert: {
+          candidate_id?: string | null
+          created_at?: string | null
+          id?: string
+          notes?: string | null
+          scheduled_at: string
+          status?: string | null
+          updated_at?: string | null
+        }
+        Update: {
+          candidate_id?: string | null
+          created_at?: string | null
+          id?: string
+          notes?: string | null
+          scheduled_at?: string
+          status?: string | null
+          updated_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "onboarding_interviews_candidate_id_fkey"
+            columns: ["candidate_id"]
+            isOneToOne: false
+            referencedRelation: "onboarding_candidates"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      onboarding_settings: {
+        Row: {
+          allowed_roles: string[] | null
+          created_at: string | null
+          feature_key: string
+          id: string
+          is_enabled: boolean | null
+          updated_at: string | null
+        }
+        Insert: {
+          allowed_roles?: string[] | null
+          created_at?: string | null
+          feature_key: string
+          id?: string
+          is_enabled?: boolean | null
+          updated_at?: string | null
+        }
+        Update: {
+          allowed_roles?: string[] | null
+          created_at?: string | null
+          feature_key?: string
+          id?: string
+          is_enabled?: boolean | null
+          updated_at?: string | null
         }
         Relationships: []
       }
