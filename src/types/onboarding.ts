@@ -1,10 +1,15 @@
 export interface Candidate {
   id: string;
   name: string;
+  first_name: string;
+  last_name: string;
   email: string;
   phone: string;
   status: 'new' | 'emailed' | 'interviewed' | 'approved' | 'not_interested';
   stage: 'ingest' | 'process' | 'screening' | 'results';
+  language: string;
+  source: string;
+  remarks: string;
   scout: {
     id: string;
     full_name: string;
@@ -15,31 +20,29 @@ export interface Candidate {
 }
 
 export interface ExcelRowData {
-  full_name: string;
-  public_email: string;
-  public_phone?: string;
-  followers_count?: number;
-  following_count?: number;
-  profile_url?: string;
-  external_url?: string;
-  biography?: string;
-  username: string;
+  first_name: string;
+  last_name: string;
+  email: string;
+  phone?: string;
+  language: string;
+  native_language: string;
+  source?: string;
+  remarks?: string;
 }
 
-export interface CandidateStats {
-  ingested: number;
-  inProcess: number;
-  emailsSent: number;
-  emailsFailed: number;
-  interviewsScheduled: number;
-  chatbotConfirmed: number;
-  chatbotDeclined: number;
-  preScreeningPending: number;
+export interface CandidateTableProps {
+  candidates: Candidate[];
+  selectedCandidates: Candidate[];
+  onSelectCandidate: (candidate: Candidate) => void;
+  onSelectAll: (checked: boolean) => void;
+  stage: 'ingest' | 'process' | 'screening' | 'results';
+  getStatusColor: (status: string) => string;
 }
 
-export type CandidateStage = 'ingest' | 'process' | 'screening' | 'results';
-
-export interface CandidateAction {
-  label: string;
-  action: string;
+export interface CandidateActionsProps {
+  candidateId: string;
+  candidateName: string;
+  email?: string;
+  phone?: string;
+  stage: 'ingest' | 'process' | 'screening' | 'results';
 }

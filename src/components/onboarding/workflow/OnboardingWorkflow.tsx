@@ -49,13 +49,13 @@ export function OnboardingWorkflow() {
           name: `${row.first_name} ${row.last_name}`,
           first_name: row.first_name,
           last_name: row.last_name,
-          email: row.public_email,
-          phone: row.public_phone,
+          email: row.email,
+          phone: row.phone,
           status: "new" as const,
           stage: "ingest" as const,
           language: row.native_language,
-          source: "excel_import",
-          remarks: ""
+          source: row.source || "excel_import",
+          remarks: row.remarks || ""
         }))
       );
 

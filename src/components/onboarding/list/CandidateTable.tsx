@@ -8,22 +8,15 @@ import {
 } from "@/components/ui/table";
 import { Checkbox } from "@/components/ui/checkbox";
 import { CandidateActions } from "./CandidateActions";
-import type { Candidate } from "@/types/onboarding";
-
-interface CandidateTableProps {
-  candidates: Candidate[];
-  selectedCandidates: Candidate[];
-  onSelectCandidate: (candidate: Candidate) => void;
-  onSelectAll: (checked: boolean) => void;
-  stage: "ingest" | "process" | "screening" | "results";
-}
+import type { CandidateTableProps } from "@/types/onboarding";
 
 export function CandidateTable({ 
   candidates,
   selectedCandidates,
   onSelectCandidate,
   onSelectAll,
-  stage
+  stage,
+  getStatusColor
 }: CandidateTableProps) {
   return (
     <div className="rounded-md border">
@@ -68,6 +61,8 @@ export function CandidateTable({
                 <CandidateActions 
                   candidateId={candidate.id}
                   candidateName={candidate.name}
+                  email={candidate.email}
+                  phone={candidate.phone}
                   stage={stage}
                 />
               </TableCell>
