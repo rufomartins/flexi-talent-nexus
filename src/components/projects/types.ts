@@ -14,7 +14,7 @@ export interface ProjectTask {
   priority?: string;
   created_at: string;
   updated_at?: string;
-  language?: Language; // Make language optional in ProjectTask
+  language?: Language; // Optional in ProjectTask
 }
 
 export interface ProjectItem extends ProjectTask {
