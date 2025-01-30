@@ -37,13 +37,14 @@ export function PreviewTable({
                 onCheckedChange={onToggleAll}
               />
             </TableHead>
-            <TableHead>Full Name</TableHead>
+            <TableHead>First Name</TableHead>
+            <TableHead>Last Name</TableHead>
             <TableHead>Email</TableHead>
             <TableHead>Phone</TableHead>
-            <TableHead>Username</TableHead>
-            <TableHead>Followers</TableHead>
-            <TableHead>Following</TableHead>
-            <TableHead>Profile URL</TableHead>
+            <TableHead>Language</TableHead>
+            <TableHead>Native Language</TableHead>
+            <TableHead>Source</TableHead>
+            <TableHead>Remarks</TableHead>
             <TableHead>Status</TableHead>
           </TableRow>
         </TableHeader>
@@ -63,32 +64,33 @@ export function PreviewTable({
                 </TableCell>
                 <TableCell>
                   <div className="space-y-1">
-                    <span>{row.full_name}</span>
-                    {rowErrors?.full_name && (
-                      <p className="text-xs text-destructive">{rowErrors.full_name}</p>
+                    <span>{row.first_name}</span>
+                    {rowErrors?.first_name && (
+                      <p className="text-xs text-destructive">{rowErrors.first_name}</p>
                     )}
                   </div>
                 </TableCell>
                 <TableCell>
                   <div className="space-y-1">
-                    <span>{row.public_email}</span>
-                    {rowErrors?.public_email && (
-                      <p className="text-xs text-destructive">{rowErrors.public_email}</p>
+                    <span>{row.last_name}</span>
+                    {rowErrors?.last_name && (
+                      <p className="text-xs text-destructive">{rowErrors.last_name}</p>
                     )}
                   </div>
                 </TableCell>
-                <TableCell>{row.public_phone}</TableCell>
-                <TableCell>{row.username}</TableCell>
-                <TableCell>{row.followers_count}</TableCell>
-                <TableCell>{row.following_count}</TableCell>
                 <TableCell>
                   <div className="space-y-1">
-                    <span>{row.profile_url}</span>
-                    {rowErrors?.profile_url && (
-                      <p className="text-xs text-destructive">{rowErrors.profile_url}</p>
+                    <span>{row.email}</span>
+                    {rowErrors?.email && (
+                      <p className="text-xs text-destructive">{rowErrors.email}</p>
                     )}
                   </div>
                 </TableCell>
+                <TableCell>{row.phone}</TableCell>
+                <TableCell>{row.language}</TableCell>
+                <TableCell>{row.native_language}</TableCell>
+                <TableCell>{row.source}</TableCell>
+                <TableCell>{row.remarks}</TableCell>
                 <TableCell>
                   {hasErrors ? (
                     <span className="text-destructive font-medium">Error</span>
