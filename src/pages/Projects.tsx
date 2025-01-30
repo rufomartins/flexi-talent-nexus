@@ -83,7 +83,6 @@ const dummyProjects: Project[] = [
           {
             id: "l3",
             language_name: "German",
-            country_id: "c3",
             tasks: [
               {
                 id: "t3",
