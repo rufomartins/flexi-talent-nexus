@@ -2,23 +2,14 @@ import { z } from "zod";
 
 // Define the schema for a single row of Excel data
 export const excelRowSchema = z.object({
-  full_name: z.string().min(1, "Full name is required"),
-  public_email: z.string().email("Invalid email format").optional().nullable(),
-  public_phone: z.string().optional().nullable(),
-  followers_count: z.string()
-    .transform((val) => parseInt(val))
-    .refine((val) => !isNaN(val), "Followers count must be a valid number")
-    .optional()
-    .nullable(),
-  following_count: z.string()
-    .transform((val) => parseInt(val))
-    .refine((val) => !isNaN(val), "Following count must be a valid number")
-    .optional()
-    .nullable(),
-  profile_url: z.string().url("Invalid profile URL").optional().nullable(),
-  external_url: z.string().url("Invalid external URL").optional().nullable(),
-  biography: z.string().optional().nullable(),
-  username: z.string().min(1, "Username is required"),
+  first_name: z.string().min(1, "First name is required"),
+  last_name: z.string().min(1, "Last name is required"),
+  email: z.string().email("Invalid email format"),
+  phone: z.string().optional().nullable(),
+  language: z.string().min(1, "Language is required"),
+  native_language: z.string().min(1, "Native language is required"),
+  source: z.string().optional().nullable(),
+  remarks: z.string().optional().nullable(),
 });
 
 export type ExcelRowData = z.infer<typeof excelRowSchema>;

@@ -8,6 +8,7 @@ export interface Candidate {
   status: 'new' | 'emailed' | 'interviewed' | 'approved' | 'not_interested';
   stage: 'ingest' | 'process' | 'screening' | 'results';
   language: string;
+  native_language: string;
   source: string;
   remarks: string;
   scout: {

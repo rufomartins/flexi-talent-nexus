@@ -53,7 +53,8 @@ export function OnboardingWorkflow() {
           phone: row.phone,
           status: "new" as const,
           stage: "ingest" as const,
-          language: row.native_language,
+          language: row.language,
+          native_language: row.native_language,
           source: row.source || "excel_import",
           remarks: row.remarks || ""
         }))
