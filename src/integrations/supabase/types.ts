@@ -1168,6 +1168,27 @@ export type Database = {
           },
         ]
       }
+      languages: {
+        Row: {
+          code: string
+          created_at: string | null
+          id: string
+          name: string
+        }
+        Insert: {
+          code: string
+          created_at?: string | null
+          id?: string
+          name: string
+        }
+        Update: {
+          code?: string
+          created_at?: string | null
+          id?: string
+          name?: string
+        }
+        Relationships: []
+      }
       locations: {
         Row: {
           address: string | null
@@ -1386,20 +1407,26 @@ export type Database = {
       }
       onboarding_candidates: {
         Row: {
+          archive_status: boolean | null
           biography: string | null
           communication_status: string | null
           created_at: string
           email: string
           external_url: string | null
+          first_name: string | null
           followers_count: number | null
           following_count: number | null
           id: string
+          language: string | null
+          last_name: string | null
           name: string
           notes: string | null
           phone: string | null
           profile_url: string | null
+          remarks: string | null
           scout_id: string | null
           source: string | null
+          stage: string | null
           status: Database["public"]["Enums"]["candidate_status"]
           updated_at: string
           username: string | null
@@ -1408,20 +1435,26 @@ export type Database = {
           video_watched: boolean | null
         }
         Insert: {
+          archive_status?: boolean | null
           biography?: string | null
           communication_status?: string | null
           created_at?: string
           email: string
           external_url?: string | null
+          first_name?: string | null
           followers_count?: number | null
           following_count?: number | null
           id?: string
+          language?: string | null
+          last_name?: string | null
           name: string
           notes?: string | null
           phone?: string | null
           profile_url?: string | null
+          remarks?: string | null
           scout_id?: string | null
           source?: string | null
+          stage?: string | null
           status?: Database["public"]["Enums"]["candidate_status"]
           updated_at?: string
           username?: string | null
@@ -1430,20 +1463,26 @@ export type Database = {
           video_watched?: boolean | null
         }
         Update: {
+          archive_status?: boolean | null
           biography?: string | null
           communication_status?: string | null
           created_at?: string
           email?: string
           external_url?: string | null
+          first_name?: string | null
           followers_count?: number | null
           following_count?: number | null
           id?: string
+          language?: string | null
+          last_name?: string | null
           name?: string
           notes?: string | null
           phone?: string | null
           profile_url?: string | null
+          remarks?: string | null
           scout_id?: string | null
           source?: string | null
+          stage?: string | null
           status?: Database["public"]["Enums"]["candidate_status"]
           updated_at?: string
           username?: string | null
@@ -3311,6 +3350,7 @@ export type Database = {
         | "PAYMENT_REMINDER"
         | "EMAIL"
         | "SMS"
+      onboarding_stage: "ingest" | "process" | "screening" | "results"
       onboarding_template_type:
         | "welcome"
         | "interview_scheduled"

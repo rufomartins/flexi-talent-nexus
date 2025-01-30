@@ -2,6 +2,7 @@ import { useQuery } from "@tanstack/react-query";
 import { useAuth } from "@/contexts/auth";
 import { useToast } from "@/hooks/use-toast";
 import { CandidateList } from "@/components/onboarding/CandidateList";
+import { OnboardingNav } from "@/components/onboarding/navigation/OnboardingNav";
 import { supabase } from "@/integrations/supabase/client";
 import type { Candidate } from "@/types/onboarding";
 
@@ -37,7 +38,6 @@ const Onboarding = () => {
 
       console.log("[Onboarding] Fetched candidates:", data?.length || 0);
       
-      // Transform the data to match the Candidate type
       const transformedData: Candidate[] = (data || []).map(item => ({
         id: item.id,
         name: item.name,
@@ -77,6 +77,8 @@ const Onboarding = () => {
           </p>
         </div>
       </div>
+
+      <OnboardingNav />
 
       <CandidateList 
         candidates={candidates || []} 

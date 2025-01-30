@@ -89,6 +89,26 @@ function App() {
             <Onboarding />
           </ProtectedRoute>
         } />
+        <Route path="/onboarding/admin/evaluation" element={
+          <ProtectedRoute allowedRoles={['super_admin', 'super_user']}>
+            <Onboarding />
+          </ProtectedRoute>
+        } />
+        <Route path="/onboarding/admin/approved" element={
+          <ProtectedRoute allowedRoles={['super_admin', 'super_user']}>
+            <Onboarding />
+          </ProtectedRoute>
+        } />
+        <Route path="/onboarding/admin/rejected" element={
+          <ProtectedRoute allowedRoles={['super_admin', 'super_user']}>
+            <Onboarding />
+          </ProtectedRoute>
+        } />
+        <Route path="/onboarding/admin/archived" element={
+          <ProtectedRoute allowedRoles={['super_admin', 'super_user']}>
+            <Onboarding />
+          </ProtectedRoute>
+        } />
         <Route path="/onboarding/admin/:id" element={
           <ProtectedRoute allowedRoles={['super_admin', 'super_user']}>
             <CandidateProfile />
