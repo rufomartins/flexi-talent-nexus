@@ -64,7 +64,7 @@ export const ProjectDetails = ({ projectId }: ProjectDetailsProps) => {
           priority,
           created_at,
           updated_at,
-          language:project_languages (
+          language:project_languages!inner (
             id,
             language_name
           )
