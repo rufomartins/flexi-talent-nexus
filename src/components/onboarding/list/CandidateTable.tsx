@@ -9,9 +9,9 @@ export interface CandidateTableProps {
   selectedCandidates: Candidate[];
   onSelectCandidate: (candidate: Candidate) => void;
   onSelectAll: (checked: boolean) => void;
-  onEmailClick: (candidate: Candidate) => void;
-  onSmsClick: (candidate: Candidate) => void;
   stage: 'ingest' | 'process' | 'screening' | 'results';
+  onEmailClick?: (candidate: Candidate) => void;
+  onSmsClick?: (candidate: Candidate) => void;
 }
 
 export function CandidateTable({
@@ -19,9 +19,9 @@ export function CandidateTable({
   selectedCandidates,
   onSelectCandidate,
   onSelectAll,
+  stage,
   onEmailClick,
-  onSmsClick,
-  stage
+  onSmsClick
 }: CandidateTableProps) {
   return (
     <div className="rounded-md border">
@@ -54,7 +54,15 @@ export function CandidateTable({
               <td className="px-4 py-3">{candidate.name}</td>
               <td className="px-4 py-3">{candidate.email}</td>
               <td className="px-4 py-3">{candidate.phone}</td>
-              <td className="px-4 py-3">{candidate.status}</td>
+              <td className="px-4 py-3">
+                <Badge variant={
+                  candidate.status === 'approved' ? 'default' :
+                  candidate.status === 'not_interested' ? 'destructive' :
+                  'secondary'
+                }>
+                  {candidate.status}
+                </Badge>
+              </td>
               <td className="px-4 py-3">
                 <Badge variant={
                   candidate.communication_status === 'email_sent' ? 'default' :
@@ -66,20 +74,24 @@ export function CandidateTable({
               </td>
               <td className="px-4 py-3">
                 <div className="flex gap-2">
-                  <Button
-                    size="sm"
-                    variant="ghost"
-                    onClick={() => onEmailClick(candidate)}
-                  >
-                    <Mail className="h-4 w-4" />
-                  </Button>
-                  <Button
-                    size="sm"
-                    variant="ghost"
-                    onClick={() => onSmsClick(candidate)}
-                  >
-                    <MessageSquare className="h-4 w-4" />
-                  </Button>
+                  {onEmailClick && (
+                    <Button
+                      size="sm"
+                      variant="ghost"
+                      onClick={() => onEmailClick(candidate)}
+                    >
+                      <Mail className="h-4 w-4" />
+                    </Button>
+                  )}
+                  {onSmsClick && (
+                    <Button
+                      size="sm"
+                      variant="ghost"
+                      onClick={() => onSmsClick(candidate)}
+                    >
+                      <MessageSquare className="h-4 w-4" />
+                    </Button>
+                  )}
                 </div>
               </td>
             </tr>

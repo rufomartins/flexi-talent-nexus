@@ -14,8 +14,6 @@ export function OnboardingWorkflow() {
   const { data: candidates, isLoading, error } = useQuery({
     queryKey: ["onboarding-candidates"],
     queryFn: async () => {
-      console.log("[OnboardingWorkflow] Fetching candidates...");
-      
       const { data, error } = await supabase
         .from("onboarding_candidates")
         .select(`
@@ -34,11 +32,7 @@ export function OnboardingWorkflow() {
         `)
         .order("created_at", { ascending: false });
 
-      if (error) {
-        console.error("[OnboardingWorkflow] Error:", error);
-        throw error;
-      }
-
+      if (error) throw error;
       return data as Candidate[];
     }
   });

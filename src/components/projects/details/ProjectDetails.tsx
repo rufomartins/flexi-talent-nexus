@@ -44,7 +44,7 @@ export const ProjectDetails = ({ projectId }: ProjectDetailsProps) => {
         .single();
 
       if (error) throw error;
-      return data as Project;
+      return data as unknown as Project;
     },
   });
 
@@ -73,7 +73,7 @@ export const ProjectDetails = ({ projectId }: ProjectDetailsProps) => {
         .order('created_at', { ascending: false });
 
       if (error) throw error;
-      return data as ProjectItem[];
+      return data as unknown as ProjectItem[];
     },
   });
 
