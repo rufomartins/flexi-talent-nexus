@@ -53,7 +53,7 @@ export function OnboardingWorkflow() {
           name: row.full_name,
           email: row.public_email,
           phone: row.public_phone,
-          status: "new" as const, // Explicitly set as 'new' to match enum
+          status: "new" as const,
           stage: "ingest" as const,
           username: row.username,
           followers_count: row.followers_count,

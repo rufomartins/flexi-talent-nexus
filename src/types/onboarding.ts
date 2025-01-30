@@ -12,3 +12,15 @@ export interface Candidate {
     full_name: string;
   };
 }
+
+export interface ExcelRowData {
+  full_name: string;
+  public_email: string;
+  public_phone?: string;
+  followers_count?: number;
+  following_count?: number;
+  profile_url?: string;
+  external_url?: string;
+  biography?: string;
+  username: string;
+}
