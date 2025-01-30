@@ -4,13 +4,11 @@ import { ProjectHeader } from "./ProjectHeader";
 import { ProjectStats } from "../ProjectStats";
 import { ProjectItems } from "./ProjectItems";
 import type { Project } from "@/types/project";
-import type { ProjectItem } from "../types";
 
 interface ProjectDetailsProps {
   projectId: string;
 }
 
-// Simplified type for the database query response
 type ProjectQueryResponse = {
   id: string;
   name: string;
@@ -99,7 +97,7 @@ export const ProjectDetails = ({ projectId }: ProjectDetailsProps) => {
         .order('created_at', { ascending: false });
 
       if (error) throw error;
-      return data as ProjectItem[];
+      return data;
     },
   });
 
