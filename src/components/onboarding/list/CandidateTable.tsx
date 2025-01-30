@@ -11,6 +11,7 @@ export interface CandidateTableProps {
   onSelectAll: (checked: boolean) => void;
   onEmailClick: (candidate: Candidate) => void;
   onSmsClick: (candidate: Candidate) => void;
+  stage: 'ingest' | 'process' | 'screening' | 'results';
 }
 
 export function CandidateTable({
@@ -19,7 +20,8 @@ export function CandidateTable({
   onSelectCandidate,
   onSelectAll,
   onEmailClick,
-  onSmsClick
+  onSmsClick,
+  stage
 }: CandidateTableProps) {
   return (
     <div className="rounded-md border">

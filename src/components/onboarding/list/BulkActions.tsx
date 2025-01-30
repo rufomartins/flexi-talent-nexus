@@ -3,36 +3,34 @@ import { Button } from "@/components/ui/button";
 
 export interface BulkActionsProps {
   selectedCount: number;
-  onEmailClick: () => void;
-  onSmsClick: () => void;
+  actions: { label: string; action: string }[];
+  onActionSelect: (action: string) => Promise<void>;
 }
 
 export function BulkActions({
   selectedCount,
-  onEmailClick,
-  onSmsClick
+  actions,
+  onActionSelect
 }: BulkActionsProps) {
   if (selectedCount === 0) return null;
 
   return (
     <div className="flex gap-2">
-      <Button
-        onClick={onEmailClick}
-        size="sm"
-        className="flex items-center gap-2"
-      >
-        <Mail className="h-4 w-4" />
-        Send Email
-      </Button>
-      <Button
-        onClick={onSmsClick}
-        size="sm"
-        variant="secondary"
-        className="flex items-center gap-2"
-      >
-        <MessageSquare className="h-4 w-4" />
-        Send SMS
-      </Button>
+      {actions.map((action) => (
+        <Button
+          key={action.action}
+          onClick={() => onActionSelect(action.action)}
+          size="sm"
+          className="flex items-center gap-2"
+        >
+          {action.action === 'contact' ? (
+            <Mail className="h-4 w-4" />
+          ) : action.action === 'sms' ? (
+            <MessageSquare className="h-4 w-4" />
+          ) : null}
+          {action.label}
+        </Button>
+      ))}
     </div>
   );
 }
