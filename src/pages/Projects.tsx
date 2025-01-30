@@ -102,6 +102,7 @@ const dummyProjects: Project[] = [
     ],
     created_at: new Date().toISOString(),
     updated_at: new Date().toISOString(),
+    status: 'active'
   },
 ];
 
