@@ -10,6 +10,32 @@ interface ProjectDetailsProps {
   projectId: string;
 }
 
+// Simplified type for the database query response
+type ProjectQueryResponse = {
+  id: string;
+  name: string;
+  description: string | null;
+  status: string;
+  type: string | null;
+  completion_percentage: number | null;
+  active_tasks_count: number | null;
+  upcoming_deadlines_count: number | null;
+  created_at: string;
+  updated_at: string | null;
+  client: {
+    id: string;
+    name: string;
+  } | null;
+  countries: Array<{
+    id: string;
+    country_name: string;
+    languages: Array<{
+      id: string;
+      language_name: string;
+    }>;
+  }>;
+};
+
 export const ProjectDetails = ({ projectId }: ProjectDetailsProps) => {
   const { data: project, isLoading: isLoadingProject } = useQuery({
     queryKey: ['project', projectId],
@@ -44,7 +70,7 @@ export const ProjectDetails = ({ projectId }: ProjectDetailsProps) => {
         .single();
 
       if (error) throw error;
-      return data as unknown as Project;
+      return data as ProjectQueryResponse;
     },
   });
 
@@ -73,7 +99,7 @@ export const ProjectDetails = ({ projectId }: ProjectDetailsProps) => {
         .order('created_at', { ascending: false });
 
       if (error) throw error;
-      return data as unknown as ProjectItem[];
+      return data as ProjectItem[];
     },
   });
 
