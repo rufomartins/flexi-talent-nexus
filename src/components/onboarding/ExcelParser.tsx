@@ -6,6 +6,7 @@ import { useToast } from "@/hooks/use-toast";
 import { validateExcelData, type ValidationError, type ExcelRowData } from "@/utils/excelValidation";
 import { DataPreview } from "./DataPreview";
 import { supabase } from "@/integrations/supabase/client";
+import { Database } from "@/integrations/supabase/types";
 
 interface ExcelParserProps {
   file: File;
@@ -53,20 +54,24 @@ export const ExcelParser = ({ file, onValidDataReceived, onError }: ExcelParserP
 
   const handleConfirmImport = async (selectedData: ExcelRowData[]) => {
     try {
+      type CandidateInsert = Database["public"]["Tables"]["onboarding_candidates"]["Insert"];
+      
+      const candidatesToInsert: CandidateInsert[] = selectedData.map(row => ({
+        name: `${row.first_name || ''} ${row.last_name || ''}`.trim(),
+        first_name: row.first_name || null,
+        last_name: row.last_name || null,
+        email: row.email,
+        phone: row.phone || null,
+        language: row.language || null,
+        source: row.source || 'excel_import',
+        remarks: row.remarks || null,
+        status: 'new',
+        stage: 'ingest'
+      }));
+
       const { error } = await supabase
         .from('onboarding_candidates')
-        .insert(selectedData.map(row => ({
-          name: `${row.first_name || ''} ${row.last_name || ''}`.trim(),
-          first_name: row.first_name || null,
-          last_name: row.last_name || null,
-          email: row.email,
-          phone: row.phone || null,
-          language: row.language || null,
-          source: row.source || 'excel_import',
-          remarks: row.remarks || null,
-          status: 'new',
-          stage: 'ingest'
-        })));
+        .insert(candidatesToInsert);
 
       if (error) throw error;
 
