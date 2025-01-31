@@ -5,6 +5,7 @@ import { Card } from "@/components/ui/card";
 import { useToast } from "@/hooks/use-toast";
 import { validateExcelData, type ValidationError, type ExcelRowData } from "@/utils/excelValidation";
 import { DataPreview } from "./DataPreview";
+import { supabase } from "@/integrations/supabase/client";
 
 interface ExcelParserProps {
   file: File;
@@ -50,13 +51,39 @@ export const ExcelParser = ({ file, onValidDataReceived, onError }: ExcelParserP
     }
   };
 
-  const handleConfirmImport = (selectedData: ExcelRowData[]) => {
-    onValidDataReceived(selectedData);
-    setShowPreview(false);
-    toast({
-      title: "Success",
-      description: `Successfully processed ${selectedData.length} rows of data.`,
-    });
+  const handleConfirmImport = async (selectedData: ExcelRowData[]) => {
+    try {
+      const { error } = await supabase
+        .from('onboarding_candidates')
+        .insert(selectedData.map(row => ({
+          name: `${row.first_name || ''} ${row.last_name || ''}`.trim(),
+          first_name: row.first_name || null,
+          last_name: row.last_name || null,
+          email: row.email,
+          phone: row.phone || null,
+          language: row.language || null,
+          source: row.source || 'excel_import',
+          remarks: row.remarks || null,
+          status: 'new',
+          stage: 'ingest'
+        })));
+
+      if (error) throw error;
+
+      onValidDataReceived(selectedData);
+      setShowPreview(false);
+      toast({
+        title: "Success",
+        description: `Successfully imported ${selectedData.length} candidates.`,
+      });
+    } catch (error) {
+      console.error('Error importing candidates:', error);
+      toast({
+        title: "Error",
+        description: "Failed to import candidates. Please try again.",
+        variant: "destructive"
+      });
+    }
   };
 
   const downloadErrorReport = () => {
