@@ -3,12 +3,14 @@ import { supabase } from "@/integrations/supabase/client";
 import { ProjectHeader } from "./ProjectHeader";
 import { ProjectItems } from "./ProjectItems";
 import type { Project } from "@/types/project";
+import { useToast } from "@/hooks/use-toast";
 
 interface ProjectDetailsProps {
   projectId: string;
 }
 
 export function ProjectDetails({ projectId }: ProjectDetailsProps) {
+  const { toast } = useToast();
   const { data: project, isLoading } = useQuery({
     queryKey: ["project", projectId],
     queryFn: async () => {
@@ -28,15 +30,55 @@ export function ProjectDetails({ projectId }: ProjectDetailsProps) {
           active_tasks_count,
           upcoming_deadlines_count,
           progress_percentage,
-          color_code
+          color_code,
+          created_at,
+          updated_at,
+          client:clients(name)
         `)
         .eq("id", projectId)
         .single();
 
       if (error) throw error;
-      return data as Project;
+
+      // Transform the data to match the Project type
+      const transformedProject: Project = {
+        ...data,
+        countries: [], // Initialize with empty array since we'll fetch this separately if needed
+        created_at: data.created_at,
+        updated_at: data.updated_at,
+        status: data.status || 'active',
+      };
+
+      return transformedProject;
     },
   });
+
+  const handleEdit = () => {
+    // Implement edit functionality
+    console.log("Edit project:", projectId);
+  };
+
+  const handleStatusChange = async (newStatus: Project['status']) => {
+    try {
+      const { error } = await supabase
+        .from('projects')
+        .update({ status: newStatus })
+        .eq('id', projectId);
+
+      if (error) throw error;
+
+      toast({
+        title: "Status updated",
+        description: `Project status changed to ${newStatus}`,
+      });
+    } catch (error) {
+      toast({
+        title: "Error",
+        description: "Failed to update project status",
+        variant: "destructive",
+      });
+    }
+  };
 
   if (isLoading) {
     return <div>Loading project details...</div>;
@@ -48,8 +90,19 @@ export function ProjectDetails({ projectId }: ProjectDetailsProps) {
 
   return (
     <div className="space-y-6">
-      <ProjectHeader project={project} />
-      <ProjectItems projectId={projectId} />
+      <ProjectHeader 
+        project={project} 
+        onEdit={handleEdit}
+        onStatusChange={handleStatusChange}
+      />
+      <ProjectItems 
+        projectId={projectId}
+        items={[]} // Initialize with empty array
+        onItemStatusUpdate={async (itemId, updates) => {
+          // Implement status update logic
+          console.log("Update item status:", itemId, updates);
+        }}
+      />
     </div>
   );
 }
