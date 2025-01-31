@@ -10,9 +10,10 @@ interface DataPreviewProps {
   errors: ValidationError[];
   onConfirm: (selectedData: ExcelRowData[]) => void;
   onCancel: () => void;
+  isImporting: boolean;
 }
 
-export function DataPreview({ data, errors, onConfirm, onCancel }: DataPreviewProps) {
+export function DataPreview({ data, errors, onConfirm, onCancel, isImporting }: DataPreviewProps) {
   const [selectedRows, setSelectedRows] = useState<Set<number>>(new Set(data.map((_, i) => i)));
   const [currentPage, setCurrentPage] = useState(1);
   const rowsPerPage = 50;
@@ -64,6 +65,7 @@ export function DataPreview({ data, errors, onConfirm, onCancel }: DataPreviewPr
         selectedCount={selectedRows.size}
         onCancel={onCancel}
         onConfirm={handleConfirm}
+        isImporting={isImporting}
       />
 
       <PreviewTable

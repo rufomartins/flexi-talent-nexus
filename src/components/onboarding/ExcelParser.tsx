@@ -7,6 +7,7 @@ import { validateExcelData, type ValidationError, type ExcelRowData } from "@/ut
 import { DataPreview } from "./DataPreview";
 import { supabase } from "@/integrations/supabase/client";
 import { Database } from "@/integrations/supabase/types";
+import { useQueryClient } from "@tanstack/react-query";
 
 interface ExcelParserProps {
   file: File;
@@ -18,7 +19,9 @@ export const ExcelParser = ({ file, onValidDataReceived, onError }: ExcelParserP
   const [validationErrors, setValidationErrors] = useState<ValidationError[]>([]);
   const [parsedData, setParsedData] = useState<ExcelRowData[]>([]);
   const [showPreview, setShowPreview] = useState(false);
+  const [isImporting, setIsImporting] = useState(false);
   const { toast } = useToast();
+  const queryClient = useQueryClient();
 
   const parseExcel = async () => {
     try {
@@ -53,6 +56,16 @@ export const ExcelParser = ({ file, onValidDataReceived, onError }: ExcelParserP
   };
 
   const handleConfirmImport = async (selectedData: ExcelRowData[]) => {
+    if (selectedData.length === 0) {
+      toast({
+        title: "No Data Selected",
+        description: "Please select at least one row to import.",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    setIsImporting(true);
     try {
       type CandidateInsert = Database["public"]["Tables"]["onboarding_candidates"]["Insert"];
       
@@ -75,6 +88,9 @@ export const ExcelParser = ({ file, onValidDataReceived, onError }: ExcelParserP
 
       if (error) throw error;
 
+      // Invalidate the candidates query to refresh the listing
+      await queryClient.invalidateQueries({ queryKey: ['onboarding-candidates'] });
+
       onValidDataReceived(selectedData);
       setShowPreview(false);
       toast({
@@ -88,6 +104,8 @@ export const ExcelParser = ({ file, onValidDataReceived, onError }: ExcelParserP
         description: "Failed to import candidates. Please try again.",
         variant: "destructive"
       });
+    } finally {
+      setIsImporting(false);
     }
   };
 
@@ -122,6 +140,7 @@ export const ExcelParser = ({ file, onValidDataReceived, onError }: ExcelParserP
         errors={validationErrors}
         onConfirm={handleConfirmImport}
         onCancel={() => setShowPreview(false)}
+        isImporting={isImporting}
       />
     );
   }
