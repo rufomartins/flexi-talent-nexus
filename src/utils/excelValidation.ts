@@ -11,13 +11,18 @@ export const excelRowSchema = z.object({
   source: z.string().optional(),
   remarks: z.string().optional(),
 }).transform(data => {
-  // If full_name is provided, split it into first_name and last_name
-  if (data.full_name) {
-    const [firstName, ...lastNameParts] = data.full_name.split(' ');
-    if (!data.first_name) data.first_name = firstName;
-    if (!data.last_name) data.last_name = lastNameParts.join(' ');
+  // Create a new object to avoid mutating the input
+  const transformedData = { ...data };
+  
+  // Handle "Full Name" column if it exists in the raw data
+  const rawData = data as Record<string, any>;
+  if (rawData["Full Name"]) {
+    const [firstName, ...lastNameParts] = rawData["Full Name"].split(' ');
+    if (!transformedData.first_name) transformedData.first_name = firstName;
+    if (!transformedData.last_name) transformedData.last_name = lastNameParts.join(' ');
   }
-  return data;
+  
+  return transformedData;
 });
 
 export type ExcelRowData = z.infer<typeof excelRowSchema>;
@@ -35,13 +40,6 @@ export const validateExcelData = (
   const errors: ValidationError[] = [];
 
   data.forEach((row, index) => {
-    // Handle potential "Full Name" column
-    if (row["Full Name"] && !row["First Name"]) {
-      const [firstName, ...lastNameParts] = row["Full Name"].split(' ');
-      row["First Name"] = firstName;
-      row["Last Name"] = lastNameParts.join(' ');
-    }
-
     // Map common variations of field names
     const normalizedRow = {
       first_name: row["First Name"] || row["FirstName"] || row["first_name"],
@@ -52,6 +50,8 @@ export const validateExcelData = (
       native_language: row["Native Language"] || row["native_language"],
       source: row["Source"] || row["source"],
       remarks: row["Remarks"] || row["remarks"],
+      // Include the Full Name field for transformation
+      "Full Name": row["Full Name"] || row["FullName"] || row["full_name"],
     };
 
     const result = excelRowSchema.safeParse(normalizedRow);
