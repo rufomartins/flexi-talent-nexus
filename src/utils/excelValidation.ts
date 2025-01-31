@@ -11,10 +11,9 @@ export const excelRowSchema = z.object({
   source: z.string().optional(),
   remarks: z.string().optional(),
 }).transform(data => {
-  // Create a new object to avoid mutating the input
   const transformedData = { ...data };
   
-  // Handle "Full Name" column if it exists in the raw data
+  // Handle "Full Name" column if it exists
   const rawData = data as Record<string, any>;
   if (rawData["Full Name"] && (!transformedData.first_name || !transformedData.last_name)) {
     const nameParts = rawData["Full Name"].trim().split(/\s+/);
@@ -66,7 +65,7 @@ export const validateExcelData = (
     } else {
       // Only include actual validation errors, not missing optional fields
       const validationErrors = result.error.errors.reduce((acc, err) => {
-        // Only include required field errors
+        // Only include required field errors or format errors
         if (err.message !== "Required") {
           acc[err.path[0]] = err.message;
         }

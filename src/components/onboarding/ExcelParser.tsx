@@ -32,7 +32,13 @@ export const ExcelParser = ({ file, onValidDataReceived, onError }: ExcelParserP
         setValidationErrors(errors);
         toast({
           title: "Validation Warnings",
-          description: `Found ${errors.length} rows with warnings. You can still proceed with valid data.`,
+          description: `Found ${errors.length} rows with validation issues. You can still proceed with valid data.`,
+          variant: "default",
+        });
+      } else {
+        toast({
+          title: "Validation Success",
+          description: "All rows passed validation successfully.",
           variant: "default",
         });
       }
@@ -54,12 +60,20 @@ export const ExcelParser = ({ file, onValidDataReceived, onError }: ExcelParserP
   };
 
   const downloadErrorReport = () => {
-    if (validationErrors.length === 0) return;
+    if (validationErrors.length === 0) {
+      toast({
+        title: "No Errors",
+        description: "There are no validation errors to report.",
+      });
+      return;
+    }
 
     const errorRows = validationErrors.map(({ row, errors, rawData }) => ({
       Row: row,
       ...rawData,
-      Errors: Object.values(errors).join("; "),
+      Errors: Object.entries(errors)
+        .map(([field, error]) => `${field}: ${error}`)
+        .join("; "),
     }));
 
     const worksheet = XLSX.utils.json_to_sheet(errorRows);
