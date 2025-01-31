@@ -31,9 +31,9 @@ export const ExcelParser = ({ file, onValidDataReceived, onError }: ExcelParserP
       if (errors.length > 0) {
         setValidationErrors(errors);
         toast({
-          title: "Validation Errors",
-          description: `Found ${errors.length} rows with errors. Please review and fix the issues.`,
-          variant: "destructive",
+          title: "Validation Warnings",
+          description: `Found ${errors.length} rows with warnings. You can still proceed with valid data.`,
+          variant: "default",
         });
       }
       
@@ -90,19 +90,19 @@ export const ExcelParser = ({ file, onValidDataReceived, onError }: ExcelParserP
         <Card className="p-4">
           <div className="space-y-4">
             <div className="flex items-center justify-between">
-              <h3 className="text-lg font-medium">Validation Errors</h3>
+              <h3 className="text-lg font-medium">Validation Warnings</h3>
               <Button variant="outline" onClick={downloadErrorReport}>
-                Download Error Report
+                Download Warning Report
               </Button>
             </div>
             
             <div className="max-h-60 overflow-y-auto space-y-2">
               {validationErrors.map(({ row, errors }, index) => (
-                <div key={index} className="p-2 bg-destructive/10 rounded-md">
+                <div key={index} className="p-2 bg-yellow-50 rounded-md">
                   <p className="font-medium">Row {row}:</p>
                   <ul className="list-disc list-inside">
                     {Object.entries(errors).map(([field, error]) => (
-                      <li key={field} className="text-sm text-destructive">
+                      <li key={field} className="text-sm text-yellow-700">
                         {field}: {error}
                       </li>
                     ))}
