@@ -16,10 +16,16 @@ export const excelRowSchema = z.object({
   
   // Handle "Full Name" column if it exists in the raw data
   const rawData = data as Record<string, any>;
-  if (rawData["Full Name"]) {
-    const [firstName, ...lastNameParts] = rawData["Full Name"].split(' ');
-    if (!transformedData.first_name) transformedData.first_name = firstName;
-    if (!transformedData.last_name) transformedData.last_name = lastNameParts.join(' ');
+  if (rawData["Full Name"] && (!transformedData.first_name || !transformedData.last_name)) {
+    const nameParts = rawData["Full Name"].trim().split(/\s+/);
+    if (nameParts.length > 0) {
+      if (!transformedData.first_name) {
+        transformedData.first_name = nameParts[0];
+      }
+      if (!transformedData.last_name && nameParts.length > 1) {
+        transformedData.last_name = nameParts.slice(1).join(' ');
+      }
+    }
   }
   
   return transformedData;
@@ -50,7 +56,6 @@ export const validateExcelData = (
       native_language: row["Native Language"] || row["native_language"],
       source: row["Source"] || row["source"],
       remarks: row["Remarks"] || row["remarks"],
-      // Include the Full Name field for transformation
       "Full Name": row["Full Name"] || row["FullName"] || row["full_name"],
     };
 

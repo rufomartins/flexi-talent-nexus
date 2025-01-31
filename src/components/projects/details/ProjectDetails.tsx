@@ -1,107 +1,45 @@
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { ProjectHeader } from "./ProjectHeader";
-import { ProjectStats } from "../ProjectStats";
 import { ProjectItems } from "./ProjectItems";
+import type { Project } from "@/types/project";
 
 interface ProjectDetailsProps {
   projectId: string;
 }
 
-type ProjectQueryResponse = {
-  id: string;
-  name: string;
-  description: string | null;
-  status: string;
-  type: string | null;
-  completion_percentage: number | null;
-  active_tasks_count: number | null;
-  upcoming_deadlines_count: number | null;
-  created_at: string;
-  updated_at: string | null;
-  client: {
-    id: string;
-    name: string;
-  } | null;
-  countries: Array<{
-    id: string;
-    country_name: string;
-    languages: Array<{
-      id: string;
-      language_name: string;
-    }>;
-  }>;
-};
-
-export const ProjectDetails = ({ projectId }: ProjectDetailsProps) => {
-  const { data: project, isLoading: isLoadingProject } = useQuery({
-    queryKey: ['project', projectId],
+export function ProjectDetails({ projectId }: ProjectDetailsProps) {
+  const { data: project, isLoading } = useQuery({
+    queryKey: ["project", projectId],
     queryFn: async () => {
       const { data, error } = await supabase
-        .from('projects')
+        .from("projects")
         .select(`
           id,
           name,
           description,
           status,
+          start_date,
+          end_date,
+          client_id,
+          project_manager_id,
           type,
           completion_percentage,
           active_tasks_count,
           upcoming_deadlines_count,
-          created_at,
-          updated_at,
-          client:clients (
-            id,
-            name
-          ),
-          countries:project_countries (
-            id,
-            country_name,
-            languages:project_languages (
-              id,
-              language_name
-            )
-          )
+          progress_percentage,
+          color_code
         `)
-        .eq('id', projectId)
+        .eq("id", projectId)
         .single();
 
       if (error) throw error;
-      return data as ProjectQueryResponse;
+      return data as Project;
     },
   });
 
-  const { data: tasks = [], isLoading: isLoadingTasks } = useQuery({
-    queryKey: ['project-tasks', projectId],
-    queryFn: async () => {
-      const { data, error } = await supabase
-        .from('project_tasks')
-        .select(`
-          id,
-          language_id,
-          name,
-          script_status,
-          review_status,
-          talent_status,
-          delivery_status,
-          priority,
-          created_at,
-          updated_at,
-          language:project_languages!inner (
-            id,
-            language_name
-          )
-        `)
-        .eq('project_id', projectId)
-        .order('created_at', { ascending: false });
-
-      if (error) throw error;
-      return data;
-    },
-  });
-
-  if (isLoadingProject || isLoadingTasks) {
-    return <div>Loading...</div>;
+  if (isLoading) {
+    return <div>Loading project details...</div>;
   }
 
   if (!project) {
@@ -110,9 +48,8 @@ export const ProjectDetails = ({ projectId }: ProjectDetailsProps) => {
 
   return (
     <div className="space-y-6">
-      <ProjectHeader project={project} onEdit={() => {}} onStatusChange={async () => {}} />
-      <ProjectStats stats={[]} />
-      <ProjectItems items={tasks} projectId={projectId} onItemStatusUpdate={async () => {}} />
+      <ProjectHeader project={project} />
+      <ProjectItems projectId={projectId} />
     </div>
   );
-};
+}
