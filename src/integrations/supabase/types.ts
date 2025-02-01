@@ -1418,6 +1418,7 @@ export type Database = {
           first_name: string | null
           followers_count: number | null
           following_count: number | null
+          full_name: string | null
           id: string
           interview_date: string | null
           language: string | null
@@ -1450,6 +1451,7 @@ export type Database = {
           first_name?: string | null
           followers_count?: number | null
           following_count?: number | null
+          full_name?: string | null
           id?: string
           interview_date?: string | null
           language?: string | null
@@ -1482,6 +1484,7 @@ export type Database = {
           first_name?: string | null
           followers_count?: number | null
           following_count?: number | null
+          full_name?: string | null
           id?: string
           interview_date?: string | null
           language?: string | null

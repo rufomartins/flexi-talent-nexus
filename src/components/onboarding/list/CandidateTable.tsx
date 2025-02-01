@@ -31,6 +31,7 @@ export function CandidateTable({
   const startEditing = (candidate: any) => {
     setEditingId(candidate.id);
     setEditValues({
+      name: candidate.name || '',
       first_name: candidate.first_name || '',
       last_name: candidate.last_name || '',
       email: candidate.email || '',
@@ -45,7 +46,16 @@ export function CandidateTable({
     try {
       const { error } = await supabase
         .from('onboarding_candidates')
-        .update(editValues)
+        .update({
+          name: editValues.name,
+          first_name: editValues.first_name,
+          last_name: editValues.last_name,
+          email: editValues.email,
+          phone: editValues.phone,
+          language: editValues.language,
+          source: editValues.source,
+          remarks: editValues.remarks
+        })
         .eq('id', id);
 
       if (error) throw error;
@@ -78,6 +88,7 @@ export function CandidateTable({
                 onCheckedChange={onSelectAll}
               />
             </TableHead>
+            <TableHead>Full Name</TableHead>
             <TableHead>First Name</TableHead>
             <TableHead>Last Name</TableHead>
             <TableHead>Email</TableHead>
@@ -100,6 +111,16 @@ export function CandidateTable({
                     checked={selectedCandidates.some(c => c.id === candidate.id)}
                     onCheckedChange={() => onSelectCandidate(candidate)}
                   />
+                </TableCell>
+                <TableCell>
+                  {isEditing ? (
+                    <Input
+                      value={editValues.name}
+                      onChange={(e) => setEditValues({...editValues, name: e.target.value})}
+                    />
+                  ) : (
+                    candidate.name || `${candidate.first_name} ${candidate.last_name}`.trim()
+                  )}
                 </TableCell>
                 <TableCell>
                   {isEditing ? (

@@ -3,9 +3,6 @@ import { Link, useLocation } from "react-router-dom";
 
 const navItems = [
   { label: "All Candidates", path: "/onboarding/admin" },
-  { label: "Under Evaluation", path: "/onboarding/admin/evaluation" },
-  { label: "Approved", path: "/onboarding/admin/approved" },
-  { label: "Rejected", path: "/onboarding/admin/rejected" },
   { label: "Archived", path: "/onboarding/admin/archived" }
 ];
 
