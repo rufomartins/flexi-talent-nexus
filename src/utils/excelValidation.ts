@@ -2,6 +2,7 @@ import { z } from "zod";
 import { SUPPORTED_LANGUAGES } from "./languages";
 
 export const excelRowSchema = z.object({
+  name: z.string().optional(),
   first_name: z.string().optional(),
   last_name: z.string().optional(),
   email: z.string().email("Invalid email format").optional(),
@@ -12,18 +13,20 @@ export const excelRowSchema = z.object({
 }).transform(data => {
   const transformedData = { ...data };
   
-  // Handle "Full Name" column if it exists
+  // Handle "Full Name" or "Name" column if it exists
   const rawData = data as Record<string, any>;
-  if (rawData["Full Name"] && (!transformedData.first_name || !transformedData.last_name)) {
-    const nameParts = rawData["Full Name"].trim().split(/\s+/);
-    if (nameParts.length > 0) {
-      if (!transformedData.first_name) {
-        transformedData.first_name = nameParts[0];
-      }
-      if (!transformedData.last_name && nameParts.length > 1) {
-        transformedData.last_name = nameParts.slice(1).join(' ');
-      }
-    }
+  if (rawData["Full Name"] && !transformedData.name) {
+    transformedData.name = rawData["Full Name"].trim();
+  } else if (rawData["Name"] && !transformedData.name) {
+    transformedData.name = rawData["Name"].trim();
+  }
+  
+  // Handle "First Name" and "Last Name" columns
+  if (rawData["First Name"] && !transformedData.first_name) {
+    transformedData.first_name = rawData["First Name"].trim();
+  }
+  if (rawData["Last Name"] && !transformedData.last_name) {
+    transformedData.last_name = rawData["Last Name"].trim();
   }
   
   return transformedData;
@@ -46,6 +49,7 @@ export const validateExcelData = (
   data.forEach((row, index) => {
     // Map common variations of field names
     const normalizedRow = {
+      name: row["Name"] || row["Full Name"] || row["name"],
       first_name: row["First Name"] || row["FirstName"] || row["first_name"],
       last_name: row["Last Name"] || row["LastName"] || row["last_name"],
       email: row["Email"] || row["email"],
@@ -53,7 +57,6 @@ export const validateExcelData = (
       language: row["Language"] || row["language"],
       source: row["Source"] || row["source"],
       remarks: row["Remarks"] || row["remarks"],
-      "Full Name": row["Full Name"] || row["FullName"] || row["full_name"],
     };
 
     const result = excelRowSchema.safeParse(normalizedRow);

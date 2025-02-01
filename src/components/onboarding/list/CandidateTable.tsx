@@ -16,6 +16,14 @@ import { useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 
+const formatName = (candidate: any) => {
+  if (candidate.name) return candidate.name;
+  if (candidate.first_name || candidate.last_name) {
+    return [candidate.first_name, candidate.last_name].filter(Boolean).join(' ');
+  }
+  return '';
+};
+
 export function CandidateTable({ 
   candidates,
   selectedCandidates,
@@ -47,14 +55,14 @@ export function CandidateTable({
       const { error } = await supabase
         .from('onboarding_candidates')
         .update({
-          name: editValues.name,
-          first_name: editValues.first_name,
-          last_name: editValues.last_name,
-          email: editValues.email,
-          phone: editValues.phone,
-          language: editValues.language,
-          source: editValues.source,
-          remarks: editValues.remarks
+          name: editValues.name || null,
+          first_name: editValues.first_name || null,
+          last_name: editValues.last_name || null,
+          email: editValues.email || null,
+          phone: editValues.phone || null,
+          language: editValues.language || null,
+          source: editValues.source || null,
+          remarks: editValues.remarks || null
         })
         .eq('id', id);
 
@@ -119,7 +127,7 @@ export function CandidateTable({
                       onChange={(e) => setEditValues({...editValues, name: e.target.value})}
                     />
                   ) : (
-                    candidate.name || `${candidate.first_name} ${candidate.last_name}`.trim()
+                    formatName(candidate)
                   )}
                 </TableCell>
                 <TableCell>
@@ -129,7 +137,7 @@ export function CandidateTable({
                       onChange={(e) => setEditValues({...editValues, first_name: e.target.value})}
                     />
                   ) : (
-                    candidate.first_name
+                    candidate.first_name || ''
                   )}
                 </TableCell>
                 <TableCell>
@@ -139,7 +147,7 @@ export function CandidateTable({
                       onChange={(e) => setEditValues({...editValues, last_name: e.target.value})}
                     />
                   ) : (
-                    candidate.last_name
+                    candidate.last_name || ''
                   )}
                 </TableCell>
                 <TableCell>
@@ -149,7 +157,7 @@ export function CandidateTable({
                       onChange={(e) => setEditValues({...editValues, email: e.target.value})}
                     />
                   ) : (
-                    candidate.email
+                    candidate.email || ''
                   )}
                 </TableCell>
                 <TableCell>
@@ -159,7 +167,7 @@ export function CandidateTable({
                       onChange={(e) => setEditValues({...editValues, phone: e.target.value})}
                     />
                   ) : (
-                    candidate.phone
+                    candidate.phone || ''
                   )}
                 </TableCell>
                 <TableCell>
@@ -180,27 +188,7 @@ export function CandidateTable({
                       </SelectContent>
                     </Select>
                   ) : (
-                    candidate.language
-                  )}
-                </TableCell>
-                <TableCell>
-                  {isEditing ? (
-                    <Input
-                      value={editValues.source}
-                      onChange={(e) => setEditValues({...editValues, source: e.target.value})}
-                    />
-                  ) : (
-                    candidate.source
-                  )}
-                </TableCell>
-                <TableCell>
-                  {isEditing ? (
-                    <Input
-                      value={editValues.remarks}
-                      onChange={(e) => setEditValues({...editValues, remarks: e.target.value})}
-                    />
-                  ) : (
-                    candidate.remarks
+                    candidate.language || ''
                   )}
                 </TableCell>
                 <TableCell>
@@ -240,7 +228,7 @@ export function CandidateTable({
                       )}
                       <CandidateActions 
                         candidateId={candidate.id}
-                        candidateName={candidate.name}
+                        candidateName={formatName(candidate)}
                         email={candidate.email}
                         phone={candidate.phone}
                         stage={stage}
