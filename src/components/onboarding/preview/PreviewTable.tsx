@@ -8,6 +8,9 @@ import {
 } from "@/components/ui/table";
 import { Checkbox } from "@/components/ui/checkbox";
 import { ExcelRowData, ValidationError } from "@/utils/excelValidation";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Input } from "@/components/ui/input";
+import { SUPPORTED_LANGUAGES } from "@/utils/languages";
 
 interface PreviewTableProps {
   data: ExcelRowData[];
@@ -16,6 +19,8 @@ interface PreviewTableProps {
   errorsByRow: Record<number, Record<string, string>>;
   onToggleRow: (index: number) => void;
   onToggleAll: () => void;
+  onUpdateRow?: (index: number, field: string, value: string) => void;
+  isEditable?: boolean;
 }
 
 export function PreviewTable({
@@ -25,6 +30,8 @@ export function PreviewTable({
   errorsByRow,
   onToggleRow,
   onToggleAll,
+  onUpdateRow,
+  isEditable = false,
 }: PreviewTableProps) {
   return (
     <div className="rounded-md border">
@@ -63,7 +70,15 @@ export function PreviewTable({
                 </TableCell>
                 <TableCell>
                   <div className="space-y-1">
-                    <span>{row.first_name}</span>
+                    {isEditable ? (
+                      <Input
+                        value={row.first_name || ''}
+                        onChange={(e) => onUpdateRow?.(index, 'first_name', e.target.value)}
+                        className="w-full"
+                      />
+                    ) : (
+                      <span>{row.first_name}</span>
+                    )}
                     {rowErrors?.first_name && (
                       <p className="text-xs text-destructive">{rowErrors.first_name}</p>
                     )}
@@ -71,7 +86,15 @@ export function PreviewTable({
                 </TableCell>
                 <TableCell>
                   <div className="space-y-1">
-                    <span>{row.last_name}</span>
+                    {isEditable ? (
+                      <Input
+                        value={row.last_name || ''}
+                        onChange={(e) => onUpdateRow?.(index, 'last_name', e.target.value)}
+                        className="w-full"
+                      />
+                    ) : (
+                      <span>{row.last_name}</span>
+                    )}
                     {rowErrors?.last_name && (
                       <p className="text-xs text-destructive">{rowErrors.last_name}</p>
                     )}
@@ -79,16 +102,74 @@ export function PreviewTable({
                 </TableCell>
                 <TableCell>
                   <div className="space-y-1">
-                    <span>{row.email}</span>
+                    {isEditable ? (
+                      <Input
+                        value={row.email || ''}
+                        onChange={(e) => onUpdateRow?.(index, 'email', e.target.value)}
+                        className="w-full"
+                      />
+                    ) : (
+                      <span>{row.email}</span>
+                    )}
                     {rowErrors?.email && (
                       <p className="text-xs text-destructive">{rowErrors.email}</p>
                     )}
                   </div>
                 </TableCell>
-                <TableCell>{row.phone}</TableCell>
-                <TableCell>{row.language}</TableCell>
-                <TableCell>{row.source}</TableCell>
-                <TableCell>{row.remarks}</TableCell>
+                <TableCell>
+                  {isEditable ? (
+                    <Input
+                      value={row.phone || ''}
+                      onChange={(e) => onUpdateRow?.(index, 'phone', e.target.value)}
+                      className="w-full"
+                    />
+                  ) : (
+                    <span>{row.phone}</span>
+                  )}
+                </TableCell>
+                <TableCell>
+                  {isEditable ? (
+                    <Select
+                      value={row.language || ''}
+                      onValueChange={(value) => onUpdateRow?.(index, 'language', value)}
+                    >
+                      <SelectTrigger className="w-full">
+                        <SelectValue placeholder="Select language" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {SUPPORTED_LANGUAGES.map((lang) => (
+                          <SelectItem key={lang} value={lang}>
+                            {lang}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  ) : (
+                    <span>{row.language}</span>
+                  )}
+                </TableCell>
+                <TableCell>
+                  {isEditable ? (
+                    <Input
+                      value={row.source || ''}
+                      onChange={(e) => onUpdateRow?.(index, 'source', e.target.value)}
+                      className="w-full"
+                    />
+                  ) : (
+                    <span>{row.source}</span>
+                  )}
+                </TableCell>
+                <TableCell>
+                  {isEditable ? (
+                    <Input
+                      value={row.remarks || ''}
+                      onChange={(e) => onUpdateRow?.(index, 'remarks', e.target.value)}
+                      className="w-full"
+                    />
+                  ) : (
+                    <span>{row.remarks}</span>
+                  )}
+                </TableCell>
                 <TableCell>
                   {hasErrors ? (
                     <span className="text-destructive font-medium">Error</span>

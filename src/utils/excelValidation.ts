@@ -1,6 +1,6 @@
 import { z } from "zod";
+import { SUPPORTED_LANGUAGES } from "./languages";
 
-// Define the schema for a single row of Excel data
 export const excelRowSchema = z.object({
   first_name: z.string().optional(),
   last_name: z.string().optional(),
