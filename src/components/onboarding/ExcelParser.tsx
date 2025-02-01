@@ -70,7 +70,7 @@ export const ExcelParser = ({ file, onValidDataReceived, onError }: ExcelParserP
       type CandidateInsert = Database["public"]["Tables"]["onboarding_candidates"]["Insert"];
       
       const candidatesToInsert: CandidateInsert[] = selectedData.map(row => ({
-        name: `${row.first_name || ''} ${row.last_name || ''}`.trim(),
+        name: row.name || '',
         first_name: row.first_name || null,
         last_name: row.last_name || null,
         email: row.email,
@@ -88,7 +88,6 @@ export const ExcelParser = ({ file, onValidDataReceived, onError }: ExcelParserP
 
       if (error) throw error;
 
-      // Invalidate the candidates query to refresh the listing
       await queryClient.invalidateQueries({ queryKey: ['onboarding-candidates'] });
 
       onValidDataReceived(selectedData);
