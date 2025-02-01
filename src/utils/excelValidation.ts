@@ -7,7 +7,6 @@ export const excelRowSchema = z.object({
   email: z.string().email("Invalid email format").optional(),
   phone: z.string().optional(),
   language: z.string().optional(),
-  native_language: z.string().optional(),
   source: z.string().optional(),
   remarks: z.string().optional(),
 }).transform(data => {
@@ -52,7 +51,6 @@ export const validateExcelData = (
       email: row["Email"] || row["email"],
       phone: row["Phone"] || row["Phone Number"] || row["phone"],
       language: row["Language"] || row["language"],
-      native_language: row["Native Language"] || row["native_language"],
       source: row["Source"] || row["source"],
       remarks: row["Remarks"] || row["remarks"],
       "Full Name": row["Full Name"] || row["FullName"] || row["full_name"],

@@ -42,7 +42,6 @@ export function PreviewTable({
             <TableHead>Email</TableHead>
             <TableHead>Phone</TableHead>
             <TableHead>Language</TableHead>
-            <TableHead>Native Language</TableHead>
             <TableHead>Source</TableHead>
             <TableHead>Remarks</TableHead>
             <TableHead>Status</TableHead>
@@ -88,7 +87,6 @@ export function PreviewTable({
                 </TableCell>
                 <TableCell>{row.phone}</TableCell>
                 <TableCell>{row.language}</TableCell>
-                <TableCell>{row.native_language}</TableCell>
                 <TableCell>{row.source}</TableCell>
                 <TableCell>{row.remarks}</TableCell>
                 <TableCell>
