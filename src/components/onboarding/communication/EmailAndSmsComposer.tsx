@@ -1,135 +1,213 @@
 import { useState } from "react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { Button } from "@/components/ui/button";
+import { Switch } from "@/components/ui/switch";
+import { Label } from "@/components/ui/label";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { useToast } from "@/hooks/use-toast";
-import { sendSMS } from "@/utils/sms";
+import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
+import { EmailComposer } from "./EmailComposer";
 import { SmsComposer } from "./SmsComposer";
-import { CandidateList } from "./CandidateList";
 
 interface EmailAndSmsComposerProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
-  candidateId: string;
-  candidateName: string;
-  email?: string;
-  phone?: string;
-  mode?: 'email' | 'sms';
-  selectedCandidates?: Array<{
+  selectedCandidates: Array<{
     id: string;
-    name: string;
-    phone?: string;
+    name?: string;
+    first_name?: string;
+    last_name?: string;
     email?: string;
+    phone?: string;
   }>;
 }
 
 export function EmailAndSmsComposer({
   open,
   onOpenChange,
-  candidateId,
-  candidateName,
-  email,
-  phone,
-  mode = 'sms',
-  selectedCandidates = []
+  selectedCandidates
 }: EmailAndSmsComposerProps) {
-  const [message, setMessage] = useState('');
-  const [isSending, setIsSending] = useState(false);
+  const [step, setStep] = useState<'compose' | 'preview' | 'sending'>('compose');
+  const [enableSms, setEnableSms] = useState(false);
+  const [emailData, setEmailData] = useState({
+    templateId: '',
+    subject: '',
+    body: ''
+  });
+  const [smsData, setSmsData] = useState({
+    templateId: '',
+    message: ''
+  });
+  
   const { toast } = useToast();
 
-  const handleSend = async () => {
-    if (!message.trim()) {
-      toast({
-        title: "Error",
-        description: "Please enter a message",
-        variant: "destructive",
-      });
-      return;
+  const { data: emailTemplates } = useQuery({
+    queryKey: ['email-templates', 'onboarding'],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from('onboarding_email_templates')
+        .select('*')
+        .eq('type', 'onboarding')
+        .eq('is_active', true);
+
+      if (error) throw error;
+      return data;
     }
+  });
 
-    setIsSending(true);
+  const handleSend = async () => {
     try {
-      const candidates = selectedCandidates.length > 0 
-        ? selectedCandidates 
-        : [{ id: candidateId, name: candidateName, phone, email }];
+      setStep('sending');
       
-      for (const candidate of candidates) {
-        if (mode === 'sms' && !candidate.phone) {
-          toast({
-            title: "Error",
-            description: `No phone number available for ${candidate.name}`,
-            variant: "destructive",
-          });
-          continue;
-        }
+      // Send email
+      const emailPromises = selectedCandidates.map(async (candidate) => {
+        if (!candidate.email) return;
+        
+        const { error } = await supabase.functions.invoke('send-onboarding-email', {
+          body: {
+            templateId: emailData.templateId,
+            recipient: {
+              email: candidate.email,
+              name: candidate.name || `${candidate.first_name || ''} ${candidate.last_name || ''}`.trim()
+            },
+            subject: emailData.subject,
+            body: emailData.body
+          }
+        });
 
-        if (mode === 'email' && !candidate.email) {
-          toast({
-            title: "Error",
-            description: `No email available for ${candidate.name}`,
-            variant: "destructive",
-          });
-          continue;
-        }
+        if (error) throw error;
+      });
 
-        if (mode === 'sms') {
-          await sendSMS({
-            to: candidate.phone!,
-            message,
+      // Send SMS if enabled
+      const smsPromises = enableSms ? selectedCandidates.map(async (candidate) => {
+        if (!candidate.phone) return;
+        
+        const { error } = await supabase.functions.invoke('send-sms', {
+          body: {
+            to: candidate.phone,
+            message: smsData.message,
             module: 'onboarding',
             metadata: {
               candidateId: candidate.id,
-              candidateName: candidate.name
+              candidateName: candidate.name || `${candidate.first_name || ''} ${candidate.last_name || ''}`.trim()
             }
-          });
-        }
+          }
+        });
 
-        const { error: updateError } = await supabase
-          .from('onboarding_candidates')
-          .update({
-            communication_status: mode === 'sms' ? 'sms_sent' : 'email_sent'
-          })
-          .eq('id', candidate.id);
+        if (error) throw error;
+      }) : [];
 
-        if (updateError) throw updateError;
-      }
+      await Promise.all([...emailPromises, ...smsPromises]);
 
       toast({
         title: "Success",
-        description: `${mode.toUpperCase()} sent successfully`,
+        description: "Messages sent successfully",
       });
 
       onOpenChange(false);
-      setMessage('');
     } catch (error: any) {
-      console.error(`Error sending ${mode}:`, error);
+      console.error('Error sending messages:', error);
       toast({
         title: "Error",
-        description: error.message || `Failed to send ${mode}`,
+        description: error.message || "Failed to send messages",
         variant: "destructive",
       });
     } finally {
-      setIsSending(false);
+      setStep('compose');
+    }
+  };
+
+  const insertPersonalization = (field: string) => {
+    const tag = `{${field}}`;
+    if (enableSms) {
+      setSmsData(prev => ({
+        ...prev,
+        message: prev.message + tag
+      }));
+    } else {
+      setEmailData(prev => ({
+        ...prev,
+        body: prev.body + tag
+      }));
     }
   };
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent>
+      <DialogContent className="max-w-3xl">
         <DialogHeader>
           <DialogTitle>
-            Send {mode === 'sms' ? 'SMS' : 'Email'} to {selectedCandidates.length > 0 ? `${selectedCandidates.length} candidates` : candidateName}
+            Contact {selectedCandidates.length} candidate{selectedCandidates.length !== 1 ? 's' : ''}
           </DialogTitle>
         </DialogHeader>
 
-        <CandidateList selectedCandidates={selectedCandidates} />
+        {step === 'compose' && (
+          <div className="space-y-6">
+            <EmailComposer
+              templates={emailTemplates || []}
+              data={emailData}
+              onChange={setEmailData}
+              onInsertTag={insertPersonalization}
+            />
 
-        <SmsComposer
-          message={message}
-          onMessageChange={setMessage}
-          onSend={handleSend}
-          isSending={isSending}
-          onCancel={() => onOpenChange(false)}
-        />
+            <div className="flex items-center space-x-2 pt-4 border-t">
+              <Switch
+                id="enable-sms"
+                checked={enableSms}
+                onCheckedChange={setEnableSms}
+              />
+              <Label htmlFor="enable-sms">Also send SMS</Label>
+            </div>
+
+            {enableSms && (
+              <SmsComposer
+                data={smsData}
+                onChange={setSmsData}
+                onInsertTag={insertPersonalization}
+              />
+            )}
+
+            <div className="flex justify-end space-x-2">
+              <Button variant="outline" onClick={() => onOpenChange(false)}>
+                Cancel
+              </Button>
+              <Button onClick={() => setStep('preview')}>
+                Preview
+              </Button>
+            </div>
+          </div>
+        )}
+
+        {step === 'preview' && (
+          <div className="space-y-6">
+            <div className="space-y-4">
+              <h3 className="font-medium">Email Preview</h3>
+              <div className="border p-4 rounded-md">
+                <p className="font-medium">Subject: {emailData.subject}</p>
+                <div className="mt-2 whitespace-pre-wrap">{emailData.body}</div>
+              </div>
+
+              {enableSms && (
+                <>
+                  <h3 className="font-medium">SMS Preview</h3>
+                  <div className="border p-4 rounded-md whitespace-pre-wrap">
+                    {smsData.message}
+                  </div>
+                </>
+              )}
+            </div>
+
+            <div className="flex justify-end space-x-2">
+              <Button variant="outline" onClick={() => setStep('compose')}>
+                Back
+              </Button>
+              <Button onClick={handleSend} disabled={step === 'sending'}>
+                {step === 'sending' ? 'Sending...' : 'Send'}
+              </Button>
+            </div>
+          </div>
+        )}
       </DialogContent>
     </Dialog>
   );

@@ -6,7 +6,6 @@ import { CommunicationMetrics } from "./list/CommunicationMetrics";
 import { CandidateFilters } from "./list/CandidateFilters";
 import { CandidateTable } from "./list/CandidateTable";
 import { BulkActions } from "./list/BulkActions";
-import { OnboardingEmailComposer } from "./email/OnboardingEmailComposer";
 import { EmailAndSmsComposer } from "./communication/EmailAndSmsComposer";
 import type { Candidate } from "@/types/onboarding";
 
@@ -20,7 +19,6 @@ interface CandidateListProps {
 export function CandidateList({ candidates, isLoading, error, stage }: CandidateListProps) {
   const [selectedCandidates, setSelectedCandidates] = useState<Candidate[]>([]);
   const [isEmailComposerOpen, setIsEmailComposerOpen] = useState(false);
-  const [isSmsComposerOpen, setIsSmsComposerOpen] = useState(false);
   const [statusFilter, setStatusFilter] = useState<string>("all");
   const [searchQuery, setSearchQuery] = useState<string>("");
   const queryClient = useQueryClient();
@@ -49,14 +47,13 @@ export function CandidateList({ candidates, isLoading, error, stage }: Candidate
       .on(
         'postgres_changes',
         {
-          event: 'UPDATE',
+          event: '*',
           schema: 'public',
-          table: 'onboarding_candidates',
-          filter: 'status=neq.null'
+          table: 'onboarding_candidates'
         },
         (payload) => {
-          console.log('Status updated:', payload);
-          queryClient.invalidateQueries({ queryKey: ['candidates'] });
+          console.log('Candidate updated:', payload);
+          queryClient.invalidateQueries({ queryKey: ['onboarding-candidates'] });
         }
       )
       .subscribe();
@@ -147,7 +144,7 @@ export function CandidateList({ candidates, isLoading, error, stage }: Candidate
       });
 
       setSelectedCandidates([]);
-      queryClient.invalidateQueries({ queryKey: ['candidates'] });
+      queryClient.invalidateQueries({ queryKey: ['onboarding-candidates'] });
     } catch (error) {
       console.error('Error performing bulk action:', error);
       toast({
@@ -172,7 +169,7 @@ export function CandidateList({ candidates, isLoading, error, stage }: Candidate
   }).filter(candidate => {
     if (!searchQuery) return true;
     return (
-      candidate.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      candidate.name?.toLowerCase().includes(searchQuery.toLowerCase()) ||
       candidate.email.toLowerCase().includes(searchQuery.toLowerCase())
     );
   });
@@ -205,27 +202,18 @@ export function CandidateList({ candidates, isLoading, error, stage }: Candidate
         getStatusColor={getStatusColor}
       />
 
-      <OnboardingEmailComposer
+      <EmailAndSmsComposer
         open={isEmailComposerOpen}
         onOpenChange={setIsEmailComposerOpen}
         selectedCandidates={selectedCandidates.map(c => ({
           id: c.id,
           name: c.name,
-          email: c.email
+          first_name: c.first_name,
+          last_name: c.last_name,
+          email: c.email,
+          phone: c.phone
         }))}
       />
-
-      {isSmsComposerOpen && selectedCandidates.length > 0 && (
-        <EmailAndSmsComposer
-          candidateId={selectedCandidates[0].id}
-          candidateName={selectedCandidates[0].name}
-          phone={selectedCandidates[0].phone}
-          open={isSmsComposerOpen}
-          onOpenChange={setIsSmsComposerOpen}
-          mode="sms"
-          selectedCandidates={selectedCandidates}
-        />
-      )}
     </div>
   );
 }

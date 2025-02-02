@@ -15,6 +15,7 @@ import type { CandidateTableProps } from "@/types/onboarding";
 import { useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
+import { Button } from "@/components/ui/button";
 
 const formatName = (candidate: any) => {
   if (candidate.name) return candidate.name;
@@ -35,18 +36,33 @@ export function CandidateTable({
   const { toast } = useToast();
   const [editingId, setEditingId] = useState<string | null>(null);
   const [editValues, setEditValues] = useState<Record<string, any>>({});
+  const queryClient = useQueryClient();
+
+  const formatSource = (source: string) => {
+    if (!source || source === 'new') return '';
+    if (source.startsWith('http')) {
+      return (
+        <a 
+          href={source}
+          target="_blank"
+          rel="noopener noreferrer"
+          className="text-blue-500 hover:underline"
+        >
+          {new URL(source).hostname}
+        </a>
+      );
+    }
+    return source;
+  };
 
   const startEditing = (candidate: any) => {
     setEditingId(candidate.id);
     setEditValues({
       name: candidate.name || '',
-      first_name: candidate.first_name || '',
-      last_name: candidate.last_name || '',
       email: candidate.email || '',
       phone: candidate.phone || '',
-      language: candidate.language || '',
       source: candidate.source || '',
-      remarks: candidate.remarks || ''
+      status: candidate.status || ''
     });
   };
 
@@ -56,13 +72,10 @@ export function CandidateTable({
         .from('onboarding_candidates')
         .update({
           name: editValues.name || null,
-          first_name: editValues.first_name || null,
-          last_name: editValues.last_name || null,
           email: editValues.email || null,
           phone: editValues.phone || null,
-          language: editValues.language || null,
           source: editValues.source || null,
-          remarks: editValues.remarks || null
+          status: editValues.status || null
         })
         .eq('id', id);
 
@@ -75,6 +88,7 @@ export function CandidateTable({
       
       setEditingId(null);
       setEditValues({});
+      queryClient.invalidateQueries({ queryKey: ['onboarding_candidates'] });
     } catch (error) {
       console.error('Error updating candidate:', error);
       toast({
@@ -97,13 +111,9 @@ export function CandidateTable({
               />
             </TableHead>
             <TableHead>Full Name</TableHead>
-            <TableHead>First Name</TableHead>
-            <TableHead>Last Name</TableHead>
             <TableHead>Email</TableHead>
             <TableHead>Phone</TableHead>
-            <TableHead>Language</TableHead>
             <TableHead>Source</TableHead>
-            <TableHead>Remarks</TableHead>
             <TableHead>Status</TableHead>
             <TableHead className="text-right">Actions</TableHead>
           </TableRow>
@@ -133,26 +143,6 @@ export function CandidateTable({
                 <TableCell>
                   {isEditing ? (
                     <Input
-                      value={editValues.first_name}
-                      onChange={(e) => setEditValues({...editValues, first_name: e.target.value})}
-                    />
-                  ) : (
-                    candidate.first_name || ''
-                  )}
-                </TableCell>
-                <TableCell>
-                  {isEditing ? (
-                    <Input
-                      value={editValues.last_name}
-                      onChange={(e) => setEditValues({...editValues, last_name: e.target.value})}
-                    />
-                  ) : (
-                    candidate.last_name || ''
-                  )}
-                </TableCell>
-                <TableCell>
-                  {isEditing ? (
-                    <Input
                       value={editValues.email}
                       onChange={(e) => setEditValues({...editValues, email: e.target.value})}
                     />
@@ -172,23 +162,12 @@ export function CandidateTable({
                 </TableCell>
                 <TableCell>
                   {isEditing ? (
-                    <Select
-                      value={editValues.language}
-                      onValueChange={(value) => setEditValues({...editValues, language: value})}
-                    >
-                      <SelectTrigger className="w-[180px]">
-                        <SelectValue placeholder="Select language" />
-                      </SelectTrigger>
-                      <SelectContent>
-                        {SUPPORTED_LANGUAGES.map((lang) => (
-                          <SelectItem key={lang} value={lang}>
-                            {lang}
-                          </SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
+                    <Input
+                      value={editValues.source}
+                      onChange={(e) => setEditValues({...editValues, source: e.target.value})}
+                    />
                   ) : (
-                    candidate.language || ''
+                    formatSource(candidate.source)
                   )}
                 </TableCell>
                 <TableCell>
@@ -197,43 +176,34 @@ export function CandidateTable({
                       candidate.status
                     )}`}
                   >
-                    {candidate.status}
+                    {candidate.status.replace('_', ' ')}
                   </span>
                 </TableCell>
                 <TableCell className="text-right">
                   {isEditing ? (
                     <div className="flex justify-end gap-2">
-                      <button
+                      <Button
                         onClick={() => handleSave(candidate.id)}
-                        className="px-2 py-1 text-sm bg-primary text-primary-foreground rounded-md"
+                        size="sm"
                       >
                         Save
-                      </button>
-                      <button
+                      </Button>
+                      <Button
                         onClick={() => setEditingId(null)}
-                        className="px-2 py-1 text-sm bg-secondary text-secondary-foreground rounded-md"
+                        variant="outline"
+                        size="sm"
                       >
                         Cancel
-                      </button>
+                      </Button>
                     </div>
                   ) : (
-                    <div className="flex justify-end gap-2">
-                      {stage === 'process' && (
-                        <button
-                          onClick={() => startEditing(candidate)}
-                          className="px-2 py-1 text-sm bg-secondary text-secondary-foreground rounded-md"
-                        >
-                          Edit
-                        </button>
-                      )}
-                      <CandidateActions 
-                        candidateId={candidate.id}
-                        candidateName={formatName(candidate)}
-                        email={candidate.email}
-                        phone={candidate.phone}
-                        stage={stage}
-                      />
-                    </div>
+                    <Button
+                      onClick={() => startEditing(candidate)}
+                      variant="ghost"
+                      size="sm"
+                    >
+                      Edit
+                    </Button>
                   )}
                 </TableCell>
               </TableRow>

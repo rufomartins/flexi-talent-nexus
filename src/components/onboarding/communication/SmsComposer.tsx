@@ -1,43 +1,69 @@
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Textarea } from "@/components/ui/textarea";
 import { Button } from "@/components/ui/button";
 
 interface SmsComposerProps {
-  message: string;
-  onMessageChange: (message: string) => void;
-  onSend: () => Promise<void>;
-  isSending: boolean;
-  onCancel: () => void;
+  data: {
+    templateId: string;
+    message: string;
+  };
+  onChange: (data: { templateId: string; message: string }) => void;
+  onInsertTag: (tag: string) => void;
 }
 
-export function SmsComposer({
-  message,
-  onMessageChange,
-  onSend,
-  isSending,
-  onCancel,
-}: SmsComposerProps) {
+export function SmsComposer({ data, onChange, onInsertTag }: SmsComposerProps) {
   return (
-    <div className="space-y-4">
-      <Textarea
-        placeholder="Type your SMS message here..."
-        value={message}
-        onChange={(e) => onMessageChange(e.target.value)}
-        className="min-h-[100px]"
-      />
+    <div className="space-y-4 pt-4 border-t">
+      <div>
+        <label className="text-sm font-medium">SMS Template</label>
+        <Select
+          value={data.templateId}
+          onValueChange={(value) => onChange({ ...data, templateId: value })}
+        >
+          <SelectTrigger>
+            <SelectValue placeholder="Select a template" />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value="template1">Template 1</SelectItem>
+            <SelectItem value="template2">Template 2</SelectItem>
+          </SelectContent>
+        </Select>
+      </div>
 
-      <div className="flex justify-end space-x-2">
-        <Button
-          variant="outline"
-          onClick={onCancel}
-        >
-          Cancel
-        </Button>
-        <Button
-          onClick={onSend}
-          disabled={isSending}
-        >
-          {isSending ? 'Sending...' : 'Send'}
-        </Button>
+      <div>
+        <label className="text-sm font-medium">Message</label>
+        <div className="flex gap-2 mb-2">
+          <Button
+            type="button"
+            variant="outline"
+            size="sm"
+            onClick={() => onInsertTag('First Name')}
+          >
+            Add First Name
+          </Button>
+          <Button
+            type="button"
+            variant="outline"
+            size="sm"
+            onClick={() => onInsertTag('Last Name')}
+          >
+            Add Last Name
+          </Button>
+          <Button
+            type="button"
+            variant="outline"
+            size="sm"
+            onClick={() => onInsertTag('Full Name')}
+          >
+            Add Full Name
+          </Button>
+        </div>
+        <Textarea
+          value={data.message}
+          onChange={(e) => onChange({ ...data, message: e.target.value })}
+          placeholder="Type your SMS message here..."
+          className="min-h-[100px]"
+        />
       </div>
     </div>
   );
