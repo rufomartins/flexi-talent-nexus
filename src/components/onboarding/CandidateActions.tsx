@@ -64,6 +64,12 @@ export function CandidateActions({
       <EmailAndSmsComposer
         open={showCommunication}
         onOpenChange={setShowCommunication}
+        selectedCandidates={[{
+          id: candidateId,
+          name: candidateName,
+          email,
+          phone
+        }]}
         candidateId={candidateId}
         candidateName={candidateName}
         email={email}

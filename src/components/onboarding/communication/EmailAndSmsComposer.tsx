@@ -31,7 +31,7 @@ export interface EmailAndSmsComposerProps {
 export function EmailAndSmsComposer({
   open,
   onOpenChange,
-  selectedCandidates,
+  selectedCandidates = [],
   candidateId,
   candidateName,
   email,
@@ -69,16 +69,14 @@ export function EmailAndSmsComposer({
     try {
       setStep('send');
       
-      // Send email
-      const emailPromises = selectedCandidates.map(async (candidate) => {
-        if (!candidate.email) return;
-        
+      // If single candidate mode
+      if (candidateId && email) {
         const { error } = await supabase.functions.invoke('send-onboarding-email', {
           body: {
             templateId: emailData.templateId,
             recipient: {
-              email: candidate.email,
-              name: candidate.name || `${candidate.first_name || ''} ${candidate.last_name || ''}`.trim()
+              email,
+              name: candidateName
             },
             subject: emailData.subject,
             body: emailData.body
@@ -86,28 +84,62 @@ export function EmailAndSmsComposer({
         });
 
         if (error) throw error;
-      });
 
-      // Send SMS if enabled
-      const smsPromises = enableSms ? selectedCandidates.map(async (candidate) => {
-        if (!candidate.phone) return;
-        
-        const { error } = await supabase.functions.invoke('send-sms', {
-          body: {
-            to: candidate.phone,
-            message: smsData.message,
-            module: 'welcome',
-            metadata: {
-              candidateId: candidate.id,
-              candidateName: candidate.name || `${candidate.first_name || ''} ${candidate.last_name || ''}`.trim()
+        if (enableSms && phone) {
+          const { error: smsError } = await supabase.functions.invoke('send-sms', {
+            body: {
+              to: phone,
+              message: smsData.message,
+              module: 'welcome',
+              metadata: {
+                candidateId,
+                candidateName
+              }
             }
-          }
+          });
+
+          if (smsError) throw smsError;
+        }
+      } else {
+        // Multiple candidates mode
+        const emailPromises = selectedCandidates.map(async (candidate) => {
+          if (!candidate.email) return;
+          
+          const { error } = await supabase.functions.invoke('send-onboarding-email', {
+            body: {
+              templateId: emailData.templateId,
+              recipient: {
+                email: candidate.email,
+                name: candidate.name || `${candidate.first_name || ''} ${candidate.last_name || ''}`.trim()
+              },
+              subject: emailData.subject,
+              body: emailData.body
+            }
+          });
+
+          if (error) throw error;
         });
 
-        if (error) throw error;
-      }) : [];
+        const smsPromises = enableSms ? selectedCandidates.map(async (candidate) => {
+          if (!candidate.phone) return;
+          
+          const { error } = await supabase.functions.invoke('send-sms', {
+            body: {
+              to: candidate.phone,
+              message: smsData.message,
+              module: 'welcome',
+              metadata: {
+                candidateId: candidate.id,
+                candidateName: candidate.name || `${candidate.first_name || ''} ${candidate.last_name || ''}`.trim()
+              }
+            }
+          });
 
-      await Promise.all([...emailPromises, ...smsPromises]);
+          if (error) throw error;
+        }) : [];
+
+        await Promise.all([...emailPromises, ...smsPromises]);
+      }
 
       toast({
         title: "Success",
