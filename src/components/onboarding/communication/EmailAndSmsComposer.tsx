@@ -3,14 +3,15 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/u
 import { Button } from "@/components/ui/button";
 import { Switch } from "@/components/ui/switch";
 import { Label } from "@/components/ui/label";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { useToast } from "@/hooks/use-toast";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { EmailComposer } from "./EmailComposer";
 import { SmsComposer } from "./SmsComposer";
 
-interface EmailAndSmsComposerProps {
+type Step = 'compose' | 'preview' | 'send';
+
+export interface EmailAndSmsComposerProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
   selectedCandidates: Array<{
@@ -21,14 +22,22 @@ interface EmailAndSmsComposerProps {
     email?: string;
     phone?: string;
   }>;
+  candidateId?: string;
+  candidateName?: string;
+  email?: string;
+  phone?: string;
 }
 
 export function EmailAndSmsComposer({
   open,
   onOpenChange,
-  selectedCandidates
+  selectedCandidates,
+  candidateId,
+  candidateName,
+  email,
+  phone
 }: EmailAndSmsComposerProps) {
-  const [step, setStep] = useState<'compose' | 'preview' | 'sending'>('compose');
+  const [step, setStep] = useState<Step>('compose');
   const [enableSms, setEnableSms] = useState(false);
   const [emailData, setEmailData] = useState({
     templateId: '',
@@ -48,7 +57,7 @@ export function EmailAndSmsComposer({
       const { data, error } = await supabase
         .from('onboarding_email_templates')
         .select('*')
-        .eq('type', 'onboarding')
+        .eq('type', 'welcome')
         .eq('is_active', true);
 
       if (error) throw error;
@@ -58,7 +67,7 @@ export function EmailAndSmsComposer({
 
   const handleSend = async () => {
     try {
-      setStep('sending');
+      setStep('send');
       
       // Send email
       const emailPromises = selectedCandidates.map(async (candidate) => {
@@ -87,7 +96,7 @@ export function EmailAndSmsComposer({
           body: {
             to: candidate.phone,
             message: smsData.message,
-            module: 'onboarding',
+            module: 'welcome',
             metadata: {
               candidateId: candidate.id,
               candidateName: candidate.name || `${candidate.first_name || ''} ${candidate.last_name || ''}`.trim()
@@ -202,8 +211,8 @@ export function EmailAndSmsComposer({
               <Button variant="outline" onClick={() => setStep('compose')}>
                 Back
               </Button>
-              <Button onClick={handleSend} disabled={step === 'sending'}>
-                {step === 'sending' ? 'Sending...' : 'Send'}
+              <Button onClick={handleSend} disabled={step === 'send'}>
+                {step === 'send' ? 'Sending...' : 'Send'}
               </Button>
             </div>
           </div>

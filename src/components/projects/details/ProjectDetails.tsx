@@ -2,7 +2,7 @@ import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { ProjectHeader } from "./ProjectHeader";
 import { ProjectItems } from "./ProjectItems";
-import type { Project } from "@/types/project";
+import type { Project, ProjectStatus } from "@/types/project";
 import { useToast } from "@/hooks/use-toast";
 
 interface ProjectDetailsProps {
@@ -46,7 +46,7 @@ export function ProjectDetails({ projectId }: ProjectDetailsProps) {
         countries: [], // Initialize with empty array since we'll fetch this separately if needed
         created_at: data.created_at,
         updated_at: data.updated_at,
-        status: data.status || 'active',
+        status: (data.status || 'active') as ProjectStatus,
       };
 
       return transformedProject;
