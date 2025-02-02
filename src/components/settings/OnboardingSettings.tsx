@@ -6,6 +6,7 @@ import { Button } from "@/components/ui/button";
 import { useToast } from "@/hooks/use-toast";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
+import { TemplateManagement } from "./onboarding/TemplateManagement";
 
 export function OnboardingSettings() {
   const { toast } = useToast();
@@ -46,6 +47,8 @@ export function OnboardingSettings() {
         </div>
       </Card>
 
+      <TemplateManagement />
+
       <Card className="p-6">
         <h3 className="text-lg font-medium mb-4">Notification Settings</h3>
         
@@ -62,31 +65,6 @@ export function OnboardingSettings() {
               SMS Notifications
             </Label>
             <Switch id="sms-notifications" />
-          </div>
-        </div>
-      </Card>
-
-      <Card className="p-6">
-        <h3 className="text-lg font-medium mb-4">Interview Settings</h3>
-        
-        <div className="space-y-4">
-          <div className="grid grid-cols-2 gap-4">
-            <div className="space-y-2">
-              <Label htmlFor="min-duration">Minimum Duration (minutes)</Label>
-              <Input id="min-duration" type="number" defaultValue={30} />
-            </div>
-
-            <div className="space-y-2">
-              <Label htmlFor="max-duration">Maximum Duration (minutes)</Label>
-              <Input id="max-duration" type="number" defaultValue={60} />
-            </div>
-          </div>
-
-          <div className="flex items-center justify-between">
-            <Label htmlFor="auto-schedule">
-              Enable Auto-Scheduling
-            </Label>
-            <Switch id="auto-schedule" />
           </div>
         </div>
       </Card>
