@@ -20,15 +20,21 @@ export interface Candidate {
   updated_at?: string;
 }
 
-export interface ExcelRowData {
-  first_name: string;
-  last_name: string;
-  email: string;
+export interface CandidateTableProps {
+  candidates: Candidate[];
+  selectedCandidates: Candidate[];
+  onSelectCandidate: (candidate: Candidate) => void;
+  onSelectAll: (checked: boolean) => void;
+  stage: 'ingest' | 'process' | 'screening' | 'results';
+  getStatusColor: (status: string) => string;
+}
+
+export interface CandidateActionsProps {
+  candidateId: string;
+  candidateName: string;
+  email?: string;
   phone?: string;
-  language: string;
-  native_language: string;
-  source?: string;
-  remarks?: string;
+  stage: 'ingest' | 'process' | 'screening' | 'results';
 }
 
 export type TemplateType = 'welcome' | 'interview_scheduled' | 'interview_reminder' | 'approval' | 'rejection';
