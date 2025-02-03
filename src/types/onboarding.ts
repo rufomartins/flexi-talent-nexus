@@ -31,27 +31,10 @@ export interface ExcelRowData {
   remarks?: string;
 }
 
-export interface CandidateTableProps {
-  candidates: Candidate[];
-  selectedCandidates: Candidate[];
-  onSelectCandidate: (candidate: Candidate) => void;
-  onSelectAll: (checked: boolean) => void;
-  stage: 'ingest' | 'process' | 'screening' | 'results';
-  getStatusColor: (status: string) => string;
-}
-
-export interface CandidateActionsProps {
-  candidateId: string;
-  candidateName: string;
-  email?: string;
-  phone?: string;
-  stage: 'ingest' | 'process' | 'screening' | 'results';
-}
-
 export type TemplateType = 'welcome' | 'interview_scheduled' | 'interview_reminder' | 'approval' | 'rejection';
 
 export interface EmailTemplate {
-  id?: string;
+  id: string;
   name: string;
   type: TemplateType;
   subject: string;
@@ -63,7 +46,7 @@ export interface EmailTemplate {
 }
 
 export interface SmsTemplate {
-  id?: string;
+  id: string;
   name: string;
   type: TemplateType;
   message: string;
@@ -110,4 +93,5 @@ export interface EmailAndSmsComposerProps {
   candidateName?: string;
   email?: string;
   phone?: string;
+  stage?: 'ingest' | 'process' | 'screening' | 'results';
 }

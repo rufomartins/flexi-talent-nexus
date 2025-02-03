@@ -6,7 +6,7 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { Eye, Mail, Calendar, MoreHorizontal } from "lucide-react";
+import { Eye, MoreHorizontal } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { InterviewSchedulerDialog } from "../interview/InterviewSchedulerDialog";
 import { EmailAndSmsComposer } from "../communication/EmailAndSmsComposer";
@@ -109,6 +109,7 @@ export function CandidateActions({
         candidateName={candidateName}
         email={email}
         phone={phone}
+        stage={stage}
       />
     </>
   );

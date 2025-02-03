@@ -8,24 +8,7 @@ import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { EmailComposer } from "./EmailComposer";
 import { SmsComposer } from "./SmsComposer";
-import type { Step } from "@/types/onboarding";
-
-export interface EmailAndSmsComposerProps {
-  open: boolean;
-  onOpenChange: (open: boolean) => void;
-  selectedCandidates: Array<{
-    id: string;
-    name?: string;
-    first_name?: string;
-    last_name?: string;
-    email?: string;
-    phone?: string;
-  }>;
-  candidateId?: string;
-  candidateName?: string;
-  email?: string;
-  phone?: string;
-}
+import type { Step, EmailTemplate, SmsTemplate } from "@/types/onboarding";
 
 export function EmailAndSmsComposer({
   open,
@@ -34,7 +17,8 @@ export function EmailAndSmsComposer({
   candidateId,
   candidateName,
   email,
-  phone
+  phone,
+  stage
 }: EmailAndSmsComposerProps) {
   const [step, setStep] = useState<Step>('compose');
   const [enableSms, setEnableSms] = useState(false);
@@ -59,10 +43,28 @@ export function EmailAndSmsComposer({
         .eq('is_active', true);
 
       if (error) throw error;
+      
       return data.map(template => ({
         ...template,
         variables: Array.isArray(template.variables) ? template.variables : []
-      }));
+      })) as EmailTemplate[];
+    }
+  });
+
+  const { data: smsTemplates } = useQuery({
+    queryKey: ['sms-templates'],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from('onboarding_sms_templates')
+        .select('*')
+        .eq('is_active', true);
+
+      if (error) throw error;
+      
+      return data.map(template => ({
+        ...template,
+        variables: Array.isArray(template.variables) ? template.variables : []
+      })) as SmsTemplate[];
     }
   });
 
@@ -87,7 +89,7 @@ export function EmailAndSmsComposer({
     try {
       setStep('send');
       
-      // If single candidate mode
+      // Single candidate mode
       if (candidateId && email) {
         const { error } = await supabase.functions.invoke('send-onboarding-email', {
           body: {
