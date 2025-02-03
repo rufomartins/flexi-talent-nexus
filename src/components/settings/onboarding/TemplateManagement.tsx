@@ -4,30 +4,16 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
+import { Label } from "@/components/ui/label";
 import { useToast } from "@/hooks/use-toast";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-
-type TemplateType = "welcome" | "interview_scheduled" | "interview_reminder" | "approval" | "rejection";
-
-interface Template {
-  id: string;
-  name: string;
-  type: TemplateType;
-  subject?: string;
-  body?: string;
-  message?: string;
-  is_active: boolean;
-  variables?: string[];
-  created_at: string;
-  updated_at: string;
-}
+import type { EmailTemplate, SmsTemplate, TemplateType } from "@/types/onboarding";
 
 export function TemplateManagement() {
-  const [selectedType, setSelectedType] = useState<TemplateType>("welcome");
-  const { toast } = useToast();
+  const [activeTab, setActiveTab] = useState<"email" | "sms">("email");
   const queryClient = useQueryClient();
+  const { toast } = useToast();
 
   const { data: emailTemplates, isLoading: emailLoading } = useQuery({
     queryKey: ['email-templates'],
@@ -38,7 +24,7 @@ export function TemplateManagement() {
         .eq('is_active', true);
 
       if (error) throw error;
-      return data;
+      return data as EmailTemplate[];
     }
   });
 
@@ -51,21 +37,15 @@ export function TemplateManagement() {
         .eq('is_active', true);
 
       if (error) throw error;
-      return data;
+      return data as SmsTemplate[];
     }
   });
 
-  const createTemplateMutation = useMutation({
-    mutationFn: async (template: Partial<Template>) => {
-      const table = template.message ? 'onboarding_sms_templates' : 'onboarding_email_templates';
+  const createEmailTemplate = useMutation({
+    mutationFn: async (template: Omit<EmailTemplate, 'id'>) => {
       const { data, error } = await supabase
-        .from(table)
-        .insert([{
-          ...template,
-          type: selectedType,
-          is_active: true,
-          variables: ['First Name', 'Last Name', 'Full Name']
-        }])
+        .from('onboarding_email_templates')
+        .insert([template])
         .select()
         .single();
 
@@ -74,10 +54,36 @@ export function TemplateManagement() {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['email-templates'] });
+      toast({
+        title: "Success",
+        description: "Email template created successfully",
+      });
+    },
+    onError: (error: any) => {
+      toast({
+        title: "Error",
+        description: error.message,
+        variant: "destructive",
+      });
+    }
+  });
+
+  const createSmsTemplate = useMutation({
+    mutationFn: async (template: Omit<SmsTemplate, 'id'>) => {
+      const { data, error } = await supabase
+        .from('onboarding_sms_templates')
+        .insert([template])
+        .select()
+        .single();
+
+      if (error) throw error;
+      return data;
+    },
+    onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['sms-templates'] });
       toast({
         title: "Success",
-        description: "Template created successfully",
+        description: "SMS template created successfully",
       });
     },
     onError: (error: any) => {
@@ -92,27 +98,11 @@ export function TemplateManagement() {
   return (
     <Card className="p-6">
       <h3 className="text-lg font-medium mb-4">Template Management</h3>
-      <Tabs defaultValue="email" className="space-y-4">
+      <Tabs value={activeTab} onValueChange={(value) => setActiveTab(value as "email" | "sms")}>
         <TabsList>
           <TabsTrigger value="email">Email Templates</TabsTrigger>
           <TabsTrigger value="sms">SMS Templates</TabsTrigger>
         </TabsList>
-
-        <div className="mb-4">
-          <Label>Template Type</Label>
-          <Select value={selectedType} onValueChange={(value: TemplateType) => setSelectedType(value)}>
-            <SelectTrigger>
-              <SelectValue placeholder="Select template type" />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="welcome">Welcome</SelectItem>
-              <SelectItem value="interview_scheduled">Interview Scheduled</SelectItem>
-              <SelectItem value="interview_reminder">Interview Reminder</SelectItem>
-              <SelectItem value="approval">Approval</SelectItem>
-              <SelectItem value="rejection">Rejection</SelectItem>
-            </SelectContent>
-          </Select>
-        </div>
 
         <TabsContent value="email" className="space-y-4">
           <div className="space-y-4">
@@ -121,15 +111,27 @@ export function TemplateManagement() {
               <Input
                 id="name"
                 placeholder="Enter template name"
-                onChange={(e) => {/* Handle change */}}
               />
+            </div>
+            <div>
+              <Label htmlFor="type">Template Type</Label>
+              <select
+                id="type"
+                className="w-full p-2 border rounded"
+                defaultValue="welcome"
+              >
+                <option value="welcome">Welcome</option>
+                <option value="interview_scheduled">Interview Scheduled</option>
+                <option value="interview_reminder">Interview Reminder</option>
+                <option value="approval">Approval</option>
+                <option value="rejection">Rejection</option>
+              </select>
             </div>
             <div>
               <Label htmlFor="subject">Subject</Label>
               <Input
                 id="subject"
                 placeholder="Enter email subject"
-                onChange={(e) => {/* Handle change */}}
               />
             </div>
             <div>
@@ -164,7 +166,6 @@ export function TemplateManagement() {
                 id="body"
                 placeholder="Type your message here..."
                 className="min-h-[200px]"
-                onChange={(e) => {/* Handle change */}}
               />
             </div>
           </div>
@@ -177,8 +178,21 @@ export function TemplateManagement() {
               <Input
                 id="sms-name"
                 placeholder="Enter template name"
-                onChange={(e) => {/* Handle change */}}
               />
+            </div>
+            <div>
+              <Label htmlFor="sms-type">Template Type</Label>
+              <select
+                id="sms-type"
+                className="w-full p-2 border rounded"
+                defaultValue="welcome"
+              >
+                <option value="welcome">Welcome</option>
+                <option value="interview_scheduled">Interview Scheduled</option>
+                <option value="interview_reminder">Interview Reminder</option>
+                <option value="approval">Approval</option>
+                <option value="rejection">Rejection</option>
+              </select>
             </div>
             <div>
               <Label htmlFor="message">Message</Label>
@@ -212,21 +226,10 @@ export function TemplateManagement() {
                 id="message"
                 placeholder="Type your SMS message here..."
                 className="min-h-[100px]"
-                onChange={(e) => {/* Handle change */}}
               />
             </div>
           </div>
         </TabsContent>
-
-        <div className="flex justify-end space-x-2 mt-4">
-          <Button variant="outline">Cancel</Button>
-          <Button onClick={() => createTemplateMutation.mutate({
-            name: "New Template",
-            type: selectedType,
-          })}>
-            Save Template
-          </Button>
-        </div>
       </Tabs>
     </Card>
   );

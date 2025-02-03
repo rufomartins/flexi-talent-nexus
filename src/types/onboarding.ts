@@ -47,3 +47,30 @@ export interface CandidateActionsProps {
   phone?: string;
   stage: 'ingest' | 'process' | 'screening' | 'results';
 }
+
+export type TemplateType = 'welcome' | 'interview_scheduled' | 'interview_reminder' | 'approval' | 'rejection';
+
+export interface EmailTemplate {
+  id?: string;
+  name: string;
+  type: TemplateType;
+  subject: string;
+  body: string;
+  variables?: string[];
+  is_active: boolean;
+  created_at?: string;
+  updated_at?: string;
+}
+
+export interface SmsTemplate {
+  id?: string;
+  name: string;
+  type: TemplateType;
+  message: string;
+  variables?: string[];
+  is_active: boolean;
+  created_at?: string;
+  updated_at?: string;
+}
+
+export type Step = 'compose' | 'preview' | 'send';

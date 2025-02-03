@@ -8,8 +8,7 @@ import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { EmailComposer } from "./EmailComposer";
 import { SmsComposer } from "./SmsComposer";
-
-type Step = 'compose' | 'preview' | 'send';
+import type { Step } from "@/types/onboarding";
 
 export interface EmailAndSmsComposerProps {
   open: boolean;
@@ -52,7 +51,7 @@ export function EmailAndSmsComposer({
   const { toast } = useToast();
 
   const { data: emailTemplates } = useQuery({
-    queryKey: ['email-templates', 'onboarding'],
+    queryKey: ['email-templates'],
     queryFn: async () => {
       const { data, error } = await supabase
         .from('onboarding_email_templates')
@@ -159,21 +158,6 @@ export function EmailAndSmsComposer({
     }
   };
 
-  const insertPersonalization = (field: string) => {
-    const tag = `{${field}}`;
-    if (enableSms) {
-      setSmsData(prev => ({
-        ...prev,
-        message: prev.message + tag
-      }));
-    } else {
-      setEmailData(prev => ({
-        ...prev,
-        body: prev.body + tag
-      }));
-    }
-  };
-
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="max-w-3xl">
@@ -189,7 +173,6 @@ export function EmailAndSmsComposer({
               templates={emailTemplates || []}
               data={emailData}
               onChange={setEmailData}
-              onInsertTag={insertPersonalization}
             />
 
             <div className="flex items-center space-x-2 pt-4 border-t">
@@ -205,7 +188,6 @@ export function EmailAndSmsComposer({
               <SmsComposer
                 data={smsData}
                 onChange={setSmsData}
-                onInsertTag={insertPersonalization}
               />
             )}
 
