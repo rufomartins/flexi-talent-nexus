@@ -1,15 +1,7 @@
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Textarea } from "@/components/ui/textarea";
 import { Button } from "@/components/ui/button";
-
-interface SmsComposerProps {
-  data: {
-    templateId: string;
-    message: string;
-  };
-  onChange: (data: { templateId: string; message: string }) => void;
-  onInsertTag: (tag: string) => void;
-}
+import type { SmsComposerProps } from "@/types/onboarding";
 
 export function SmsComposer({ data, onChange, onInsertTag }: SmsComposerProps) {
   return (

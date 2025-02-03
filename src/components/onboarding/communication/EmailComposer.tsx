@@ -2,24 +2,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Button } from "@/components/ui/button";
-
-interface EmailTemplate {
-  id: string;
-  name: string;
-  subject: string;
-  body: string;
-}
-
-interface EmailComposerProps {
-  templates: EmailTemplate[];
-  data: {
-    templateId: string;
-    subject: string;
-    body: string;
-  };
-  onChange: (data: { templateId: string; subject: string; body: string }) => void;
-  onInsertTag: (tag: string) => void;
-}
+import type { EmailComposerProps } from "@/types/onboarding";
 
 export function EmailComposer({ templates, data, onChange, onInsertTag }: EmailComposerProps) {
   const handleTemplateChange = (templateId: string) => {
@@ -43,7 +26,7 @@ export function EmailComposer({ templates, data, onChange, onInsertTag }: EmailC
           </SelectTrigger>
           <SelectContent>
             {templates.map(template => (
-              <SelectItem key={template.id} value={template.id}>
+              <SelectItem key={template.id} value={template.id || ''}>
                 {template.name}
               </SelectItem>
             ))}

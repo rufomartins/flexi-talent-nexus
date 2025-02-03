@@ -74,3 +74,40 @@ export interface SmsTemplate {
 }
 
 export type Step = 'compose' | 'preview' | 'send';
+
+export interface EmailComposerProps {
+  templates: EmailTemplate[];
+  data: {
+    templateId: string;
+    subject: string;
+    body: string;
+  };
+  onChange: (data: { templateId: string; subject: string; body: string }) => void;
+  onInsertTag: (tag: string) => void;
+}
+
+export interface SmsComposerProps {
+  data: {
+    templateId: string;
+    message: string;
+  };
+  onChange: (data: { templateId: string; message: string }) => void;
+  onInsertTag: (tag: string) => void;
+}
+
+export interface EmailAndSmsComposerProps {
+  open: boolean;
+  onOpenChange: (open: boolean) => void;
+  selectedCandidates: Array<{
+    id: string;
+    name?: string;
+    first_name?: string;
+    last_name?: string;
+    email?: string;
+    phone?: string;
+  }>;
+  candidateId?: string;
+  candidateName?: string;
+  email?: string;
+  phone?: string;
+}
