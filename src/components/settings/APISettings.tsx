@@ -23,13 +23,19 @@ export function APISettings() {
         twilio: formData.get('twilio')
       };
 
+      const updates = Object.entries(keys).map(([name, value]) => ({
+        name,
+        value: { key: value },
+        updated_at: new Date().toISOString()
+      }));
+
       const { error } = await supabase
         .from('api_settings')
         .upsert(
-          Object.entries(keys).map(([name, value]) => ({
-            name,
-            value: { key: value },
-            updated_at: new Date().toISOString()
+          updates.map(update => ({
+            name: update.name,
+            value: update.value as any,
+            updated_at: update.updated_at
           }))
         );
 

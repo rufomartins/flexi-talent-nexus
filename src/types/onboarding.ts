@@ -56,7 +56,7 @@ export interface EmailTemplate {
   type: TemplateType;
   subject: string;
   body: string;
-  variables?: string[];
+  variables: string[];
   is_active: boolean;
   created_at?: string;
   updated_at?: string;
@@ -67,7 +67,7 @@ export interface SmsTemplate {
   name: string;
   type: TemplateType;
   message: string;
-  variables?: string[];
+  variables: string[];
   is_active: boolean;
   created_at?: string;
   updated_at?: string;

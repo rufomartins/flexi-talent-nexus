@@ -56,13 +56,32 @@ export function EmailAndSmsComposer({
       const { data, error } = await supabase
         .from('onboarding_email_templates')
         .select('*')
-        .eq('type', 'welcome')
         .eq('is_active', true);
 
       if (error) throw error;
-      return data;
+      return data.map(template => ({
+        ...template,
+        variables: Array.isArray(template.variables) ? template.variables : []
+      }));
     }
   });
+
+  const handleInsertTag = (tag: string) => {
+    if (step === 'compose') {
+      const tagText = `{{${tag}}}`;
+      if (enableSms) {
+        setSmsData(prev => ({
+          ...prev,
+          message: prev.message + tagText
+        }));
+      } else {
+        setEmailData(prev => ({
+          ...prev,
+          body: prev.body + tagText
+        }));
+      }
+    }
+  };
 
   const handleSend = async () => {
     try {
@@ -89,7 +108,7 @@ export function EmailAndSmsComposer({
             body: {
               to: phone,
               message: smsData.message,
-              module: 'welcome',
+              module: 'onboarding',
               metadata: {
                 candidateId,
                 candidateName
@@ -126,7 +145,7 @@ export function EmailAndSmsComposer({
             body: {
               to: candidate.phone,
               message: smsData.message,
-              module: 'welcome',
+              module: 'onboarding',
               metadata: {
                 candidateId: candidate.id,
                 candidateName: candidate.name || `${candidate.first_name || ''} ${candidate.last_name || ''}`.trim()
@@ -173,6 +192,7 @@ export function EmailAndSmsComposer({
               templates={emailTemplates || []}
               data={emailData}
               onChange={setEmailData}
+              onInsertTag={handleInsertTag}
             />
 
             <div className="flex items-center space-x-2 pt-4 border-t">
@@ -188,6 +208,7 @@ export function EmailAndSmsComposer({
               <SmsComposer
                 data={smsData}
                 onChange={setSmsData}
+                onInsertTag={handleInsertTag}
               />
             )}
 
