@@ -101,3 +101,14 @@ export interface EmailAndSmsComposerProps {
   phone?: string;
   stage?: 'ingest' | 'process' | 'screening' | 'results';
 }
+
+export interface ExcelRowData {
+  first_name: string;
+  last_name: string;
+  email: string;
+  phone?: string;
+  language: string;
+  native_language: string;
+  source?: string;
+  remarks?: string;
+}

@@ -8,7 +8,7 @@ import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { EmailComposer } from "./EmailComposer";
 import { SmsComposer } from "./SmsComposer";
-import type { Step, EmailTemplate, SmsTemplate, EmailAndSmsComposerProps } from "@/types/onboarding";
+import type { Step, EmailTemplate, SmsTemplate, EmailAndSmsComposerProps, TemplateType } from "@/types/onboarding";
 
 export function EmailAndSmsComposer({
   open,
@@ -63,7 +63,7 @@ export function EmailAndSmsComposer({
       
       return data.map(template => ({
         ...template,
-        type: template.type || 'welcome' as TemplateType,
+        type: template.type as TemplateType || 'welcome',
         variables: Array.isArray(template.variables) ? template.variables : []
       })) as SmsTemplate[];
     }

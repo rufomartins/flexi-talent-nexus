@@ -7,18 +7,7 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { CandidateActions } from "./CandidateActions";
-
-interface Candidate {
-  id: string;
-  name: string;
-  email: string;
-  phone: string;
-  status: 'new' | 'emailed' | 'interviewed' | 'approved' | 'not_interested';
-  scout: {
-    id: string;
-    full_name: string;
-  } | null;
-}
+import type { Candidate } from "@/types/onboarding";
 
 interface CandidateTableProps {
   candidates: Candidate[];
@@ -61,6 +50,7 @@ export function CandidateTable({ candidates, getStatusColor }: CandidateTablePro
                   candidateName={candidate.name}
                   email={candidate.email}
                   phone={candidate.phone}
+                  stage={candidate.stage}
                 />
               </TableCell>
             </TableRow>
