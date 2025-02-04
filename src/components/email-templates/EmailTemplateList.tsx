@@ -21,10 +21,10 @@ export function EmailTemplateList() {
   const { toast } = useToast();
   
   const { data: templates, isLoading, refetch } = useQuery({
-    queryKey: ['email-templates'],
+    queryKey: ['onboarding-email-templates'],
     queryFn: async () => {
       const { data, error } = await supabase
-        .from('email_templates')
+        .from('onboarding_email_templates')
         .select('*')
         .order('created_at', { ascending: false });
 
@@ -44,7 +44,7 @@ export function EmailTemplateList() {
   const toggleTemplateStatus = async (templateId: string, currentStatus: boolean) => {
     try {
       const { error } = await supabase
-        .from('email_templates')
+        .from('onboarding_email_templates')
         .update({ is_active: !currentStatus })
         .eq('id', templateId);
 

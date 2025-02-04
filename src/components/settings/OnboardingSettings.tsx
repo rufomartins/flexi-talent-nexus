@@ -7,6 +7,7 @@ import { useToast } from "@/hooks/use-toast";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { TemplateManagement } from "./onboarding/TemplateManagement";
+import { EmailSettings } from "./onboarding/EmailSettings";
 
 export function OnboardingSettings() {
   const { toast } = useToast();
@@ -20,6 +21,9 @@ export function OnboardingSettings() {
 
   return (
     <div className="space-y-6">
+      <EmailSettings />
+      <TemplateManagement />
+      
       <Card className="p-6">
         <h3 className="text-lg font-medium mb-4">Onboarding Configuration</h3>
         
@@ -43,28 +47,6 @@ export function OnboardingSettings() {
               Auto-Approve Candidates
             </Label>
             <Switch id="auto-approve" />
-          </div>
-        </div>
-      </Card>
-
-      <TemplateManagement />
-
-      <Card className="p-6">
-        <h3 className="text-lg font-medium mb-4">Notification Settings</h3>
-        
-        <div className="space-y-4">
-          <div className="flex items-center justify-between">
-            <Label htmlFor="email-notifications">
-              Email Notifications
-            </Label>
-            <Switch id="email-notifications" defaultChecked />
-          </div>
-
-          <div className="flex items-center justify-between">
-            <Label htmlFor="sms-notifications">
-              SMS Notifications
-            </Label>
-            <Switch id="sms-notifications" />
           </div>
         </div>
       </Card>

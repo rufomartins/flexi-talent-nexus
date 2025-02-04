@@ -915,6 +915,36 @@ export type Database = {
           },
         ]
       }
+      email_settings: {
+        Row: {
+          created_at: string | null
+          enable_receiving: boolean | null
+          id: string
+          is_active: boolean | null
+          sender_email: string
+          stage: string
+          updated_at: string | null
+        }
+        Insert: {
+          created_at?: string | null
+          enable_receiving?: boolean | null
+          id?: string
+          is_active?: boolean | null
+          sender_email: string
+          stage: string
+          updated_at?: string | null
+        }
+        Update: {
+          created_at?: string | null
+          enable_receiving?: boolean | null
+          id?: string
+          is_active?: boolean | null
+          sender_email?: string
+          stage?: string
+          updated_at?: string | null
+        }
+        Relationships: []
+      }
       email_templates: {
         Row: {
           body: string
@@ -1747,6 +1777,7 @@ export type Database = {
           is_active: boolean | null
           message: string
           name: string
+          type: Database["public"]["Enums"]["onboarding_template_type"] | null
           updated_at: string | null
           variables: Json | null
         }
@@ -1757,6 +1788,7 @@ export type Database = {
           is_active?: boolean | null
           message: string
           name: string
+          type?: Database["public"]["Enums"]["onboarding_template_type"] | null
           updated_at?: string | null
           variables?: Json | null
         }
@@ -1767,6 +1799,7 @@ export type Database = {
           is_active?: boolean | null
           message?: string
           name?: string
+          type?: Database["public"]["Enums"]["onboarding_template_type"] | null
           updated_at?: string | null
           variables?: Json | null
         }
