@@ -8,7 +8,7 @@ import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { EmailComposer } from "./EmailComposer";
 import { SmsComposer } from "./SmsComposer";
-import type { Step, EmailTemplate, SmsTemplate, EmailAndSmsComposerProps, TemplateType } from "@/types/onboarding";
+import type { Step, OnboardingEmailTemplate, SmsTemplate } from "@/types/onboarding";
 
 export function EmailAndSmsComposer({
   open,
@@ -20,7 +20,7 @@ export function EmailAndSmsComposer({
   phone,
   stage
 }: EmailAndSmsComposerProps) {
-  const [step, setStep] = useState<Step>('compose');
+  const [step, setStep] = useState<'compose' | 'preview' | 'send'>('compose');
   const [enableSms, setEnableSms] = useState(false);
   const [emailData, setEmailData] = useState({
     templateId: '',
@@ -43,12 +43,7 @@ export function EmailAndSmsComposer({
         .eq('is_active', true);
 
       if (error) throw error;
-      
-      return data.map(template => ({
-        ...template,
-        type: template.type as TemplateType,
-        variables: Array.isArray(template.variables) ? template.variables : []
-      })) as EmailTemplate[];
+      return data as OnboardingEmailTemplate[];
     }
   });
 
@@ -71,8 +66,8 @@ export function EmailAndSmsComposer({
   });
 
   const handleInsertTag = (tag: string) => {
+    const tagText = `{{${tag}}}`;
     if (step === 'compose') {
-      const tagText = `{{${tag}}}`;
       if (enableSms) {
         setSmsData(prev => ({
           ...prev,
@@ -250,8 +245,8 @@ export function EmailAndSmsComposer({
               <Button variant="outline" onClick={() => setStep('compose')}>
                 Back
               </Button>
-              <Button onClick={handleSend} disabled={step === 'send'}>
-                {step === 'send' ? 'Sending...' : 'Send'}
+              <Button onClick={handleSend}>
+                Send
               </Button>
             </div>
           </div>

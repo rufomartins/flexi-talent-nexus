@@ -39,7 +39,7 @@ export interface CandidateActionsProps {
 
 export type TemplateType = 'welcome' | 'interview_scheduled' | 'interview_reminder' | 'approval' | 'rejection';
 
-export interface EmailTemplate {
+export interface OnboardingEmailTemplate {
   id: string;
   name: string;
   type: TemplateType;
@@ -49,6 +49,7 @@ export interface EmailTemplate {
   is_active: boolean;
   created_at?: string;
   updated_at?: string;
+  created_by?: string;
 }
 
 export interface SmsTemplate {
@@ -62,10 +63,17 @@ export interface SmsTemplate {
   updated_at?: string;
 }
 
+export interface EmailSenderConfig {
+  stage: string;
+  sender_email: string;
+  is_active: boolean;
+  enable_receiving: boolean;
+}
+
 export type Step = 'compose' | 'preview' | 'send';
 
 export interface EmailComposerProps {
-  templates: EmailTemplate[];
+  templates: OnboardingEmailTemplate[];
   data: {
     templateId: string;
     subject: string;

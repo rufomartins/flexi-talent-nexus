@@ -6,16 +6,7 @@ import { Button } from "@/components/ui/button";
 import { formatDate } from "@/lib/utils";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
-
-interface EmailTemplate {
-  id: string;
-  name: string;
-  type: "casting_availability" | "booking_confirmation" | "talent_application" | "project_update" | "talent_invitation";
-  subject: string;
-  is_active: boolean;
-  created_at: string;
-  updated_at: string;
-}
+import { OnboardingEmailTemplate } from "@/types/onboarding";
 
 export function EmailTemplateList() {
   const { toast } = useToast();
@@ -37,7 +28,7 @@ export function EmailTemplateList() {
         throw error;
       }
 
-      return data as EmailTemplate[];
+      return data as OnboardingEmailTemplate[];
     },
   });
 

@@ -7,14 +7,7 @@ import { Switch } from "@/components/ui/switch";
 import { Label } from "@/components/ui/label";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
-
-interface EmailSetting {
-  id: string;
-  stage: string;
-  sender_email: string;
-  is_active: boolean;
-  enable_receiving: boolean;
-}
+import type { EmailSenderConfig } from "@/types/onboarding";
 
 export function EmailSettings() {
   const { toast } = useToast();
@@ -30,12 +23,12 @@ export function EmailSettings() {
         .order('stage');
 
       if (error) throw error;
-      return data as EmailSetting[];
+      return data as EmailSenderConfig[];
     }
   });
 
   const updateSetting = useMutation({
-    mutationFn: async (setting: Partial<EmailSetting> & { id: string }) => {
+    mutationFn: async (setting: Partial<EmailSenderConfig> & { id: string }) => {
       const { error } = await supabase
         .from('email_settings')
         .update(setting)
