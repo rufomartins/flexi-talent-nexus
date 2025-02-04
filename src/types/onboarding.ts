@@ -18,6 +18,11 @@ export interface Candidate {
   communication_status?: string;
   created_at?: string;
   updated_at?: string;
+  archive_status?: boolean;
+  date_added_to_screening?: string;
+  last_activity_date?: string;
+  interview_date?: string;
+  chatbot_status?: string;
 }
 
 export interface CandidateTableProps {
@@ -27,14 +32,6 @@ export interface CandidateTableProps {
   onSelectAll: (checked: boolean) => void;
   stage: 'ingest' | 'process' | 'screening' | 'results';
   getStatusColor: (status: string) => string;
-}
-
-export interface CandidateActionsProps {
-  candidateId: string;
-  candidateName: string;
-  email?: string;
-  phone?: string;
-  stage: 'ingest' | 'process' | 'screening' | 'results';
 }
 
 export type TemplateType = 'welcome' | 'interview_scheduled' | 'interview_reminder' | 'approval' | 'rejection';
@@ -64,10 +61,13 @@ export interface SmsTemplate {
 }
 
 export interface EmailSenderConfig {
+  id: string;
   stage: string;
   sender_email: string;
   is_active: boolean;
   enable_receiving: boolean;
+  created_at?: string;
+  updated_at?: string;
 }
 
 export type Step = 'compose' | 'preview' | 'send';
@@ -108,15 +108,4 @@ export interface EmailAndSmsComposerProps {
   email?: string;
   phone?: string;
   stage?: 'ingest' | 'process' | 'screening' | 'results';
-}
-
-export interface ExcelRowData {
-  first_name: string;
-  last_name: string;
-  email: string;
-  phone?: string;
-  language: string;
-  native_language: string;
-  source?: string;
-  remarks?: string;
 }

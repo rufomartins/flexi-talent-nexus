@@ -8,7 +8,7 @@ import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { EmailComposer } from "./EmailComposer";
 import { SmsComposer } from "./SmsComposer";
-import type { Step, OnboardingEmailTemplate, SmsTemplate } from "@/types/onboarding";
+import type { Step, OnboardingEmailTemplate, SmsTemplate, EmailAndSmsComposerProps } from "@/types/onboarding";
 
 export function EmailAndSmsComposer({
   open,
@@ -20,7 +20,7 @@ export function EmailAndSmsComposer({
   phone,
   stage
 }: EmailAndSmsComposerProps) {
-  const [step, setStep] = useState<'compose' | 'preview' | 'send'>('compose');
+  const [step, setStep] = useState<Step>('compose');
   const [enableSms, setEnableSms] = useState(false);
   const [emailData, setEmailData] = useState({
     templateId: '',
@@ -56,12 +56,7 @@ export function EmailAndSmsComposer({
         .eq('is_active', true);
 
       if (error) throw error;
-      
-      return data.map(template => ({
-        ...template,
-        type: template.type as TemplateType,
-        variables: Array.isArray(template.variables) ? template.variables : []
-      })) as SmsTemplate[];
+      return data as SmsTemplate[];
     }
   });
 

@@ -34,7 +34,7 @@ export function APISettings() {
         .upsert(
           updates.map(update => ({
             name: update.name,
-            value: update.value as any,
+            value: update.value,
             updated_at: update.updated_at
           }))
         );

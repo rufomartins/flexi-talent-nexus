@@ -7,6 +7,8 @@ import { CandidateFilters } from "./list/CandidateFilters";
 import { CandidateTable } from "./list/CandidateTable";
 import { BulkActions } from "./list/BulkActions";
 import { EmailAndSmsComposer } from "./communication/EmailAndSmsComposer";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { SUPPORTED_LANGUAGES } from "@/utils/languages";
 import type { Candidate } from "@/types/onboarding";
 
 interface CandidateListProps {
@@ -21,6 +23,7 @@ export function CandidateList({ candidates, isLoading, error, stage }: Candidate
   const [isEmailComposerOpen, setIsEmailComposerOpen] = useState(false);
   const [statusFilter, setStatusFilter] = useState<string>("all");
   const [searchQuery, setSearchQuery] = useState<string>("");
+  const [languageFilter, setLanguageFilter] = useState<string>("all");
   const queryClient = useQueryClient();
   const { toast } = useToast();
 
@@ -164,10 +167,10 @@ export function CandidateList({ candidates, isLoading, error, stage }: Candidate
   }
 
   const filteredCandidates = candidates.filter(candidate => {
-    if (statusFilter === "all") return true;
-    return candidate.status === statusFilter;
-  }).filter(candidate => {
+    if (statusFilter !== "all" && candidate.status !== statusFilter) return false;
+    if (languageFilter !== "all" && candidate.language !== languageFilter) return false;
     if (!searchQuery) return true;
+    
     return (
       candidate.name?.toLowerCase().includes(searchQuery.toLowerCase()) ||
       candidate.email.toLowerCase().includes(searchQuery.toLowerCase())
@@ -179,12 +182,25 @@ export function CandidateList({ candidates, isLoading, error, stage }: Candidate
       <div className="flex items-center justify-between bg-muted p-4 rounded-lg">
         <div className="flex items-center gap-4">
           <span>{selectedCandidates.length} candidate(s) selected</span>
-          <CandidateFilters
-            statusFilter={statusFilter}
-            onStatusFilterChange={setStatusFilter}
-            searchQuery={searchQuery}
-            onSearchQueryChange={setSearchQuery}
-          />
+          <div className="flex items-center gap-4">
+            <CandidateFilters
+              statusFilter={statusFilter}
+              onStatusFilterChange={setStatusFilter}
+              searchQuery={searchQuery}
+              onSearchQueryChange={setSearchQuery}
+            />
+            <Select value={languageFilter} onValueChange={setLanguageFilter}>
+              <SelectTrigger className="w-[180px]">
+                <SelectValue placeholder="Filter by language" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="all">All languages</SelectItem>
+                {SUPPORTED_LANGUAGES.map((lang) => (
+                  <SelectItem key={lang} value={lang}>{lang}</SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </div>
         </div>
         <BulkActions
           selectedCount={selectedCandidates.length}
