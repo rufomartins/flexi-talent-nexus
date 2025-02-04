@@ -19,10 +19,10 @@ export default function CandidateProfile() {
   const [showCommunication, setShowCommunication] = useState(false);
 
   const { data: candidate, isLoading } = useQuery({
-    queryKey: ['candidate', candidateId],
+    queryKey: ['onboarding-candidate', candidateId],
     queryFn: async () => {
       const { data, error } = await supabase
-        .from('candidates')
+        .from('onboarding_candidates')
         .select(`
           *,
           scout:scouts(id, full_name)

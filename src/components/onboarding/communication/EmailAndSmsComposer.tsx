@@ -46,6 +46,7 @@ export function EmailAndSmsComposer({
       
       return data.map(template => ({
         ...template,
+        type: template.type as TemplateType,
         variables: Array.isArray(template.variables) ? template.variables : []
       })) as EmailTemplate[];
     }
@@ -63,7 +64,7 @@ export function EmailAndSmsComposer({
       
       return data.map(template => ({
         ...template,
-        type: template.type as TemplateType || 'welcome',
+        type: template.type as TemplateType,
         variables: Array.isArray(template.variables) ? template.variables : []
       })) as SmsTemplate[];
     }
