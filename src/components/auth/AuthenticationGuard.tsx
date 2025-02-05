@@ -42,6 +42,8 @@ export const AuthenticationGuard = ({ children }: AuthenticationGuardProps) => {
         }
 
         setLoadingMessage("Fetching user details...");
+        
+        // First verify if session exists
         const { data: { session } } = await supabase.auth.getSession();
         
         if (!session) {
@@ -49,10 +51,11 @@ export const AuthenticationGuard = ({ children }: AuthenticationGuardProps) => {
           throw new Error("No active session");
         }
 
+        // Use RPC call instead of direct table query to avoid recursion
         const { data: userData, error: userError } = await supabase
-          .from("users")
-          .select("*")
-          .eq("id", user.id)
+          .from('user_profiles')
+          .select('*')
+          .eq('id', user.id)
           .maybeSingle();
 
         if (userError) {

@@ -70,42 +70,29 @@ export interface EmailSenderConfig {
   updated_at?: string;
 }
 
-export type Step = 'compose' | 'preview' | 'send';
-
-export interface EmailComposerProps {
-  templates: OnboardingEmailTemplate[];
-  data: {
-    templateId: string;
-    subject: string;
-    body: string;
-  };
-  onChange: (data: { templateId: string; subject: string; body: string }) => void;
-  onInsertTag: (tag: string) => void;
+export interface ApiSettings {
+  id: string;
+  name: string;
+  value: Record<string, any>;
+  created_at?: string;
+  updated_at?: string;
 }
 
-export interface SmsComposerProps {
-  data: {
-    templateId: string;
-    message: string;
-  };
-  onChange: (data: { templateId: string; message: string }) => void;
-  onInsertTag: (tag: string) => void;
-}
-
-export interface EmailAndSmsComposerProps {
-  open: boolean;
-  onOpenChange: (open: boolean) => void;
-  selectedCandidates: Array<{
-    id: string;
-    name?: string;
-    first_name?: string;
-    last_name?: string;
-    email?: string;
-    phone?: string;
-  }>;
-  candidateId?: string;
-  candidateName?: string;
-  email?: string;
+export interface CandidateActionsProps {
+  candidateId: string;
+  candidateName: string;
+  email: string;
   phone?: string;
   stage?: 'ingest' | 'process' | 'screening' | 'results';
+}
+
+export interface ExcelRowData {
+  first_name: string;
+  last_name: string;
+  email: string;
+  phone?: string;
+  language?: string;
+  native_language?: string;
+  source?: string;
+  remarks?: string;
 }
