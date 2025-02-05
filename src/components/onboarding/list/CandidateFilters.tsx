@@ -1,5 +1,12 @@
+import { useEffect, useState } from "react";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Input } from "@/components/ui/input";
+import { supabase } from "@/integrations/supabase/client";
+
+interface Language {
+  id: string;
+  name: string;
+}
 
 interface CandidateFiltersProps {
   statusFilter: string;
@@ -14,6 +21,29 @@ export function CandidateFilters({
   searchQuery,
   onSearchQueryChange,
 }: CandidateFiltersProps) {
+  const [languages, setLanguages] = useState<Language[]>([]);
+
+  useEffect(() => {
+    async function fetchLanguages() {
+      try {
+        const { data, error } = await supabase
+          .from("languages")
+          .select("id, name");
+
+        if (error) {
+          console.error("Error fetching languages:", error);
+          return;
+        }
+
+        setLanguages(data || []);
+      } catch (err) {
+        console.error("Error in fetchLanguages:", err);
+      }
+    }
+
+    fetchLanguages();
+  }, []);
+
   return (
     <div className="flex items-center gap-4">
       <div className="flex-1">
@@ -38,6 +68,19 @@ export function CandidateFilters({
           <SelectItem value="interviewed">Interviewed</SelectItem>
           <SelectItem value="approved">Approved</SelectItem>
           <SelectItem value="not_interested">Not Interested</SelectItem>
+        </SelectContent>
+      </Select>
+      <Select defaultValue="all">
+        <SelectTrigger className="w-[180px]">
+          <SelectValue placeholder="Filter by language" />
+        </SelectTrigger>
+        <SelectContent>
+          <SelectItem value="all">All languages</SelectItem>
+          {languages.map((lang) => (
+            <SelectItem key={lang.id} value={lang.id}>
+              {lang.name}
+            </SelectItem>
+          ))}
         </SelectContent>
       </Select>
     </div>
