@@ -1200,19 +1200,19 @@ export type Database = {
       }
       languages: {
         Row: {
-          code: string
+          code: string | null
           created_at: string | null
           id: string
           name: string
         }
         Insert: {
-          code: string
+          code?: string | null
           created_at?: string | null
           id?: string
           name: string
         }
         Update: {
-          code?: string
+          code?: string | null
           created_at?: string | null
           id?: string
           name?: string
