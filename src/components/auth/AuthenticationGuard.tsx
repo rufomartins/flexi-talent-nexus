@@ -51,7 +51,7 @@ export const AuthenticationGuard = ({ children }: AuthenticationGuardProps) => {
           throw new Error("No active session");
         }
 
-        // Use RPC call instead of direct table query to avoid recursion
+        // Use user_profiles view instead of direct users table query
         const { data: userData, error: userError } = await supabase
           .from('user_profiles')
           .select('*')
@@ -63,15 +63,21 @@ export const AuthenticationGuard = ({ children }: AuthenticationGuardProps) => {
           throw userError;
         }
 
-        if (userData) {
-          setUserDetails(userData);
-          setRetryCount(0);
-          setError(null);
-        } else {
-          throw new Error("Unable to load user profile");
+        if (!userData) {
+          console.warn("[AuthenticationGuard] No user profile found for ID:", user.id);
+          throw new Error("User profile not found");
         }
+
+        console.log("[AuthenticationGuard] Successfully fetched user details:", {
+          id: userData.id,
+          role: userData.role
+        });
+
+        setUserDetails(userData);
+        setRetryCount(0);
+        setError(null);
       } catch (error) {
-        console.error("[AuthenticationGuard] Error:", error);
+        console.error("[AuthenticationGuard] Exception:", error);
         if (retryCount < MAX_RETRIES) {
           setRetryCount(prev => prev + 1);
         } else {
