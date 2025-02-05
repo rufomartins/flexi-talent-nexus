@@ -3449,6 +3449,38 @@ export type Database = {
           role: Database["public"]["Enums"]["user_role"] | null
           status: Database["public"]["Enums"]["user_status"] | null
         }
+        Insert: {
+          avatar_url?: string | null
+          company_id?: string | null
+          created_at?: string | null
+          email?: string | null
+          first_name?: string | null
+          full_name?: string | null
+          gender?: string | null
+          id?: string | null
+          last_login?: string | null
+          last_name?: string | null
+          mobile_phone?: string | null
+          nationality?: string | null
+          role?: Database["public"]["Enums"]["user_role"] | null
+          status?: Database["public"]["Enums"]["user_status"] | null
+        }
+        Update: {
+          avatar_url?: string | null
+          company_id?: string | null
+          created_at?: string | null
+          email?: string | null
+          first_name?: string | null
+          full_name?: string | null
+          gender?: string | null
+          id?: string | null
+          last_login?: string | null
+          last_name?: string | null
+          mobile_phone?: string | null
+          nationality?: string | null
+          role?: Database["public"]["Enums"]["user_role"] | null
+          status?: Database["public"]["Enums"]["user_status"] | null
+        }
         Relationships: [
           {
             foreignKeyName: "users_company_id_fkey"
