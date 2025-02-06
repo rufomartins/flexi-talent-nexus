@@ -1,3 +1,4 @@
+
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Button } from "@/components/ui/button";
@@ -41,7 +42,7 @@ export function CandidateTable({
   };
 
   return (
-    <div className="rounded-md border">
+    <div className="rounded-md border overflow-x-auto">
       <Table>
         <TableHeader>
           <TableRow>
@@ -51,15 +52,15 @@ export function CandidateTable({
                 onCheckedChange={onSelectAll}
               />
             </TableHead>
-            <TableHead>Full Name</TableHead>
-            <TableHead>First Name</TableHead>
-            <TableHead>Last Name</TableHead>
-            <TableHead>Email</TableHead>
-            <TableHead>Phone</TableHead>
-            <TableHead>Language</TableHead>
-            <TableHead>Source</TableHead>
-            <TableHead>Status</TableHead>
-            <TableHead className="text-right">Actions</TableHead>
+            <TableHead className="min-w-[120px]">Full Name</TableHead>
+            <TableHead className="min-w-[120px]">First Name</TableHead>
+            <TableHead className="min-w-[120px]">Last Name</TableHead>
+            <TableHead className="min-w-[200px]">Email</TableHead>
+            <TableHead className="min-w-[120px]">Phone</TableHead>
+            <TableHead className="min-w-[180px]">Language</TableHead>
+            <TableHead className="min-w-[120px]">Source</TableHead>
+            <TableHead className="min-w-[120px]">Status</TableHead>
+            <TableHead className="text-right min-w-[120px]">Actions</TableHead>
           </TableRow>
         </TableHeader>
         <TableBody>
@@ -68,7 +69,7 @@ export function CandidateTable({
             const isEditing = editingId === candidate.id;
             
             return (
-              <TableRow key={candidate.id}>
+              <TableRow key={candidate.id} className={isSelected ? "bg-muted/50" : undefined}>
                 <TableCell>
                   <Checkbox
                     checked={isSelected}
@@ -80,6 +81,7 @@ export function CandidateTable({
                     <Input 
                       value={candidate.name || ''}
                       onChange={(e) => handleFieldChange(candidate.id, 'name', e.target.value)}
+                      className="max-w-[200px]"
                     />
                   ) : (
                     candidate.name
@@ -90,6 +92,7 @@ export function CandidateTable({
                     <Input 
                       value={candidate.first_name || ''}
                       onChange={(e) => handleFieldChange(candidate.id, 'first_name', e.target.value)}
+                      className="max-w-[200px]"
                     />
                   ) : (
                     candidate.first_name
@@ -100,6 +103,7 @@ export function CandidateTable({
                     <Input 
                       value={candidate.last_name || ''}
                       onChange={(e) => handleFieldChange(candidate.id, 'last_name', e.target.value)}
+                      className="max-w-[200px]"
                     />
                   ) : (
                     candidate.last_name
@@ -110,6 +114,7 @@ export function CandidateTable({
                     <Input 
                       value={candidate.email || ''}
                       onChange={(e) => handleFieldChange(candidate.id, 'email', e.target.value)}
+                      className="max-w-[200px]"
                     />
                   ) : (
                     candidate.email
@@ -120,6 +125,7 @@ export function CandidateTable({
                     <Input 
                       value={candidate.phone || ''}
                       onChange={(e) => handleFieldChange(candidate.id, 'phone', e.target.value)}
+                      className="max-w-[200px]"
                     />
                   ) : (
                     candidate.phone
@@ -131,12 +137,16 @@ export function CandidateTable({
                       value={candidate.language || ""}
                       onValueChange={(value) => handleFieldChange(candidate.id, 'language', value)}
                     >
-                      <SelectTrigger className="w-[180px]">
+                      <SelectTrigger className="w-[180px] bg-white">
                         <SelectValue placeholder="Select language" />
                       </SelectTrigger>
-                      <SelectContent>
+                      <SelectContent className="bg-white z-50 max-h-[300px]">
                         {SUPPORTED_LANGUAGES.map((lang) => (
-                          <SelectItem key={lang} value={lang}>
+                          <SelectItem 
+                            key={lang} 
+                            value={lang}
+                            className="hover:bg-muted/50 cursor-pointer"
+                          >
                             {lang}
                           </SelectItem>
                         ))}
