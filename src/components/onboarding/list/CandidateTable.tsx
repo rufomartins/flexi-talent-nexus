@@ -1,50 +1,39 @@
-import { useEffect, useState } from "react";
-import { cn } from "@/lib/utils";
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from "@/components/ui/table";
-import { CandidateActions } from "./CandidateActions";
-import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem } from "@/components/ui/command";
-import { Check } from "lucide-react";
-import { supabase } from "@/integrations/supabase/client";
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
+import { Checkbox } from "@/components/ui/checkbox";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { SUPPORTED_LANGUAGES } from "@/utils/languages";
+import { MoreHorizontal } from "lucide-react";
+import { Button } from "@/components/ui/button";
 import type { Candidate } from "@/types/onboarding";
 
-interface CandidateTableProps {
+export interface CandidateTableProps {
   candidates: Candidate[];
+  selectedCandidates: string[];
+  onSelectCandidate: (candidate: Candidate) => void;
+  onSelectAll: (checked: boolean) => void;
+  stage: 'ingest' | 'process' | 'screening' | 'results';
   getStatusColor: (status: string) => string;
 }
 
-export function CandidateTable({ candidates, getStatusColor }: CandidateTableProps) {
-  const [languages, setLanguages] = useState<{id: string, name: string}[]>([]);
-
-  useEffect(() => {
-    const fetchLanguages = async () => {
-      const { data, error } = await supabase
-        .from('languages')
-        .select('id, name')
-        .order('name');
-
-      if (error) {
-        console.error('Error fetching languages:', error);
-        return;
-      }
-
-      setLanguages(data || []);
-    };
-
-    fetchLanguages();
-  }, []);
-
+export function CandidateTable({ 
+  candidates, 
+  selectedCandidates, 
+  onSelectCandidate, 
+  onSelectAll,
+  stage,
+  getStatusColor 
+}: CandidateTableProps) {
   return (
     <div className="rounded-md border">
       <Table>
         <TableHeader>
           <TableRow>
+            <TableHead className="w-[50px]">
+              <Checkbox 
+                checked={candidates.length > 0 && selectedCandidates.length === candidates.length}
+                onCheckedChange={onSelectAll}
+              />
+            </TableHead>
             <TableHead>Full Name</TableHead>
             <TableHead>First Name</TableHead>
             <TableHead>Last Name</TableHead>
@@ -59,31 +48,57 @@ export function CandidateTable({ candidates, getStatusColor }: CandidateTablePro
         <TableBody>
           {candidates.map((candidate) => (
             <TableRow key={candidate.id}>
+              <TableCell>
+                <Checkbox
+                  checked={selectedCandidates.includes(candidate.id)}
+                  onCheckedChange={() => onSelectCandidate(candidate)}
+                />
+              </TableCell>
               <TableCell className="font-medium">{candidate.name}</TableCell>
               <TableCell>{candidate.first_name}</TableCell>
               <TableCell>{candidate.last_name}</TableCell>
               <TableCell>{candidate.email}</TableCell>
               <TableCell>{candidate.phone}</TableCell>
-              <TableCell>{candidate.language}</TableCell>
+              <TableCell>
+                <Select
+                  value={candidate.language || ""}
+                  onValueChange={async (value) => {
+                    try {
+                      await supabase
+                        .from('onboarding_candidates')
+                        .update({ language: value })
+                        .eq('id', candidate.id);
+                    } catch (error) {
+                      console.error('Error updating language:', error);
+                    }
+                  }}
+                >
+                  <SelectTrigger className="w-[180px]">
+                    <SelectValue placeholder="Select language" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {SUPPORTED_LANGUAGES.map((lang) => (
+                      <SelectItem key={lang} value={lang}>
+                        {lang}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </TableCell>
               <TableCell>{candidate.source}</TableCell>
               <TableCell>
                 <span
-                  className={cn(
-                    "inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium",
-                    getStatusColor(candidate.status)
-                  )}
+                  className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${getStatusColor(
+                    candidate.status
+                  )}`}
                 >
                   {candidate.status}
                 </span>
               </TableCell>
               <TableCell className="text-right">
-                <CandidateActions 
-                  candidateId={candidate.id}
-                  candidateName={candidate.name}
-                  email={candidate.email}
-                  phone={candidate.phone}
-                  stage={candidate.stage}
-                />
+                <Button variant="ghost" size="icon">
+                  <MoreHorizontal className="h-4 w-4" />
+                </Button>
               </TableCell>
             </TableRow>
           ))}

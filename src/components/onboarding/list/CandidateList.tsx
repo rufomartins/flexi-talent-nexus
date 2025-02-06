@@ -1,26 +1,21 @@
 import { useState } from "react";
 import { CandidateFilters } from "./CandidateFilters";
 import { CandidateTable } from "./CandidateTable";
+import { BulkActions } from "./BulkActions";
 import type { Candidate } from "@/types/onboarding";
 
 interface CandidateListProps {
   candidates: Candidate[];
-  onCandidateSelect: (candidate: Candidate) => void;
-  selectedCandidates: Candidate[];
-  onSelectAll: (checked: boolean) => void;
+  isLoading: boolean;
+  error: Error | null;
   stage: 'ingest' | 'process' | 'screening' | 'results';
 }
 
-export function CandidateList({
-  candidates,
-  onCandidateSelect,
-  selectedCandidates,
-  onSelectAll,
-  stage
-}: CandidateListProps) {
-  const [statusFilter, setStatusFilter] = useState("all");
-  const [searchQuery, setSearchQuery] = useState("");
-  const [languageFilter, setLanguageFilter] = useState("all");
+export function CandidateList({ candidates, isLoading, error, stage }: CandidateListProps) {
+  const [selectedCandidates, setSelectedCandidates] = useState<string[]>([]);
+  const [statusFilter, setStatusFilter] = useState<string>("all");
+  const [searchQuery, setSearchQuery] = useState<string>("");
+  const [languageFilter, setLanguageFilter] = useState<string>("all");
 
   const getStatusColor = (status: string) => {
     switch (status) {
@@ -39,6 +34,18 @@ export function CandidateList({
     }
   };
 
+  const handleSelectCandidate = (candidate: Candidate) => {
+    setSelectedCandidates(prev => 
+      prev.includes(candidate.id) 
+        ? prev.filter(id => id !== candidate.id)
+        : [...prev, candidate.id]
+    );
+  };
+
+  const handleSelectAll = (checked: boolean) => {
+    setSelectedCandidates(checked ? candidates.map(c => c.id) : []);
+  };
+
   const filteredCandidates = candidates.filter((candidate) => {
     const matchesStatus = statusFilter === "all" || candidate.status === statusFilter;
     const matchesSearch = searchQuery === "" || 
@@ -50,24 +57,39 @@ export function CandidateList({
     return matchesStatus && matchesSearch && matchesLanguage;
   });
 
+  if (isLoading) {
+    return <div>Loading candidates...</div>;
+  }
+
+  if (error) {
+    return <div>Error loading candidates: {error.message}</div>;
+  }
+
   return (
     <div className="space-y-4">
-      <div className="flex justify-between items-center">
-        <CandidateFilters
-          statusFilter={statusFilter}
-          onStatusFilterChange={setStatusFilter}
-          searchQuery={searchQuery}
-          onSearchQueryChange={setSearchQuery}
-          languageFilter={languageFilter}
-          onLanguageFilterChange={setLanguageFilter}
+      <div className="flex items-center justify-between bg-muted p-4 rounded-lg">
+        <div className="flex items-center gap-4">
+          <span>{selectedCandidates.length} candidate(s) selected</span>
+          <CandidateFilters
+            statusFilter={statusFilter}
+            onStatusFilterChange={setStatusFilter}
+            searchQuery={searchQuery}
+            onSearchQueryChange={setSearchQuery}
+            languageFilter={languageFilter}
+            onLanguageFilterChange={setLanguageFilter}
+          />
+        </div>
+        <BulkActions
+          selectedCount={selectedCandidates.length}
+          onActionSelect={() => {}}
         />
       </div>
 
       <CandidateTable
-        candidates={filteredCandidates}
+        candidates={candidates}
         selectedCandidates={selectedCandidates}
-        onSelectCandidate={onCandidateSelect}
-        onSelectAll={onSelectAll}
+        onSelectCandidate={handleSelectCandidate}
+        onSelectAll={handleSelectAll}
         stage={stage}
         getStatusColor={getStatusColor}
       />
