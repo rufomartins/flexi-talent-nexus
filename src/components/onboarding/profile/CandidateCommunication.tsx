@@ -7,7 +7,7 @@ interface CandidateCommunicationProps {
   candidateId: string;
 }
 
-// Explicitly defined types for our data structures
+// Explicitly defined types that match Supabase table structures
 interface EmailLog {
   id: string;
   subject: string;
@@ -32,7 +32,7 @@ export function CandidateCommunication({ candidateId }: CandidateCommunicationPr
   const { data: communications, isLoading } = useQuery({
     queryKey: ['candidate-communications', candidateId],
     queryFn: async () => {
-      // Fetch email logs
+      // Fetch email logs with explicit column selection
       const emailResult = await supabase
         .from('email_logs')
         .select('id, subject, sent_at, metadata')
@@ -43,7 +43,7 @@ export function CandidateCommunication({ candidateId }: CandidateCommunicationPr
         throw emailResult.error;
       }
 
-      // Fetch SMS logs
+      // Fetch SMS logs with explicit column selection
       const smsResult = await supabase
         .from('sms_logs')
         .select('id, message, sent_at, created_at, candidate_id')
@@ -54,9 +54,10 @@ export function CandidateCommunication({ candidateId }: CandidateCommunicationPr
         throw smsResult.error;
       }
 
+      // Create communications object without type assertions
       const communications: CommunicationData = {
-        emails: emailResult.data as EmailLog[],
-        sms: smsResult.data as SmsLog[],
+        emails: emailResult.data,
+        sms: smsResult.data,
       };
 
       return communications;
