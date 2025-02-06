@@ -1,6 +1,6 @@
 
 import { useQuery } from "@tanstack/react-query";
-import { PostgrestError } from "@supabase/supabase-js";
+import { PostgrestError, Json } from "@supabase/supabase-js";
 import { supabase } from "@/integrations/supabase/client";
 import { Card } from "@/components/ui/card";
 
@@ -12,10 +12,7 @@ interface EmailLog {
   id: string;
   subject: string;
   sent_at: string;
-  metadata: {
-    candidate_id?: string;
-    [key: string]: any;
-  };
+  metadata: Json;
 }
 
 interface SmsLog {
@@ -59,8 +56,8 @@ export function CandidateCommunication({ candidateId }: CandidateCommunicationPr
 
       // Return properly typed data
       return {
-        emails: emailResult.data || [],
-        sms: smsResult.data || []
+        emails: emailResult.data as EmailLog[] || [],
+        sms: smsResult.data as SmsLog[] || []
       };
     }
   });
