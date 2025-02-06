@@ -96,3 +96,35 @@ export interface ExcelRowData {
   source?: string;
   remarks?: string;
 }
+
+export type Step = 'email' | 'sms' | 'review';
+
+export interface EmailAndSmsComposerProps {
+  candidates: Candidate[];
+  onClose: () => void;
+  currentStep: Step;
+  onStepChange: (step: Step) => void;
+}
+
+export interface EmailComposerProps {
+  candidates: Candidate[];
+  onSend: (subject: string, body: string) => Promise<void>;
+}
+
+export interface SmsComposerProps {
+  candidates: Candidate[];
+  onSend: (message: string) => Promise<void>;
+}
+
+export interface EmailTemplate {
+  id: string;
+  name: string;
+  type: TemplateType;
+  subject: string;
+  body: string;
+  variables: string[];
+  is_active: boolean;
+  created_at?: string;
+  updated_at?: string;
+  created_by?: string;
+}

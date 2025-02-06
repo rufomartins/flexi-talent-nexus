@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useState, useEffect } from "react";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Input } from "@/components/ui/input";
 import { supabase } from "@/integrations/supabase/client";
@@ -26,13 +26,16 @@ export function CandidateFilters({
   onLanguageFilterChange,
 }: CandidateFiltersProps) {
   const [languages, setLanguages] = useState<Language[]>([]);
+  const [isLoading, setIsLoading] = useState(false);
 
   useEffect(() => {
     async function fetchLanguages() {
+      setIsLoading(true);
       try {
         const { data, error } = await supabase
           .from("languages")
-          .select("id, name");
+          .select("id, name")
+          .order("name");
 
         if (error) {
           console.error("Error fetching languages:", error);
@@ -42,6 +45,8 @@ export function CandidateFilters({
         setLanguages(data || []);
       } catch (err) {
         console.error("Error in fetchLanguages:", err);
+      } finally {
+        setIsLoading(false);
       }
     }
 
@@ -77,6 +82,7 @@ export function CandidateFilters({
       <Select
         value={languageFilter}
         onValueChange={onLanguageFilterChange}
+        disabled={isLoading}
       >
         <SelectTrigger className="w-[180px]">
           <SelectValue placeholder="Filter by language" />
@@ -84,7 +90,7 @@ export function CandidateFilters({
         <SelectContent>
           <SelectItem value="all">All languages</SelectItem>
           {languages.map((lang) => (
-            <SelectItem key={lang.id} value={lang.id}>
+            <SelectItem key={lang.id} value={lang.name}>
               {lang.name}
             </SelectItem>
           ))}
