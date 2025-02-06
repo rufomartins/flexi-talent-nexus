@@ -1,4 +1,3 @@
-
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Button } from "@/components/ui/button";
@@ -139,7 +138,7 @@ export function CandidateTable({
                 <TableCell>
                   {isEditing ? (
                     <Input 
-                      value={pendingUpdate.name ?? candidate.name || ''}
+                      value={((pendingUpdate.name ?? candidate.name) || '')}
                       onChange={(e) => handleFieldChange(candidate.id, 'name', e.target.value)}
                       className="max-w-[200px]"
                     />
@@ -150,7 +149,7 @@ export function CandidateTable({
                 <TableCell>
                   {isEditing ? (
                     <Input 
-                      value={pendingUpdate.first_name ?? candidate.first_name || ''}
+                      value={((pendingUpdate.first_name ?? candidate.first_name) || '')}
                       onChange={(e) => handleFieldChange(candidate.id, 'first_name', e.target.value)}
                       className="max-w-[200px]"
                     />
@@ -161,7 +160,7 @@ export function CandidateTable({
                 <TableCell>
                   {isEditing ? (
                     <Input 
-                      value={pendingUpdate.last_name ?? candidate.last_name || ''}
+                      value={((pendingUpdate.last_name ?? candidate.last_name) || '')}
                       onChange={(e) => handleFieldChange(candidate.id, 'last_name', e.target.value)}
                       className="max-w-[200px]"
                     />
@@ -172,7 +171,7 @@ export function CandidateTable({
                 <TableCell>
                   {isEditing ? (
                     <Input 
-                      value={pendingUpdate.email ?? candidate.email || ''}
+                      value={((pendingUpdate.email ?? candidate.email) || '')}
                       onChange={(e) => handleFieldChange(candidate.id, 'email', e.target.value)}
                       className="max-w-[200px]"
                     />
@@ -183,7 +182,7 @@ export function CandidateTable({
                 <TableCell>
                   {isEditing ? (
                     <Input 
-                      value={pendingUpdate.phone ?? candidate.phone || ''}
+                      value={((pendingUpdate.phone ?? candidate.phone) || '')}
                       onChange={(e) => handleFieldChange(candidate.id, 'phone', e.target.value)}
                       className="max-w-[200px]"
                     />
@@ -194,7 +193,7 @@ export function CandidateTable({
                 <TableCell>
                   {isEditing ? (
                     <Select
-                      value={pendingUpdate.language ?? candidate.language || ""}
+                      value={((pendingUpdate.language ?? candidate.language) || "")}
                       onValueChange={(value) => handleFieldChange(candidate.id, 'language', value)}
                     >
                       <SelectTrigger className="w-[180px] bg-white">
