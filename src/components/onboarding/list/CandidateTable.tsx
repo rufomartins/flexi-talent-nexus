@@ -6,7 +6,8 @@ import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { SUPPORTED_LANGUAGES } from "@/utils/languages";
 import { supabase } from "@/integrations/supabase/client";
-import { useState } from "react";
+import { useState, useCallback } from "react";
+import { useToast } from "@/hooks/use-toast";
 import type { Candidate } from "@/types/onboarding";
 
 export interface CandidateTableProps {
@@ -27,18 +28,76 @@ export function CandidateTable({
   getStatusColor 
 }: CandidateTableProps) {
   const [editingId, setEditingId] = useState<string | null>(null);
+  const [pendingUpdates, setPendingUpdates] = useState<Record<string, any>>({});
+  const { toast } = useToast();
 
-  const handleFieldChange = async (candidateId: string, field: string, value: string) => {
+  // Track changes in memory without immediately sending to database
+  const handleFieldChange = useCallback((candidateId: string, field: string, value: string) => {
+    console.log(`Field change detected - ID: ${candidateId}, Field: ${field}, Value: ${value}`);
+    setPendingUpdates(prev => ({
+      ...prev,
+      [candidateId]: {
+        ...(prev[candidateId] || {}),
+        [field]: value
+      }
+    }));
+  }, []);
+
+  // Only send updates when "Done" is clicked
+  const handleSaveChanges = async (candidateId: string) => {
+    const updates = pendingUpdates[candidateId];
+    if (!updates) {
+      setEditingId(null);
+      return;
+    }
+
+    console.log('Saving updates to database:', {
+      candidateId,
+      updates
+    });
+
     try {
+      // Validate language value if it's being updated
+      if (updates.language && !SUPPORTED_LANGUAGES.includes(updates.language)) {
+        throw new Error(`Invalid language value: ${updates.language}`);
+      }
+
       const { error } = await supabase
         .from('onboarding_candidates')
-        .update({ [field]: value })
+        .update(updates)
         .eq('id', candidateId);
 
       if (error) throw error;
+
+      toast({
+        title: "Changes saved successfully",
+        description: "The candidate information has been updated.",
+      });
+
+      // Clear pending updates for this candidate
+      setPendingUpdates(prev => {
+        const { [candidateId]: _, ...rest } = prev;
+        return rest;
+      });
     } catch (error) {
-      console.error('Error updating field:', error);
+      console.error('Error saving changes:', error);
+      toast({
+        title: "Error saving changes",
+        description: "Please try again or contact support if the issue persists.",
+        variant: "destructive"
+      });
     }
+
+    setEditingId(null);
+  };
+
+  const handleCancelEdit = (candidateId: string) => {
+    // Clear any pending updates for this candidate
+    setPendingUpdates(prev => {
+      const { [candidateId]: _, ...rest } = prev;
+      return rest;
+    });
+    setEditingId(null);
   };
 
   return (
@@ -67,6 +126,7 @@ export function CandidateTable({
           {candidates.map((candidate) => {
             const isSelected = selectedCandidates.includes(candidate.id);
             const isEditing = editingId === candidate.id;
+            const pendingUpdate = pendingUpdates[candidate.id] || {};
             
             return (
               <TableRow key={candidate.id} className={isSelected ? "bg-muted/50" : undefined}>
@@ -79,7 +139,7 @@ export function CandidateTable({
                 <TableCell>
                   {isEditing ? (
                     <Input 
-                      value={candidate.name || ''}
+                      value={pendingUpdate.name ?? candidate.name || ''}
                       onChange={(e) => handleFieldChange(candidate.id, 'name', e.target.value)}
                       className="max-w-[200px]"
                     />
@@ -90,7 +150,7 @@ export function CandidateTable({
                 <TableCell>
                   {isEditing ? (
                     <Input 
-                      value={candidate.first_name || ''}
+                      value={pendingUpdate.first_name ?? candidate.first_name || ''}
                       onChange={(e) => handleFieldChange(candidate.id, 'first_name', e.target.value)}
                       className="max-w-[200px]"
                     />
@@ -101,7 +161,7 @@ export function CandidateTable({
                 <TableCell>
                   {isEditing ? (
                     <Input 
-                      value={candidate.last_name || ''}
+                      value={pendingUpdate.last_name ?? candidate.last_name || ''}
                       onChange={(e) => handleFieldChange(candidate.id, 'last_name', e.target.value)}
                       className="max-w-[200px]"
                     />
@@ -112,7 +172,7 @@ export function CandidateTable({
                 <TableCell>
                   {isEditing ? (
                     <Input 
-                      value={candidate.email || ''}
+                      value={pendingUpdate.email ?? candidate.email || ''}
                       onChange={(e) => handleFieldChange(candidate.id, 'email', e.target.value)}
                       className="max-w-[200px]"
                     />
@@ -123,7 +183,7 @@ export function CandidateTable({
                 <TableCell>
                   {isEditing ? (
                     <Input 
-                      value={candidate.phone || ''}
+                      value={pendingUpdate.phone ?? candidate.phone || ''}
                       onChange={(e) => handleFieldChange(candidate.id, 'phone', e.target.value)}
                       className="max-w-[200px]"
                     />
@@ -134,7 +194,7 @@ export function CandidateTable({
                 <TableCell>
                   {isEditing ? (
                     <Select
-                      value={candidate.language || ""}
+                      value={pendingUpdate.language ?? candidate.language || ""}
                       onValueChange={(value) => handleFieldChange(candidate.id, 'language', value)}
                     >
                       <SelectTrigger className="w-[180px] bg-white">
@@ -169,13 +229,32 @@ export function CandidateTable({
                 <TableCell className="text-right">
                   {isSelected && (
                     <div className="flex justify-end gap-2">
-                      <Button 
-                        variant="outline" 
-                        size="sm"
-                        onClick={() => setEditingId(isEditing ? null : candidate.id)}
-                      >
-                        {isEditing ? 'Done' : 'Edit'}
-                      </Button>
+                      {isEditing ? (
+                        <>
+                          <Button 
+                            variant="outline" 
+                            size="sm"
+                            onClick={() => handleCancelEdit(candidate.id)}
+                          >
+                            Cancel
+                          </Button>
+                          <Button 
+                            variant="default" 
+                            size="sm"
+                            onClick={() => handleSaveChanges(candidate.id)}
+                          >
+                            Save
+                          </Button>
+                        </>
+                      ) : (
+                        <Button 
+                          variant="outline" 
+                          size="sm"
+                          onClick={() => setEditingId(candidate.id)}
+                        >
+                          Edit
+                        </Button>
+                      )}
                     </div>
                   )}
                 </TableCell>
