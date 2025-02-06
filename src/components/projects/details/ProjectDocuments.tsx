@@ -1,4 +1,4 @@
-import { Card } from "@/components/ui/card";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import type { Project } from "@/types/projects";
 
 interface ProjectDocumentsProps {
@@ -7,15 +7,16 @@ interface ProjectDocumentsProps {
 
 export function ProjectDocuments({ project }: ProjectDocumentsProps) {
   return (
-    <div className="space-y-6">
-      <Card className="p-6">
-        <h3 className="text-lg font-medium mb-4">Project Documents</h3>
+    <Card>
+      <CardHeader>
+        <CardTitle>Project Documents</CardTitle>
+      </CardHeader>
+      <CardContent>
         <div className="space-y-4">
-          {/* Document list will be implemented here */}
-          <p className="text-muted-foreground">Project documents will be displayed here</p>
+          <p className="text-sm text-muted-foreground">Project documents will be displayed here</p>
         </div>
-      </Card>
-    </div>
+      </CardContent>
+    </Card>
   );
 }
 

@@ -8,6 +8,7 @@ export interface CandidateTableProps {
   selectedCandidates: Candidate[];
   onSelectCandidate: (candidate: Candidate) => void;
   onSelectAll: (checked: boolean) => void;
+  stage: 'ingest' | 'process' | 'screening' | 'results';
   getStatusColor: (status: string) => string;
 }
 
@@ -16,6 +17,7 @@ export function CandidateTable({
   selectedCandidates, 
   onSelectCandidate, 
   onSelectAll,
+  stage,
   getStatusColor 
 }: CandidateTableProps) {
   return (
@@ -71,7 +73,7 @@ export function CandidateTable({
                   candidateName={candidate.name}
                   email={candidate.email}
                   phone={candidate.phone}
-                  stage={candidate.stage}
+                  stage={stage}
                 />
               </TableCell>
             </TableRow>
