@@ -1,11 +1,11 @@
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Checkbox } from "@/components/ui/checkbox";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { SUPPORTED_LANGUAGES } from "@/utils/languages";
 import { supabase } from "@/integrations/supabase/client";
-import { MoreHorizontal } from "lucide-react";
-import { Button } from "@/components/ui/button";
+import { useState } from "react";
 import type { Candidate } from "@/types/onboarding";
 
 export interface CandidateTableProps {
@@ -25,6 +25,21 @@ export function CandidateTable({
   stage,
   getStatusColor 
 }: CandidateTableProps) {
+  const [editingId, setEditingId] = useState<string | null>(null);
+
+  const handleFieldChange = async (candidateId: string, field: string, value: string) => {
+    try {
+      const { error } = await supabase
+        .from('onboarding_candidates')
+        .update({ [field]: value })
+        .eq('id', candidateId);
+
+      if (error) throw error;
+    } catch (error) {
+      console.error('Error updating field:', error);
+    }
+  };
+
   return (
     <div className="rounded-md border">
       <Table>
@@ -50,6 +65,7 @@ export function CandidateTable({
         <TableBody>
           {candidates.map((candidate) => {
             const isSelected = selectedCandidates.includes(candidate.id);
+            const isEditing = editingId === candidate.id;
             
             return (
               <TableRow key={candidate.id}>
@@ -60,125 +76,75 @@ export function CandidateTable({
                   />
                 </TableCell>
                 <TableCell>
-                  {isSelected ? (
+                  {isEditing ? (
                     <Input 
                       value={candidate.name || ''}
-                      onChange={async (e) => {
-                        try {
-                          await supabase
-                            .from('onboarding_candidates')
-                            .update({ name: e.target.value })
-                            .eq('id', candidate.id);
-                        } catch (error) {
-                          console.error('Error updating name:', error);
-                        }
-                      }}
+                      onChange={(e) => handleFieldChange(candidate.id, 'name', e.target.value)}
                     />
                   ) : (
                     candidate.name
                   )}
                 </TableCell>
                 <TableCell>
-                  {isSelected ? (
+                  {isEditing ? (
                     <Input 
                       value={candidate.first_name || ''}
-                      onChange={async (e) => {
-                        try {
-                          await supabase
-                            .from('onboarding_candidates')
-                            .update({ first_name: e.target.value })
-                            .eq('id', candidate.id);
-                        } catch (error) {
-                          console.error('Error updating first name:', error);
-                        }
-                      }}
+                      onChange={(e) => handleFieldChange(candidate.id, 'first_name', e.target.value)}
                     />
                   ) : (
                     candidate.first_name
                   )}
                 </TableCell>
                 <TableCell>
-                  {isSelected ? (
+                  {isEditing ? (
                     <Input 
                       value={candidate.last_name || ''}
-                      onChange={async (e) => {
-                        try {
-                          await supabase
-                            .from('onboarding_candidates')
-                            .update({ last_name: e.target.value })
-                            .eq('id', candidate.id);
-                        } catch (error) {
-                          console.error('Error updating last name:', error);
-                        }
-                      }}
+                      onChange={(e) => handleFieldChange(candidate.id, 'last_name', e.target.value)}
                     />
                   ) : (
                     candidate.last_name
                   )}
                 </TableCell>
                 <TableCell>
-                  {isSelected ? (
+                  {isEditing ? (
                     <Input 
                       value={candidate.email || ''}
-                      onChange={async (e) => {
-                        try {
-                          await supabase
-                            .from('onboarding_candidates')
-                            .update({ email: e.target.value })
-                            .eq('id', candidate.id);
-                        } catch (error) {
-                          console.error('Error updating email:', error);
-                        }
-                      }}
+                      onChange={(e) => handleFieldChange(candidate.id, 'email', e.target.value)}
                     />
                   ) : (
                     candidate.email
                   )}
                 </TableCell>
                 <TableCell>
-                  {isSelected ? (
+                  {isEditing ? (
                     <Input 
                       value={candidate.phone || ''}
-                      onChange={async (e) => {
-                        try {
-                          await supabase
-                            .from('onboarding_candidates')
-                            .update({ phone: e.target.value })
-                            .eq('id', candidate.id);
-                        } catch (error) {
-                          console.error('Error updating phone:', error);
-                        }
-                      }}
+                      onChange={(e) => handleFieldChange(candidate.id, 'phone', e.target.value)}
                     />
                   ) : (
                     candidate.phone
                   )}
                 </TableCell>
                 <TableCell>
-                  <Select
-                    value={candidate.language || ""}
-                    onValueChange={async (value) => {
-                      try {
-                        await supabase
-                          .from('onboarding_candidates')
-                          .update({ language: value })
-                          .eq('id', candidate.id);
-                      } catch (error) {
-                        console.error('Error updating language:', error);
-                      }
-                    }}
-                  >
-                    <SelectTrigger className="w-[180px]">
-                      <SelectValue placeholder="Select language" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      {SUPPORTED_LANGUAGES.map((lang) => (
-                        <SelectItem key={lang} value={lang}>
-                          {lang}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
+                  {isEditing ? (
+                    <Select
+                      value={candidate.language || ""}
+                      onValueChange={(value) => handleFieldChange(candidate.id, 'language', value)}
+                    >
+                      <SelectTrigger className="w-[180px]">
+                        <SelectValue placeholder="Select language" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {SUPPORTED_LANGUAGES.map((lang) => (
+                          <SelectItem key={lang} value={lang}>
+                            {lang}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  ) : (
+                    candidate.language
+                  )}
                 </TableCell>
                 <TableCell>{candidate.source}</TableCell>
                 <TableCell>
@@ -191,9 +157,17 @@ export function CandidateTable({
                   </span>
                 </TableCell>
                 <TableCell className="text-right">
-                  <Button variant="ghost" size="icon">
-                    <MoreHorizontal className="h-4 w-4" />
-                  </Button>
+                  {isSelected && (
+                    <div className="flex justify-end gap-2">
+                      <Button 
+                        variant="outline" 
+                        size="sm"
+                        onClick={() => setEditingId(isEditing ? null : candidate.id)}
+                      >
+                        {isEditing ? 'Done' : 'Edit'}
+                      </Button>
+                    </div>
+                  )}
                 </TableCell>
               </TableRow>
             );
