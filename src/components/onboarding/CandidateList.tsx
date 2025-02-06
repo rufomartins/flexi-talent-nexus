@@ -2,13 +2,10 @@ import { useState, useEffect } from "react";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
-import { CommunicationMetrics } from "./list/CommunicationMetrics";
-import { CandidateFilters } from "./list/CandidateFilters";
-import { CandidateTable } from "./list/CandidateTable";
+import { CandidateFilters } from "./CandidateFilters";
+import { CandidateTable } from "./CandidateTable";
 import { BulkActions } from "./list/BulkActions";
 import { EmailAndSmsComposer } from "./communication/EmailAndSmsComposer";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { SUPPORTED_LANGUAGES } from "@/utils/languages";
 import type { Candidate } from "@/types/onboarding";
 
 interface CandidateListProps {
@@ -19,7 +16,7 @@ interface CandidateListProps {
 }
 
 export function CandidateList({ candidates, isLoading, error, stage }: CandidateListProps) {
-  const [selectedCandidates, setSelectedCandidates] = useState<Candidate[]>([]);
+  const [selectedCandidates, setSelectedCandidates] = useState<string[]>([]);
   const [isEmailComposerOpen, setIsEmailComposerOpen] = useState(false);
   const [statusFilter, setStatusFilter] = useState<string>("all");
   const [searchQuery, setSearchQuery] = useState<string>("");
@@ -67,19 +64,15 @@ export function CandidateList({ candidates, isLoading, error, stage }: Candidate
   }, [queryClient]);
 
   const handleSelectCandidate = (candidate: Candidate) => {
-    if (selectedCandidates.find(c => c.id === candidate.id)) {
-      setSelectedCandidates(selectedCandidates.filter(c => c.id !== candidate.id));
-    } else {
-      setSelectedCandidates([...selectedCandidates, candidate]);
-    }
+    setSelectedCandidates(prev => 
+      prev.includes(candidate.id) 
+        ? prev.filter(id => id !== candidate.id)
+        : [...prev, candidate.id]
+    );
   };
 
   const handleSelectAll = (checked: boolean) => {
-    if (checked) {
-      setSelectedCandidates(candidates);
-    } else {
-      setSelectedCandidates([]);
-    }
+    setSelectedCandidates(checked ? candidates.map(c => c.id) : []);
   };
 
   const getBulkActions = () => {
@@ -115,26 +108,24 @@ export function CandidateList({ candidates, isLoading, error, stage }: Candidate
     if (selectedCandidates.length === 0) return;
 
     try {
-      const ids = selectedCandidates.map(c => c.id);
-      
       switch (action) {
         case 'move_to_process':
           await supabase
             .from('onboarding_candidates')
             .update({ stage: 'process' })
-            .in('id', ids);
+            .in('id', selectedCandidates);
           break;
         case 'move_to_archive':
           await supabase
             .from('onboarding_candidates')
             .update({ archive_status: true })
-            .in('id', ids);
+            .in('id', selectedCandidates);
           break;
         case 'remove':
           await supabase
             .from('onboarding_candidates')
             .delete()
-            .in('id', ids);
+            .in('id', selectedCandidates);
           break;
         case 'contact':
           setIsEmailComposerOpen(true);
@@ -182,25 +173,14 @@ export function CandidateList({ candidates, isLoading, error, stage }: Candidate
       <div className="flex items-center justify-between bg-muted p-4 rounded-lg">
         <div className="flex items-center gap-4">
           <span>{selectedCandidates.length} candidate(s) selected</span>
-          <div className="flex items-center gap-4">
-            <CandidateFilters
-              statusFilter={statusFilter}
-              onStatusFilterChange={setStatusFilter}
-              searchQuery={searchQuery}
-              onSearchQueryChange={setSearchQuery}
-            />
-            <Select value={languageFilter} onValueChange={setLanguageFilter}>
-              <SelectTrigger className="w-[180px]">
-                <SelectValue placeholder="Filter by language" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="all">All languages</SelectItem>
-                {SUPPORTED_LANGUAGES.map((lang) => (
-                  <SelectItem key={lang} value={lang}>{lang}</SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-          </div>
+          <CandidateFilters
+            statusFilter={statusFilter}
+            onStatusFilterChange={setStatusFilter}
+            searchQuery={searchQuery}
+            onSearchQueryChange={setSearchQuery}
+            languageFilter={languageFilter}
+            onLanguageFilterChange={setLanguageFilter}
+          />
         </div>
         <BulkActions
           selectedCount={selectedCandidates.length}
@@ -221,7 +201,7 @@ export function CandidateList({ candidates, isLoading, error, stage }: Candidate
       <EmailAndSmsComposer
         open={isEmailComposerOpen}
         onOpenChange={setIsEmailComposerOpen}
-        selectedCandidates={selectedCandidates.map(c => ({
+        selectedCandidates={candidates.filter(c => selectedCandidates.includes(c.id)).map(c => ({
           id: c.id,
           name: c.name,
           first_name: c.first_name,

@@ -5,7 +5,7 @@ import type { Candidate } from "@/types/onboarding";
 
 export interface CandidateTableProps {
   candidates: Candidate[];
-  selectedCandidates: Candidate[];
+  selectedCandidates: string[];
   onSelectCandidate: (candidate: Candidate) => void;
   onSelectAll: (checked: boolean) => void;
   stage: 'ingest' | 'process' | 'screening' | 'results';
@@ -47,7 +47,7 @@ export function CandidateTable({
             <TableRow key={candidate.id}>
               <TableCell>
                 <Checkbox
-                  checked={selectedCandidates.some(c => c.id === candidate.id)}
+                  checked={selectedCandidates.includes(candidate.id)}
                   onCheckedChange={() => onSelectCandidate(candidate)}
                 />
               </TableCell>
