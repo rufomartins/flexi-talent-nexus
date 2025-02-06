@@ -1,29 +1,41 @@
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from "@/components/ui/table";
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
+import { Checkbox } from "@/components/ui/checkbox";
 import { CandidateActions } from "./CandidateActions";
 import type { Candidate } from "@/types/onboarding";
 
-interface CandidateTableProps {
+export interface CandidateTableProps {
   candidates: Candidate[];
+  selectedCandidates: Candidate[];
+  onSelectCandidate: (candidate: Candidate) => void;
+  onSelectAll: (checked: boolean) => void;
   getStatusColor: (status: string) => string;
 }
 
-export function CandidateTable({ candidates, getStatusColor }: CandidateTableProps) {
+export function CandidateTable({ 
+  candidates, 
+  selectedCandidates, 
+  onSelectCandidate, 
+  onSelectAll,
+  getStatusColor 
+}: CandidateTableProps) {
   return (
     <div className="rounded-md border">
       <Table>
         <TableHeader>
           <TableRow>
-            <TableHead>Name</TableHead>
+            <TableHead className="w-[50px]">
+              <Checkbox 
+                checked={candidates.length > 0 && selectedCandidates.length === candidates.length}
+                onCheckedChange={onSelectAll}
+              />
+            </TableHead>
+            <TableHead>Full Name</TableHead>
+            <TableHead>First Name</TableHead>
+            <TableHead>Last Name</TableHead>
             <TableHead>Email</TableHead>
             <TableHead>Phone</TableHead>
-            <TableHead>Scout</TableHead>
+            <TableHead>Language</TableHead>
+            <TableHead>Source</TableHead>
             <TableHead>Status</TableHead>
             <TableHead className="text-right">Actions</TableHead>
           </TableRow>
@@ -31,10 +43,19 @@ export function CandidateTable({ candidates, getStatusColor }: CandidateTablePro
         <TableBody>
           {candidates.map((candidate) => (
             <TableRow key={candidate.id}>
+              <TableCell>
+                <Checkbox
+                  checked={selectedCandidates.some(c => c.id === candidate.id)}
+                  onCheckedChange={() => onSelectCandidate(candidate)}
+                />
+              </TableCell>
               <TableCell className="font-medium">{candidate.name}</TableCell>
+              <TableCell>{candidate.first_name}</TableCell>
+              <TableCell>{candidate.last_name}</TableCell>
               <TableCell>{candidate.email}</TableCell>
               <TableCell>{candidate.phone}</TableCell>
-              <TableCell>{candidate.scout?.full_name || '-'}</TableCell>
+              <TableCell>{candidate.language}</TableCell>
+              <TableCell>{candidate.source}</TableCell>
               <TableCell>
                 <span
                   className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${getStatusColor(

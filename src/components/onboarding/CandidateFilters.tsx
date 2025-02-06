@@ -1,5 +1,7 @@
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Input } from "@/components/ui/input";
+import { useEffect, useState } from "react";
+import { supabase } from "@/integrations/supabase/client";
 
 export interface CandidateFiltersProps {
   statusFilter: string;
@@ -18,6 +20,26 @@ export function CandidateFilters({
   languageFilter,
   onLanguageFilterChange,
 }: CandidateFiltersProps) {
+  const [languages, setLanguages] = useState<{ id: string; name: string }[]>([]);
+
+  useEffect(() => {
+    const fetchLanguages = async () => {
+      const { data, error } = await supabase
+        .from("languages")
+        .select("id, name")
+        .order("name");
+
+      if (error) {
+        console.error("Error fetching languages:", error);
+        return;
+      }
+
+      setLanguages(data || []);
+    };
+
+    fetchLanguages();
+  }, []);
+
   return (
     <div className="flex items-center gap-4">
       <div className="flex-1">
@@ -29,7 +51,7 @@ export function CandidateFilters({
         />
       </div>
       <Select
-        value={statusFilter || "all"}
+        value={statusFilter}
         onValueChange={onStatusFilterChange}
       >
         <SelectTrigger className="w-[180px]">
@@ -53,7 +75,11 @@ export function CandidateFilters({
         </SelectTrigger>
         <SelectContent>
           <SelectItem value="all">All languages</SelectItem>
-          {/* Languages will be populated from parent */}
+          {languages.map((lang) => (
+            <SelectItem key={lang.id} value={lang.name}>
+              {lang.name}
+            </SelectItem>
+          ))}
         </SelectContent>
       </Select>
     </div>
