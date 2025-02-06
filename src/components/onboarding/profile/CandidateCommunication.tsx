@@ -1,7 +1,6 @@
 
 import { useQuery } from "@tanstack/react-query";
 import type { PostgrestError } from "@supabase/supabase-js";
-import type { Database } from "@/integrations/supabase/types";
 import { supabase } from "@/integrations/supabase/client";
 import { Card } from "@/components/ui/card";
 
@@ -9,12 +8,15 @@ interface CandidateCommunicationProps {
   candidateId: string;
 }
 
-// Using more specific types that match the database schema
+// Simplified types that match our exact needs
 interface EmailLog {
   id: string;
   subject: string;
   sent_at: string;
-  metadata: Database['public']['Tables']['email_logs']['Row']['metadata'];
+  metadata: {
+    candidate_id?: string;
+    [key: string]: any;
+  };
 }
 
 interface SmsLog {
@@ -31,7 +33,7 @@ interface CommunicationData {
 }
 
 export function CandidateCommunication({ candidateId }: CandidateCommunicationProps) {
-  const { data: communications, isLoading } = useQuery<CommunicationData, PostgrestError>({
+  const { data: communications, isLoading } = useQuery({
     queryKey: ['candidate-communications', candidateId],
     queryFn: async () => {
       // Fetch email logs
@@ -56,12 +58,13 @@ export function CandidateCommunication({ candidateId }: CandidateCommunicationPr
         throw smsResult.error;
       }
 
-      // Return properly typed data
-      return {
-        emails: emailResult.data as EmailLog[],
-        sms: smsResult.data as SmsLog[]
+      const communications: CommunicationData = {
+        emails: emailResult.data,
+        sms: smsResult.data,
       };
-    }
+
+      return communications;
+    },
   });
 
   if (isLoading) {
