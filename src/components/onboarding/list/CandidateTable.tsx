@@ -17,6 +17,8 @@ import { useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 import { Button } from "@/components/ui/button";
+import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem } from "@/components/ui/command";
+import { Check } from "lucide-react";
 
 const formatName = (candidate: any) => {
   if (candidate.name) return candidate.name;
@@ -37,7 +39,41 @@ export function CandidateTable({
   const { toast } = useToast();
   const [editingId, setEditingId] = useState<string | null>(null);
   const [editValues, setEditValues] = useState<Record<string, any>>({});
+  const [languages, setLanguages] = useState<{id: string, name: string}[]>([]);
   const queryClient = useQueryClient();
+
+  // Fetch languages when component mounts
+  useEffect(() => {
+    const fetchLanguages = async () => {
+      const { data, error } = await supabase
+        .from('languages')
+        .select('id, name')
+        .order('name');
+
+      if (error) {
+        console.error('Error fetching languages:', error);
+        return;
+      }
+
+      setLanguages(data || []);
+    };
+
+    fetchLanguages();
+
+    // Set up realtime subscription
+    const channel = supabase
+      .channel('languages-changes')
+      .on(
+        'postgres_changes',
+        { event: '*', schema: 'public', table: 'languages' },
+        () => fetchLanguages()
+      )
+      .subscribe();
+
+    return () => {
+      supabase.removeChannel(channel);
+    };
+  }, []);
 
   const formatSource = (source: string) => {
     if (!source || source === 'new') return '';
@@ -60,9 +96,12 @@ export function CandidateTable({
     setEditingId(candidate.id);
     setEditValues({
       name: candidate.name || '',
+      first_name: candidate.first_name || '',
+      last_name: candidate.last_name || '',
       email: candidate.email || '',
       phone: candidate.phone || '',
       source: candidate.source || '',
+      language: candidate.language || '',
       status: candidate.status || ''
     });
   };
@@ -73,9 +112,12 @@ export function CandidateTable({
         .from('onboarding_candidates')
         .update({
           name: editValues.name || null,
+          first_name: editValues.first_name || null,
+          last_name: editValues.last_name || null,
           email: editValues.email || null,
           phone: editValues.phone || null,
           source: editValues.source || null,
+          language: editValues.language || null,
           status: editValues.status || null
         })
         .eq('id', id);
@@ -112,8 +154,11 @@ export function CandidateTable({
               />
             </TableHead>
             <TableHead>Full Name</TableHead>
+            <TableHead>First Name</TableHead>
+            <TableHead>Last Name</TableHead>
             <TableHead>Email</TableHead>
             <TableHead>Phone</TableHead>
+            <TableHead>Language</TableHead>
             <TableHead>Source</TableHead>
             <TableHead>Status</TableHead>
             <TableHead className="text-right">Actions</TableHead>
@@ -144,6 +189,26 @@ export function CandidateTable({
                 <TableCell>
                   {isEditing ? (
                     <Input
+                      value={editValues.first_name}
+                      onChange={(e) => setEditValues({...editValues, first_name: e.target.value})}
+                    />
+                  ) : (
+                    candidate.first_name || ''
+                  )}
+                </TableCell>
+                <TableCell>
+                  {isEditing ? (
+                    <Input
+                      value={editValues.last_name}
+                      onChange={(e) => setEditValues({...editValues, last_name: e.target.value})}
+                    />
+                  ) : (
+                    candidate.last_name || ''
+                  )}
+                </TableCell>
+                <TableCell>
+                  {isEditing ? (
+                    <Input
                       value={editValues.email}
                       onChange={(e) => setEditValues({...editValues, email: e.target.value})}
                     />
@@ -159,6 +224,35 @@ export function CandidateTable({
                     />
                   ) : (
                     candidate.phone || ''
+                  )}
+                </TableCell>
+                <TableCell>
+                  {isEditing ? (
+                    <Command className="rounded-lg border shadow-md">
+                      <CommandInput placeholder="Search languages..." />
+                      <CommandEmpty>No language found.</CommandEmpty>
+                      <CommandGroup className="max-h-64 overflow-auto">
+                        {languages.map((language) => (
+                          <CommandItem
+                            key={language.id}
+                            value={language.name}
+                            onSelect={() => {
+                              setEditValues({...editValues, language: language.name});
+                            }}
+                          >
+                            <Check
+                              className={cn(
+                                "mr-2 h-4 w-4",
+                                language.name === editValues.language ? "opacity-100" : "opacity-0"
+                              )}
+                            />
+                            {language.name}
+                          </CommandItem>
+                        ))}
+                      </CommandGroup>
+                    </Command>
+                  ) : (
+                    candidate.language || ''
                   )}
                 </TableCell>
                 <TableCell>

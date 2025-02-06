@@ -1,3 +1,5 @@
+// ... keep existing code
+
 export interface Candidate {
   id: string;
   name: string;
