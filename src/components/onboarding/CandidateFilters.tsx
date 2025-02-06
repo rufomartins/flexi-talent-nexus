@@ -1,15 +1,11 @@
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Input } from "@/components/ui/input";
-import { useEffect, useState } from "react";
-import { supabase } from "@/integrations/supabase/client";
 
 export interface CandidateFiltersProps {
   statusFilter: string;
   onStatusFilterChange: (value: string) => void;
   searchQuery: string;
   onSearchQueryChange: (value: string) => void;
-  languageFilter: string;
-  onLanguageFilterChange: (value: string) => void;
 }
 
 export function CandidateFilters({
@@ -17,29 +13,7 @@ export function CandidateFilters({
   onStatusFilterChange,
   searchQuery,
   onSearchQueryChange,
-  languageFilter,
-  onLanguageFilterChange,
 }: CandidateFiltersProps) {
-  const [languages, setLanguages] = useState<{ id: string; name: string }[]>([]);
-
-  useEffect(() => {
-    const fetchLanguages = async () => {
-      const { data, error } = await supabase
-        .from("languages")
-        .select("id, name")
-        .order("name");
-
-      if (error) {
-        console.error("Error fetching languages:", error);
-        return;
-      }
-
-      setLanguages(data || []);
-    };
-
-    fetchLanguages();
-  }, []);
-
   return (
     <div className="flex items-center gap-4">
       <div className="flex-1">
@@ -64,22 +38,6 @@ export function CandidateFilters({
           <SelectItem value="interviewed">Interviewed</SelectItem>
           <SelectItem value="approved">Approved</SelectItem>
           <SelectItem value="not_interested">Not Interested</SelectItem>
-        </SelectContent>
-      </Select>
-      <Select
-        value={languageFilter}
-        onValueChange={onLanguageFilterChange}
-      >
-        <SelectTrigger className="w-[180px]">
-          <SelectValue placeholder="Filter by language" />
-        </SelectTrigger>
-        <SelectContent>
-          <SelectItem value="all">All languages</SelectItem>
-          {languages.map((lang) => (
-            <SelectItem key={lang.id} value={lang.name}>
-              {lang.name}
-            </SelectItem>
-          ))}
         </SelectContent>
       </Select>
     </div>

@@ -20,7 +20,6 @@ export function CandidateList({ candidates, isLoading, error, stage }: Candidate
   const [isEmailComposerOpen, setIsEmailComposerOpen] = useState(false);
   const [statusFilter, setStatusFilter] = useState<string>("all");
   const [searchQuery, setSearchQuery] = useState<string>("");
-  const [languageFilter, setLanguageFilter] = useState<string>("all");
   const queryClient = useQueryClient();
   const { toast } = useToast();
 
@@ -159,7 +158,6 @@ export function CandidateList({ candidates, isLoading, error, stage }: Candidate
 
   const filteredCandidates = candidates.filter(candidate => {
     if (statusFilter !== "all" && candidate.status !== statusFilter) return false;
-    if (languageFilter !== "all" && candidate.language !== languageFilter) return false;
     if (!searchQuery) return true;
     
     return (
@@ -178,8 +176,6 @@ export function CandidateList({ candidates, isLoading, error, stage }: Candidate
             onStatusFilterChange={setStatusFilter}
             searchQuery={searchQuery}
             onSearchQueryChange={setSearchQuery}
-            languageFilter={languageFilter}
-            onLanguageFilterChange={setLanguageFilter}
           />
         </div>
         <BulkActions
