@@ -45,7 +45,8 @@ export default function CandidateProfile() {
         scout: data.scout ? {
           id: data.scout.id,
           full_name: data.scout.full_name
-        } : null
+        } : null,
+        stage: data.stage as 'ingest' | 'process' | 'screening' | 'results'
       };
 
       return transformedData;
