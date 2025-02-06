@@ -31,7 +31,15 @@ export default function CandidateProfile() {
         .eq('id', candidateId)
         .single();
 
-      if (error) throw error;
+      if (error) {
+        console.error('Error fetching candidate:', error);
+        throw error;
+      }
+
+      if (!data) {
+        throw new Error('Candidate not found');
+      }
+
       return data as Candidate;
     },
     enabled: !!candidateId

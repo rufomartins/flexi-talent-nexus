@@ -1455,6 +1455,7 @@ export type Database = {
           last_activity_date: string | null
           last_name: string | null
           name: string
+          native_language: string | null
           notes: string | null
           phone: string | null
           profile_url: string | null
@@ -1488,6 +1489,7 @@ export type Database = {
           last_activity_date?: string | null
           last_name?: string | null
           name: string
+          native_language?: string | null
           notes?: string | null
           phone?: string | null
           profile_url?: string | null
@@ -1521,6 +1523,7 @@ export type Database = {
           last_activity_date?: string | null
           last_name?: string | null
           name?: string
+          native_language?: string | null
           notes?: string | null
           phone?: string | null
           profile_url?: string | null

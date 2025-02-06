@@ -6,23 +6,30 @@ interface CandidateCommunicationProps {
   candidateId: string;
 }
 
+interface Communication {
+  id: string;
+  type: 'email' | 'sms';
+  subject?: string;
+  message: string;
+  sent_at: string;
+}
+
 export function CandidateCommunication({ candidateId }: CandidateCommunicationProps) {
   const { data: communications, isLoading } = useQuery({
     queryKey: ['candidate-communications', candidateId],
     queryFn: async () => {
-      const emailLogs = supabase
-        .from('email_logs')
-        .select('*')
-        .eq('metadata->candidate_id', candidateId)
-        .order('sent_at', { ascending: false });
-
-      const smsLogs = supabase
-        .from('sms_logs')
-        .select('*')
-        .eq('candidate_id', candidateId)
-        .order('sent_at', { ascending: false });
-
-      const [emailResult, smsResult] = await Promise.all([emailLogs, smsLogs]);
+      const [emailResult, smsResult] = await Promise.all([
+        supabase
+          .from('email_logs')
+          .select('*')
+          .eq('metadata->candidate_id', candidateId)
+          .order('sent_at', { ascending: false }),
+        supabase
+          .from('sms_logs')
+          .select('*')
+          .eq('candidate_id', candidateId)
+          .order('sent_at', { ascending: false })
+      ]);
 
       if (emailResult.error) throw emailResult.error;
       if (smsResult.error) throw smsResult.error;
