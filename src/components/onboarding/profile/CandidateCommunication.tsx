@@ -1,3 +1,4 @@
+
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { Card } from "@/components/ui/card";
@@ -6,27 +7,39 @@ interface CandidateCommunicationProps {
   candidateId: string;
 }
 
-interface Communication {
+interface EmailLog {
   id: string;
-  type: 'email' | 'sms';
-  subject?: string;
-  message: string;
+  subject: string;
   sent_at: string;
+  metadata: Record<string, any>;
+}
+
+interface SmsLog {
+  id: string;
+  message: string;
+  sent_at: string | null;
+  created_at: string;
+  candidate_id: string;
+}
+
+interface CommunicationData {
+  emails: EmailLog[];
+  sms: SmsLog[];
 }
 
 export function CandidateCommunication({ candidateId }: CandidateCommunicationProps) {
-  const { data: communications, isLoading } = useQuery({
+  const { data: communications, isLoading } = useQuery<CommunicationData>({
     queryKey: ['candidate-communications', candidateId],
     queryFn: async () => {
       const [emailResult, smsResult] = await Promise.all([
         supabase
           .from('email_logs')
-          .select('*')
+          .select('id, subject, sent_at, metadata')
           .eq('metadata->candidate_id', candidateId)
           .order('sent_at', { ascending: false }),
         supabase
           .from('sms_logs')
-          .select('*')
+          .select('id, message, sent_at, created_at')
           .eq('candidate_id', candidateId)
           .order('sent_at', { ascending: false })
       ]);
