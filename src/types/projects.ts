@@ -8,6 +8,7 @@ export interface Project {
   end_date?: string;
   status?: string;
   type?: string;
+  budget?: number;
   completion_percentage?: number;
   active_tasks_count?: number;
   upcoming_deadlines_count?: number;

@@ -25,8 +25,7 @@ export default function CandidateProfile() {
         .from('onboarding_candidates')
         .select(`
           *,
-          scout:scouts(id, full_name),
-          native_language
+          scout:scouts(id, full_name)
         `)
         .eq('id', candidateId)
         .single();
@@ -40,7 +39,16 @@ export default function CandidateProfile() {
         throw new Error('Candidate not found');
       }
 
-      return data as Candidate;
+      // Transform the data to match the Candidate type
+      const transformedData: Candidate = {
+        ...data,
+        scout: data.scout ? {
+          id: data.scout.id,
+          full_name: data.scout.full_name
+        } : null
+      };
+
+      return transformedData;
     },
     enabled: !!candidateId
   });

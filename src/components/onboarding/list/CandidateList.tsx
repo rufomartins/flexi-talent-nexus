@@ -15,7 +15,6 @@ export function CandidateList({ candidates, isLoading, error, stage }: Candidate
   const [selectedCandidates, setSelectedCandidates] = useState<string[]>([]);
   const [statusFilter, setStatusFilter] = useState<string>("all");
   const [searchQuery, setSearchQuery] = useState<string>("");
-  const [languageFilter, setLanguageFilter] = useState<string>("all");
 
   const getStatusColor = (status: string) => {
     switch (status) {
@@ -46,15 +45,18 @@ export function CandidateList({ candidates, isLoading, error, stage }: Candidate
     setSelectedCandidates(checked ? candidates.map(c => c.id) : []);
   };
 
+  const handleBulkAction = async (action: string) => {
+    // Implementation will be added later
+    return Promise.resolve();
+  };
+
   const filteredCandidates = candidates.filter((candidate) => {
     const matchesStatus = statusFilter === "all" || candidate.status === statusFilter;
     const matchesSearch = searchQuery === "" || 
       candidate.name?.toLowerCase().includes(searchQuery.toLowerCase()) ||
       candidate.email?.toLowerCase().includes(searchQuery.toLowerCase());
-    const matchesLanguage = languageFilter === "all" || 
-      candidate.native_language === languageFilter;
 
-    return matchesStatus && matchesSearch && matchesLanguage;
+    return matchesStatus && matchesSearch;
   });
 
   if (isLoading) {
@@ -75,18 +77,16 @@ export function CandidateList({ candidates, isLoading, error, stage }: Candidate
             onStatusFilterChange={setStatusFilter}
             searchQuery={searchQuery}
             onSearchQueryChange={setSearchQuery}
-            languageFilter={languageFilter}
-            onLanguageFilterChange={setLanguageFilter}
           />
         </div>
         <BulkActions
           selectedCount={selectedCandidates.length}
-          onActionSelect={() => {}}
+          onActionSelect={handleBulkAction}
         />
       </div>
 
       <CandidateTable
-        candidates={candidates}
+        candidates={filteredCandidates}
         selectedCandidates={selectedCandidates}
         onSelectCandidate={handleSelectCandidate}
         onSelectAll={handleSelectAll}
