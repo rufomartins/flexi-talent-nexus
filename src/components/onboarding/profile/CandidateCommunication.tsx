@@ -1,6 +1,7 @@
 
 import { useQuery } from "@tanstack/react-query";
-import { PostgrestError, Json } from "@supabase/supabase-js";
+import type { PostgrestError } from "@supabase/supabase-js";
+import type { Database } from "@/integrations/supabase/types";
 import { supabase } from "@/integrations/supabase/client";
 import { Card } from "@/components/ui/card";
 
@@ -8,11 +9,12 @@ interface CandidateCommunicationProps {
   candidateId: string;
 }
 
+// Using more specific types that match the database schema
 interface EmailLog {
   id: string;
   subject: string;
   sent_at: string;
-  metadata: Json;
+  metadata: Database['public']['Tables']['email_logs']['Row']['metadata'];
 }
 
 interface SmsLog {
@@ -56,8 +58,8 @@ export function CandidateCommunication({ candidateId }: CandidateCommunicationPr
 
       // Return properly typed data
       return {
-        emails: emailResult.data as EmailLog[] || [],
-        sms: smsResult.data as SmsLog[] || []
+        emails: emailResult.data as EmailLog[],
+        sms: smsResult.data as SmsLog[]
       };
     }
   });
