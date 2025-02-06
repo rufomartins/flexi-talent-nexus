@@ -13,6 +13,8 @@ interface CandidateFiltersProps {
   onStatusFilterChange: (value: string) => void;
   searchQuery: string;
   onSearchQueryChange: (value: string) => void;
+  languageFilter: string;
+  onLanguageFilterChange: (value: string) => void;
 }
 
 export function CandidateFilters({
@@ -20,6 +22,8 @@ export function CandidateFilters({
   onStatusFilterChange,
   searchQuery,
   onSearchQueryChange,
+  languageFilter,
+  onLanguageFilterChange,
 }: CandidateFiltersProps) {
   const [languages, setLanguages] = useState<Language[]>([]);
 
@@ -70,7 +74,10 @@ export function CandidateFilters({
           <SelectItem value="not_interested">Not Interested</SelectItem>
         </SelectContent>
       </Select>
-      <Select defaultValue="all">
+      <Select
+        value={languageFilter}
+        onValueChange={onLanguageFilterChange}
+      >
         <SelectTrigger className="w-[180px]">
           <SelectValue placeholder="Filter by language" />
         </SelectTrigger>
