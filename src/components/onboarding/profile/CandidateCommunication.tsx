@@ -1,5 +1,6 @@
 
 import { useQuery } from "@tanstack/react-query";
+import { PostgrestError } from "@supabase/supabase-js";
 import { supabase } from "@/integrations/supabase/client";
 import { Card } from "@/components/ui/card";
 
@@ -11,7 +12,10 @@ interface EmailLog {
   id: string;
   subject: string;
   sent_at: string;
-  metadata: Record<string, any>;
+  metadata: {
+    candidate_id?: string;
+    [key: string]: any;
+  };
 }
 
 interface SmsLog {
@@ -28,25 +32,32 @@ interface CommunicationData {
 }
 
 export function CandidateCommunication({ candidateId }: CandidateCommunicationProps) {
-  const { data: communications, isLoading } = useQuery<CommunicationData>({
+  const { data: communications, isLoading } = useQuery<CommunicationData, PostgrestError>({
     queryKey: ['candidate-communications', candidateId],
     queryFn: async () => {
-      const [emailResult, smsResult] = await Promise.all([
-        supabase
-          .from('email_logs')
-          .select('id, subject, sent_at, metadata')
-          .eq('metadata->candidate_id', candidateId)
-          .order('sent_at', { ascending: false }),
-        supabase
-          .from('sms_logs')
-          .select('id, message, sent_at, created_at')
-          .eq('candidate_id', candidateId)
-          .order('sent_at', { ascending: false })
-      ]);
+      // Fetch email logs
+      const emailResult = await supabase
+        .from('email_logs')
+        .select('id, subject, sent_at, metadata')
+        .eq('metadata->candidate_id', candidateId)
+        .order('sent_at', { ascending: false });
 
-      if (emailResult.error) throw emailResult.error;
-      if (smsResult.error) throw smsResult.error;
+      if (emailResult.error) {
+        throw emailResult.error;
+      }
 
+      // Fetch SMS logs
+      const smsResult = await supabase
+        .from('sms_logs')
+        .select('id, message, sent_at, created_at, candidate_id')
+        .eq('candidate_id', candidateId)
+        .order('sent_at', { ascending: false });
+
+      if (smsResult.error) {
+        throw smsResult.error;
+      }
+
+      // Return properly typed data
       return {
         emails: emailResult.data || [],
         sms: smsResult.data || []
