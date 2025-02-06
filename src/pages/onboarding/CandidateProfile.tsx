@@ -25,7 +25,8 @@ export default function CandidateProfile() {
         .from('onboarding_candidates')
         .select(`
           *,
-          scout:scouts(id, full_name)
+          scout:scouts(id, full_name),
+          native_language
         `)
         .eq('id', candidateId)
         .single();

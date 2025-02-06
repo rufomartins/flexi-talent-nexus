@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -8,20 +8,11 @@ export function APISettings() {
   const [settings, setSettings] = useState<any[]>([]);
   const { toast } = useToast();
 
-  useEffect(() => {
-    const fetchSettings = async () => {
-      const { data, error } = await supabase.from('api_settings').select('*');
-      if (error) {
-        console.error('Error fetching API settings:', error);
-        return;
-      }
-      setSettings(data || []);
-    };
+  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
+    const form = e.currentTarget;
+    const formData = new FormData(form);
 
-    fetchSettings();
-  }, []);
-
-  const handleSubmit = async (formData: FormData) => {
     const settings = Array.from(formData.entries()).map(([name, value]) => ({
       name,
       value: { key: value },
@@ -52,11 +43,7 @@ export function APISettings() {
   return (
     <div>
       <h1 className="text-2xl font-semibold">API Settings</h1>
-      <form onSubmit={(e) => {
-        e.preventDefault();
-        const formData = new FormData(e.target);
-        handleSubmit(formData);
-      }}>
+      <form onSubmit={handleSubmit}>
         {settings.map((setting) => (
           <div key={setting.name} className="mb-4">
             <label className="block text-sm font-medium">{setting.name}</label>
