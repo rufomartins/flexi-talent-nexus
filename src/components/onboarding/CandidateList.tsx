@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from "react";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
@@ -20,25 +21,9 @@ export function CandidateList({ candidates, isLoading, error, stage }: Candidate
   const [isEmailComposerOpen, setIsEmailComposerOpen] = useState(false);
   const [statusFilter, setStatusFilter] = useState<string>("all");
   const [searchQuery, setSearchQuery] = useState<string>("");
+  const [languageFilter, setLanguageFilter] = useState<string>("all");
   const queryClient = useQueryClient();
   const { toast } = useToast();
-
-  const getStatusColor = (status: string) => {
-    switch (status) {
-      case 'new':
-        return 'bg-blue-100 text-blue-800';
-      case 'emailed':
-        return 'bg-yellow-100 text-yellow-800';
-      case 'interviewed':
-        return 'bg-purple-100 text-purple-800';
-      case 'approved':
-        return 'bg-green-100 text-green-800';
-      case 'not_interested':
-        return 'bg-red-100 text-red-800';
-      default:
-        return 'bg-gray-100 text-gray-800';
-    }
-  };
 
   useEffect(() => {
     const channel = supabase
@@ -158,6 +143,7 @@ export function CandidateList({ candidates, isLoading, error, stage }: Candidate
 
   const filteredCandidates = candidates.filter(candidate => {
     if (statusFilter !== "all" && candidate.status !== statusFilter) return false;
+    if (languageFilter !== "all" && candidate.language !== languageFilter) return false;
     if (!searchQuery) return true;
     
     return (
@@ -176,6 +162,8 @@ export function CandidateList({ candidates, isLoading, error, stage }: Candidate
             onStatusFilterChange={setStatusFilter}
             searchQuery={searchQuery}
             onSearchQueryChange={setSearchQuery}
+            languageFilter={languageFilter}
+            onLanguageFilterChange={setLanguageFilter}
           />
         </div>
         <BulkActions
@@ -209,3 +197,20 @@ export function CandidateList({ candidates, isLoading, error, stage }: Candidate
     </div>
   );
 }
+
+const getStatusColor = (status: string) => {
+  switch (status) {
+    case 'new':
+      return 'bg-blue-100 text-blue-800';
+    case 'emailed':
+      return 'bg-yellow-100 text-yellow-800';
+    case 'interviewed':
+      return 'bg-purple-100 text-purple-800';
+    case 'approved':
+      return 'bg-green-100 text-green-800';
+    case 'not_interested':
+      return 'bg-red-100 text-red-800';
+    default:
+      return 'bg-gray-100 text-gray-800';
+  }
+};
