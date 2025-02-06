@@ -97,23 +97,44 @@ export interface ExcelRowData {
   remarks?: string;
 }
 
-export type Step = 'email' | 'sms' | 'review';
+export type Step = 'compose' | 'preview' | 'send';
 
 export interface EmailAndSmsComposerProps {
-  candidates: Candidate[];
-  onClose: () => void;
-  currentStep: Step;
-  onStepChange: (step: Step) => void;
+  open: boolean;
+  onOpenChange: (open: boolean) => void;
+  selectedCandidates: {
+    id: string;
+    name: string;
+    email: string;
+    phone?: string;
+    first_name?: string;
+    last_name?: string;
+  }[];
+  candidateId?: string;
+  candidateName?: string;
+  email?: string;
+  phone?: string;
+  stage?: 'ingest' | 'process' | 'screening' | 'results';
 }
 
 export interface EmailComposerProps {
-  candidates: Candidate[];
-  onSend: (subject: string, body: string) => Promise<void>;
+  templates: OnboardingEmailTemplate[];
+  data: {
+    templateId: string;
+    subject: string;
+    body: string;
+  };
+  onChange: (data: { templateId: string; subject: string; body: string }) => void;
+  onInsertTag: (tag: string) => void;
 }
 
 export interface SmsComposerProps {
-  candidates: Candidate[];
-  onSend: (message: string) => Promise<void>;
+  data: {
+    templateId: string;
+    message: string;
+  };
+  onChange: (data: { templateId: string; message: string }) => void;
+  onInsertTag: (tag: string) => void;
 }
 
 export interface EmailTemplate {
@@ -127,4 +148,13 @@ export interface EmailTemplate {
   created_at?: string;
   updated_at?: string;
   created_by?: string;
+}
+
+export interface CandidateFiltersProps {
+  statusFilter: string;
+  onStatusFilterChange: (value: string) => void;
+  searchQuery: string;
+  onSearchQueryChange: (value: string) => void;
+  languageFilter: string;
+  onLanguageFilterChange: (value: string) => void;
 }

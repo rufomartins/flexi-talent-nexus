@@ -1,109 +1,74 @@
-import { useState } from "react";
-import { Card } from "@/components/ui/card";
-import { Input } from "@/components/ui/input";
-import { Button } from "@/components/ui/button";
-import { Label } from "@/components/ui/label";
-import { useToast } from "@/hooks/use-toast";
+import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { useToast } from "@/hooks/use-toast";
 
 export function APISettings() {
+  const [settings, setSettings] = useState<any[]>([]);
   const { toast } = useToast();
-  const [loading, setLoading] = useState(false);
 
-  const handleSaveKeys = async (event: React.FormEvent<HTMLFormElement>) => {
-    event.preventDefault();
-    setLoading(true);
+  useEffect(() => {
+    const fetchSettings = async () => {
+      const { data, error } = await supabase.from('api_settings').select('*');
+      if (error) {
+        console.error('Error fetching API settings:', error);
+        return;
+      }
+      setSettings(data || []);
+    };
 
-    try {
-      const formData = new FormData(event.currentTarget);
-      const keys = {
-        resend: formData.get('resend'),
-        cloudmailin: formData.get('cloudmailin'),
-        agora: formData.get('agora'),
-        twilio: formData.get('twilio')
-      };
+    fetchSettings();
+  }, []);
 
-      const updates = Object.entries(keys).map(([name, value]) => ({
-        name,
-        value: { key: value },
-        updated_at: new Date().toISOString()
-      }));
+  const handleSubmit = async (formData: FormData) => {
+    const settings = Array.from(formData.entries()).map(([name, value]) => ({
+      name,
+      value: { key: value },
+      updated_at: new Date().toISOString()
+    }));
 
-      const { error } = await supabase
-        .from('api_settings')
-        .upsert(
-          updates.map(update => ({
-            name: update.name,
-            value: update.value,
-            updated_at: update.updated_at
-          }))
-        );
+    const { error } = await supabase
+      .from('api_settings')
+      .upsert(
+        settings.map(setting => ({
+          name: setting.name,
+          value: setting.value as any,
+          updated_at: setting.updated_at
+        }))
+      );
 
-      if (error) throw error;
-
-      toast({
-        title: "Success",
-        description: "API keys have been updated successfully.",
-      });
-    } catch (error: any) {
-      toast({
-        title: "Error",
-        description: error.message,
-        variant: "destructive",
-      });
-    } finally {
-      setLoading(false);
+    if (error) {
+      console.error('Error updating API settings:', error);
+      return;
     }
+
+    toast({
+      title: "Success",
+      description: "API settings updated successfully",
+    });
   };
 
   return (
-    <Card className="p-6">
-      <h3 className="text-lg font-medium mb-4">API Settings</h3>
-      <form onSubmit={handleSaveKeys} className="space-y-4">
-        <div className="space-y-2">
-          <Label htmlFor="resend">Resend API Key</Label>
-          <Input
-            id="resend"
-            name="resend"
-            type="password"
-            placeholder="Enter Resend API key"
-          />
-        </div>
-
-        <div className="space-y-2">
-          <Label htmlFor="cloudmailin">CloudMailin API Key</Label>
-          <Input
-            id="cloudmailin"
-            name="cloudmailin"
-            type="password"
-            placeholder="Enter CloudMailin API key"
-          />
-        </div>
-
-        <div className="space-y-2">
-          <Label htmlFor="agora">Agora API Key</Label>
-          <Input
-            id="agora"
-            name="agora"
-            type="password"
-            placeholder="Enter Agora API key"
-          />
-        </div>
-
-        <div className="space-y-2">
-          <Label htmlFor="twilio">Twilio API Key</Label>
-          <Input
-            id="twilio"
-            name="twilio"
-            type="password"
-            placeholder="Enter Twilio API key"
-          />
-        </div>
-
-        <Button type="submit" disabled={loading}>
-          {loading ? "Saving..." : "Save API Keys"}
-        </Button>
+    <div>
+      <h1 className="text-2xl font-semibold">API Settings</h1>
+      <form onSubmit={(e) => {
+        e.preventDefault();
+        const formData = new FormData(e.target);
+        handleSubmit(formData);
+      }}>
+        {settings.map((setting) => (
+          <div key={setting.name} className="mb-4">
+            <label className="block text-sm font-medium">{setting.name}</label>
+            <Input
+              defaultValue={setting.value.key}
+              name={setting.name}
+              required
+            />
+          </div>
+        ))}
+        <Button type="submit">Save Settings</Button>
       </form>
-    </Card>
+    </div>
   );
 }

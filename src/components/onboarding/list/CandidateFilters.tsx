@@ -2,19 +2,11 @@ import { useState, useEffect } from "react";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Input } from "@/components/ui/input";
 import { supabase } from "@/integrations/supabase/client";
+import type { CandidateFiltersProps } from "@/types/onboarding";
 
 interface Language {
   id: string;
   name: string;
-}
-
-interface CandidateFiltersProps {
-  statusFilter: string;
-  onStatusFilterChange: (value: string) => void;
-  searchQuery: string;
-  onSearchQueryChange: (value: string) => void;
-  languageFilter: string;
-  onLanguageFilterChange: (value: string) => void;
 }
 
 export function CandidateFilters({
@@ -64,7 +56,7 @@ export function CandidateFilters({
         />
       </div>
       <Select
-        value={statusFilter || "all"}
+        value={statusFilter}
         onValueChange={onStatusFilterChange}
       >
         <SelectTrigger className="w-[180px]">
