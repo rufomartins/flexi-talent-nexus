@@ -3,7 +3,7 @@ import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { Card } from "@/components/ui/card";
 import { PostgrestError } from "@supabase/supabase-js";
-import type { Json } from "@supabase/supabase-js";
+import type { Database } from "@/integrations/supabase/types";
 
 interface CandidateCommunicationProps {
   candidateId: string;
@@ -14,7 +14,7 @@ interface EmailLog {
   id: string;
   subject: string;
   sent_at: string;
-  metadata: Json;
+  metadata: Database['public']['Tables']['email_logs']['Row']['metadata'];
 }
 
 interface SmsLog {
