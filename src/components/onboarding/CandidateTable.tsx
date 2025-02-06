@@ -1,10 +1,13 @@
+
 import { useState } from "react";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { CandidateActions } from "./CandidateActions";
 import { supabase } from "@/integrations/supabase/client";
+import { SUPPORTED_LANGUAGES } from "@/utils/languages";
 import type { Candidate } from "@/types/onboarding";
 
 export interface CandidateTableProps {
@@ -120,10 +123,21 @@ export function CandidateTable({
                 </TableCell>
                 <TableCell>
                   {isEditing ? (
-                    <Input
-                      value={candidate.language || ''}
-                      onChange={(e) => handleFieldChange(candidate.id, 'language', e.target.value)}
-                    />
+                    <Select
+                      value={candidate.language || ""}
+                      onValueChange={(value) => handleFieldChange(candidate.id, 'language', value)}
+                    >
+                      <SelectTrigger className="w-[180px]">
+                        <SelectValue placeholder="Select language" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {SUPPORTED_LANGUAGES.map((lang) => (
+                          <SelectItem key={lang} value={lang}>
+                            {lang}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
                   ) : candidate.language}
                 </TableCell>
                 <TableCell>{candidate.source}</TableCell>
