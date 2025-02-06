@@ -1,6 +1,5 @@
 
 import { useQuery } from "@tanstack/react-query";
-import { supabase } from "@/integrations/supabase/client";
 import { Card } from "@/components/ui/card";
 
 interface CandidateCommunicationProps {
@@ -29,38 +28,14 @@ interface CommunicationData {
 }
 
 export function CandidateCommunication({ candidateId }: CandidateCommunicationProps) {
-  // Removed explicit type parameters from useQuery
   const { data: communications, isLoading } = useQuery({
     queryKey: ['candidate-communications', candidateId],
     queryFn: async () => {
-      // Fetch email logs with explicit column selection
-      const emailResult = await supabase
-        .from('email_logs')
-        .select('id, subject, sent_at, metadata')
-        .eq('metadata->candidate_id', candidateId)
-        .order('sent_at', { ascending: false });
-
-      if (emailResult.error) {
-        throw emailResult.error;
-      }
-
-      // Fetch SMS logs with explicit column selection
-      const smsResult = await supabase
-        .from('sms_logs')
-        .select('id, message, sent_at, created_at, candidate_id')
-        .eq('candidate_id', candidateId)
-        .order('sent_at', { ascending: false });
-
-      if (smsResult.error) {
-        throw smsResult.error;
-      }
-
-      // Create communications object without type assertions
-      const communications = {
-        emails: emailResult.data,
-        sms: smsResult.data,
+      // Return hardcoded basic object for debugging
+      const communications: CommunicationData = {
+        emails: [], // Hardcoded empty array
+        sms: [],    // Hardcoded empty array
       };
-
       return communications;
     },
   });
@@ -69,6 +44,10 @@ export function CandidateCommunication({ candidateId }: CandidateCommunicationPr
     return <div>Loading communication history...</div>;
   }
 
+  // Minimal return for testing
+  return <div>Testing - No Rendering</div>;
+
+  /* COMMENTED OUT FOR DEBUGGING
   return (
     <div className="space-y-6">
       <div>
@@ -112,4 +91,5 @@ export function CandidateCommunication({ candidateId }: CandidateCommunicationPr
       </div>
     </div>
   );
+  */
 }
