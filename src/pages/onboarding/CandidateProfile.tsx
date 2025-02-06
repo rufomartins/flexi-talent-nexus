@@ -25,7 +25,7 @@ export default function CandidateProfile() {
         .from('onboarding_candidates')
         .select(`
           *,
-          scout:scouts(id, full_name)
+          scout:users(id, full_name)
         `)
         .eq('id', candidateId)
         .single();
