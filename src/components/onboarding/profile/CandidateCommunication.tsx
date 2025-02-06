@@ -2,19 +2,17 @@
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { Card } from "@/components/ui/card";
-import { PostgrestError } from "@supabase/supabase-js";
-import type { Database } from "@/integrations/supabase/types";
 
 interface CandidateCommunicationProps {
   candidateId: string;
 }
 
-// Types that match Supabase table structures exactly
+// Radically simplified types
 interface EmailLog {
   id: string;
   subject: string;
   sent_at: string;
-  metadata: Database['public']['Tables']['email_logs']['Row']['metadata'];
+  metadata: any; // Simplified to any
 }
 
 interface SmsLog {
@@ -26,14 +24,15 @@ interface SmsLog {
 }
 
 interface CommunicationData {
-  emails: EmailLog[];
-  sms: SmsLog[];
+  emails: any[]; // Simplified to any[]
+  sms: any[];    // Simplified to any[]
 }
 
 export function CandidateCommunication({ candidateId }: CandidateCommunicationProps) {
-  const { data: communications, isLoading } = useQuery<CommunicationData, PostgrestError>({
+  // Removed explicit type parameters from useQuery
+  const { data: communications, isLoading } = useQuery({
     queryKey: ['candidate-communications', candidateId],
-    queryFn: async (): Promise<CommunicationData> => {
+    queryFn: async () => {
       // Fetch email logs with explicit column selection
       const emailResult = await supabase
         .from('email_logs')
@@ -57,7 +56,7 @@ export function CandidateCommunication({ candidateId }: CandidateCommunicationPr
       }
 
       // Create communications object without type assertions
-      const communications: CommunicationData = {
+      const communications = {
         emails: emailResult.data,
         sms: smsResult.data,
       };
