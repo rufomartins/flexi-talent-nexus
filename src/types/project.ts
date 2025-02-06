@@ -1,9 +1,3 @@
-import type { Database } from "@/integrations/supabase/types";
-
-type ProjectScriptStatus = Database["public"]["Enums"]["project_script_status"];
-type ProjectReviewStatus = Database["public"]["Enums"]["project_review_status"];
-type ProjectTalentStatus = Database["public"]["Enums"]["project_talent_status"];
-type ProjectDeliveryStatus = Database["public"]["Enums"]["project_delivery_status"];
 
 export type ProjectStatus = 'active' | 'completed' | 'on_hold';
 
@@ -37,7 +31,7 @@ export interface Project {
   completion_percentage?: number;
   active_tasks_count?: number;
   upcoming_deadlines_count?: number;
-  client?: Client;
+  client?: Client;  // Add the client property
   project_manager?: {
     full_name: string;
   };
