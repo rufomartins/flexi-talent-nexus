@@ -2,17 +2,19 @@
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { Card } from "@/components/ui/card";
+import { PostgrestError } from "@supabase/supabase-js";
+import type { Json } from "@supabase/supabase-js";
 
 interface CandidateCommunicationProps {
   candidateId: string;
 }
 
-// Explicitly defined types that match Supabase table structures
+// Types that match Supabase table structures exactly
 interface EmailLog {
   id: string;
   subject: string;
   sent_at: string;
-  metadata: Record<string, unknown>;
+  metadata: Json;
 }
 
 interface SmsLog {
@@ -29,9 +31,9 @@ interface CommunicationData {
 }
 
 export function CandidateCommunication({ candidateId }: CandidateCommunicationProps) {
-  const { data: communications, isLoading } = useQuery({
+  const { data: communications, isLoading } = useQuery<CommunicationData, PostgrestError>({
     queryKey: ['candidate-communications', candidateId],
-    queryFn: async () => {
+    queryFn: async (): Promise<CommunicationData> => {
       // Fetch email logs with explicit column selection
       const emailResult = await supabase
         .from('email_logs')
