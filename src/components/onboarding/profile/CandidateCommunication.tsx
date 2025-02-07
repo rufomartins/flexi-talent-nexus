@@ -1,6 +1,7 @@
 
 import { useQuery } from "@tanstack/react-query";
 import { Card } from "@/components/ui/card";
+import { supabase } from "@/integrations/supabase/client";
 
 interface CandidateCommunicationProps {
   candidateId: string;
@@ -30,10 +31,30 @@ export function CandidateCommunication({ candidateId }: CandidateCommunicationPr
   const { data: communications, isLoading } = useQuery({
     queryKey: ['candidate-communications', candidateId],
     queryFn: async () => {
-      // Return hardcoded basic object for debugging
+      // Fetch email logs
+      const emailResult = await supabase
+        .from('email_logs')
+        .select('id, subject, sent_at, metadata')
+        .eq('metadata->candidate_id', candidateId)
+        .order('sent_at', { ascending: false });
+      if (emailResult.error) {
+        throw emailResult.error;
+      }
+
+      // Fetch SMS logs
+      const smsResult = await supabase
+        .from('sms_logs')
+        .select('id, message, sent_at, created_at, candidate_id')
+        .eq('candidate_id', candidateId)
+        .order('sent_at', { ascending: false });
+      if (smsResult.error) {
+        throw smsResult.error;
+      }
+
+      // Create communications object with our simplified types
       const communications: CommunicationData = {
-        emails: [], // Hardcoded empty array
-        sms: [],    // Hardcoded empty array
+        emails: emailResult.data,
+        sms: smsResult.data,
       };
       return communications;
     },
