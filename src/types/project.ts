@@ -1,6 +1,11 @@
 
 export type ProjectStatus = 'active' | 'completed' | 'on_hold';
 
+export type ProjectScriptStatus = 'Pending' | 'In Progress' | 'Completed';
+export type ProjectReviewStatus = 'Internal Review' | 'Client Review' | 'Approved';
+export type ProjectTalentStatus = 'Booked' | 'Confirmed' | 'Unavailable';
+export type ProjectDeliveryStatus = 'Pending' | 'In Progress' | 'Delivered';
+
 export interface Client {
   id: string;
   name: string;
@@ -31,7 +36,7 @@ export interface Project {
   completion_percentage?: number;
   active_tasks_count?: number;
   upcoming_deadlines_count?: number;
-  client?: Client;  // Add the client property
+  client?: Client;
   project_manager?: {
     full_name: string;
   };

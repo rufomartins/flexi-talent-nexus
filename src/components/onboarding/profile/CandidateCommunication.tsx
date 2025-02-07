@@ -2,8 +2,7 @@
 import { useQuery } from "@tanstack/react-query";
 import { Card } from "@/components/ui/card";
 import { supabase } from "@/integrations/supabase/client";
-import type { Database } from "@/types/supabase/base";
-type Json = Database['public']['Json'];
+import type { Json } from '@/integrations/supabase/types';
 
 interface CandidateCommunicationProps {
   candidateId: string;
