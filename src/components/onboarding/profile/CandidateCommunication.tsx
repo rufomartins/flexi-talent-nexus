@@ -4,6 +4,8 @@ import type { Database } from '@/integrations/supabase/types';
 import { Card } from "@/components/ui/card";
 import { supabase } from "@/integrations/supabase/client";
 
+type Json = Database['public']['Json'];
+
 interface CandidateCommunicationProps {
   candidateId: string;
 }
