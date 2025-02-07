@@ -1,6 +1,6 @@
 
 import { useQuery } from "@tanstack/react-query";
-import { Json } from '@supabase/supabase-js';
+import type { Database } from '@supabase/supabase-js';
 import { Card } from "@/components/ui/card";
 import { supabase } from "@/integrations/supabase/client";
 
@@ -12,7 +12,7 @@ interface EmailLog {
   id: string;
   subject: string;
   sent_at: string;
-  metadata: Json;
+  metadata: Database['public']['Tables']['email_logs']['Row']['metadata'];
 }
 
 interface SmsLog {
