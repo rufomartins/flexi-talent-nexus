@@ -110,3 +110,4 @@ export function CandidateCommunication({ candidateId }: CandidateCommunicationPr
     </div>
   );
 }
+
