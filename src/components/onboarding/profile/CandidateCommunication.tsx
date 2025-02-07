@@ -6,25 +6,24 @@ interface CandidateCommunicationProps {
   candidateId: string;
 }
 
-// Radically simplified types
 interface EmailLog {
   id: string;
   subject: string;
   sent_at: string;
-  metadata: any; // Simplified to any
+  metadata: Record<string, unknown>;
 }
 
 interface SmsLog {
   id: string;
-  message: string;
+  message: string;  
   sent_at: string | null;
   created_at: string;
   candidate_id: string;
 }
 
 interface CommunicationData {
-  emails: any[]; // Simplified to any[]
-  sms: any[];    // Simplified to any[]
+  emails: EmailLog[];
+  sms: SmsLog[];
 }
 
 export function CandidateCommunication({ candidateId }: CandidateCommunicationProps) {
