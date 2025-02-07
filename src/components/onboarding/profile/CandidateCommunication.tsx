@@ -2,6 +2,7 @@
 import { useQuery } from "@tanstack/react-query";
 import { Card } from "@/components/ui/card";
 import { supabase } from "@/integrations/supabase/client";
+import type { Json } from '@supabase/supabase-js';
 
 interface CandidateCommunicationProps {
   candidateId: string;
@@ -11,7 +12,7 @@ interface EmailLog {
   id: string;
   subject: string;
   sent_at: string;
-  metadata: Record<string, unknown>;
+  metadata: Json;
 }
 
 interface SmsLog {
