@@ -43,10 +43,6 @@ export function CandidateCommunication({ candidateId }: CandidateCommunicationPr
     return <div>Loading communication history...</div>;
   }
 
-  // Minimal return for testing
-  return <div>Testing - No Rendering</div>;
-
-  /* COMMENTED OUT FOR DEBUGGING
   return (
     <div className="space-y-6">
       <div>
@@ -90,5 +86,4 @@ export function CandidateCommunication({ candidateId }: CandidateCommunicationPr
       </div>
     </div>
   );
-  */
 }
