@@ -41,9 +41,9 @@ export function CandidateCommunication({ candidateId }: CandidateCommunicationPr
   const { data: communications, isLoading } = useQuery<CommunicationData>({
     queryKey: ['candidate-communications', candidateId],
     queryFn: async () => {
-      // Fetch email logs with explicit row type
+      // Fetch email logs
       const emailResult = await supabase
-        .from<"email_logs", EmailLog>("email_logs")
+        .from('email_logs')
         .select('id, subject, sent_at, metadata')
         .filter("metadata", "cs", { candidate_id: candidateId })
         .order('sent_at', { ascending: false });
@@ -51,17 +51,17 @@ export function CandidateCommunication({ candidateId }: CandidateCommunicationPr
         throw emailResult.error;
       }
 
-      // Fetch SMS logs with explicit row type
+      // Fetch SMS logs
       const smsResult = await supabase
-        .from<"sms_logs", SmsLog>("sms_logs")
+        .from('sms_logs')
         .select('id, message, sent_at, created_at, candidate_id')
-        .eq("candidate_id" as "candidate_id", candidateId)
+        .eq('candidate_id', candidateId)
         .order('sent_at', { ascending: false });
       if (smsResult.error) {
         throw smsResult.error;
       }
 
-      // Create communications object
+      // Create communications object with type assertions
       const communications: CommunicationData = {
         emails: emailResult.data as unknown as EmailLog[],
         sms: smsResult.data as unknown as SmsLog[],
