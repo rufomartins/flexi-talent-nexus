@@ -29,10 +29,18 @@ serve(async (req) => {
       Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') ?? ''
     )
 
-    const requestData = await req.json()
-    console.log('Received request data:', requestData)
+    // Log the raw request
+    console.log('Raw request:', {
+      method: req.method,
+      headers: Object.fromEntries(req.headers.entries()),
+      url: req.url,
+    })
 
-    // Extract email data from the request body directly
+    // Parse request body and log it
+    const requestData = await req.json()
+    console.log('Parsed request data:', JSON.stringify(requestData, null, 2))
+
+    // Extract email data with detailed logging
     const {
       templateId,
       recipient
@@ -40,16 +48,28 @@ serve(async (req) => {
 
     console.log('Extracted templateId:', templateId)
     console.log('Extracted recipient:', recipient)
+    console.log('RequestData full object:', requestData)
 
-    if (!templateId) {
-      throw new Error('Template ID is required')
+    // Validate inputs with detailed error messages
+    if (typeof templateId !== 'string' || !templateId.trim()) {
+      const error = new Error('Template ID is required and must be a non-empty string')
+      console.error('Validation error:', error.message)
+      throw error
     }
 
-    if (!recipient?.email || !recipient?.name) {
-      throw new Error('Recipient email and name are required')
+    if (!recipient || typeof recipient.email !== 'string' || !recipient.email.trim()) {
+      const error = new Error('Recipient email is required and must be a non-empty string')
+      console.error('Validation error:', error.message)
+      throw error
+    }
+
+    if (!recipient.name || typeof recipient.name !== 'string' || !recipient.name.trim()) {
+      const error = new Error('Recipient name is required and must be a non-empty string')
+      console.error('Validation error:', error.message)
+      throw error
     }
     
-    // Format the email data to match our expected structure
+    // Format email data
     const emailData: EmailRequest = {
       templateId,
       recipients: [{
@@ -59,6 +79,8 @@ serve(async (req) => {
       }],
       customVariables: requestData.customVariables
     }
+
+    console.log('Formatted email data:', emailData)
     
     // Get email template
     const { data: template, error: templateError } = await supabaseClient
@@ -80,7 +102,6 @@ serve(async (req) => {
 
     // Process each recipient
     const emailPromises = emailData.recipients.map(async (recipient) => {
-      // Replace variables in template
       let emailContent = template.message
       let emailSubject = template.subject
       
@@ -93,12 +114,16 @@ serve(async (req) => {
         ...emailData.customVariables
       }
 
+      console.log('Applying replacements:', standardReplacements)
+
       Object.entries(standardReplacements).forEach(([key, value]) => {
         emailContent = emailContent.replace(new RegExp(key, 'g'), value || '')
         emailSubject = emailSubject.replace(new RegExp(key, 'g'), value || '')
       })
 
       console.log('Sending email to:', recipient.email)
+      console.log('Email subject:', emailSubject)
+      console.log('Email content preview:', emailContent.substring(0, 200) + '...')
 
       // Send email using Resend
       const res = await fetch('https://api.resend.com/emails', {
@@ -136,7 +161,9 @@ serve(async (req) => {
           }
         })
 
-      return res.json()
+      const responseData = await res.json()
+      console.log('Resend API response:', responseData)
+      return responseData
     })
 
     // Wait for all emails to be sent
@@ -151,8 +178,13 @@ serve(async (req) => {
     )
   } catch (error) {
     console.error('Error sending onboarding email:', error)
+    // Return more detailed error information
     return new Response(
-      JSON.stringify({ error: error.message }),
+      JSON.stringify({ 
+        error: error.message,
+        stack: error.stack,
+        timestamp: new Date().toISOString()
+      }),
       { 
         headers: { ...corsHeaders, 'Content-Type': 'application/json' },
         status: 500
