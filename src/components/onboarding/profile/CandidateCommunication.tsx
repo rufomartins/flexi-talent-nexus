@@ -4,13 +4,14 @@ import type { Database } from '@/integrations/supabase/types';
 import { Card } from "@/components/ui/card";
 import { supabase } from "@/integrations/supabase/client";
 
+// Use a less recursive JSON type to avoid TS2589
 type Json =
   | string
   | number
   | boolean
   | null
-  | { [key: string]: Json }
-  | Json[];
+  | { [key: string]: unknown }
+  | unknown[];
 
 interface CandidateCommunicationProps {
   candidateId: string;
