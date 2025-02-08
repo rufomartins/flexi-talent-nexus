@@ -1,15 +1,14 @@
-
 import { useState } from "react";
 import { Card } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
-import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
 import { useToast } from "@/hooks/use-toast";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import type { EmailTemplate, SmsTemplate, TemplateType } from "@/types/onboarding";
+import { EmailEditor } from "@/components/email-templates/EmailEditor";
 
 export function TemplateManagement() {
   const [activeTab, setActiveTab] = useState<"email" | "sms">("email");
@@ -264,12 +263,9 @@ export function TemplateManagement() {
                   Add Full Name
                 </Button>
               </div>
-              <Textarea
-                id="message"
+              <EmailEditor
                 value={emailTemplate.message}
-                onChange={(e) => setEmailTemplate(prev => ({ ...prev, message: e.target.value }))}
-                placeholder="Type your message here..."
-                className="min-h-[200px]"
+                onChange={(value) => setEmailTemplate(prev => ({ ...prev, message: value }))}
               />
             </div>
             <Button type="submit">Save Email Template</Button>
