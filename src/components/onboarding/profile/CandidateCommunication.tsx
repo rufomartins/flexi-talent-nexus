@@ -43,9 +43,9 @@ export function CandidateCommunication({ candidateId }: CandidateCommunicationPr
     queryFn: async () => {
       // Fetch email logs with explicit row type
       const emailResult = await supabase
-        .from<EmailLog>('email_logs')
+        .from<"email_logs", EmailLog>("email_logs")
         .select('id, subject, sent_at, metadata')
-        .eq('metadata->candidate_id', candidateId)
+        .filter("metadata", "cs", { candidate_id: candidateId })
         .order('sent_at', { ascending: false });
       if (emailResult.error) {
         throw emailResult.error;
@@ -53,9 +53,9 @@ export function CandidateCommunication({ candidateId }: CandidateCommunicationPr
 
       // Fetch SMS logs with explicit row type
       const smsResult = await supabase
-        .from<SmsLog>('sms_logs')
+        .from<"sms_logs", SmsLog>("sms_logs")
         .select('id, message, sent_at, created_at, candidate_id')
-        .eq('candidate_id', candidateId)
+        .eq("candidate_id" as "candidate_id", candidateId)
         .order('sent_at', { ascending: false });
       if (smsResult.error) {
         throw smsResult.error;
@@ -63,8 +63,8 @@ export function CandidateCommunication({ candidateId }: CandidateCommunicationPr
 
       // Create communications object
       const communications: CommunicationData = {
-        emails: emailResult.data,
-        sms: smsResult.data,
+        emails: emailResult.data as unknown as EmailLog[],
+        sms: smsResult.data as unknown as SmsLog[],
       };
       return communications;
     },
