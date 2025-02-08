@@ -1,3 +1,4 @@
+
 import { useState } from "react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
@@ -25,7 +26,7 @@ export function EmailAndSmsComposer({
   const [emailData, setEmailData] = useState({
     templateId: '',
     subject: '',
-    body: ''
+    message: '' // Changed from body to message
   });
   const [smsData, setSmsData] = useState({
     templateId: '',
@@ -40,7 +41,7 @@ export function EmailAndSmsComposer({
       console.log('Fetching email templates...');
       const { data, error } = await supabase
         .from('onboarding_email_templates')
-        .select('*')
+        .select('id, name, type, subject, message, variables, is_active, created_at')
         .eq('is_active', true)
         .order('created_at', { ascending: false });
 
@@ -60,7 +61,7 @@ export function EmailAndSmsComposer({
       console.log('Fetching SMS templates...');
       const { data, error } = await supabase
         .from('onboarding_sms_templates')
-        .select('*')
+        .select('id, name, type, message, variables, is_active, created_at')
         .eq('is_active', true)
         .order('created_at', { ascending: false });
 
@@ -85,7 +86,7 @@ export function EmailAndSmsComposer({
       } else {
         setEmailData(prev => ({
           ...prev,
-          body: prev.body + tagText
+          message: prev.message + tagText // Changed from body to message
         }));
       }
     }
@@ -105,7 +106,7 @@ export function EmailAndSmsComposer({
               name: candidateName
             },
             subject: emailData.subject,
-            body: emailData.body
+            message: emailData.message // Changed from body to message
           }
         });
 
@@ -139,7 +140,7 @@ export function EmailAndSmsComposer({
                 name: candidate.name || `${candidate.first_name || ''} ${candidate.last_name || ''}`.trim()
               },
               subject: emailData.subject,
-              body: emailData.body
+              message: emailData.message // Changed from body to message
             }
           });
 
@@ -238,7 +239,7 @@ export function EmailAndSmsComposer({
               <h3 className="font-medium">Email Preview</h3>
               <div className="border p-4 rounded-md">
                 <p className="font-medium">Subject: {emailData.subject}</p>
-                <div className="mt-2 whitespace-pre-wrap">{emailData.body}</div>
+                <div className="mt-2 whitespace-pre-wrap">{emailData.message}</div>
               </div>
 
               {enableSms && (

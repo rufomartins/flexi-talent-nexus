@@ -1,3 +1,4 @@
+
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
@@ -11,7 +12,7 @@ export function EmailComposer({ templates, data, onChange, onInsertTag }: EmailC
       onChange({
         templateId,
         subject: template.subject,
-        body: template.body
+        message: template.message // Changed from body to message
       });
     }
   };
@@ -21,10 +22,10 @@ export function EmailComposer({ templates, data, onChange, onInsertTag }: EmailC
       <div>
         <label className="text-sm font-medium">Email Template</label>
         <Select value={data.templateId} onValueChange={handleTemplateChange}>
-          <SelectTrigger>
+          <SelectTrigger className="w-full bg-white border border-gray-300 z-50">
             <SelectValue placeholder="Select a template" />
           </SelectTrigger>
-          <SelectContent>
+          <SelectContent className="bg-white z-50">
             {templates.map(template => (
               <SelectItem key={template.id} value={template.id || ''}>
                 {template.name}
@@ -72,8 +73,8 @@ export function EmailComposer({ templates, data, onChange, onInsertTag }: EmailC
           </Button>
         </div>
         <Textarea
-          value={data.body}
-          onChange={(e) => onChange({ ...data, body: e.target.value })}
+          value={data.message}
+          onChange={(e) => onChange({ ...data, message: e.target.value })}
           placeholder="Type your message here..."
           className="min-h-[200px]"
         />

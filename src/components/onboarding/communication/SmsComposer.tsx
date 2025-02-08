@@ -1,23 +1,34 @@
+
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Textarea } from "@/components/ui/textarea";
 import { Button } from "@/components/ui/button";
 import type { SmsComposerProps } from "@/types/onboarding";
 
-export function SmsComposer({ data, onChange, onInsertTag }: SmsComposerProps) {
+export function SmsComposer({ templates, data, onChange, onInsertTag }: SmsComposerProps) {
+  const handleTemplateChange = (templateId: string) => {
+    const template = templates.find(t => t.id === templateId);
+    if (template) {
+      onChange({
+        templateId,
+        message: template.message
+      });
+    }
+  };
+
   return (
     <div className="space-y-4 pt-4 border-t">
       <div>
         <label className="text-sm font-medium">SMS Template</label>
-        <Select
-          value={data.templateId}
-          onValueChange={(value) => onChange({ ...data, templateId: value })}
-        >
-          <SelectTrigger>
+        <Select value={data.templateId} onValueChange={handleTemplateChange}>
+          <SelectTrigger className="w-full bg-white border border-gray-300 z-50">
             <SelectValue placeholder="Select a template" />
           </SelectTrigger>
-          <SelectContent>
-            <SelectItem value="template1">Template 1</SelectItem>
-            <SelectItem value="template2">Template 2</SelectItem>
+          <SelectContent className="bg-white z-50">
+            {templates.map(template => (
+              <SelectItem key={template.id} value={template.id}>
+                {template.name}
+              </SelectItem>
+            ))}
           </SelectContent>
         </Select>
       </div>

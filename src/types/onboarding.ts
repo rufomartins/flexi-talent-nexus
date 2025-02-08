@@ -43,7 +43,7 @@ export interface OnboardingEmailTemplate {
   name: string;
   type: TemplateType;
   subject: string;
-  body: string;
+  message: string; // Changed from body to message
   variables: string[];
   is_active: boolean;
   created_at?: string;
@@ -124,13 +124,14 @@ export interface EmailComposerProps {
   data: {
     templateId: string;
     subject: string;
-    body: string;
+    message: string; // Changed from body to message
   };
-  onChange: (data: { templateId: string; subject: string; body: string }) => void;
+  onChange: (data: { templateId: string; subject: string; message: string }) => void;
   onInsertTag: (tag: string) => void;
 }
 
 export interface SmsComposerProps {
+  templates: SmsTemplate[];
   data: {
     templateId: string;
     message: string;
@@ -144,7 +145,7 @@ export interface EmailTemplate {
   name: string;
   type: TemplateType;
   subject: string;
-  body: string;
+  message: string; // Changed from body to message
   variables: string[];
   is_active: boolean;
   created_at?: string;
