@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { Card } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -167,6 +166,22 @@ export function TemplateManagement() {
     }
   });
 
+  const handleEmailTagInsert = (tag: string) => {
+    const tagText = `{{${tag}}}`;
+    setEmailTemplate(prev => ({
+      ...prev,
+      message: prev.message + tagText
+    }));
+  };
+
+  const handleSmsTagInsert = (tag: string) => {
+    const tagText = `{{${tag}}}`;
+    setSmsTemplate(prev => ({
+      ...prev,
+      message: prev.message + tagText
+    }));
+  };
+
   const handleEmailSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     if (!emailTemplate.name || !emailTemplate.subject || !emailTemplate.message) {
@@ -244,7 +259,7 @@ export function TemplateManagement() {
                   type="button"
                   variant="outline"
                   size="sm"
-                  onClick={() => setEmailTemplate(prev => ({ ...prev, message: prev.message + "{{First Name}}" }))}
+                  onClick={() => handleEmailTagInsert("First Name")}
                 >
                   Add First Name
                 </Button>
@@ -252,7 +267,7 @@ export function TemplateManagement() {
                   type="button"
                   variant="outline"
                   size="sm"
-                  onClick={() => setEmailTemplate(prev => ({ ...prev, message: prev.message + "{{Last Name}}" }))}
+                  onClick={() => handleEmailTagInsert("Last Name")}
                 >
                   Add Last Name
                 </Button>
@@ -260,7 +275,7 @@ export function TemplateManagement() {
                   type="button"
                   variant="outline"
                   size="sm"
-                  onClick={() => setEmailTemplate(prev => ({ ...prev, message: prev.message + "{{Full Name}}" }))}
+                  onClick={() => handleEmailTagInsert("Full Name")}
                 >
                   Add Full Name
                 </Button>
@@ -307,7 +322,7 @@ export function TemplateManagement() {
                   type="button"
                   variant="outline"
                   size="sm"
-                  onClick={() => setSmsTemplate(prev => ({ ...prev, message: prev.message + "{{First Name}}" }))}
+                  onClick={() => handleSmsTagInsert("First Name")}
                 >
                   Add First Name
                 </Button>
@@ -315,7 +330,7 @@ export function TemplateManagement() {
                   type="button"
                   variant="outline"
                   size="sm"
-                  onClick={() => setSmsTemplate(prev => ({ ...prev, message: prev.message + "{{Last Name}}" }))}
+                  onClick={() => handleSmsTagInsert("Last Name")}
                 >
                   Add Last Name
                 </Button>
@@ -323,7 +338,7 @@ export function TemplateManagement() {
                   type="button"
                   variant="outline"
                   size="sm"
-                  onClick={() => setSmsTemplate(prev => ({ ...prev, message: prev.message + "{{Full Name}}" }))}
+                  onClick={() => handleSmsTagInsert("Full Name")}
                 >
                   Add Full Name
                 </Button>
