@@ -1589,11 +1589,11 @@ export type Database = {
       }
       onboarding_email_templates: {
         Row: {
-          body: string
           created_at: string | null
           created_by: string | null
           id: string
           is_active: boolean | null
+          message: string
           name: string
           subject: string
           type: Database["public"]["Enums"]["onboarding_template_type"]
@@ -1601,11 +1601,11 @@ export type Database = {
           variables: Json | null
         }
         Insert: {
-          body: string
           created_at?: string | null
           created_by?: string | null
           id?: string
           is_active?: boolean | null
+          message: string
           name: string
           subject: string
           type: Database["public"]["Enums"]["onboarding_template_type"]
@@ -1613,11 +1613,11 @@ export type Database = {
           variables?: Json | null
         }
         Update: {
-          body?: string
           created_at?: string | null
           created_by?: string | null
           id?: string
           is_active?: boolean | null
+          message?: string
           name?: string
           subject?: string
           type?: Database["public"]["Enums"]["onboarding_template_type"]
