@@ -1,3 +1,4 @@
+
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts"
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.7.1"
 
@@ -28,7 +29,15 @@ serve(async (req) => {
       Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') ?? ''
     )
 
-    const { emailData } = await req.json() as { emailData: EmailRequest }
+    const requestData = await req.json()
+    console.log('Received request data:', requestData)
+
+    const emailData: EmailRequest = requestData.emailData
+    console.log('Parsed email data:', emailData)
+
+    if (!emailData?.templateId) {
+      throw new Error('Template ID is required')
+    }
     
     // Get email template
     const { data: template, error: templateError } = await supabaseClient
@@ -37,25 +46,38 @@ serve(async (req) => {
       .eq('id', emailData.templateId)
       .single()
 
-    if (templateError) throw templateError
+    if (templateError) {
+      console.error('Template fetch error:', templateError)
+      throw templateError
+    }
+
+    if (!template) {
+      throw new Error(`Template not found with ID: ${emailData.templateId}`)
+    }
+
+    console.log('Found template:', template)
 
     // Process each recipient
     const emailPromises = emailData.recipients.map(async (recipient) => {
       // Replace variables in template
-      let emailBody = template.body
+      let emailContent = template.message
       let emailSubject = template.subject
       
       // Replace standard variables
       const standardReplacements = {
-        '{name}': recipient.name,
-        '{email}': recipient.email,
+        '{{First Name}}': recipient.name.split(' ')[0],
+        '{{Last Name}}': recipient.name.split(' ').slice(1).join(' '),
+        '{{Full Name}}': recipient.name,
+        '{{Email}}': recipient.email,
         ...emailData.customVariables
       }
 
       Object.entries(standardReplacements).forEach(([key, value]) => {
-        emailBody = emailBody.replace(new RegExp(key, 'g'), value || '')
+        emailContent = emailContent.replace(new RegExp(key, 'g'), value || '')
         emailSubject = emailSubject.replace(new RegExp(key, 'g'), value || '')
       })
+
+      console.log('Sending email to:', recipient.email)
 
       // Send email using Resend
       const res = await fetch('https://api.resend.com/emails', {
@@ -68,12 +90,13 @@ serve(async (req) => {
           from: 'Onboarding <onboarding@yourdomain.com>',
           to: [recipient.email],
           subject: emailSubject,
-          html: emailBody
+          html: emailContent
         })
       })
 
       if (!res.ok) {
         const error = await res.text()
+        console.error('Resend API error:', error)
         throw new Error(error)
       }
 
@@ -84,7 +107,7 @@ serve(async (req) => {
           template_id: template.id,
           recipient: recipient.email,
           subject: emailSubject,
-          body: emailBody,
+          body: emailContent,
           status: 'sent',
           metadata: {
             candidate_id: recipient.id,
