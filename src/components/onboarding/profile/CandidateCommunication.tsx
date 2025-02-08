@@ -38,12 +38,12 @@ interface CommunicationData {
 }
 
 export function CandidateCommunication({ candidateId }: CandidateCommunicationProps) {
-  const { data: communications, isLoading } = useQuery({
+  const { data: communications, isLoading } = useQuery<CommunicationData>({
     queryKey: ['candidate-communications', candidateId],
     queryFn: async () => {
-      // Fetch email logs
+      // Fetch email logs with explicit row type
       const emailResult = await supabase
-        .from('email_logs')
+        .from<EmailLog>('email_logs')
         .select('id, subject, sent_at, metadata')
         .eq('metadata->candidate_id', candidateId)
         .order('sent_at', { ascending: false });
@@ -51,9 +51,9 @@ export function CandidateCommunication({ candidateId }: CandidateCommunicationPr
         throw emailResult.error;
       }
 
-      // Fetch SMS logs
+      // Fetch SMS logs with explicit row type
       const smsResult = await supabase
-        .from('sms_logs')
+        .from<SmsLog>('sms_logs')
         .select('id, message, sent_at, created_at, candidate_id')
         .eq('candidate_id', candidateId)
         .order('sent_at', { ascending: false });
@@ -61,7 +61,7 @@ export function CandidateCommunication({ candidateId }: CandidateCommunicationPr
         throw smsResult.error;
       }
 
-      // Create communications object with our simplified types
+      // Create communications object
       const communications: CommunicationData = {
         emails: emailResult.data,
         sms: smsResult.data,
