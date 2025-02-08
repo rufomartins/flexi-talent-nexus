@@ -32,18 +32,39 @@ serve(async (req) => {
     const requestData = await req.json()
     console.log('Received request data:', requestData)
 
-    const emailData: EmailRequest = requestData.emailData
-    console.log('Parsed email data:', emailData)
+    // Extract email data from the request body directly
+    const {
+      templateId,
+      recipient
+    } = requestData
 
-    if (!emailData?.templateId) {
+    console.log('Extracted templateId:', templateId)
+    console.log('Extracted recipient:', recipient)
+
+    if (!templateId) {
       throw new Error('Template ID is required')
+    }
+
+    if (!recipient?.email || !recipient?.name) {
+      throw new Error('Recipient email and name are required')
+    }
+    
+    // Format the email data to match our expected structure
+    const emailData: EmailRequest = {
+      templateId,
+      recipients: [{
+        id: recipient.id || 'temp-id',
+        email: recipient.email,
+        name: recipient.name
+      }],
+      customVariables: requestData.customVariables
     }
     
     // Get email template
     const { data: template, error: templateError } = await supabaseClient
       .from('onboarding_email_templates')
       .select('*')
-      .eq('id', emailData.templateId)
+      .eq('id', templateId)
       .single()
 
     if (templateError) {
@@ -52,7 +73,7 @@ serve(async (req) => {
     }
 
     if (!template) {
-      throw new Error(`Template not found with ID: ${emailData.templateId}`)
+      throw new Error(`Template not found with ID: ${templateId}`)
     }
 
     console.log('Found template:', template)
