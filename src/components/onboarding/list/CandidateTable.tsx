@@ -1,3 +1,4 @@
+
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Button } from "@/components/ui/button";
@@ -30,7 +31,6 @@ export function CandidateTable({
   const [pendingUpdates, setPendingUpdates] = useState<Record<string, any>>({});
   const { toast } = useToast();
 
-  // Track changes in memory without immediately sending to database
   const handleFieldChange = useCallback((candidateId: string, field: string, value: string) => {
     console.log(`Field change detected - ID: ${candidateId}, Field: ${field}, Value: ${value}`);
     setPendingUpdates(prev => ({
@@ -42,7 +42,6 @@ export function CandidateTable({
     }));
   }, []);
 
-  // Only send updates when "Done" is clicked
   const handleSaveChanges = async (candidateId: string) => {
     const updates = pendingUpdates[candidateId];
     if (!updates) {
@@ -50,13 +49,7 @@ export function CandidateTable({
       return;
     }
 
-    console.log('Saving updates to database:', {
-      candidateId,
-      updates
-    });
-
     try {
-      // Validate language value if it's being updated
       if (updates.language && !SUPPORTED_LANGUAGES.includes(updates.language)) {
         throw new Error(`Invalid language value: ${updates.language}`);
       }
@@ -73,7 +66,6 @@ export function CandidateTable({
         description: "The candidate information has been updated.",
       });
 
-      // Clear pending updates for this candidate
       setPendingUpdates(prev => {
         const { [candidateId]: _, ...rest } = prev;
         return rest;
@@ -91,7 +83,6 @@ export function CandidateTable({
   };
 
   const handleCancelEdit = (candidateId: string) => {
-    // Clear any pending updates for this candidate
     setPendingUpdates(prev => {
       const { [candidateId]: _, ...rest } = prev;
       return rest;
@@ -100,7 +91,7 @@ export function CandidateTable({
   };
 
   return (
-    <div className="rounded-md border overflow-x-auto">
+    <div className="rounded-md border overflow-x-auto relative">
       <Table>
         <TableHeader>
           <TableRow>
@@ -118,7 +109,7 @@ export function CandidateTable({
             <TableHead className="min-w-[180px]">Language</TableHead>
             <TableHead className="min-w-[120px]">Source</TableHead>
             <TableHead className="min-w-[120px]">Status</TableHead>
-            <TableHead className="text-right min-w-[120px]">Actions</TableHead>
+            <TableHead className="text-right min-w-[120px] sticky right-0 bg-white">Actions</TableHead>
           </TableRow>
         </TableHeader>
         <TableBody>
@@ -196,7 +187,7 @@ export function CandidateTable({
                       value={((pendingUpdate.language ?? candidate.language) || "")}
                       onValueChange={(value) => handleFieldChange(candidate.id, 'language', value)}
                     >
-                      <SelectTrigger className="w-[180px] bg-white">
+                      <SelectTrigger className="w-[180px] bg-white z-50">
                         <SelectValue placeholder="Select language" />
                       </SelectTrigger>
                       <SelectContent className="bg-white z-50 max-h-[300px]">
@@ -225,7 +216,7 @@ export function CandidateTable({
                     {candidate.status}
                   </span>
                 </TableCell>
-                <TableCell className="text-right">
+                <TableCell className="text-right sticky right-0 bg-white">
                   {isSelected && (
                     <div className="flex justify-end gap-2">
                       {isEditing ? (

@@ -37,12 +37,19 @@ export function EmailAndSmsComposer({
   const { data: emailTemplates } = useQuery({
     queryKey: ['email-templates'],
     queryFn: async () => {
+      console.log('Fetching email templates...');
       const { data, error } = await supabase
         .from('onboarding_email_templates')
         .select('*')
-        .eq('is_active', true);
+        .eq('is_active', true)
+        .order('created_at', { ascending: false });
 
-      if (error) throw error;
+      if (error) {
+        console.error('Error fetching email templates:', error);
+        throw error;
+      }
+
+      console.log('Email templates fetched:', data);
       return data as OnboardingEmailTemplate[];
     }
   });
@@ -50,12 +57,19 @@ export function EmailAndSmsComposer({
   const { data: smsTemplates } = useQuery({
     queryKey: ['sms-templates'],
     queryFn: async () => {
+      console.log('Fetching SMS templates...');
       const { data, error } = await supabase
         .from('onboarding_sms_templates')
         .select('*')
-        .eq('is_active', true);
+        .eq('is_active', true)
+        .order('created_at', { ascending: false });
 
-      if (error) throw error;
+      if (error) {
+        console.error('Error fetching SMS templates:', error);
+        throw error;
+      }
+
+      console.log('SMS templates fetched:', data);
       return data as SmsTemplate[];
     }
   });
@@ -200,6 +214,7 @@ export function EmailAndSmsComposer({
 
             {enableSms && (
               <SmsComposer
+                templates={smsTemplates || []}
                 data={smsData}
                 onChange={setSmsData}
                 onInsertTag={handleInsertTag}
