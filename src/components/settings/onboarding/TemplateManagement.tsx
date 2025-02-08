@@ -18,12 +18,14 @@ export function TemplateManagement() {
     type: "welcome" as TemplateType,
     subject: "",
     message: "",
+    variables: [] as string[],
     is_active: true
   });
   const [smsTemplate, setSmsTemplate] = useState({
     name: "",
     type: "welcome" as TemplateType,
     message: "",
+    variables: [] as string[],
     is_active: true
   });
 
@@ -82,8 +84,8 @@ export function TemplateManagement() {
           type: template.type,
           subject: template.subject,
           message: template.message,
-          is_active: true,
-          variables: []
+          variables: template.variables,
+          is_active: true
         }])
         .select()
         .single();
@@ -105,6 +107,7 @@ export function TemplateManagement() {
         type: "welcome",
         subject: "",
         message: "",
+        variables: [],
         is_active: true
       });
     },
@@ -127,8 +130,8 @@ export function TemplateManagement() {
           name: template.name,
           type: template.type,
           message: template.message,
-          is_active: true,
-          variables: []
+          variables: template.variables,
+          is_active: true
         }])
         .select()
         .single();
@@ -149,6 +152,7 @@ export function TemplateManagement() {
         name: "",
         type: "welcome",
         message: "",
+        variables: [],
         is_active: true
       });
     },
