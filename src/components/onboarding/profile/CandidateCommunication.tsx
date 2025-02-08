@@ -4,7 +4,13 @@ import type { Database } from '@/integrations/supabase/types';
 import { Card } from "@/components/ui/card";
 import { supabase } from "@/integrations/supabase/client";
 
-type Json = Database['public']['Json'];
+type Json =
+  | string
+  | number
+  | boolean
+  | null
+  | { [key: string]: Json }
+  | Json[];
 
 interface CandidateCommunicationProps {
   candidateId: string;
@@ -14,7 +20,7 @@ interface EmailLog {
   id: string;
   subject: string;
   sent_at: string;
-  metadata: Database['public']['Tables']['email_logs']['Row']['metadata'];
+  metadata: Json;
 }
 
 interface SmsLog {
