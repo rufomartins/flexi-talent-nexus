@@ -1,4 +1,3 @@
-
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts"
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.7.1"
 
@@ -125,7 +124,7 @@ serve(async (req) => {
       console.log('Email subject:', emailSubject)
       console.log('Email content preview:', emailContent.substring(0, 200) + '...')
 
-      // Send email using Resend
+      // Send email using Resend with new sender address
       const res = await fetch('https://api.resend.com/emails', {
         method: 'POST',
         headers: {
@@ -133,7 +132,7 @@ serve(async (req) => {
           'Authorization': `Bearer ${Deno.env.get('RESEND_API_KEY')}`
         },
         body: JSON.stringify({
-          from: 'Onboarding <onboarding@resend.dev>',
+          from: 'GTMD Onboarding <onboarding@gtmd.studio>',
           to: [recipient.email],
           subject: emailSubject,
           html: emailContent
@@ -192,4 +191,3 @@ serve(async (req) => {
     )
   }
 })
-
