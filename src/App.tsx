@@ -1,8 +1,8 @@
+
 import { Routes, Route, Navigate } from "react-router-dom";
 import ProtectedRoute from "@/components/ProtectedRoute";
 import PublicRoute from "@/components/PublicRoute";
 import { MainLayout } from "@/components/layout/MainLayout";
-import Index from "@/pages/Index";
 import Login from "@/pages/Login";
 import WelcomeVideoPage from "@/pages/onboarding/WelcomeVideoPage";
 import Dashboard from "@/pages/Dashboard";
@@ -25,21 +25,23 @@ function App() {
   
   return (
     <Routes>
-      {/* Root redirect based on auth status - only for non-public routes */}
-      <Route 
-        path="/" 
-        element={
-          user ? <Navigate to="/dashboard" replace /> : <Navigate to="/login" replace />
-        } 
-      />
-      
       {/* Public onboarding routes - NO auth required */}
-      <Route path="/onboarding">
-        <Route path="welcome" element={<WelcomePage />} />
-        <Route path="welcome-video/:candidateId" element={<WelcomeVideoPage />} />
-        <Route path="chatbot/:candidateId" element={<ChatbotPage />} />
-        <Route path="schedule/:candidateId" element={<SchedulePage />} />
-      </Route>
+      <Route 
+        path="/onboarding/welcome" 
+        element={<WelcomePage />} 
+      />
+      <Route 
+        path="/onboarding/welcome-video/:candidateId" 
+        element={<WelcomeVideoPage />} 
+      />
+      <Route 
+        path="/onboarding/chatbot/:candidateId" 
+        element={<ChatbotPage />} 
+      />
+      <Route 
+        path="/onboarding/schedule/:candidateId" 
+        element={<SchedulePage />} 
+      />
       
       {/* Public routes (no authentication required) */}
       <Route 
@@ -106,7 +108,13 @@ function App() {
         } />
       </Route>
       
-      {/* Redirect unknown routes to dashboard if authenticated, login if not */}
+      {/* Root and unknown routes */}
+      <Route 
+        path="/" 
+        element={
+          user ? <Navigate to="/dashboard" replace /> : <Navigate to="/login" replace />
+        } 
+      />
       <Route 
         path="*" 
         element={

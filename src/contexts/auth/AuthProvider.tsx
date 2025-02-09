@@ -46,12 +46,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     return PUBLIC_ROUTES.some(route => location.pathname.startsWith(route));
   };
 
-  // Skip auth check for public routes
-  if (isPublicRoute()) {
-    return <>{children}</>;
-  }
-
-  // Loading state - only show for protected routes
+  // Show loader only for protected routes during session check
   if (sessionLoading && !isPublicRoute()) {
     return (
       <div className="flex flex-col items-center justify-center min-h-screen p-4">
@@ -61,6 +56,12 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         </p>
       </div>
     );
+  }
+
+  // For public routes, render children immediately
+  if (isPublicRoute()) {
+    console.log("[AuthProvider] Rendering public route:", location.pathname);
+    return <>{children}</>;
   }
 
   return (
