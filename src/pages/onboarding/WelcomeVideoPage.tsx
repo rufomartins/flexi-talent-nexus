@@ -113,7 +113,7 @@ const WelcomeVideoPage = () => {
         <div className="relative aspect-video rounded-lg overflow-hidden shadow-lg bg-black">
           <iframe
             className="absolute inset-0 w-full h-full"
-            src={`${videoUrl}?autoplay=1&control=1`}
+            src={`${videoUrl}?autoplay=1&control=1&responsive=1&playsinline=1&letterboxColor=000000&preload=1`}
             allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
             allowFullScreen
           />
