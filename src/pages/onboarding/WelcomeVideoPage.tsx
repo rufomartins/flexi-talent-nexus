@@ -46,8 +46,9 @@ const WelcomeVideoPage = () => {
 
         if (settingsError) throw settingsError;
 
-        const videoSettings = settings?.value as WelcomeVideoSettings;
-        if (videoSettings?.url) {
+        // Type guard to ensure settings.value has the correct shape
+        if (settings?.value && typeof settings.value === 'object' && !Array.isArray(settings.value) && 'url' in settings.value) {
+          const videoSettings = settings.value as WelcomeVideoSettings;
           setVideoUrl(videoSettings.url);
         }
       } catch (error) {
