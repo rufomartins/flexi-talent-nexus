@@ -169,7 +169,7 @@ export function TemplateManagement() {
   const handleEmailTagInsert = (tag: string) => {
     const textarea = document.getElementById('email-message') as HTMLTextAreaElement;
     const cursorPosition = textarea?.selectionStart || emailTemplate.message.length;
-    const tagText = `{{${tag}}}`;
+    const tagText = tag === "?id={{Candidate ID}}" ? tag : `{{${tag}}}`;
     const newMessage = 
       emailTemplate.message.slice(0, cursorPosition) + 
       tagText + 
@@ -293,6 +293,14 @@ export function TemplateManagement() {
                   onClick={() => handleEmailTagInsert("Candidate ID")}
                 >
                   Add Candidate ID
+                </Button>
+                <Button
+                  type="button"
+                  variant="outline"
+                  size="sm"
+                  onClick={() => handleEmailTagInsert("?id={{Candidate ID}}")}
+                >
+                  Add ID Parameter
                 </Button>
               </div>
               <Textarea
