@@ -110,10 +110,10 @@ const WelcomeVideoPage = () => {
       <div className="space-y-6">
         <h1 className="text-2xl font-bold text-center mb-8">Welcome Video</h1>
         
-        <div className="relative aspect-video rounded-lg overflow-hidden shadow-lg">
+        <div className="relative aspect-video rounded-lg overflow-hidden shadow-lg bg-black">
           <iframe
-            className="w-full h-full"
-            src={videoUrl}
+            className="absolute inset-0 w-full h-full"
+            src={`${videoUrl}?autoplay=1&control=1`}
             allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
             allowFullScreen
           />
