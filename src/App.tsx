@@ -1,3 +1,4 @@
+
 import { Routes, Route, Navigate } from "react-router-dom";
 import ProtectedRoute from "@/components/ProtectedRoute";
 import PublicRoute from "@/components/PublicRoute";
@@ -41,7 +42,7 @@ function App() {
         } 
       />
       
-      {/* Public candidate-facing onboarding routes */}
+      {/* Public candidate-facing onboarding routes - NO auth required */}
       <Route path="/onboarding">
         <Route 
           path="welcome" 

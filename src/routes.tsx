@@ -1,3 +1,4 @@
+
 import { createBrowserRouter } from "react-router-dom";
 import ProtectedRoute from "@/components/ProtectedRoute";
 import Index from "@/pages/Index";
@@ -24,7 +25,7 @@ const router = createBrowserRouter([
     path: "/login",
     element: <Login />,
   },
-  // Public candidate-facing onboarding routes
+  // Public candidate-facing onboarding routes - NO authentication required
   {
     path: "/onboarding",
     children: [
