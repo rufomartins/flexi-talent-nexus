@@ -1,3 +1,4 @@
+
 import { useLocation, useNavigate } from "react-router-dom";
 import { AuthContext } from "./AuthContext";
 import { useSessionManagement } from "@/hooks/auth/useSessionManagement";
@@ -45,7 +46,12 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     return PUBLIC_ROUTES.some(route => location.pathname.startsWith(route));
   };
 
-  // Loading state
+  // Skip auth check for public routes
+  if (isPublicRoute()) {
+    return <>{children}</>;
+  }
+
+  // Loading state - only show for protected routes
   if (sessionLoading && !isPublicRoute()) {
     return (
       <div className="flex flex-col items-center justify-center min-h-screen p-4">
