@@ -47,9 +47,9 @@ const WelcomeVideoPage = () => {
         if (settingsError) throw settingsError;
 
         // Type guard to ensure settings.value has the correct shape
-        if (settings?.value && typeof settings.value === 'object' && !Array.isArray(settings.value) && 'url' in settings.value) {
-          const videoSettings = settings.value as WelcomeVideoSettings;
-          setVideoUrl(videoSettings.url);
+        const settingsValue = settings?.value as Record<string, unknown>;
+        if (settingsValue && typeof settingsValue.url === 'string') {
+          setVideoUrl(settingsValue.url);
         }
       } catch (error) {
         console.error('Error fetching welcome video URL:', error);
@@ -110,9 +110,9 @@ const WelcomeVideoPage = () => {
       <div className="space-y-6">
         <h1 className="text-2xl font-bold text-center mb-8">Welcome Video</h1>
         
-        <div className="relative w-full" style={{ paddingTop: '56.25%' }}>
+        <div className="relative w-full pb-[56.25%] bg-black rounded-lg overflow-hidden">
           <iframe
-            className="absolute top-0 left-0 w-full h-full rounded-lg"
+            className="absolute inset-0 w-full h-full"
             src={videoUrl}
             allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
             allowFullScreen
@@ -133,4 +133,3 @@ const WelcomeVideoPage = () => {
 };
 
 export default WelcomeVideoPage;
-
