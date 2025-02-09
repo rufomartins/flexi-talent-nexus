@@ -1451,6 +1451,8 @@ export type Database = {
           full_name: string | null
           id: string
           interview_date: string | null
+          invite_expiry_date: string | null
+          invite_sent_date: string | null
           language: string | null
           last_activity_date: string | null
           last_name: string | null
@@ -1485,6 +1487,8 @@ export type Database = {
           full_name?: string | null
           id?: string
           interview_date?: string | null
+          invite_expiry_date?: string | null
+          invite_sent_date?: string | null
           language?: string | null
           last_activity_date?: string | null
           last_name?: string | null
@@ -1519,6 +1523,8 @@ export type Database = {
           full_name?: string | null
           id?: string
           interview_date?: string | null
+          invite_expiry_date?: string | null
+          invite_sent_date?: string | null
           language?: string | null
           last_activity_date?: string | null
           last_name?: string | null
@@ -1753,6 +1759,7 @@ export type Database = {
           id: string
           is_enabled: boolean | null
           updated_at: string | null
+          value: Json
         }
         Insert: {
           allowed_roles?: string[] | null
@@ -1761,6 +1768,7 @@ export type Database = {
           id?: string
           is_enabled?: boolean | null
           updated_at?: string | null
+          value?: Json
         }
         Update: {
           allowed_roles?: string[] | null
@@ -1769,6 +1777,7 @@ export type Database = {
           id?: string
           is_enabled?: boolean | null
           updated_at?: string | null
+          value?: Json
         }
         Relationships: []
       }
