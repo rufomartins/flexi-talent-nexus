@@ -58,12 +58,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     );
   }
 
-  // For public routes, render children immediately
-  if (isPublicRoute()) {
-    console.log("[AuthProvider] Rendering public route:", location.pathname);
-    return <>{children}</>;
-  }
-
+  // Always provide the auth context, but for public routes we don't block rendering
   return (
     <AuthContext.Provider 
       value={{
