@@ -6,6 +6,10 @@ import { useToast } from "@/hooks/use-toast";
 import { supabase } from '@/integrations/supabase/client';
 import { Loader2 } from "lucide-react";
 
+interface WelcomeVideoSettings {
+  url: string;
+}
+
 const WelcomeVideoPage = () => {
   const { candidateId } = useParams();
   const [videoUrl, setVideoUrl] = useState<string | null>(null);
@@ -27,8 +31,9 @@ const WelcomeVideoPage = () => {
 
         if (settingsError) throw settingsError;
 
-        if (settings?.value?.url) {
-          setVideoUrl(settings.value.url);
+        const videoSettings = settings?.value as WelcomeVideoSettings;
+        if (videoSettings?.url) {
+          setVideoUrl(videoSettings.url);
         }
       } catch (error) {
         console.error('Error fetching welcome video URL:', error);
