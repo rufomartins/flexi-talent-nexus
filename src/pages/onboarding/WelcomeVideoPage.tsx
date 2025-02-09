@@ -113,7 +113,7 @@ const WelcomeVideoPage = () => {
         <div className="relative aspect-video rounded-lg overflow-hidden shadow-lg bg-black">
           <iframe
             className="absolute inset-0 w-full h-full"
-            src={`${videoUrl}?poster=yes&responsive-mode=fit&player-style=default&nocontrols=false&autoplay=1`}
+            src={`${videoUrl}?responsive-mode=scale&aspect-ratio=16:9&width=100%&height=100%&autoplay=1`}
             allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
             allowFullScreen
           />
@@ -133,3 +133,4 @@ const WelcomeVideoPage = () => {
 };
 
 export default WelcomeVideoPage;
+
