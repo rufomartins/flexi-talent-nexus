@@ -1,3 +1,4 @@
+
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { GeneralSettings } from "@/components/settings/GeneralSettings";
 import { OnboardingSettings } from "@/components/settings/OnboardingSettings";
@@ -31,17 +32,21 @@ export default function Settings() {
       </div>
 
       <Tabs defaultValue="general" className="space-y-4">
-        <TabsList className="grid grid-cols-3 lg:grid-cols-5 gap-4">
-          <TabsTrigger value="general">General</TabsTrigger>
-          <TabsTrigger value="onboarding">Onboarding</TabsTrigger>
-          <TabsTrigger value="talents">Talents</TabsTrigger>
-          <TabsTrigger value="castings">Castings</TabsTrigger>
-          <TabsTrigger value="projects">Projects</TabsTrigger>
-          <TabsTrigger value="messages">Messages</TabsTrigger>
-          <TabsTrigger value="financial">Financial</TabsTrigger>
-          <TabsTrigger value="calendar">Calendar</TabsTrigger>
-          <TabsTrigger value="apis">APIs</TabsTrigger>
-        </TabsList>
+        <div className="border-b">
+          <div className="overflow-x-auto">
+            <TabsList className="inline-flex h-10 items-center justify-start w-full px-1 py-1">
+              <TabsTrigger value="general" className="px-4">General</TabsTrigger>
+              <TabsTrigger value="onboarding" className="px-4">Onboarding</TabsTrigger>
+              <TabsTrigger value="talents" className="px-4">Talents</TabsTrigger>
+              <TabsTrigger value="castings" className="px-4">Castings</TabsTrigger>
+              <TabsTrigger value="projects" className="px-4">Projects</TabsTrigger>
+              <TabsTrigger value="messages" className="px-4">Messages</TabsTrigger>
+              <TabsTrigger value="financial" className="px-4">Financial</TabsTrigger>
+              <TabsTrigger value="calendar" className="px-4">Calendar</TabsTrigger>
+              <TabsTrigger value="apis" className="px-4">APIs</TabsTrigger>
+            </TabsList>
+          </div>
+        </div>
 
         <TabsContent value="general" className="space-y-4">
           <GeneralSettings />
