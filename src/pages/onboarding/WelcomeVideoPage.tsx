@@ -32,9 +32,12 @@ const WelcomeVideoPage = () => {
         if (settingsError) throw settingsError;
 
         const rawValue = settings?.value;
-        if (rawValue && typeof rawValue === 'object' && 'url' in rawValue) {
-          const videoSettings = rawValue as WelcomeVideoSettings;
-          setVideoUrl(videoSettings.url);
+        if (rawValue && typeof rawValue === 'object' && !Array.isArray(rawValue)) {
+          // Type assertion after checking the shape
+          const videoSettings = rawValue as unknown as WelcomeVideoSettings;
+          if ('url' in videoSettings) {
+            setVideoUrl(videoSettings.url);
+          }
         }
       } catch (error) {
         console.error('Error fetching welcome video URL:', error);

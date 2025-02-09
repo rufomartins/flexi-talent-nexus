@@ -261,7 +261,7 @@ export function TemplateManagement() {
             </div>
             <div>
               <Label htmlFor="message">Message</Label>
-              <div className="flex gap-2 mb-2">
+              <div className="flex gap-2 mb-2 flex-wrap">
                 <Button
                   type="button"
                   variant="outline"
@@ -285,6 +285,14 @@ export function TemplateManagement() {
                   onClick={() => handleEmailTagInsert("Full Name")}
                 >
                   Add Full Name
+                </Button>
+                <Button
+                  type="button"
+                  variant="outline"
+                  size="sm"
+                  onClick={() => handleEmailTagInsert("Candidate ID")}
+                >
+                  Add Candidate ID
                 </Button>
               </div>
               <Textarea
@@ -327,7 +335,7 @@ export function TemplateManagement() {
             </div>
             <div>
               <Label htmlFor="sms-message">Message</Label>
-              <div className="flex gap-2 mb-2">
+              <div className="flex gap-2 mb-2 flex-wrap">
                 <Button
                   type="button"
                   variant="outline"
@@ -351,6 +359,14 @@ export function TemplateManagement() {
                   onClick={() => handleSmsTagInsert("Full Name")}
                 >
                   Add Full Name
+                </Button>
+                <Button
+                  type="button"
+                  variant="outline"
+                  size="sm"
+                  onClick={() => handleSmsTagInsert("Candidate ID")}
+                >
+                  Add Candidate ID
                 </Button>
               </div>
               <Textarea
