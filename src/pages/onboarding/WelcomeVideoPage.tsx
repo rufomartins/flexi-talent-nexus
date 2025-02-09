@@ -110,10 +110,10 @@ const WelcomeVideoPage = () => {
       <div className="space-y-6">
         <h1 className="text-2xl font-bold text-center mb-8">Welcome Video</h1>
         
-        <div className="relative aspect-video rounded-lg overflow-hidden shadow-lg bg-black">
+        <div className="relative w-full" style={{ paddingTop: '56.25%' }}>
           <iframe
-            className="absolute inset-0 w-full h-full"
-            src={`${videoUrl}?responsive-mode=scale&aspect-ratio=16:9&width=100%&height=100%&autoplay=1`}
+            className="absolute top-0 left-0 w-full h-full rounded-lg"
+            src={videoUrl}
             allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
             allowFullScreen
           />
