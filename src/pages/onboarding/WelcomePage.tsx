@@ -1,8 +1,9 @@
 
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useSearchParams } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { ArrowRight } from "lucide-react";
+import { useToast } from "@/hooks/use-toast";
 
 const welcomeText = {
   title: "Welcome to Global Talent Management Division",
@@ -16,11 +17,22 @@ const welcomeText = {
 
 const WelcomePage = () => {
   const navigate = useNavigate();
-
+  const [searchParams] = useSearchParams();
+  const { toast } = useToast();
+  
   const handleNext = () => {
-    // This will be replaced with actual candidateId from URL params or query
-    const demoId = "demo-candidate-id";
-    navigate(`/onboarding/welcome-video/${demoId}`);
+    const candidateId = searchParams.get('id');
+    
+    if (!candidateId) {
+      toast({
+        title: "Error",
+        description: "Invalid invitation link. Please use the link sent to your email.",
+        variant: "destructive"
+      });
+      return;
+    }
+
+    navigate(`/onboarding/welcome-video/${candidateId}`);
   };
 
   return (

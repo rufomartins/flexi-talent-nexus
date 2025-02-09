@@ -8,6 +8,7 @@ import { Loader2 } from "lucide-react";
 
 interface WelcomeVideoSettings {
   url: string;
+  min_watch_percentage: number;
 }
 
 const WelcomeVideoPage = () => {
@@ -16,13 +17,32 @@ const WelcomeVideoPage = () => {
   const [loading, setLoading] = useState(true);
   const [progress, setProgress] = useState(0);
   const [canProceed, setCanProceed] = useState(false);
+  const [minWatchPercentage, setMinWatchPercentage] = useState(50);
   const videoRef = useRef<HTMLVideoElement>(null);
   const navigate = useNavigate();
   const { toast } = useToast();
 
   useEffect(() => {
-    const fetchVideoUrl = async () => {
+    const validateCandidateAndFetchVideo = async () => {
       try {
+        // Validate candidate exists
+        const { data: candidate, error: candidateError } = await supabase
+          .from('onboarding_candidates')
+          .select('id')
+          .eq('id', candidateId)
+          .single();
+
+        if (candidateError || !candidate) {
+          toast({
+            title: "Error",
+            description: "Invalid candidate ID. Please use the link sent to your email.",
+            variant: "destructive"
+          });
+          navigate('/onboarding/welcome');
+          return;
+        }
+
+        // Fetch video settings
         const { data: settings, error: settingsError } = await supabase
           .from('onboarding_settings')
           .select('value')
@@ -31,13 +51,10 @@ const WelcomeVideoPage = () => {
 
         if (settingsError) throw settingsError;
 
-        const rawValue = settings?.value;
-        if (rawValue && typeof rawValue === 'object' && !Array.isArray(rawValue)) {
-          // Type assertion after checking the shape
-          const videoSettings = rawValue as unknown as WelcomeVideoSettings;
-          if ('url' in videoSettings) {
-            setVideoUrl(videoSettings.url);
-          }
+        const videoSettings = settings?.value as WelcomeVideoSettings;
+        if (videoSettings?.url) {
+          setVideoUrl(videoSettings.url);
+          setMinWatchPercentage(videoSettings.min_watch_percentage || 50);
         }
       } catch (error) {
         console.error('Error fetching welcome video URL:', error);
@@ -51,8 +68,8 @@ const WelcomeVideoPage = () => {
       }
     };
 
-    fetchVideoUrl();
-  }, [toast]);
+    validateCandidateAndFetchVideo();
+  }, [candidateId, navigate, toast]);
 
   const handleTimeUpdate = async () => {
     if (!videoRef.current || !candidateId) return;
@@ -60,7 +77,7 @@ const WelcomeVideoPage = () => {
     const currentProgress = (videoRef.current.currentTime / videoRef.current.duration) * 100;
     setProgress(currentProgress);
 
-    if (currentProgress >= 50 && !canProceed) {
+    if (currentProgress >= minWatchPercentage && !canProceed) {
       setCanProceed(true);
       try {
         await supabase
@@ -85,7 +102,7 @@ const WelcomeVideoPage = () => {
     if (!canProceed) {
       toast({
         title: "Cannot proceed",
-        description: "Please watch at least 50% of the video before continuing",
+        description: `Please watch at least ${minWatchPercentage}% of the video before continuing`,
         variant: "destructive",
       });
       return;
@@ -118,17 +135,12 @@ const WelcomeVideoPage = () => {
         <h1 className="text-2xl font-bold text-center mb-8">Welcome Video</h1>
         
         <div className="relative aspect-video rounded-lg overflow-hidden shadow-lg">
-          <video
-            ref={videoRef}
+          <iframe
             className="w-full h-full"
-            controls
-            onTimeUpdate={handleTimeUpdate}
             src={videoUrl}
-          >
-            <source src={videoUrl} type="video/mp4" />
-            <source src={videoUrl} type="video/webm" />
-            Your browser does not support the video tag.
-          </video>
+            allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+            allowFullScreen
+          />
         </div>
 
         <div className="mt-8 space-y-4">
@@ -145,7 +157,7 @@ const WelcomeVideoPage = () => {
               disabled={!canProceed}
               className="w-full sm:w-auto"
             >
-              {canProceed ? 'Continue to Next Step' : 'Please watch at least 50% of the video'}
+              {canProceed ? 'Continue to Next Step' : `Please watch at least ${minWatchPercentage}% of the video`}
             </Button>
           </div>
         </div>
