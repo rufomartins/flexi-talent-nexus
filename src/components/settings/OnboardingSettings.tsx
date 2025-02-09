@@ -1,22 +1,63 @@
+
 import { Card } from "@/components/ui/card";
 import { Switch } from "@/components/ui/switch";
 import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { useToast } from "@/hooks/use-toast";
-import { useQuery } from "@tanstack/react-query";
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { TemplateManagement } from "./onboarding/TemplateManagement";
 import { EmailSettings } from "./onboarding/EmailSettings";
 
 export function OnboardingSettings() {
   const { toast } = useToast();
+  const queryClient = useQueryClient();
+
+  const { data: videoSettings } = useQuery({
+    queryKey: ['onboarding-settings', 'welcome_video'],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from('onboarding_settings')
+        .select('value')
+        .eq('feature_key', 'welcome_video')
+        .single();
+
+      if (error) throw error;
+      return data?.value as { url: string; min_watch_percentage: number };
+    }
+  });
+
+  const updateVideoSettings = useMutation({
+    mutationFn: async (newSettings: { url: string; min_watch_percentage: number }) => {
+      const { error } = await supabase
+        .from('onboarding_settings')
+        .update({ value: newSettings })
+        .eq('feature_key', 'welcome_video');
+
+      if (error) throw error;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['onboarding-settings', 'welcome_video'] });
+      toast({
+        title: "Settings saved",
+        description: "Welcome video settings have been updated successfully."
+      });
+    },
+    onError: (error) => {
+      console.error('Error saving video settings:', error);
+      toast({
+        title: "Error",
+        description: "Failed to save welcome video settings",
+        variant: "destructive"
+      });
+    }
+  });
 
   const handleSave = async () => {
-    toast({
-      title: "Settings saved",
-      description: "Onboarding settings have been updated successfully."
-    });
+    if (videoSettings) {
+      await updateVideoSettings.mutate(videoSettings);
+    }
   };
 
   return (
@@ -24,6 +65,53 @@ export function OnboardingSettings() {
       <EmailSettings />
       <TemplateManagement />
       
+      <Card className="p-6">
+        <h3 className="text-lg font-medium mb-4">Welcome Video Settings</h3>
+        <div className="space-y-4">
+          <div className="grid gap-2">
+            <Label htmlFor="video-url">Video Streaming URL</Label>
+            <Input
+              id="video-url"
+              placeholder="Enter video URL"
+              value={videoSettings?.url || ''}
+              onChange={(e) => {
+                if (videoSettings) {
+                  updateVideoSettings.mutate({
+                    ...videoSettings,
+                    url: e.target.value
+                  });
+                }
+              }}
+            />
+            <p className="text-sm text-muted-foreground">
+              Enter the URL of the welcome video that will be shown to candidates
+            </p>
+          </div>
+
+          <div className="grid gap-2">
+            <Label htmlFor="min-watch">Minimum Watch Percentage</Label>
+            <Input
+              id="min-watch"
+              type="number"
+              min="0"
+              max="100"
+              value={videoSettings?.min_watch_percentage || 50}
+              onChange={(e) => {
+                if (videoSettings) {
+                  updateVideoSettings.mutate({
+                    ...videoSettings,
+                    min_watch_percentage: parseInt(e.target.value, 10)
+                  });
+                }
+              }}
+            />
+            <p className="text-sm text-muted-foreground">
+              Set the minimum percentage of the video a candidate must watch before proceeding
+            </p>
+          </div>
+        </div>
+      </Card>
+
       <Card className="p-6">
         <h3 className="text-lg font-medium mb-4">Onboarding Configuration</h3>
         
