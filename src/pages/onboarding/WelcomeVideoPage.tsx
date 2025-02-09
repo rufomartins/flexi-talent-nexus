@@ -1,5 +1,5 @@
 
-import { useState, useRef, useEffect } from 'react';
+import { useState, useEffect } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { Button } from "@/components/ui/button";
 import { useToast } from "@/hooks/use-toast";
@@ -8,17 +8,12 @@ import { Loader2 } from "lucide-react";
 
 interface WelcomeVideoSettings {
   url: string;
-  min_watch_percentage: number;
 }
 
 const WelcomeVideoPage = () => {
   const { candidateId } = useParams();
   const [videoUrl, setVideoUrl] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
-  const [progress, setProgress] = useState(0);
-  const [canProceed, setCanProceed] = useState(false);
-  const [minWatchPercentage, setMinWatchPercentage] = useState(50);
-  const videoRef = useRef<HTMLVideoElement>(null);
   const navigate = useNavigate();
   const { toast } = useToast();
 
@@ -54,7 +49,6 @@ const WelcomeVideoPage = () => {
         const videoSettings = settings?.value as WelcomeVideoSettings;
         if (videoSettings?.url) {
           setVideoUrl(videoSettings.url);
-          setMinWatchPercentage(videoSettings.min_watch_percentage || 50);
         }
       } catch (error) {
         console.error('Error fetching welcome video URL:', error);
@@ -71,43 +65,24 @@ const WelcomeVideoPage = () => {
     validateCandidateAndFetchVideo();
   }, [candidateId, navigate, toast]);
 
-  const handleTimeUpdate = async () => {
-    if (!videoRef.current || !candidateId) return;
-
-    const currentProgress = (videoRef.current.currentTime / videoRef.current.duration) * 100;
-    setProgress(currentProgress);
-
-    if (currentProgress >= minWatchPercentage && !canProceed) {
-      setCanProceed(true);
-      try {
-        await supabase
-          .from('onboarding_candidates')
-          .update({ 
-            video_watched: true,
-            video_progress: currentProgress 
-          })
-          .eq('id', candidateId);
-
-        toast({
-          title: "Progress saved",
-          description: "You can now proceed to the next step",
-        });
-      } catch (error) {
-        console.error('Error updating progress:', error);
-      }
-    }
-  };
-
-  const handleNext = () => {
-    if (!canProceed) {
+  const handleNext = async () => {
+    try {
+      // Mark video as watched in the database
+      await supabase
+        .from('onboarding_candidates')
+        .update({ video_watched: true })
+        .eq('id', candidateId);
+      
+      // Navigate to the next step
+      navigate(`/onboarding/chatbot/${candidateId}`);
+    } catch (error) {
+      console.error('Error updating candidate status:', error);
       toast({
-        title: "Cannot proceed",
-        description: `Please watch at least ${minWatchPercentage}% of the video before continuing`,
-        variant: "destructive",
+        title: "Error",
+        description: "Could not update your progress. Please try again.",
+        variant: "destructive"
       });
-      return;
     }
-    navigate(`/onboarding/chatbot/${candidateId}`);
   };
 
   if (loading) {
@@ -143,23 +118,13 @@ const WelcomeVideoPage = () => {
           />
         </div>
 
-        <div className="mt-8 space-y-4">
-          <div className="w-full bg-gray-200 rounded-full h-2.5">
-            <div 
-              className="bg-primary h-2.5 rounded-full transition-all duration-300"
-              style={{ width: `${progress}%` }}
-            />
-          </div>
-
-          <div className="flex justify-center">
-            <Button
-              onClick={handleNext}
-              disabled={!canProceed}
-              className="w-full sm:w-auto"
-            >
-              {canProceed ? 'Continue to Next Step' : `Please watch at least ${minWatchPercentage}% of the video`}
-            </Button>
-          </div>
+        <div className="mt-8 flex justify-center">
+          <Button
+            onClick={handleNext}
+            className="w-full sm:w-auto"
+          >
+            Continue to Next Step
+          </Button>
         </div>
       </div>
     </div>

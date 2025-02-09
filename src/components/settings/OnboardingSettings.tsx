@@ -24,12 +24,12 @@ export function OnboardingSettings() {
         .single();
 
       if (error) throw error;
-      return data?.value as { url: string; min_watch_percentage: number };
+      return data?.value as { url: string };
     }
   });
 
   const updateVideoSettings = useMutation({
-    mutationFn: async (newSettings: { url: string; min_watch_percentage: number }) => {
+    mutationFn: async (newSettings: { url: string }) => {
       const { error } = await supabase
         .from('onboarding_settings')
         .update({ value: newSettings })
@@ -85,28 +85,6 @@ export function OnboardingSettings() {
             />
             <p className="text-sm text-muted-foreground">
               Enter the URL of the welcome video that will be shown to candidates
-            </p>
-          </div>
-
-          <div className="grid gap-2">
-            <Label htmlFor="min-watch">Minimum Watch Percentage</Label>
-            <Input
-              id="min-watch"
-              type="number"
-              min="0"
-              max="100"
-              value={videoSettings?.min_watch_percentage || 50}
-              onChange={(e) => {
-                if (videoSettings) {
-                  updateVideoSettings.mutate({
-                    ...videoSettings,
-                    min_watch_percentage: parseInt(e.target.value, 10)
-                  });
-                }
-              }}
-            />
-            <p className="text-sm text-muted-foreground">
-              Set the minimum percentage of the video a candidate must watch before proceeding
             </p>
           </div>
         </div>
