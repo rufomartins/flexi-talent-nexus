@@ -167,7 +167,8 @@ export function TemplateManagement() {
   });
 
   const handleEmailTagInsert = (tag: string) => {
-    const cursorPosition = document.getElementById('email-message')?.selectionStart || emailTemplate.message.length;
+    const textarea = document.getElementById('email-message') as HTMLTextAreaElement;
+    const cursorPosition = textarea?.selectionStart || emailTemplate.message.length;
     const tagText = `{{${tag}}}`;
     const newMessage = 
       emailTemplate.message.slice(0, cursorPosition) + 
