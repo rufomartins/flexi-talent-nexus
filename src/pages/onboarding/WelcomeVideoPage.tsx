@@ -1,3 +1,4 @@
+
 import { useState, useRef, useEffect } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { Button } from "@/components/ui/button";
@@ -16,28 +17,24 @@ const WelcomeVideoPage = () => {
   const { toast } = useToast();
 
   useEffect(() => {
-    const fetchCandidateData = async () => {
-      if (!candidateId) return;
-
+    const fetchVideoUrl = async () => {
       try {
-        const { data: candidate, error } = await supabase
-          .from('onboarding_candidates')
-          .select('video_demo_url')
-          .eq('id', candidateId)
+        const { data: settings, error: settingsError } = await supabase
+          .from('onboarding_settings')
+          .select('value')
+          .eq('feature_key', 'welcome_video')
           .single();
 
-        if (error) {
-          throw error;
-        }
+        if (settingsError) throw settingsError;
 
-        if (candidate?.video_demo_url) {
-          setVideoUrl(candidate.video_demo_url);
+        if (settings?.value?.url) {
+          setVideoUrl(settings.value.url);
         }
       } catch (error) {
-        console.error('Error fetching candidate data:', error);
+        console.error('Error fetching welcome video URL:', error);
         toast({
           title: "Error",
-          description: "Could not load welcome video",
+          description: "Could not load welcome video settings",
           variant: "destructive",
         });
       } finally {
@@ -45,8 +42,8 @@ const WelcomeVideoPage = () => {
       }
     };
 
-    fetchCandidateData();
-  }, [candidateId, toast]);
+    fetchVideoUrl();
+  }, [toast]);
 
   const handleTimeUpdate = async () => {
     if (!videoRef.current || !candidateId) return;

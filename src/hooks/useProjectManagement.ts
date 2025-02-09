@@ -1,15 +1,14 @@
+
 import { useCallback } from 'react';
 import { useToast } from '@/hooks/use-toast';
 import { supabase } from '@/integrations/supabase/client';
-import type { Project, ShotList, ProjectTask } from '@/types/project';
+import type { Project, ShotList } from '@/types/project';
 
 interface UseProjectManagement {
   createProject: (data: Omit<Project, 'id'>) => Promise<string>;
   updateProject: (id: string, data: Partial<Project>) => Promise<void>;
   addShotList: (taskId: string, data: Omit<ShotList, 'id' | 'task_id'>) => Promise<string>;
   updateShotList: (id: string, data: Partial<ShotList>) => Promise<void>;
-  addTask: (languageId: string, data: Omit<ProjectTask, 'id' | 'language_id'>) => Promise<string>;
-  updateTask: (id: string, data: Partial<ProjectTask>) => Promise<void>;
 }
 
 export const useProjectManagement = (): UseProjectManagement => {
@@ -131,74 +130,10 @@ export const useProjectManagement = (): UseProjectManagement => {
     }
   }, [toast]);
 
-  const addTask = useCallback(async (
-    languageId: string,
-    data: Omit<ProjectTask, 'id' | 'language_id'>
-  ): Promise<string> => {
-    try {
-      const { data: task, error } = await supabase
-        .from('project_tasks')
-        .insert({
-          language_id: languageId,
-          name: data.name,
-          priority: data.priority,
-          script_status: data.script_status,
-          review_status: data.review_status,
-          talent_status: data.talent_status,
-          delivery_status: data.delivery_status
-        })
-        .select('id')
-        .single();
-
-      if (error) throw error;
-      
-      toast({
-        title: "Task Added",
-        description: "Task has been added successfully"
-      });
-
-      return task.id;
-    } catch (error) {
-      console.error('Error adding task:', error);
-      toast({
-        title: "Error",
-        description: "Failed to add task",
-        variant: "destructive"
-      });
-      throw error;
-    }
-  }, [toast]);
-
-  const updateTask = useCallback(async (id: string, data: Partial<ProjectTask>): Promise<void> => {
-    try {
-      const { error } = await supabase
-        .from('project_tasks')
-        .update(data)
-        .eq('id', id);
-
-      if (error) throw error;
-      
-      toast({
-        title: "Task Updated",
-        description: "Task has been updated successfully"
-      });
-    } catch (error) {
-      console.error('Error updating task:', error);
-      toast({
-        title: "Error",
-        description: "Failed to update task",
-        variant: "destructive"
-      });
-      throw error;
-    }
-  }, [toast]);
-
   return {
     createProject,
     updateProject,
     addShotList,
-    updateShotList,
-    addTask,
-    updateTask
+    updateShotList
   };
 };
