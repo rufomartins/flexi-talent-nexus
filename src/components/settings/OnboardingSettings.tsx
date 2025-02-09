@@ -3,12 +3,18 @@ import { Card } from "@/components/ui/card";
 import { Switch } from "@/components/ui/switch";
 import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
+import { Textarea } from "@/components/ui/textarea";
 import { Button } from "@/components/ui/button";
 import { useToast } from "@/hooks/use-toast";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { TemplateManagement } from "./onboarding/TemplateManagement";
 import { EmailSettings } from "./onboarding/EmailSettings";
+
+interface VideoSettings {
+  url: string;
+  embed_code: string;
+}
 
 export function OnboardingSettings() {
   const { toast } = useToast();
@@ -24,12 +30,12 @@ export function OnboardingSettings() {
         .single();
 
       if (error) throw error;
-      return data?.value as { url: string };
+      return data?.value as VideoSettings;
     }
   });
 
   const updateVideoSettings = useMutation({
-    mutationFn: async (newSettings: { url: string }) => {
+    mutationFn: async (newSettings: VideoSettings) => {
       const { error } = await supabase
         .from('onboarding_settings')
         .update({ value: newSettings })
@@ -85,6 +91,27 @@ export function OnboardingSettings() {
             />
             <p className="text-sm text-muted-foreground">
               Enter the URL of the welcome video that will be shown to candidates
+            </p>
+          </div>
+
+          <div className="grid gap-2">
+            <Label htmlFor="embed-code">Video Embed Code</Label>
+            <Textarea
+              id="embed-code"
+              placeholder="Enter video embed code"
+              value={videoSettings?.embed_code || ''}
+              onChange={(e) => {
+                if (videoSettings) {
+                  updateVideoSettings.mutate({
+                    ...videoSettings,
+                    embed_code: e.target.value
+                  });
+                }
+              }}
+              className="min-h-[100px]"
+            />
+            <p className="text-sm text-muted-foreground">
+              Enter the complete embed code provided by Bunny.net for better video responsiveness
             </p>
           </div>
         </div>

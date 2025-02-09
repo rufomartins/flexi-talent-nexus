@@ -8,11 +8,12 @@ import { Loader2 } from "lucide-react";
 
 interface WelcomeVideoSettings {
   url: string;
+  embed_code: string;
 }
 
 const WelcomeVideoPage = () => {
   const { candidateId } = useParams();
-  const [videoUrl, setVideoUrl] = useState<string | null>(null);
+  const [videoSettings, setVideoSettings] = useState<WelcomeVideoSettings | null>(null);
   const [loading, setLoading] = useState(true);
   const navigate = useNavigate();
   const { toast } = useToast();
@@ -49,7 +50,10 @@ const WelcomeVideoPage = () => {
         // Type guard to ensure settings.value has the correct shape
         const settingsValue = settings?.value as Record<string, unknown>;
         if (settingsValue && typeof settingsValue.url === 'string') {
-          setVideoUrl(settingsValue.url);
+          setVideoSettings({
+            url: settingsValue.url,
+            embed_code: settingsValue.embed_code as string || settingsValue.url
+          });
         }
       } catch (error) {
         console.error('Error fetching welcome video URL:', error);
@@ -94,7 +98,7 @@ const WelcomeVideoPage = () => {
     );
   }
 
-  if (!videoUrl) {
+  if (!videoSettings) {
     return (
       <div className="container mx-auto px-4 py-8 max-w-4xl">
         <div className="text-center">
@@ -111,12 +115,16 @@ const WelcomeVideoPage = () => {
         <h1 className="text-2xl font-bold text-center mb-8">Welcome Video</h1>
         
         <div className="relative w-full pb-[56.25%] bg-black rounded-lg overflow-hidden">
-          <iframe
-            className="absolute inset-0 w-full h-full"
-            src={videoUrl}
-            allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-            allowFullScreen
-          />
+          {videoSettings.embed_code ? (
+            <div dangerouslySetInnerHTML={{ __html: videoSettings.embed_code }} />
+          ) : (
+            <iframe
+              className="absolute inset-0 w-full h-full"
+              src={videoSettings.url}
+              allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+              allowFullScreen
+            />
+          )}
         </div>
 
         <div className="mt-8 flex justify-center">
