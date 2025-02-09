@@ -12,7 +12,7 @@ export function EmailComposer({ templates, data, onChange, onInsertTag }: EmailC
       onChange({
         templateId,
         subject: template.subject,
-        message: template.message // Changed from body to message
+        message: template.message
       });
     }
   };
@@ -46,7 +46,7 @@ export function EmailComposer({ templates, data, onChange, onInsertTag }: EmailC
 
       <div>
         <label className="text-sm font-medium">Message</label>
-        <div className="flex gap-2 mb-2">
+        <div className="flex flex-wrap gap-2 mb-2">
           <Button
             type="button"
             variant="outline"
@@ -70,6 +70,14 @@ export function EmailComposer({ templates, data, onChange, onInsertTag }: EmailC
             onClick={() => onInsertTag('Full Name')}
           >
             Add Full Name
+          </Button>
+          <Button
+            type="button"
+            variant="outline"
+            size="sm"
+            onClick={() => onInsertTag('?id={{Candidate ID}}')}
+          >
+            Add ID Parameter
           </Button>
         </div>
         <Textarea
