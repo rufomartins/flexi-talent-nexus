@@ -26,7 +26,7 @@ export function EmailAndSmsComposer({
   const [emailData, setEmailData] = useState({
     templateId: '',
     subject: '',
-    message: '' // Changed from body to message
+    message: ''
   });
   const [smsData, setSmsData] = useState({
     templateId: '',
@@ -86,7 +86,7 @@ export function EmailAndSmsComposer({
       } else {
         setEmailData(prev => ({
           ...prev,
-          message: prev.message + tagText // Changed from body to message
+          message: prev.message + tagText
         }));
       }
     }
@@ -102,11 +102,13 @@ export function EmailAndSmsComposer({
           body: {
             templateId: emailData.templateId,
             recipient: {
+              id: candidateId,
               email,
               name: candidateName
             },
-            subject: emailData.subject,
-            message: emailData.message // Changed from body to message
+            customVariables: {
+              "Candidate ID": candidateId
+            }
           }
         });
 
@@ -136,11 +138,13 @@ export function EmailAndSmsComposer({
             body: {
               templateId: emailData.templateId,
               recipient: {
+                id: candidate.id,
                 email: candidate.email,
                 name: candidate.name || `${candidate.first_name || ''} ${candidate.last_name || ''}`.trim()
               },
-              subject: emailData.subject,
-              message: emailData.message // Changed from body to message
+              customVariables: {
+                "Candidate ID": candidate.id
+              }
             }
           });
 

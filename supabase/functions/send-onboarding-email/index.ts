@@ -43,11 +43,13 @@ serve(async (req) => {
     // Extract email data with detailed logging
     const {
       templateId,
-      recipient
+      recipient,
+      customVariables = {}
     } = requestData
 
     console.log('Extracted templateId:', templateId)
     console.log('Extracted recipient:', recipient)
+    console.log('Extracted customVariables:', customVariables)
     console.log('RequestData full object:', requestData)
 
     // Validate inputs with detailed error messages
@@ -77,7 +79,7 @@ serve(async (req) => {
         email: recipient.email,
         name: recipient.name
       }],
-      customVariables: requestData.customVariables
+      customVariables
     }
 
     console.log('Formatted email data:', emailData)
@@ -104,22 +106,32 @@ serve(async (req) => {
     const emailPromises = emailData.recipients.map(async (recipient) => {
       let emailContent = template.message
       let emailSubject = template.subject
-      
-      // Replace standard variables
+
+      // Replace standard variables including Candidate ID
       const standardReplacements = {
         '{{First Name}}': recipient.name.split(' ')[0],
         '{{Last Name}}': recipient.name.split(' ').slice(1).join(' '),
         '{{Full Name}}': recipient.name,
         '{{Email}}': recipient.email,
-        ...emailData.customVariables
+        '{{Candidate ID}}': recipient.id,
+        ...customVariables
       }
 
       console.log('Applying replacements:', standardReplacements)
 
       Object.entries(standardReplacements).forEach(([key, value]) => {
-        emailContent = emailContent.replace(new RegExp(key, 'g'), value || '')
-        emailSubject = emailSubject.replace(new RegExp(key, 'g'), value || '')
+        if (value) {
+          emailContent = emailContent.replace(new RegExp(key, 'g'), value)
+          emailSubject = emailSubject.replace(new RegExp(key, 'g'), value)
+        }
       })
+
+      // For candidate ID specifically in URLs, ensure proper encoding
+      if (recipient.id) {
+        const encodedId = encodeURIComponent(recipient.id)
+        emailContent = emailContent.replace(/{{Candidate ID}}/g, encodedId)
+        emailSubject = emailSubject.replace(/{{Candidate ID}}/g, encodedId)
+      }
 
       console.log('Sending email to:', recipient.email)
       console.log('Email subject:', emailSubject)
