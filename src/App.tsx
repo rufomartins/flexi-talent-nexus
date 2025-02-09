@@ -32,7 +32,11 @@ function App() {
       />
       <Route 
         path="/onboarding/welcome-video/:candidateId" 
-        element={<WelcomeVideoPage />} 
+        element={
+          <PublicRoute>
+            <WelcomeVideoPage />
+          </PublicRoute>
+        } 
       />
       <Route 
         path="/onboarding/chatbot/:candidateId" 
