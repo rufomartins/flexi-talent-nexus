@@ -46,7 +46,42 @@ function verifyWebhookSignature(payload: string, signature: string, key: string)
   return signature === computedSignature;
 }
 
+async function findOrCreateConversation(subject: string): Promise<string> {
+  // Try to find an existing conversation with this subject
+  const { data: existing, error: searchError } = await supabaseClient
+    .from('email_conversations')
+    .select('id')
+    .eq('subject', subject)
+    .eq('status', 'active')
+    .single();
+
+  if (searchError && searchError.code !== 'PGRST116') { // PGRST116 is "no rows returned"
+    throw searchError;
+  }
+
+  if (existing?.id) {
+    return existing.id;
+  }
+
+  // Create new conversation if none exists
+  const { data: newConversation, error: insertError } = await supabaseClient
+    .from('email_conversations')
+    .insert([{
+      subject,
+      status: 'active'
+    }])
+    .select('id')
+    .single();
+
+  if (insertError) throw insertError;
+  if (!newConversation) throw new Error('Failed to create conversation');
+
+  return newConversation.id;
+}
+
 async function handleInboundEmail(req: Request): Promise<Response> {
+  console.log('Received inbound email request');
+
   // Handle CORS preflight requests
   if (req.method === 'OPTIONS') {
     return new Response(null, { headers: corsHeaders });
@@ -55,6 +90,7 @@ async function handleInboundEmail(req: Request): Promise<Response> {
   try {
     // Get Forward Email settings
     const settings = await getForwardEmailSettings();
+    console.log('Retrieved Forward Email settings');
     
     if (!settings.enabled) {
       console.error('Forward Email integration is disabled');
@@ -102,10 +138,43 @@ async function handleInboundEmail(req: Request): Promise<Response> {
 
     // Parse the email payload
     const email: ForwardEmailPayload = JSON.parse(rawBody);
-    console.log('Received email:', { subject: email.subject, from: email.from });
+    console.log('Processing email:', { subject: email.subject, from: email.from });
 
-    // Insert into onboarding_inbox
-    const { data, error } = await supabaseClient
+    // Find or create conversation
+    const conversationId = await findOrCreateConversation(email.subject);
+    console.log('Found/created conversation:', conversationId);
+
+    // Insert into email_messages
+    const { data: message, error: messageError } = await supabaseClient
+      .from('email_messages')
+      .insert([
+        {
+          conversation_id: conversationId,
+          direction: 'inbound',
+          from_email: email.from,
+          to_email: email.to,
+          subject: email.subject,
+          body: email.text,
+          html_body: email.html,
+          headers: email.headers,
+          attachments: email.attachments,
+          status: 'unread',
+          metadata: {
+            has_html: !!email.html,
+            has_attachments: email.attachments?.length > 0,
+          }
+        }
+      ])
+      .select()
+      .single();
+
+    if (messageError) {
+      console.error('Error saving email message:', messageError);
+      throw messageError;
+    }
+
+    // For backward compatibility, also save to onboarding_inbox
+    const { error: legacyError } = await supabaseClient
       .from('onboarding_inbox')
       .insert([
         {
@@ -121,19 +190,21 @@ async function handleInboundEmail(req: Request): Promise<Response> {
             attachment_count: email.attachments?.length || 0,
           }
         }
-      ])
-      .select()
-      .single();
+      ]);
 
-    if (error) {
-      console.error('Error saving email:', error);
-      throw error;
+    if (legacyError) {
+      console.warn('Error saving to legacy inbox:', legacyError);
+      // Don't throw error for legacy storage
     }
 
-    console.log('Email saved successfully:', data.id);
+    console.log('Email processed successfully:', message.id);
     
     return new Response(
-      JSON.stringify({ success: true, message: 'Email processed successfully', id: data.id }),
+      JSON.stringify({ 
+        success: true, 
+        message: 'Email processed successfully', 
+        id: message.id 
+      }),
       { 
         headers: { ...corsHeaders, 'Content-Type': 'application/json' },
         status: 200 

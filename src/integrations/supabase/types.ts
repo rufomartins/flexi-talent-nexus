@@ -876,6 +876,7 @@ export type Database = {
           created_at: string | null
           id: string
           last_message_at: string | null
+          status: Database["public"]["Enums"]["email_thread_status"] | null
           subject: string
           updated_at: string | null
         }
@@ -883,6 +884,7 @@ export type Database = {
           created_at?: string | null
           id?: string
           last_message_at?: string | null
+          status?: Database["public"]["Enums"]["email_thread_status"] | null
           subject: string
           updated_at?: string | null
         }
@@ -890,6 +892,7 @@ export type Database = {
           created_at?: string | null
           id?: string
           last_message_at?: string | null
+          status?: Database["public"]["Enums"]["email_thread_status"] | null
           subject?: string
           updated_at?: string | null
         }
@@ -1010,6 +1013,13 @@ export type Database = {
             columns: ["parent_message_id"]
             isOneToOne: false
             referencedRelation: "email_messages"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "fk_conversation"
+            columns: ["conversation_id"]
+            isOneToOne: false
+            referencedRelation: "email_conversations"
             referencedColumns: ["id"]
           },
         ]
@@ -3636,6 +3646,7 @@ export type Database = {
         | "talent_application"
         | "project_update"
         | "talent_invitation"
+      email_thread_status: "active" | "archived" | "deleted"
       field_type:
         | "text"
         | "long_text"

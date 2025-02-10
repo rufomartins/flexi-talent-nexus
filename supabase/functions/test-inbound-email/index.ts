@@ -46,12 +46,15 @@ async function getForwardEmailSettings() {
 }
 
 async function handleTestEmail(req: Request): Promise<Response> {
+  console.log('Processing test email request');
+
   if (req.method === 'OPTIONS') {
     return new Response(null, { headers: corsHeaders });
   }
 
   try {
     const settings = await getForwardEmailSettings();
+    console.log('Retrieved Forward Email settings');
     
     if (!settings.enabled) {
       throw new Error('Forward Email integration is disabled');
@@ -62,6 +65,8 @@ async function handleTestEmail(req: Request): Promise<Response> {
     const hmac = createHmac("sha256", settings.webhook_signature_key);
     hmac.update(payloadString);
     const signature = hmac.toString();
+
+    console.log('Sending test email to handler');
 
     // Forward the test email to our handler
     const response = await fetch(
@@ -78,6 +83,7 @@ async function handleTestEmail(req: Request): Promise<Response> {
     );
 
     const result = await response.json();
+    console.log('Handler response:', result);
 
     return new Response(
       JSON.stringify({ 
