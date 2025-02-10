@@ -46,15 +46,15 @@ export function InboxTable({ conversations }: InboxTableProps) {
 
   return (
     <div>
-      <div className="rounded-md border">
+      <div className="rounded-md border bg-white">
         <Table>
           <TableHeader>
-            <TableRow>
-              <TableHead>Status</TableHead>
-              <TableHead>Subject</TableHead>
-              <TableHead>From</TableHead>
-              <TableHead>To</TableHead>
-              <TableHead>Last Message</TableHead>
+            <TableRow className="bg-muted/50">
+              <TableHead className="w-[100px]">Status</TableHead>
+              <TableHead className="w-[300px]">Subject</TableHead>
+              <TableHead className="w-[200px]">From</TableHead>
+              <TableHead className="w-[300px]">To</TableHead>
+              <TableHead className="w-[200px]">Last Message</TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
@@ -73,7 +73,9 @@ export function InboxTable({ conversations }: InboxTableProps) {
                     {conversation.subject}
                   </TableCell>
                   <TableCell>{lastMessage.from_email}</TableCell>
-                  <TableCell>{lastMessage.to_email.join(", ")}</TableCell>
+                  <TableCell className="max-w-[300px] truncate">
+                    {lastMessage.to_email.join(", ")}
+                  </TableCell>
                   <TableCell>
                     {format(new Date(lastMessage.created_at), "MMM d, yyyy HH:mm")}
                   </TableCell>

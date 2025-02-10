@@ -27,7 +27,15 @@ export default function InboxPage() {
         .order('last_message_at', { ascending: false });
       
       if (error) throw error;
-      return data;
+      
+      // Ensure correct typing of direction field
+      return data?.map(conversation => ({
+        ...conversation,
+        email_messages: conversation.email_messages.map(message => ({
+          ...message,
+          direction: message.direction as 'inbound' | 'outbound'
+        }))
+      })) || [];
     }
   });
 
@@ -43,7 +51,7 @@ export default function InboxPage() {
   }
 
   return (
-    <div className="container mx-auto py-6">
+    <div className="py-6 px-4 md:px-8 max-w-[1600px] mx-auto w-full">
       <h1 className="text-2xl font-semibold mb-6">Email Inbox</h1>
       <ErrorBoundary>
         {isLoading ? (
