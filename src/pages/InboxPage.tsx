@@ -1,3 +1,4 @@
+
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { InboxTable } from "@/components/inbox/InboxTable";
@@ -5,13 +6,25 @@ import { ErrorBoundary } from "@/components/error-boundary/ErrorBoundary";
 import { Skeleton } from "@/components/ui/skeleton";
 
 export default function InboxPage() {
-  const { data: emails, isLoading, error } = useQuery({
-    queryKey: ['inbox-emails'],
+  const { data: conversations, isLoading, error } = useQuery({
+    queryKey: ['email-conversations'],
     queryFn: async () => {
       const { data, error } = await supabase
-        .from('onboarding_inbox')
-        .select('*')
-        .order('received_at', { ascending: false });
+        .from('email_conversations')
+        .select(`
+          *,
+          email_messages: email_messages (
+            id,
+            direction,
+            from_email,
+            to_email,
+            subject,
+            body,
+            created_at,
+            status
+          )
+        `)
+        .order('last_message_at', { ascending: false });
       
       if (error) throw error;
       return data;
@@ -40,7 +53,7 @@ export default function InboxPage() {
             <Skeleton className="h-12 w-full" />
           </div>
         ) : (
-          <InboxTable emails={emails || []} />
+          <InboxTable conversations={conversations || []} />
         )}
       </ErrorBoundary>
     </div>

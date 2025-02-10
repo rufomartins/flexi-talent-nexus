@@ -871,6 +871,30 @@ export type Database = {
         }
         Relationships: []
       }
+      email_conversations: {
+        Row: {
+          created_at: string | null
+          id: string
+          last_message_at: string | null
+          subject: string
+          updated_at: string | null
+        }
+        Insert: {
+          created_at?: string | null
+          id?: string
+          last_message_at?: string | null
+          subject: string
+          updated_at?: string | null
+        }
+        Update: {
+          created_at?: string | null
+          id?: string
+          last_message_at?: string | null
+          subject?: string
+          updated_at?: string | null
+        }
+        Relationships: []
+      }
       email_logs: {
         Row: {
           body: string
@@ -911,6 +935,81 @@ export type Database = {
             columns: ["template_id"]
             isOneToOne: false
             referencedRelation: "email_templates"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      email_messages: {
+        Row: {
+          attachments: Json | null
+          bcc_email: string[] | null
+          body: string
+          cc_email: string[] | null
+          conversation_id: string | null
+          created_at: string | null
+          direction: string
+          from_email: string
+          headers: Json | null
+          html_body: string | null
+          id: string
+          metadata: Json | null
+          parent_message_id: string | null
+          status: Database["public"]["Enums"]["email_status"] | null
+          subject: string
+          to_email: string[]
+          updated_at: string | null
+        }
+        Insert: {
+          attachments?: Json | null
+          bcc_email?: string[] | null
+          body: string
+          cc_email?: string[] | null
+          conversation_id?: string | null
+          created_at?: string | null
+          direction: string
+          from_email: string
+          headers?: Json | null
+          html_body?: string | null
+          id?: string
+          metadata?: Json | null
+          parent_message_id?: string | null
+          status?: Database["public"]["Enums"]["email_status"] | null
+          subject: string
+          to_email: string[]
+          updated_at?: string | null
+        }
+        Update: {
+          attachments?: Json | null
+          bcc_email?: string[] | null
+          body?: string
+          cc_email?: string[] | null
+          conversation_id?: string | null
+          created_at?: string | null
+          direction?: string
+          from_email?: string
+          headers?: Json | null
+          html_body?: string | null
+          id?: string
+          metadata?: Json | null
+          parent_message_id?: string | null
+          status?: Database["public"]["Enums"]["email_status"] | null
+          subject?: string
+          to_email?: string[]
+          updated_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "email_messages_conversation_id_fkey"
+            columns: ["conversation_id"]
+            isOneToOne: false
+            referencedRelation: "email_conversations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "email_messages_parent_message_id_fkey"
+            columns: ["parent_message_id"]
+            isOneToOne: false
+            referencedRelation: "email_messages"
             referencedColumns: ["id"]
           },
         ]
@@ -3530,6 +3629,7 @@ export type Database = {
         | "not_interested"
       casting_status: "open" | "closed"
       casting_type: "internal" | "external"
+      email_status: "unread" | "read" | "archived" | "deleted"
       email_template_type:
         | "casting_availability"
         | "booking_confirmation"

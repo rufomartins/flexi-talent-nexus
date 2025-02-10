@@ -1,3 +1,4 @@
+
 import { format } from "date-fns";
 import {
   Table,
@@ -9,25 +10,36 @@ import {
 } from "@/components/ui/table";
 import { ActivityPagination } from "@/components/dashboard/activity/ActivityPagination";
 import { useState } from "react";
+import { Badge } from "@/components/ui/badge";
 
-interface Email {
+interface EmailMessage {
   id: string;
-  sender: string;
-  subject: string | null;
-  received_at: string;
-  processed: boolean;
+  direction: 'inbound' | 'outbound';
+  from_email: string;
+  to_email: string[];
+  subject: string;
+  body: string;
+  created_at: string;
+  status: 'unread' | 'read' | 'archived' | 'deleted';
+}
+
+interface Conversation {
+  id: string;
+  subject: string;
+  last_message_at: string;
+  email_messages: EmailMessage[];
 }
 
 interface InboxTableProps {
-  emails: Email[];
+  conversations: Conversation[];
 }
 
-export function InboxTable({ emails }: InboxTableProps) {
+export function InboxTable({ conversations }: InboxTableProps) {
   const [currentPage, setCurrentPage] = useState(1);
   const itemsPerPage = 10;
-  const totalPages = Math.ceil(emails.length / itemsPerPage);
+  const totalPages = Math.ceil(conversations.length / itemsPerPage);
 
-  const paginatedEmails = emails.slice(
+  const paginatedConversations = conversations.slice(
     (currentPage - 1) * itemsPerPage,
     currentPage * itemsPerPage
   );
@@ -38,33 +50,36 @@ export function InboxTable({ emails }: InboxTableProps) {
         <Table>
           <TableHeader>
             <TableRow>
-              <TableHead>Sender</TableHead>
-              <TableHead>Subject</TableHead>
-              <TableHead>Received At</TableHead>
               <TableHead>Status</TableHead>
+              <TableHead>Subject</TableHead>
+              <TableHead>From</TableHead>
+              <TableHead>To</TableHead>
+              <TableHead>Last Message</TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
-            {paginatedEmails.map((email) => (
-              <TableRow key={email.id}>
-                <TableCell>{email.sender}</TableCell>
-                <TableCell>{email.subject || "No subject"}</TableCell>
-                <TableCell>
-                  {format(new Date(email.received_at), "MMM d, yyyy HH:mm")}
-                </TableCell>
-                <TableCell>
-                  <span
-                    className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${
-                      email.processed
-                        ? "bg-green-100 text-green-800"
-                        : "bg-yellow-100 text-yellow-800"
-                    }`}
-                  >
-                    {email.processed ? "Processed" : "Pending"}
-                  </span>
-                </TableCell>
-              </TableRow>
-            ))}
+            {paginatedConversations.map((conversation) => {
+              const lastMessage = conversation.email_messages[0];
+              if (!lastMessage) return null;
+
+              return (
+                <TableRow key={conversation.id} className="cursor-pointer hover:bg-muted/50">
+                  <TableCell>
+                    {lastMessage.status === 'unread' && (
+                      <Badge variant="default">Unread</Badge>
+                    )}
+                  </TableCell>
+                  <TableCell className="font-medium">
+                    {conversation.subject}
+                  </TableCell>
+                  <TableCell>{lastMessage.from_email}</TableCell>
+                  <TableCell>{lastMessage.to_email.join(", ")}</TableCell>
+                  <TableCell>
+                    {format(new Date(lastMessage.created_at), "MMM d, yyyy HH:mm")}
+                  </TableCell>
+                </TableRow>
+              );
+            })}
           </TableBody>
         </Table>
       </div>
