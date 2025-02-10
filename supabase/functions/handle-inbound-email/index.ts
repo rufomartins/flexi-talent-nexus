@@ -41,12 +41,11 @@ async function handleInboundEmail(req: Request): Promise<Response> {
   }
 
   try {
-    // Check authentication from either headers or query parameters
-    const url = new URL(req.url);
-    const apiKey = req.headers.get('apikey') || url.searchParams.get('apikey');
+    // Get the Authorization header
+    const authHeader = req.headers.get('Authorization');
     
-    if (!apiKey) {
-      console.error('No API key provided');
+    if (!authHeader) {
+      console.error('No Authorization header provided');
       return new Response(
         JSON.stringify({ error: 'Authentication required' }),
         { 
@@ -56,10 +55,17 @@ async function handleInboundEmail(req: Request): Promise<Response> {
       );
     }
 
-    // Validate the API key matches our anon key
-    const SUPABASE_ANON_KEY = Deno.env.get('SUPABASE_ANON_KEY');
-    if (apiKey !== SUPABASE_ANON_KEY) {
-      console.error('Invalid API key');
+    // Check Basic Auth
+    const encoded = authHeader.split(' ')[1];
+    const decoded = atob(encoded);
+    const [username, password] = decoded.split(':');
+
+    // Validate against environment variables
+    const expectedUsername = Deno.env.get('CLOUDMAILIN_USERNAME');
+    const expectedPassword = Deno.env.get('CLOUDMAILIN_PASSWORD');
+
+    if (username !== expectedUsername || password !== expectedPassword) {
+      console.error('Invalid authentication credentials');
       return new Response(
         JSON.stringify({ error: 'Invalid authentication' }),
         { 
@@ -126,3 +132,4 @@ async function handleInboundEmail(req: Request): Promise<Response> {
 }
 
 serve(handleInboundEmail);
+
