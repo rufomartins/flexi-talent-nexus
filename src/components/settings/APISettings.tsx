@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Switch } from "@/components/ui/switch";
@@ -10,33 +9,11 @@ import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Loader2 } from "lucide-react";
+import { APIConfigs } from "@/types/api-settings";
 
-interface APIConfig {
-  enabled: boolean;
-  [key: string]: any;
-}
-
-interface ResendConfig extends APIConfig {
-  api_key: string;
-}
-
-interface TwilioConfig extends APIConfig {
-  account_sid: string;
-  auth_token: string;
-  phone_number: string;
-  module: 'onboarding' | 'casting' | 'booking';
-}
-
-interface ForwardEmailConfig extends APIConfig {
-  webhook_signature_key: string;
-  webhook_domain: string;
-  webhook_url: string;
-}
-
-interface CloudinConfig extends APIConfig {
-  api_key: string;
-  bucket: string;
-  region: string;
+interface APISettingRecord {
+  name: string;
+  value: any;
 }
 
 export function APISettings() {
@@ -53,7 +30,7 @@ export function APISettings() {
         .select('*');
 
       if (error) throw error;
-      return data;
+      return data as APISettingRecord[];
     }
   });
 
@@ -87,9 +64,7 @@ export function APISettings() {
   const testEmail = async () => {
     setTestLoading(true);
     try {
-      const { error } = await supabase.functions.invoke('test-email', {
-        body: { type: 'test' }
-      });
+      const { error } = await supabase.functions.invoke('test-inbound-email');
 
       if (error) throw error;
 
@@ -107,6 +82,11 @@ export function APISettings() {
     } finally {
       setTestLoading(false);
     }
+  };
+
+  const getSettingValue = <T extends keyof APIConfigs>(name: T): APIConfigs[T] => {
+    const setting = settings?.find(s => s.name === name);
+    return setting?.value || {};
   };
 
   if (isLoading) {
@@ -135,9 +115,9 @@ export function APISettings() {
                 <Label htmlFor="resend-enabled">Enable Resend Integration</Label>
                 <Switch
                   id="resend-enabled"
-                  checked={settings?.find(s => s.name === 'resend_settings')?.value?.enabled ?? false}
+                  checked={getSettingValue('resend_settings').enabled ?? false}
                   onCheckedChange={(checked) => {
-                    const currentValue = settings?.find(s => s.name === 'resend_settings')?.value || {};
+                    const currentValue = getSettingValue('resend_settings');
                     updateSettings.mutate({
                       name: 'resend_settings',
                       value: { ...currentValue, enabled: checked }
@@ -151,9 +131,9 @@ export function APISettings() {
                 <Input
                   id="resend-api-key"
                   type="password"
-                  value={settings?.find(s => s.name === 'resend_settings')?.value?.api_key || ''}
+                  value={getSettingValue('resend_settings').api_key || ''}
                   onChange={(e) => {
-                    const currentValue = settings?.find(s => s.name === 'resend_settings')?.value || {};
+                    const currentValue = getSettingValue('resend_settings');
                     updateSettings.mutate({
                       name: 'resend_settings',
                       value: { ...currentValue, api_key: e.target.value }
@@ -180,9 +160,9 @@ export function APISettings() {
                 <Label htmlFor="forward-email-enabled">Enable Forward Email Integration</Label>
                 <Switch
                   id="forward-email-enabled"
-                  checked={settings?.find(s => s.name === 'forward_email_settings')?.value?.enabled ?? false}
+                  checked={getSettingValue('forward_email_settings').enabled ?? false}
                   onCheckedChange={(checked) => {
-                    const currentValue = settings?.find(s => s.name === 'forward_email_settings')?.value || {};
+                    const currentValue = getSettingValue('forward_email_settings');
                     updateSettings.mutate({
                       name: 'forward_email_settings',
                       value: { ...currentValue, enabled: checked }
@@ -196,9 +176,9 @@ export function APISettings() {
                 <Input
                   id="forward-email-webhook-key"
                   type="password"
-                  value={settings?.find(s => s.name === 'forward_email_settings')?.value?.webhook_signature_key || ''}
+                  value={getSettingValue('forward_email_settings').webhook_signature_key || ''}
                   onChange={(e) => {
-                    const currentValue = settings?.find(s => s.name === 'forward_email_settings')?.value || {};
+                    const currentValue = getSettingValue('forward_email_settings');
                     updateSettings.mutate({
                       name: 'forward_email_settings',
                       value: { ...currentValue, webhook_signature_key: e.target.value }
