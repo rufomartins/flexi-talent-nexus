@@ -5,7 +5,7 @@ import { createHmac } from "https://deno.land/std@0.190.0/crypto/mod.ts";
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
-  'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
+  'Access-Control-Allow-Headers': '*',
 };
 
 // Sample test email data
@@ -47,6 +47,7 @@ async function getForwardEmailSettings() {
 
 async function handleTestEmail(req: Request): Promise<Response> {
   console.log('Processing test email request');
+  console.log('Request method:', req.method);
 
   if (req.method === 'OPTIONS') {
     return new Response(null, { headers: corsHeaders });
@@ -66,6 +67,11 @@ async function handleTestEmail(req: Request): Promise<Response> {
     hmac.update(payloadString);
     const signature = hmac.toString();
 
+    console.log('Created test payload and signature:', {
+      payloadLength: payloadString.length,
+      signatureLength: signature.length
+    });
+
     console.log('Sending test email to handler');
 
     // Forward the test email to our handler
@@ -76,7 +82,7 @@ async function handleTestEmail(req: Request): Promise<Response> {
         headers: {
           'Content-Type': 'application/json',
           'Authorization': `Bearer ${Deno.env.get('SUPABASE_ANON_KEY')}`,
-          'x-webhook-signature': signature
+          'X-Webhook-Signature': signature,
         },
         body: payloadString
       }

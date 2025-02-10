@@ -1,10 +1,11 @@
+
 import { serve } from "https://deno.land/std@0.190.0/http/server.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
 import { createHmac } from "https://deno.land/std@0.190.0/crypto/mod.ts";
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
-  'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type, x-webhook-signature',
+  'Access-Control-Allow-Headers': '*',  // Make CORS more permissive for debugging
 };
 
 interface ForwardEmailPayload {
@@ -38,16 +39,38 @@ async function getForwardEmailSettings() {
   return data.value;
 }
 
+function findSignatureHeader(headers: Headers): string | null {
+  // Check both capitalized and lowercase versions
+  const possibleNames = ['X-Webhook-Signature', 'x-webhook-signature'];
+  for (const name of possibleNames) {
+    const value = headers.get(name);
+    if (value) {
+      console.log(`Found signature in header: ${name}`);
+      return value;
+    }
+  }
+  return null;
+}
+
 function verifyWebhookSignature(payload: string, signature: string, key: string): boolean {
   try {
+    console.log('Verifying signature with key length:', key.length);
+    
     const hmac = createHmac("sha256", key);
     hmac.update(payload);
     const computedSignature = hmac.toString('hex');
+
+    console.log('Computed signature:', computedSignature);
+    console.log('Received signature:', signature);
 
     const sigBuffer = new TextEncoder().encode(signature);
     const computedBuffer = new TextEncoder().encode(computedSignature);
 
     if (sigBuffer.length !== computedBuffer.length) {
+      console.error('Signature length mismatch:', {
+        received: sigBuffer.length,
+        computed: computedBuffer.length
+      });
       return false;
     }
 
@@ -91,6 +114,13 @@ async function findOrCreateConversation(subject: string): Promise<string> {
 
 async function handleInboundEmail(req: Request): Promise<Response> {
   console.log('Received inbound email request');
+  console.log('Request method:', req.method);
+  
+  // Log all headers for debugging
+  console.log('Request headers:');
+  for (const [key, value] of req.headers.entries()) {
+    console.log(`${key}: ${value}`);
+  }
 
   if (req.method === 'OPTIONS') {
     return new Response(null, { headers: corsHeaders });
@@ -112,12 +142,17 @@ async function handleInboundEmail(req: Request): Promise<Response> {
     }
 
     const rawBody = await req.text();
-    const signature = req.headers.get('X-Webhook-Signature');
+    console.log('Request body (first 200 chars):', rawBody.substring(0, 200));
+    
+    const signature = findSignatureHeader(req.headers);
 
     if (!signature) {
-      console.error('No webhook signature provided');
+      console.error('No webhook signature found in headers');
       return new Response(
-        JSON.stringify({ error: 'No webhook signature provided' }),
+        JSON.stringify({ 
+          error: 'No webhook signature provided',
+          availableHeaders: Array.from(req.headers.keys())
+        }),
         { 
           status: 401,
           headers: { ...corsHeaders, 'Content-Type': 'application/json' }
@@ -127,7 +162,8 @@ async function handleInboundEmail(req: Request): Promise<Response> {
 
     console.log('Verifying signature...', {
       signatureLength: signature.length,
-      payloadLength: rawBody.length
+      payloadLength: rawBody.length,
+      webhookKeyLength: settings.webhook_signature_key.length
     });
 
     const isValid = verifyWebhookSignature(
@@ -150,7 +186,14 @@ async function handleInboundEmail(req: Request): Promise<Response> {
     console.log('Signature verified successfully');
 
     const email: ForwardEmailPayload = JSON.parse(rawBody);
-    console.log('Processing email:', { subject: email.subject, from: email.from });
+    console.log('Processing email:', { 
+      subject: email.subject, 
+      from: email.from,
+      to: email.to,
+      hasHtml: !!email.html,
+      textLength: email.text?.length,
+      attachmentsCount: email.attachments?.length
+    });
 
     const conversationId = await findOrCreateConversation(email.subject);
     console.log('Found/created conversation:', conversationId);
@@ -203,7 +246,6 @@ async function handleInboundEmail(req: Request): Promise<Response> {
 
     if (legacyError) {
       console.warn('Error saving to legacy inbox:', legacyError);
-      // Don't throw error for legacy storage
     }
 
     console.log('Email processed successfully:', message.id);
