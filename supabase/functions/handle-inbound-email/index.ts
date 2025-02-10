@@ -1,4 +1,3 @@
-
 import { serve } from "https://deno.land/std@0.190.0/http/server.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
 import { createHmac } from "https://deno.land/std@0.190.0/crypto/mod.ts";
@@ -40,14 +39,26 @@ async function getForwardEmailSettings() {
 }
 
 function verifyWebhookSignature(payload: string, signature: string, key: string): boolean {
-  const hmac = createHmac("sha256", key);
-  hmac.update(payload);
-  const computedSignature = hmac.toString();
-  return signature === computedSignature;
+  try {
+    const hmac = createHmac("sha256", key);
+    hmac.update(payload);
+    const computedSignature = hmac.toString('hex');
+
+    const sigBuffer = new TextEncoder().encode(signature);
+    const computedBuffer = new TextEncoder().encode(computedSignature);
+
+    if (sigBuffer.length !== computedBuffer.length) {
+      return false;
+    }
+
+    return crypto.subtle.timingSafeEqual(sigBuffer, computedBuffer);
+  } catch (error) {
+    console.error('Error verifying signature:', error);
+    return false;
+  }
 }
 
 async function findOrCreateConversation(subject: string): Promise<string> {
-  // Try to find an existing conversation with this subject
   const { data: existing, error: searchError } = await supabaseClient
     .from('email_conversations')
     .select('id')
@@ -55,7 +66,7 @@ async function findOrCreateConversation(subject: string): Promise<string> {
     .eq('status', 'active')
     .single();
 
-  if (searchError && searchError.code !== 'PGRST116') { // PGRST116 is "no rows returned"
+  if (searchError && searchError.code !== 'PGRST116') {
     throw searchError;
   }
 
@@ -63,7 +74,6 @@ async function findOrCreateConversation(subject: string): Promise<string> {
     return existing.id;
   }
 
-  // Create new conversation if none exists
   const { data: newConversation, error: insertError } = await supabaseClient
     .from('email_conversations')
     .insert([{
@@ -82,13 +92,11 @@ async function findOrCreateConversation(subject: string): Promise<string> {
 async function handleInboundEmail(req: Request): Promise<Response> {
   console.log('Received inbound email request');
 
-  // Handle CORS preflight requests
   if (req.method === 'OPTIONS') {
     return new Response(null, { headers: corsHeaders });
   }
 
   try {
-    // Get Forward Email settings
     const settings = await getForwardEmailSettings();
     console.log('Retrieved Forward Email settings');
     
@@ -103,9 +111,8 @@ async function handleInboundEmail(req: Request): Promise<Response> {
       );
     }
 
-    // Get the raw request body for signature verification
     const rawBody = await req.text();
-    const signature = req.headers.get('x-webhook-signature');
+    const signature = req.headers.get('X-Webhook-Signature');
 
     if (!signature) {
       console.error('No webhook signature provided');
@@ -118,7 +125,11 @@ async function handleInboundEmail(req: Request): Promise<Response> {
       );
     }
 
-    // Verify webhook signature
+    console.log('Verifying signature...', {
+      signatureLength: signature.length,
+      payloadLength: rawBody.length
+    });
+
     const isValid = verifyWebhookSignature(
       rawBody,
       signature,
@@ -136,15 +147,14 @@ async function handleInboundEmail(req: Request): Promise<Response> {
       );
     }
 
-    // Parse the email payload
+    console.log('Signature verified successfully');
+
     const email: ForwardEmailPayload = JSON.parse(rawBody);
     console.log('Processing email:', { subject: email.subject, from: email.from });
 
-    // Find or create conversation
     const conversationId = await findOrCreateConversation(email.subject);
     console.log('Found/created conversation:', conversationId);
 
-    // Insert into email_messages
     const { data: message, error: messageError } = await supabaseClient
       .from('email_messages')
       .insert([
@@ -173,7 +183,6 @@ async function handleInboundEmail(req: Request): Promise<Response> {
       throw messageError;
     }
 
-    // For backward compatibility, also save to onboarding_inbox
     const { error: legacyError } = await supabaseClient
       .from('onboarding_inbox')
       .insert([
