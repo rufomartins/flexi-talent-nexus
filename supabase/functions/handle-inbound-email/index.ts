@@ -1,3 +1,4 @@
+
 import { serve } from "https://deno.land/std@0.190.0/http/server.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
 
@@ -40,6 +41,34 @@ async function handleInboundEmail(req: Request): Promise<Response> {
   }
 
   try {
+    // Check authentication from either headers or query parameters
+    const url = new URL(req.url);
+    const apiKey = req.headers.get('apikey') || url.searchParams.get('apikey');
+    
+    if (!apiKey) {
+      console.error('No API key provided');
+      return new Response(
+        JSON.stringify({ error: 'Authentication required' }),
+        { 
+          status: 401,
+          headers: { ...corsHeaders, 'Content-Type': 'application/json' }
+        }
+      );
+    }
+
+    // Validate the API key matches our anon key
+    const SUPABASE_ANON_KEY = Deno.env.get('SUPABASE_ANON_KEY');
+    if (apiKey !== SUPABASE_ANON_KEY) {
+      console.error('Invalid API key');
+      return new Response(
+        JSON.stringify({ error: 'Invalid authentication' }),
+        { 
+          status: 401,
+          headers: { ...corsHeaders, 'Content-Type': 'application/json' }
+        }
+      );
+    }
+
     const email: CloudMailinEmail = await req.json();
     console.log('Received email:', { subject: email.subject, from: email.envelope.from });
 
