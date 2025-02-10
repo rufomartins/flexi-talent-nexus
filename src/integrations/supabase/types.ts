@@ -1015,13 +1015,6 @@ export type Database = {
             referencedRelation: "email_messages"
             referencedColumns: ["id"]
           },
-          {
-            foreignKeyName: "fk_conversation"
-            columns: ["conversation_id"]
-            isOneToOne: false
-            referencedRelation: "email_conversations"
-            referencedColumns: ["id"]
-          },
         ]
       }
       email_settings: {
