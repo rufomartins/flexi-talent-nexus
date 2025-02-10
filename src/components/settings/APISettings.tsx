@@ -1,3 +1,4 @@
+
 import { useState } from "react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Switch } from "@/components/ui/switch";
@@ -26,16 +27,16 @@ interface TwilioConfig extends APIConfig {
   module: 'onboarding' | 'casting' | 'booking';
 }
 
+interface ForwardEmailConfig extends APIConfig {
+  webhook_signature_key: string;
+  webhook_domain: string;
+  webhook_url: string;
+}
+
 interface CloudinConfig extends APIConfig {
   api_key: string;
   bucket: string;
   region: string;
-}
-
-interface SendGridConfig extends APIConfig {
-  api_key: string;
-  signing_key: string;
-  webhook_domain: string;
 }
 
 export function APISettings() {
@@ -120,120 +121,113 @@ export function APISettings() {
     <div className="space-y-6">
       <Card>
         <CardHeader>
-          <CardTitle>Email API Settings (Resend)</CardTitle>
+          <CardTitle>Email API Settings</CardTitle>
           <CardDescription>
-            Configure your Resend API settings for email communications
+            Configure your email communication settings
           </CardDescription>
         </CardHeader>
         <CardContent className="space-y-4">
-          <div className="flex items-center justify-between">
-            <Label htmlFor="resend-enabled">Enable Resend Integration</Label>
-            <Switch
-              id="resend-enabled"
-              checked={settings?.find(s => s.name === 'resend_settings')?.value?.enabled ?? false}
-              onCheckedChange={(checked) => {
-                const currentValue = settings?.find(s => s.name === 'resend_settings')?.value || {};
-                updateSettings.mutate({
-                  name: 'resend_settings',
-                  value: { ...currentValue, enabled: checked }
-                });
-              }}
-            />
-          </div>
-          
-          <div className="space-y-2">
-            <Label htmlFor="resend-api-key">API Key</Label>
-            <Input
-              id="resend-api-key"
-              type="password"
-              value={settings?.find(s => s.name === 'resend_settings')?.value?.api_key || ''}
-              onChange={(e) => {
-                const currentValue = settings?.find(s => s.name === 'resend_settings')?.value || {};
-                updateSettings.mutate({
-                  name: 'resend_settings',
-                  value: { ...currentValue, api_key: e.target.value }
-                });
-              }}
-              placeholder="Enter your Resend API key"
-            />
-          </div>
+          <div className="grid gap-6">
+            {/* Resend Settings */}
+            <div className="space-y-4">
+              <div className="font-medium">Resend (Outbound Email)</div>
+              <div className="flex items-center justify-between">
+                <Label htmlFor="resend-enabled">Enable Resend Integration</Label>
+                <Switch
+                  id="resend-enabled"
+                  checked={settings?.find(s => s.name === 'resend_settings')?.value?.enabled ?? false}
+                  onCheckedChange={(checked) => {
+                    const currentValue = settings?.find(s => s.name === 'resend_settings')?.value || {};
+                    updateSettings.mutate({
+                      name: 'resend_settings',
+                      value: { ...currentValue, enabled: checked }
+                    });
+                  }}
+                />
+              </div>
+              
+              <div className="space-y-2">
+                <Label htmlFor="resend-api-key">API Key</Label>
+                <Input
+                  id="resend-api-key"
+                  type="password"
+                  value={settings?.find(s => s.name === 'resend_settings')?.value?.api_key || ''}
+                  onChange={(e) => {
+                    const currentValue = settings?.find(s => s.name === 'resend_settings')?.value || {};
+                    updateSettings.mutate({
+                      name: 'resend_settings',
+                      value: { ...currentValue, api_key: e.target.value }
+                    });
+                  }}
+                  placeholder="Enter your Resend API key"
+                />
+              </div>
 
-          <Button 
-            onClick={testEmail} 
-            disabled={testLoading}
-            variant="outline"
-          >
-            {testLoading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-            Test Email Configuration
-          </Button>
-        </CardContent>
-      </Card>
+              <Button 
+                onClick={testEmail} 
+                disabled={testLoading}
+                variant="outline"
+              >
+                {testLoading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+                Test Email Configuration
+              </Button>
+            </div>
 
-      <Card>
-        <CardHeader>
-          <CardTitle>Inbound Email Settings (SendGrid)</CardTitle>
-          <CardDescription>
-            Configure SendGrid for receiving and parsing incoming emails
-          </CardDescription>
-        </CardHeader>
-        <CardContent className="space-y-4">
-          <div className="flex items-center justify-between">
-            <Label htmlFor="sendgrid-enabled">Enable SendGrid Integration</Label>
-            <Switch
-              id="sendgrid-enabled"
-              checked={settings?.find(s => s.name === 'sendgrid_inbound_settings')?.value?.enabled ?? false}
-              onCheckedChange={(checked) => {
-                const currentValue = settings?.find(s => s.name === 'sendgrid_inbound_settings')?.value || {};
-                updateSettings.mutate({
-                  name: 'sendgrid_inbound_settings',
-                  value: { ...currentValue, enabled: checked }
-                });
-              }}
-            />
-          </div>
-          
-          <div className="space-y-2">
-            <Label htmlFor="sendgrid-api-key">API Key</Label>
-            <Input
-              id="sendgrid-api-key"
-              type="password"
-              value={settings?.find(s => s.name === 'sendgrid_inbound_settings')?.value?.api_key || ''}
-              onChange={(e) => {
-                const currentValue = settings?.find(s => s.name === 'sendgrid_inbound_settings')?.value || {};
-                updateSettings.mutate({
-                  name: 'sendgrid_inbound_settings',
-                  value: { ...currentValue, api_key: e.target.value }
-                });
-              }}
-              placeholder="Enter your SendGrid API key"
-            />
-          </div>
+            {/* Forward Email Settings */}
+            <div className="space-y-4">
+              <div className="font-medium">Forward Email (Inbound Email)</div>
+              <div className="flex items-center justify-between">
+                <Label htmlFor="forward-email-enabled">Enable Forward Email Integration</Label>
+                <Switch
+                  id="forward-email-enabled"
+                  checked={settings?.find(s => s.name === 'forward_email_settings')?.value?.enabled ?? false}
+                  onCheckedChange={(checked) => {
+                    const currentValue = settings?.find(s => s.name === 'forward_email_settings')?.value || {};
+                    updateSettings.mutate({
+                      name: 'forward_email_settings',
+                      value: { ...currentValue, enabled: checked }
+                    });
+                  }}
+                />
+              </div>
+              
+              <div className="space-y-2">
+                <Label htmlFor="forward-email-webhook-key">Webhook Signature Key</Label>
+                <Input
+                  id="forward-email-webhook-key"
+                  type="password"
+                  value={settings?.find(s => s.name === 'forward_email_settings')?.value?.webhook_signature_key || ''}
+                  onChange={(e) => {
+                    const currentValue = settings?.find(s => s.name === 'forward_email_settings')?.value || {};
+                    updateSettings.mutate({
+                      name: 'forward_email_settings',
+                      value: { ...currentValue, webhook_signature_key: e.target.value }
+                    });
+                  }}
+                  placeholder="Enter your Forward Email webhook signature key"
+                />
+              </div>
 
-          <div className="space-y-2">
-            <Label htmlFor="sendgrid-signing-key">Webhook Signing Key</Label>
-            <Input
-              id="sendgrid-signing-key"
-              type="password"
-              value={settings?.find(s => s.name === 'sendgrid_inbound_settings')?.value?.signing_key || ''}
-              onChange={(e) => {
-                const currentValue = settings?.find(s => s.name === 'sendgrid_inbound_settings')?.value || {};
-                updateSettings.mutate({
-                  name: 'sendgrid_inbound_settings',
-                  value: { ...currentValue, signing_key: e.target.value }
-                });
-              }}
-              placeholder="Enter your webhook signing key"
-            />
-          </div>
+              <div className="space-y-2">
+                <Label htmlFor="forward-email-domain">Webhook Domain</Label>
+                <Input
+                  id="forward-email-domain"
+                  value="onboarding.gtmd.studio"
+                  readOnly
+                  className="bg-gray-50"
+                />
+              </div>
 
-          <div className="space-y-2">
-            <Label htmlFor="sendgrid-domain">Webhook Domain</Label>
-            <Input
-              id="sendgrid-domain"
-              value="onboarding.gtmd.studio"
-              readOnly
-              className="bg-gray-50"
-            />
+              <div className="space-y-2">
+                <Label htmlFor="forward-email-webhook-url">Webhook URL</Label>
+                <Input
+                  id="forward-email-webhook-url"
+                  value="https://uqanisnpgfgrxnlvpqss.supabase.co/functions/v1/handle-inbound-email"
+                  readOnly
+                  className="bg-gray-50"
+                />
+              </div>
+            </div>
           </div>
         </CardContent>
       </Card>

@@ -1,38 +1,50 @@
 
 import { serve } from "https://deno.land/std@0.190.0/http/server.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
+import { createHmac } from "https://deno.land/std@0.190.0/crypto/mod.ts";
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
-  'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
+  'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type, x-webhook-signature',
 };
 
-interface CloudMailinEmail {
+interface ForwardEmailPayload {
   headers: Record<string, string>;
-  envelope: {
-    to: string;
-    from: string;
-    helo_domain: string;
-    remote_ip: string;
-    recipients: string[];
-  };
-  plain: string;
-  html: string;
-  reply_plain: string;
-  attachments: Array<{
-    content: string;
-    file_name: string;
-    content_type: string;
-    size: number;
-    disposition: string;
-  }>;
+  to: string[];
+  from: string;
   subject: string;
+  text: string;
+  html?: string;
+  attachments: Array<{
+    contentType: string;
+    content: string;
+    filename: string;
+    size: number;
+  }>;
 }
 
 const supabaseClient = createClient(
   Deno.env.get('SUPABASE_URL') ?? '',
   Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') ?? ''
 );
+
+async function getForwardEmailSettings() {
+  const { data, error } = await supabaseClient
+    .from('api_settings')
+    .select('value')
+    .eq('name', 'forward_email_settings')
+    .single();
+
+  if (error) throw error;
+  return data.value;
+}
+
+function verifyWebhookSignature(payload: string, signature: string, key: string): boolean {
+  const hmac = createHmac("sha256", key);
+  hmac.update(payload);
+  const computedSignature = hmac.toString();
+  return signature === computedSignature;
+}
 
 async function handleInboundEmail(req: Request): Promise<Response> {
   // Handle CORS preflight requests
@@ -41,13 +53,28 @@ async function handleInboundEmail(req: Request): Promise<Response> {
   }
 
   try {
-    // Get the Authorization header
-    const authHeader = req.headers.get('Authorization');
+    // Get Forward Email settings
+    const settings = await getForwardEmailSettings();
     
-    if (!authHeader) {
-      console.error('No Authorization header provided');
+    if (!settings.enabled) {
+      console.error('Forward Email integration is disabled');
       return new Response(
-        JSON.stringify({ error: 'Authentication required' }),
+        JSON.stringify({ error: 'Forward Email integration is disabled' }),
+        { 
+          status: 400,
+          headers: { ...corsHeaders, 'Content-Type': 'application/json' }
+        }
+      );
+    }
+
+    // Get the raw request body for signature verification
+    const rawBody = await req.text();
+    const signature = req.headers.get('x-webhook-signature');
+
+    if (!signature) {
+      console.error('No webhook signature provided');
+      return new Response(
+        JSON.stringify({ error: 'No webhook signature provided' }),
         { 
           status: 401,
           headers: { ...corsHeaders, 'Content-Type': 'application/json' }
@@ -55,19 +82,17 @@ async function handleInboundEmail(req: Request): Promise<Response> {
       );
     }
 
-    // Check Basic Auth
-    const encoded = authHeader.split(' ')[1];
-    const decoded = atob(encoded);
-    const [username, password] = decoded.split(':');
+    // Verify webhook signature
+    const isValid = verifyWebhookSignature(
+      rawBody,
+      signature,
+      settings.webhook_signature_key
+    );
 
-    // Validate against environment variables
-    const expectedUsername = Deno.env.get('CLOUDMAILIN_USERNAME');
-    const expectedPassword = Deno.env.get('CLOUDMAILIN_PASSWORD');
-
-    if (username !== expectedUsername || password !== expectedPassword) {
-      console.error('Invalid authentication credentials');
+    if (!isValid) {
+      console.error('Invalid webhook signature');
       return new Response(
-        JSON.stringify({ error: 'Invalid authentication' }),
+        JSON.stringify({ error: 'Invalid webhook signature' }),
         { 
           status: 401,
           headers: { ...corsHeaders, 'Content-Type': 'application/json' }
@@ -75,24 +100,25 @@ async function handleInboundEmail(req: Request): Promise<Response> {
       );
     }
 
-    const email: CloudMailinEmail = await req.json();
-    console.log('Received email:', { subject: email.subject, from: email.envelope.from });
+    // Parse the email payload
+    const email: ForwardEmailPayload = JSON.parse(rawBody);
+    console.log('Received email:', { subject: email.subject, from: email.from });
 
     // Insert into onboarding_inbox
     const { data, error } = await supabaseClient
       .from('onboarding_inbox')
       .insert([
         {
-          sender: email.envelope.from,
-          recipient: email.envelope.to,
+          sender: email.from,
+          recipient: email.to[0],
           subject: email.subject,
-          body: email.html || email.plain,
+          body: email.html || email.text,
           attachments: email.attachments,
           headers: email.headers,
           metadata: {
-            envelope: email.envelope,
             has_html: !!email.html,
-            has_plain: !!email.plain,
+            has_text: !!email.text,
+            attachment_count: email.attachments?.length || 0,
           }
         }
       ])
@@ -132,4 +158,3 @@ async function handleInboundEmail(req: Request): Promise<Response> {
 }
 
 serve(handleInboundEmail);
-
