@@ -1,12 +1,13 @@
 
 import { serve } from "https://deno.land/std@0.190.0/http/server.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
-import { createHmac } from "https://deno.land/std@0.190.0/crypto/mod.ts";
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
-  'Access-Control-Allow-Headers': '*',  // Make CORS more permissive for debugging
+  'Access-Control-Allow-Headers': '*',
 };
+
+const ALLOWED_SENDERS = ['mx1.forwardemail.net', 'mx2.forwardemail.net'];
 
 interface ForwardEmailPayload {
   headers: Record<string, string>;
@@ -21,6 +22,19 @@ interface ForwardEmailPayload {
     filename: string;
     size: number;
   }>;
+  dkim: {
+    status: {
+      result: string;
+    };
+  };
+  spf: {
+    status: {
+      result: string;
+    };
+  };
+  session: {
+    mta: string;
+  };
 }
 
 const supabaseClient = createClient(
@@ -39,46 +53,26 @@ async function getForwardEmailSettings() {
   return data.value;
 }
 
-function findSignatureHeader(headers: Headers): string | null {
-  // Check both capitalized and lowercase versions
-  const possibleNames = ['X-Webhook-Signature', 'x-webhook-signature'];
-  for (const name of possibleNames) {
-    const value = headers.get(name);
-    if (value) {
-      console.log(`Found signature in header: ${name}`);
-      return value;
-    }
-  }
-  return null;
-}
-
-function verifyWebhookSignature(payload: string, signature: string, key: string): boolean {
-  try {
-    console.log('Verifying signature with key length:', key.length);
-    
-    const hmac = createHmac("sha256", key);
-    hmac.update(payload);
-    const computedSignature = hmac.toString('hex');
-
-    console.log('Computed signature:', computedSignature);
-    console.log('Received signature:', signature);
-
-    const sigBuffer = new TextEncoder().encode(signature);
-    const computedBuffer = new TextEncoder().encode(computedSignature);
-
-    if (sigBuffer.length !== computedBuffer.length) {
-      console.error('Signature length mismatch:', {
-        received: sigBuffer.length,
-        computed: computedBuffer.length
-      });
-      return false;
-    }
-
-    return crypto.subtle.timingSafeEqual(sigBuffer, computedBuffer);
-  } catch (error) {
-    console.error('Error verifying signature:', error);
+function validateEmailSecurity(payload: ForwardEmailPayload): boolean {
+  // 1. Verify sender is from Forward Email servers
+  if (!ALLOWED_SENDERS.includes(payload.session.mta)) {
+    console.error('Invalid MTA:', payload.session.mta);
     return false;
   }
+
+  // 2. Verify DKIM passed
+  if (payload.dkim?.status?.result !== 'pass') {
+    console.error('DKIM verification failed:', payload.dkim?.status);
+    return false;
+  }
+
+  // 3. Verify SPF passed
+  if (payload.spf?.status?.result !== 'pass') {
+    console.error('SPF verification failed:', payload.spf?.status);
+    return false;
+  }
+
+  return true;
 }
 
 async function findOrCreateConversation(subject: string): Promise<string> {
@@ -116,7 +110,7 @@ async function handleInboundEmail(req: Request): Promise<Response> {
   console.log('Received inbound email request');
   console.log('Request method:', req.method);
   
-  // Log all headers for debugging
+  // Log headers for debugging
   console.log('Request headers:');
   for (const [key, value] of req.headers.entries()) {
     console.log(`${key}: ${value}`);
@@ -144,47 +138,6 @@ async function handleInboundEmail(req: Request): Promise<Response> {
     const rawBody = await req.text();
     console.log('Request body (first 200 chars):', rawBody.substring(0, 200));
     
-    const signature = findSignatureHeader(req.headers);
-
-    if (!signature) {
-      console.error('No webhook signature found in headers');
-      return new Response(
-        JSON.stringify({ 
-          error: 'No webhook signature provided',
-          availableHeaders: Array.from(req.headers.keys())
-        }),
-        { 
-          status: 401,
-          headers: { ...corsHeaders, 'Content-Type': 'application/json' }
-        }
-      );
-    }
-
-    console.log('Verifying signature...', {
-      signatureLength: signature.length,
-      payloadLength: rawBody.length,
-      webhookKeyLength: settings.webhook_signature_key.length
-    });
-
-    const isValid = verifyWebhookSignature(
-      rawBody,
-      signature,
-      settings.webhook_signature_key
-    );
-
-    if (!isValid) {
-      console.error('Invalid webhook signature');
-      return new Response(
-        JSON.stringify({ error: 'Invalid webhook signature' }),
-        { 
-          status: 401,
-          headers: { ...corsHeaders, 'Content-Type': 'application/json' }
-        }
-      );
-    }
-
-    console.log('Signature verified successfully');
-
     const email: ForwardEmailPayload = JSON.parse(rawBody);
     console.log('Processing email:', { 
       subject: email.subject, 
@@ -194,6 +147,20 @@ async function handleInboundEmail(req: Request): Promise<Response> {
       textLength: email.text?.length,
       attachmentsCount: email.attachments?.length
     });
+
+    // Validate email security
+    if (!validateEmailSecurity(email)) {
+      console.error('Email security validation failed');
+      return new Response(
+        JSON.stringify({ error: 'Email security validation failed' }),
+        { 
+          status: 401,
+          headers: { ...corsHeaders, 'Content-Type': 'application/json' }
+        }
+      );
+    }
+
+    console.log('Email security validation passed');
 
     const conversationId = await findOrCreateConversation(email.subject);
     console.log('Found/created conversation:', conversationId);
@@ -215,6 +182,8 @@ async function handleInboundEmail(req: Request): Promise<Response> {
           metadata: {
             has_html: !!email.html,
             has_attachments: email.attachments?.length > 0,
+            dkim_status: email.dkim?.status?.result,
+            spf_status: email.spf?.status?.result
           }
         }
       ])
@@ -240,6 +209,8 @@ async function handleInboundEmail(req: Request): Promise<Response> {
             has_html: !!email.html,
             has_text: !!email.text,
             attachment_count: email.attachments?.length || 0,
+            dkim_status: email.dkim?.status?.result,
+            spf_status: email.spf?.status?.result
           }
         }
       ]);
