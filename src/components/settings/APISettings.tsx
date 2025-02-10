@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Switch } from "@/components/ui/switch";
@@ -31,6 +30,12 @@ interface CloudinConfig extends APIConfig {
   api_key: string;
   bucket: string;
   region: string;
+}
+
+interface SendGridConfig extends APIConfig {
+  api_key: string;
+  signing_key: string;
+  webhook_domain: string;
 }
 
 export function APISettings() {
@@ -161,6 +166,75 @@ export function APISettings() {
             {testLoading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
             Test Email Configuration
           </Button>
+        </CardContent>
+      </Card>
+
+      <Card>
+        <CardHeader>
+          <CardTitle>Inbound Email Settings (SendGrid)</CardTitle>
+          <CardDescription>
+            Configure SendGrid for receiving and parsing incoming emails
+          </CardDescription>
+        </CardHeader>
+        <CardContent className="space-y-4">
+          <div className="flex items-center justify-between">
+            <Label htmlFor="sendgrid-enabled">Enable SendGrid Integration</Label>
+            <Switch
+              id="sendgrid-enabled"
+              checked={settings?.find(s => s.name === 'sendgrid_inbound_settings')?.value?.enabled ?? false}
+              onCheckedChange={(checked) => {
+                const currentValue = settings?.find(s => s.name === 'sendgrid_inbound_settings')?.value || {};
+                updateSettings.mutate({
+                  name: 'sendgrid_inbound_settings',
+                  value: { ...currentValue, enabled: checked }
+                });
+              }}
+            />
+          </div>
+          
+          <div className="space-y-2">
+            <Label htmlFor="sendgrid-api-key">API Key</Label>
+            <Input
+              id="sendgrid-api-key"
+              type="password"
+              value={settings?.find(s => s.name === 'sendgrid_inbound_settings')?.value?.api_key || ''}
+              onChange={(e) => {
+                const currentValue = settings?.find(s => s.name === 'sendgrid_inbound_settings')?.value || {};
+                updateSettings.mutate({
+                  name: 'sendgrid_inbound_settings',
+                  value: { ...currentValue, api_key: e.target.value }
+                });
+              }}
+              placeholder="Enter your SendGrid API key"
+            />
+          </div>
+
+          <div className="space-y-2">
+            <Label htmlFor="sendgrid-signing-key">Webhook Signing Key</Label>
+            <Input
+              id="sendgrid-signing-key"
+              type="password"
+              value={settings?.find(s => s.name === 'sendgrid_inbound_settings')?.value?.signing_key || ''}
+              onChange={(e) => {
+                const currentValue = settings?.find(s => s.name === 'sendgrid_inbound_settings')?.value || {};
+                updateSettings.mutate({
+                  name: 'sendgrid_inbound_settings',
+                  value: { ...currentValue, signing_key: e.target.value }
+                });
+              }}
+              placeholder="Enter your webhook signing key"
+            />
+          </div>
+
+          <div className="space-y-2">
+            <Label htmlFor="sendgrid-domain">Webhook Domain</Label>
+            <Input
+              id="sendgrid-domain"
+              value="onboarding.gtmd.studio"
+              readOnly
+              className="bg-gray-50"
+            />
+          </div>
         </CardContent>
       </Card>
 
