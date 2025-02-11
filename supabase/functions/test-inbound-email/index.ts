@@ -1,14 +1,13 @@
 
 import { serve } from "https://deno.land/std@0.190.0/http/server.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
-import { createHmac } from "https://deno.land/std@0.190.0/crypto/mod.ts";
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
   'Access-Control-Allow-Headers': '*',
 };
 
-// Sample test email data
+// Sample test email data matching CloudMailin format
 const testEmailPayload = {
   headers: {
     "content-type": "text/html",
@@ -16,20 +15,22 @@ const testEmailPayload = {
     "from": "test@example.com",
     "to": "test@onboarding.gtmd.studio"
   },
-  to: ["test@onboarding.gtmd.studio"],
-  from: "test@example.com",
-  subject: "Test Email from Forward Email",
-  text: "This is a test email body",
+  envelope: {
+    to: "test@onboarding.gtmd.studio",
+    from: "test@example.com"
+  },
+  subject: "Test Email from CloudMailin",
+  plain: "This is a test email body",
   html: "<p>This is a test email body in HTML format</p>",
   attachments: [{
-    contentType: "text/plain",
-    content: "SGVsbG8gV29ybGQ=", // Base64 encoded "Hello World"
-    filename: "test.txt",
-    size: 11
+    content_type: "text/plain",
+    file_name: "test.txt",
+    size: 11,
+    url: "https://example.com/test.txt"
   }]
 };
 
-async function getForwardEmailSettings() {
+async function getEmailSettings() {
   const supabaseClient = createClient(
     Deno.env.get('SUPABASE_URL') ?? '',
     Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') ?? ''
@@ -38,11 +39,11 @@ async function getForwardEmailSettings() {
   const { data, error } = await supabaseClient
     .from('api_settings')
     .select('value')
-    .eq('name', 'forward_email_settings')
+    .eq('name', 'cloudmailin_settings')
     .single();
 
   if (error) throw error;
-  return data.value;
+  return data?.value || { enabled: true };
 }
 
 async function handleTestEmail(req: Request): Promise<Response> {
@@ -54,22 +55,18 @@ async function handleTestEmail(req: Request): Promise<Response> {
   }
 
   try {
-    const settings = await getForwardEmailSettings();
-    console.log('Retrieved Forward Email settings');
+    const settings = await getEmailSettings();
+    console.log('Retrieved email settings');
     
     if (!settings.enabled) {
-      throw new Error('Forward Email integration is disabled');
+      throw new Error('Email integration is disabled');
     }
 
-    // Convert payload to string and create signature
+    // Convert payload to string
     const payloadString = JSON.stringify(testEmailPayload);
-    const hmac = createHmac("sha256", settings.webhook_signature_key);
-    hmac.update(payloadString);
-    const signature = hmac.toString();
 
-    console.log('Created test payload and signature:', {
-      payloadLength: payloadString.length,
-      signatureLength: signature.length
+    console.log('Created test payload:', {
+      payloadLength: payloadString.length
     });
 
     console.log('Sending test email to handler');
@@ -82,7 +79,6 @@ async function handleTestEmail(req: Request): Promise<Response> {
         headers: {
           'Content-Type': 'application/json',
           'Authorization': `Bearer ${Deno.env.get('SUPABASE_ANON_KEY')}`,
-          'X-Webhook-Signature': signature,
         },
         body: payloadString
       }

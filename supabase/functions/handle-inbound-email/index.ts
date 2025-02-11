@@ -4,37 +4,24 @@ import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
-  'Access-Control-Allow-Headers': '*',
+  'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
 };
 
-const ALLOWED_SENDERS = ['mx1.forwardemail.net', 'mx2.forwardemail.net'];
-
-interface ForwardEmailPayload {
+interface CloudMailinPayload {
   headers: Record<string, string>;
-  to: string[];
-  from: string;
-  subject: string;
-  text: string;
+  envelope: {
+    to: string;
+    from: string;
+  };
+  plain: string;
   html?: string;
-  attachments: Array<{
-    contentType: string;
-    content: string;
-    filename: string;
+  subject?: string;
+  attachments?: Array<{
+    content_type: string;
+    file_name: string;
     size: number;
+    url: string;
   }>;
-  dkim: {
-    status: {
-      result: string;
-    };
-  };
-  spf: {
-    status: {
-      result: string;
-    };
-  };
-  session: {
-    mta: string;
-  };
 }
 
 const supabaseClient = createClient(
@@ -42,37 +29,18 @@ const supabaseClient = createClient(
   Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') ?? ''
 );
 
-async function getForwardEmailSettings() {
+async function getEmailSettings() {
   const { data, error } = await supabaseClient
     .from('api_settings')
     .select('value')
-    .eq('name', 'forward_email_settings')
+    .eq('name', 'cloudmailin_settings')
     .single();
 
-  if (error) throw error;
-  return data.value;
-}
-
-function validateEmailSecurity(payload: ForwardEmailPayload): boolean {
-  // 1. Verify sender is from Forward Email servers
-  if (!ALLOWED_SENDERS.includes(payload.session.mta)) {
-    console.error('Invalid MTA:', payload.session.mta);
-    return false;
+  if (error) {
+    console.error('Error fetching email settings:', error);
+    return { enabled: false };
   }
-
-  // 2. Verify DKIM passed
-  if (payload.dkim?.status?.result !== 'pass') {
-    console.error('DKIM verification failed:', payload.dkim?.status);
-    return false;
-  }
-
-  // 3. Verify SPF passed
-  if (payload.spf?.status?.result !== 'pass') {
-    console.error('SPF verification failed:', payload.spf?.status);
-    return false;
-  }
-
-  return true;
+  return data?.value || { enabled: false };
 }
 
 async function findOrCreateConversation(subject: string): Promise<string> {
@@ -121,13 +89,13 @@ async function handleInboundEmail(req: Request): Promise<Response> {
   }
 
   try {
-    const settings = await getForwardEmailSettings();
-    console.log('Retrieved Forward Email settings');
+    const settings = await getEmailSettings();
+    console.log('Retrieved email settings:', settings);
     
     if (!settings.enabled) {
-      console.error('Forward Email integration is disabled');
+      console.error('Email integration is disabled');
       return new Response(
-        JSON.stringify({ error: 'Forward Email integration is disabled' }),
+        JSON.stringify({ error: 'Email integration is disabled' }),
         { 
           status: 400,
           headers: { ...corsHeaders, 'Content-Type': 'application/json' }
@@ -138,31 +106,17 @@ async function handleInboundEmail(req: Request): Promise<Response> {
     const rawBody = await req.text();
     console.log('Request body (first 200 chars):', rawBody.substring(0, 200));
     
-    const email: ForwardEmailPayload = JSON.parse(rawBody);
+    const email: CloudMailinPayload = JSON.parse(rawBody);
     console.log('Processing email:', { 
-      subject: email.subject, 
-      from: email.from,
-      to: email.to,
+      subject: email.subject,
+      from: email.envelope.from,
+      to: email.envelope.to,
       hasHtml: !!email.html,
-      textLength: email.text?.length,
+      textLength: email.plain?.length,
       attachmentsCount: email.attachments?.length
     });
 
-    // Validate email security
-    if (!validateEmailSecurity(email)) {
-      console.error('Email security validation failed');
-      return new Response(
-        JSON.stringify({ error: 'Email security validation failed' }),
-        { 
-          status: 401,
-          headers: { ...corsHeaders, 'Content-Type': 'application/json' }
-        }
-      );
-    }
-
-    console.log('Email security validation passed');
-
-    const conversationId = await findOrCreateConversation(email.subject);
+    const conversationId = await findOrCreateConversation(email.subject || 'No Subject');
     console.log('Found/created conversation:', conversationId);
 
     const { data: message, error: messageError } = await supabaseClient
@@ -171,19 +125,23 @@ async function handleInboundEmail(req: Request): Promise<Response> {
         {
           conversation_id: conversationId,
           direction: 'inbound',
-          from_email: email.from,
-          to_email: email.to,
-          subject: email.subject,
-          body: email.text,
+          from_email: email.envelope.from,
+          to_email: [email.envelope.to],
+          subject: email.subject || 'No Subject',
+          body: email.plain,
           html_body: email.html,
           headers: email.headers,
-          attachments: email.attachments,
+          attachments: email.attachments?.map(att => ({
+            contentType: att.content_type,
+            filename: att.file_name,
+            size: att.size,
+            url: att.url
+          })),
           status: 'unread',
           metadata: {
             has_html: !!email.html,
             has_attachments: email.attachments?.length > 0,
-            dkim_status: email.dkim?.status?.result,
-            spf_status: email.spf?.status?.result
+            provider: 'cloudmailin'
           }
         }
       ])
@@ -199,18 +157,17 @@ async function handleInboundEmail(req: Request): Promise<Response> {
       .from('onboarding_inbox')
       .insert([
         {
-          sender: email.from,
-          recipient: email.to[0],
-          subject: email.subject,
-          body: email.html || email.text,
+          sender: email.envelope.from,
+          recipient: email.envelope.to,
+          subject: email.subject || 'No Subject',
+          body: email.html || email.plain,
           attachments: email.attachments,
           headers: email.headers,
           metadata: {
             has_html: !!email.html,
-            has_text: !!email.text,
+            has_text: !!email.plain,
             attachment_count: email.attachments?.length || 0,
-            dkim_status: email.dkim?.status?.result,
-            spf_status: email.spf?.status?.result
+            provider: 'cloudmailin'
           }
         }
       ]);
