@@ -1,4 +1,3 @@
-
 import { serve } from "https://deno.land/std@0.190.0/http/server.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
 
@@ -22,6 +21,19 @@ interface CloudMailinPayload {
     size: number;
     url: string;
   }>;
+}
+
+interface SNSMessage {
+  Type: string;
+  MessageId: string;
+  Token?: string;
+  TopicArn?: string;
+  Message: string;
+  SubscribeURL?: string;
+  Timestamp: string;
+  SignatureVersion: string;
+  Signature: string;
+  SigningCertURL: string;
 }
 
 const supabaseClient = createClient(
@@ -74,8 +86,83 @@ async function findOrCreateConversation(subject: string): Promise<string> {
   return newConversation.id;
 }
 
+async function handleSNSConfirmation(message: SNSMessage): Promise<Response> {
+  console.log('Processing SNS subscription confirmation');
+  
+  try {
+    if (!message.SubscribeURL) {
+      throw new Error('No SubscribeURL provided in confirmation message');
+    }
+
+    const response = await fetch(message.SubscribeURL);
+    
+    if (!response.ok) {
+      throw new Error(`Failed to confirm subscription: ${response.statusText}`);
+    }
+
+    console.log('SNS subscription confirmed successfully');
+    
+    return new Response(
+      JSON.stringify({ success: true, message: 'Subscription confirmed' }),
+      { 
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+        status: 200 
+      }
+    );
+  } catch (error) {
+    console.error('Error confirming SNS subscription:', error);
+    return new Response(
+      JSON.stringify({ error: 'Failed to confirm subscription' }),
+      { 
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+        status: 500
+      }
+    );
+  }
+}
+
+async function handleSNSNotification(message: SNSMessage): Promise<Response> {
+  console.log('Processing SNS notification');
+  
+  try {
+    const emailData = JSON.parse(message.Message);
+    console.log('SNS notification data:', emailData);
+    
+    // Process based on notification type
+    // This is where we'll handle bounces, complaints, delivery notifications, etc.
+    // For now, we'll just log it
+    const { data, error } = await supabaseClient
+      .from('email_events')
+      .insert([{
+        message_id: message.MessageId,
+        event_type: emailData.eventType || 'unknown',
+        timestamp: message.Timestamp,
+        raw_data: emailData
+      }]);
+
+    if (error) throw error;
+
+    return new Response(
+      JSON.stringify({ success: true, message: 'Event processed' }),
+      { 
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+        status: 200 
+      }
+    );
+  } catch (error) {
+    console.error('Error processing SNS notification:', error);
+    return new Response(
+      JSON.stringify({ error: 'Failed to process notification' }),
+      { 
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+        status: 500
+      }
+    );
+  }
+}
+
 async function handleInboundEmail(req: Request): Promise<Response> {
-  console.log('Received inbound email request');
+  console.log('Received inbound request');
   console.log('Request method:', req.method);
   
   // Log headers for debugging
@@ -89,6 +176,24 @@ async function handleInboundEmail(req: Request): Promise<Response> {
   }
 
   try {
+    const rawBody = await req.text();
+    console.log('Raw body preview:', rawBody.substring(0, 200));
+
+    // Try to parse as SNS message first
+    try {
+      const snsMessage: SNSMessage = JSON.parse(rawBody);
+      
+      // Handle SNS message types
+      if (snsMessage.Type === 'SubscriptionConfirmation') {
+        return handleSNSConfirmation(snsMessage);
+      } else if (snsMessage.Type === 'Notification') {
+        return handleSNSNotification(snsMessage);
+      }
+    } catch (error) {
+      console.log('Not an SNS message, trying CloudMailin format');
+    }
+
+    // If not SNS, proceed with CloudMailin handling
     const settings = await getEmailSettings();
     console.log('Retrieved email settings:', settings);
     
@@ -103,9 +208,6 @@ async function handleInboundEmail(req: Request): Promise<Response> {
       );
     }
 
-    const rawBody = await req.text();
-    console.log('Request body (first 200 chars):', rawBody.substring(0, 200));
-    
     const email: CloudMailinPayload = JSON.parse(rawBody);
     console.log('Processing email:', { 
       subject: email.subject,
@@ -191,12 +293,12 @@ async function handleInboundEmail(req: Request): Promise<Response> {
     );
 
   } catch (error) {
-    console.error('Error processing email:', error);
+    console.error('Error processing request:', error);
     
     return new Response(
       JSON.stringify({ 
         success: false, 
-        error: 'Failed to process email',
+        error: 'Failed to process request',
         details: error.message 
       }),
       { 
