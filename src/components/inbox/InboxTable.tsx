@@ -11,6 +11,7 @@ import {
 import { ActivityPagination } from "@/components/dashboard/activity/ActivityPagination";
 import { useState } from "react";
 import { Badge } from "@/components/ui/badge";
+import { useNavigate } from "react-router-dom";
 
 interface EmailMessage {
   id: string;
@@ -28,6 +29,7 @@ interface Conversation {
   subject: string;
   last_message_at: string;
   email_messages: EmailMessage[];
+  status: 'active' | 'archived' | 'deleted';
 }
 
 interface InboxTableProps {
@@ -36,6 +38,7 @@ interface InboxTableProps {
 
 export function InboxTable({ conversations }: InboxTableProps) {
   const [currentPage, setCurrentPage] = useState(1);
+  const navigate = useNavigate();
   const itemsPerPage = 10;
   const totalPages = Math.ceil(conversations.length / itemsPerPage);
 
@@ -43,6 +46,10 @@ export function InboxTable({ conversations }: InboxTableProps) {
     (currentPage - 1) * itemsPerPage,
     currentPage * itemsPerPage
   );
+
+  const handleRowClick = (conversationId: string) => {
+    navigate(`/conversation/${conversationId}`);
+  };
 
   return (
     <div>
@@ -63,7 +70,11 @@ export function InboxTable({ conversations }: InboxTableProps) {
               if (!lastMessage) return null;
 
               return (
-                <TableRow key={conversation.id} className="cursor-pointer hover:bg-muted/50">
+                <TableRow 
+                  key={conversation.id} 
+                  className="cursor-pointer hover:bg-muted/50"
+                  onClick={() => handleRowClick(conversation.id)}
+                >
                   <TableCell>
                     {lastMessage.status === 'unread' && (
                       <Badge variant="default">Unread</Badge>

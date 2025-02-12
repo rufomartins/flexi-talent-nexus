@@ -26,17 +26,20 @@ export default function InboxPage() {
               status
             )
           `)
+          .eq('status', 'active')
           .order('last_message_at', { ascending: false });
         
         if (error) {
           console.error('Supabase query error:', error);
           throw error;
         }
+
+        console.log('Fetched conversations:', data);
         
-        // Ensure correct typing of direction field
+        // Ensure correct typing of direction field and handle empty messages
         return data?.map(conversation => ({
           ...conversation,
-          email_messages: conversation.email_messages.map(message => ({
+          email_messages: (conversation.email_messages || []).map(message => ({
             ...message,
             direction: message.direction as 'inbound' | 'outbound'
           }))
