@@ -1,11 +1,6 @@
 
 import { serve } from "https://deno.land/std@0.190.0/http/server.ts";
 
-const SUPABASE_URL = Deno.env.get('SUPABASE_URL');
-const SUPABASE_ANON_KEY = Deno.env.get('SUPABASE_ANON_KEY');
-const EXPECTED_USERNAME = Deno.env.get('CLOUDMAILIN_USERNAME');
-const EXPECTED_PASSWORD = Deno.env.get('CLOUDMAILIN_PASSWORD');
-
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
   'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
@@ -20,7 +15,10 @@ function verifyBasicAuth(authHeader: string | null): boolean {
   const credentials = atob(base64Credentials);
   const [username, password] = credentials.split(':');
 
-  return username === EXPECTED_USERNAME && password === EXPECTED_PASSWORD;
+  const expectedUsername = Deno.env.get('CLOUDMAILIN_USERNAME');
+  const expectedPassword = Deno.env.get('CLOUDMAILIN_PASSWORD');
+
+  return username === expectedUsername && password === expectedPassword;
 }
 
 serve(async (req: Request) => {
@@ -56,12 +54,12 @@ serve(async (req: Request) => {
 
     // Forward to Supabase function with Bearer token
     const response = await fetch(
-      `${SUPABASE_URL}/functions/v1/handle-inbound-email`,
+      `${Deno.env.get('SUPABASE_URL')}/functions/v1/handle-inbound-email`,
       {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
-          'Authorization': `Bearer ${SUPABASE_ANON_KEY}`,
+          'Authorization': `Bearer ${Deno.env.get('SUPABASE_ANON_KEY')}`,
         },
         body: rawBody
       }
