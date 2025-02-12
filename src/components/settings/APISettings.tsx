@@ -10,6 +10,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Loader2 } from "lucide-react";
 import { APIConfigs } from "@/types/api-settings";
+import { CloudMailinSetup } from "@/components/settings/CloudMailinSetup";
 
 interface APISettingRecord {
   name: string;
