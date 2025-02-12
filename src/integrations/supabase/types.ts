@@ -2684,6 +2684,13 @@ export type Database = {
         }
         Relationships: [
           {
+            foreignKeyName: "fk_talent_calendar_casting"
+            columns: ["casting_id"]
+            isOneToOne: false
+            referencedRelation: "castings"
+            referencedColumns: ["id"]
+          },
+          {
             foreignKeyName: "talent_calendar_talent_id_fkey"
             columns: ["talent_id"]
             isOneToOne: false
