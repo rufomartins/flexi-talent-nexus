@@ -45,7 +45,20 @@ export function EmailSettings() {
         .maybeSingle();
 
       if (error) throw error;
-      return (data?.value || { enabled: false, module: 'onboarding' }) as CloudMailinSettings;
+      
+      const defaultSettings: CloudMailinSettings = {
+        enabled: false,
+        module: 'onboarding'
+      };
+
+      if (!data?.value) return defaultSettings;
+
+      // Safely type cast the value
+      const value = data.value as Record<string, unknown>;
+      return {
+        enabled: Boolean(value.enabled),
+        module: 'onboarding'
+      } as CloudMailinSettings;
     }
   });
 
@@ -83,14 +96,14 @@ export function EmailSettings() {
 
   const toggleReceiving = async (checked: boolean) => {
     try {
+      const value: Record<string, unknown> = {
+        enabled: checked,
+        module: 'onboarding'
+      };
+
       const { error } = await supabase
         .from('api_settings')
-        .update({ 
-          value: { 
-            enabled: checked,
-            module: 'onboarding'
-          } as CloudMailinSettings
-        })
+        .update({ value })
         .eq('name', 'cloudmailin_settings');
 
       if (error) throw error;
