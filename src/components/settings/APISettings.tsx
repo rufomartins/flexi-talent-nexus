@@ -208,6 +208,11 @@ export function APISettings() {
                 />
               </div>
             </div>
+
+            <div className="space-y-4">
+              <div className="font-medium">CloudMailin (Inbound Email)</div>
+              <CloudMailinSetup />
+            </div>
           </div>
         </CardContent>
       </Card>
