@@ -41,6 +41,22 @@ const supabaseClient = createClient(
   Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') ?? ''
 );
 
+function verifyBasicAuth(req: Request): boolean {
+  const authHeader = req.headers.get('authorization');
+  if (!authHeader || !authHeader.startsWith('Basic ')) {
+    return false;
+  }
+
+  const base64Credentials = authHeader.split(' ')[1];
+  const credentials = atob(base64Credentials);
+  const [username, password] = credentials.split(':');
+
+  const expectedUsername = Deno.env.get('CLOUDMAILIN_USERNAME');
+  const expectedPassword = Deno.env.get('CLOUDMAILIN_PASSWORD');
+
+  return username === expectedUsername && password === expectedPassword;
+}
+
 async function getEmailSettings() {
   const { data, error } = await supabaseClient
     .from('api_settings')
@@ -176,6 +192,22 @@ async function handleInboundEmail(req: Request): Promise<Response> {
   }
 
   try {
+    // Verify authentication for non-OPTIONS requests
+    if (!verifyBasicAuth(req)) {
+      console.error('Authentication failed');
+      return new Response(
+        JSON.stringify({ error: 'Unauthorized' }),
+        { 
+          status: 401,
+          headers: { 
+            ...corsHeaders,
+            'Content-Type': 'application/json',
+            'WWW-Authenticate': 'Basic realm="CloudMailin"'
+          }
+        }
+      );
+    }
+
     const rawBody = await req.text();
     console.log('Raw body preview:', rawBody.substring(0, 200));
 
@@ -193,7 +225,6 @@ async function handleInboundEmail(req: Request): Promise<Response> {
       console.log('Not an SNS message, trying CloudMailin format');
     }
 
-    // If not SNS, proceed with CloudMailin handling
     const settings = await getEmailSettings();
     console.log('Retrieved email settings:', settings);
     
@@ -255,6 +286,7 @@ async function handleInboundEmail(req: Request): Promise<Response> {
       throw messageError;
     }
 
+    // Update legacy table
     const { error: legacyError } = await supabaseClient
       .from('onboarding_inbox')
       .insert([
