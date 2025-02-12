@@ -1,3 +1,4 @@
+
 import { useState } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { Card } from "@/components/ui/card";
@@ -8,13 +9,15 @@ import { Label } from "@/components/ui/label";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
 import type { EmailSenderConfig } from "@/types/onboarding";
+import { LoadingState } from "@/utils/feedback";
 
 export function EmailSettings() {
   const { toast } = useToast();
   const queryClient = useQueryClient();
   const [enableReceiving, setEnableReceiving] = useState(false);
 
-  const { data: settings, isLoading } = useQuery({
+  // Query email sender settings
+  const { data: settings, isLoading: isLoadingSenderSettings } = useQuery({
     queryKey: ['email-settings'],
     queryFn: async () => {
       const { data, error } = await supabase
@@ -24,6 +27,24 @@ export function EmailSettings() {
 
       if (error) throw error;
       return data as EmailSenderConfig[];
+    }
+  });
+
+  // Query CloudMailin settings
+  const { data: cloudMailinSettings, isLoading: isLoadingCloudMailin } = useQuery({
+    queryKey: ['cloudmailin-settings'],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from('api_settings')
+        .select('value')
+        .eq('name', 'cloudmailin_settings')
+        .single();
+
+      if (error) throw error;
+      return data?.value || { enabled: false };
+    },
+    onSuccess: (data) => {
+      setEnableReceiving(data.enabled);
     }
   });
 
@@ -53,14 +74,18 @@ export function EmailSettings() {
   });
 
   const toggleReceiving = async (checked: boolean) => {
-    setEnableReceiving(checked);
     try {
       const { error } = await supabase
-        .from('email_settings')
-        .update({ enable_receiving: checked })
-        .eq('stage', 'default');
+        .from('api_settings')
+        .update({ 
+          value: { enabled: checked }
+        })
+        .eq('name', 'cloudmailin_settings');
 
       if (error) throw error;
+
+      setEnableReceiving(checked);
+      queryClient.invalidateQueries({ queryKey: ['cloudmailin-settings'] });
 
       toast({
         title: "Success",
@@ -72,11 +97,13 @@ export function EmailSettings() {
         description: error.message || "Failed to update email receiving settings",
         variant: "destructive",
       });
+      // Revert the toggle if there was an error
+      setEnableReceiving(!checked);
     }
   };
 
-  if (isLoading) {
-    return <div>Loading...</div>;
+  if (isLoadingSenderSettings || isLoadingCloudMailin) {
+    return <LoadingState loading={true} message="Loading email settings..." />;
   }
 
   return (
