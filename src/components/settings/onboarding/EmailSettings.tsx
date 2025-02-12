@@ -96,14 +96,16 @@ export function EmailSettings() {
 
   const toggleReceiving = async (checked: boolean) => {
     try {
-      const value: Record<string, unknown> = {
+      const settingsValue = {
         enabled: checked,
         module: 'onboarding'
       };
 
       const { error } = await supabase
         .from('api_settings')
-        .update({ value })
+        .update({ 
+          value: settingsValue as { [key: string]: string | boolean }
+        })
         .eq('name', 'cloudmailin_settings');
 
       if (error) throw error;
