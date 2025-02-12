@@ -76,18 +76,24 @@ async function handleTestEmail(req: Request): Promise<Response> {
     const password = Deno.env.get('CLOUDMAILIN_PASSWORD');
     const credentials = btoa(`${username}:${password}`);
 
-    // Forward the test email to our handler
+    // Forward the test email to our email-webhook-proxy
     const response = await fetch(
-      `${Deno.env.get('SUPABASE_URL')}/functions/v1/handle-inbound-email`,
+      `${Deno.env.get('SUPABASE_URL')}/functions/v1/email-webhook-proxy`,
       {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
-          'Authorization': `Bearer ${Deno.env.get('SUPABASE_ANON_KEY')}`,
+          'Authorization': `Basic ${credentials}`,
         },
         body: payloadString
       }
     );
+
+    if (!response.ok) {
+      const errorText = await response.text();
+      console.error('Error response:', response.status, errorText);
+      throw new Error(`Failed to process test email: ${response.status} ${errorText}`);
+    }
 
     const result = await response.json();
     console.log('Handler response:', result);
