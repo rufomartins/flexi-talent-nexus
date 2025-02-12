@@ -1,7 +1,7 @@
 
 import { useState } from "react";
-import { Button } from "@/components/common/Button";
-import { Card } from "@/components/common/Card";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
 import { Loader2, Copy } from "lucide-react";
@@ -52,40 +52,48 @@ export function CloudMailinSetup() {
   };
 
   return (
-    <Card className="w-full">
-      <div className="space-y-4 p-6">
-        <h3 className="text-lg font-medium">CloudMailin Setup</h3>
-        <p className="text-sm text-muted-foreground">
-          Generate and copy your CloudMailin webhook URL with embedded credentials.
-        </p>
-        
-        <div className="flex flex-col space-y-4">
-          <Button
-            onClick={getCloudMailinUrl}
-            disabled={loading}
-            className="w-fit"
-          >
-            {loading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-            Generate URL
-          </Button>
-
-          {url && (
-            <div className="relative">
-              <div className="rounded-md border bg-muted p-4 font-mono text-sm">
-                {url}
-              </div>
-              <Button
-                variant="outline"
-                size="icon"
-                className="absolute right-2 top-2"
-                onClick={copyToClipboard}
-              >
-                <Copy className="h-4 w-4" />
-              </Button>
-            </div>
-          )}
-        </div>
+    <div className="space-y-4">
+      <div className="flex items-center justify-between">
+        <Label htmlFor="forward-email-enabled">Enable CloudMailin Integration</Label>
+        <Switch
+          id="forward-email-enabled"
+          checked={getSettingValue('cloudmailin_settings')?.enabled ?? false}
+          onCheckedChange={(checked) => {
+            const currentValue = getSettingValue('cloudmailin_settings');
+            updateSettings.mutate({
+              name: 'cloudmailin_settings',
+              value: { ...currentValue, enabled: checked }
+            });
+          }}
+        />
       </div>
-    </Card>
+      
+      <div className="space-y-4">
+        <Button
+          onClick={getCloudMailinUrl}
+          disabled={loading}
+          variant="outline"
+        >
+          {loading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+          Generate URL
+        </Button>
+
+        {url && (
+          <div className="relative">
+            <div className="rounded-md border bg-muted p-4 font-mono text-sm">
+              {url}
+            </div>
+            <Button
+              variant="outline"
+              size="icon"
+              className="absolute right-2 top-2"
+              onClick={copyToClipboard}
+            >
+              <Copy className="h-4 w-4" />
+            </Button>
+          </div>
+        )}
+      </div>
+    </div>
   );
 }
