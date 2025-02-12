@@ -1,6 +1,5 @@
 
 import { serve } from "https://deno.land/std@0.190.0/http/server.ts";
-import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
@@ -71,6 +70,11 @@ async function handleTestEmail(req: Request): Promise<Response> {
 
     console.log('Sending test email to handler');
 
+    // Create Basic Auth credentials
+    const username = Deno.env.get('CLOUDMAILIN_USERNAME');
+    const password = Deno.env.get('CLOUDMAILIN_PASSWORD');
+    const credentials = btoa(`${username}:${password}`);
+
     // Forward the test email to our handler
     const response = await fetch(
       `${Deno.env.get('SUPABASE_URL')}/functions/v1/handle-inbound-email`,
@@ -78,7 +82,7 @@ async function handleTestEmail(req: Request): Promise<Response> {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
-          'Authorization': `Bearer ${Deno.env.get('SUPABASE_ANON_KEY')}`,
+          'Authorization': `Basic ${credentials}`,
         },
         body: payloadString
       }
