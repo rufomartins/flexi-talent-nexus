@@ -1,5 +1,5 @@
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { Card } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
@@ -9,7 +9,11 @@ import { Label } from "@/components/ui/label";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
 import type { EmailSenderConfig } from "@/types/onboarding";
-import { LoadingState } from "@/utils/feedback";
+
+interface CloudMailinSettings {
+  enabled: boolean;
+  module: 'onboarding';
+}
 
 export function EmailSettings() {
   const { toast } = useToast();
@@ -38,15 +42,19 @@ export function EmailSettings() {
         .from('api_settings')
         .select('value')
         .eq('name', 'cloudmailin_settings')
-        .single();
+        .maybeSingle();
 
       if (error) throw error;
-      return data?.value || { enabled: false };
-    },
-    onSuccess: (data) => {
-      setEnableReceiving(data.enabled);
+      return (data?.value || { enabled: false, module: 'onboarding' }) as CloudMailinSettings;
     }
   });
+
+  // Update enableReceiving state when cloudMailinSettings changes
+  useEffect(() => {
+    if (cloudMailinSettings) {
+      setEnableReceiving(cloudMailinSettings.enabled);
+    }
+  }, [cloudMailinSettings]);
 
   const updateSetting = useMutation({
     mutationFn: async (setting: Partial<EmailSenderConfig> & { id: string }) => {
@@ -78,7 +86,10 @@ export function EmailSettings() {
       const { error } = await supabase
         .from('api_settings')
         .update({ 
-          value: { enabled: checked }
+          value: { 
+            enabled: checked,
+            module: 'onboarding'
+          } as CloudMailinSettings
         })
         .eq('name', 'cloudmailin_settings');
 
@@ -103,7 +114,13 @@ export function EmailSettings() {
   };
 
   if (isLoadingSenderSettings || isLoadingCloudMailin) {
-    return <LoadingState loading={true} message="Loading email settings..." />;
+    return (
+      <div className="flex items-center justify-center p-6">
+        <div className="text-sm text-muted-foreground">
+          Loading email settings...
+        </div>
+      </div>
+    );
   }
 
   return (
