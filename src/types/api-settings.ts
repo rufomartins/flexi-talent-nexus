@@ -19,6 +19,10 @@ export interface ForwardEmailConfig {
   webhook_url: string;
 }
 
+export interface CloudMailinConfig {
+  enabled: boolean;
+}
+
 export interface CloudinConfig {
   enabled: boolean;
   api_key: string;
@@ -38,6 +42,7 @@ export interface APIConfigs {
   casting_twilio_credentials?: TwilioConfig;
   booking_twilio_credentials?: TwilioConfig;
   forward_email_settings?: ForwardEmailConfig;
+  cloudmailin_settings?: CloudMailinConfig;
   cloudin_settings?: CloudinConfig;
   agora_settings?: AgoraConfig;
 }

@@ -212,7 +212,10 @@ export function APISettings() {
 
             <div className="space-y-4">
               <div className="font-medium">CloudMailin (Inbound Email)</div>
-              <CloudMailinSetup />
+              <CloudMailinSetup 
+                getSettingValue={getSettingValue}
+                updateSettings={updateSettings.mutate}
+              />
             </div>
           </div>
         </CardContent>
