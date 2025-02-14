@@ -8,13 +8,50 @@ app.set('trust proxy', true);
 // Parse JSON bodies
 app.use(express.json());
 
-// Webhook endpoint
-app.post('/webhook', async (req, res) => {
+// Add detailed logging middleware
+app.use((req, res, next) => {
+  console.log('Incoming request:', {
+    method: req.method,
+    path: req.path,
+    headers: req.headers,
+    body: req.body,
+    timestamp: new Date().toISOString()
+  });
+  next();
+});
+
+// Basic auth middleware for CloudMailin
+const authenticateCloudMailin = (req, res, next) => {
+  const authHeader = req.headers.authorization;
+  
+  if (!authHeader || !authHeader.startsWith('Basic ')) {
+    console.log('Missing or invalid authorization header');
+    return res.status(401).json({ error: 'Unauthorized' });
+  }
+
+  const base64Credentials = authHeader.split(' ')[1];
+  const credentials = Buffer.from(base64Credentials, 'base64').toString('ascii');
+  const [username, password] = credentials.split(':');
+
+  if (
+    username !== process.env.CLOUDMAILIN_USERNAME ||
+    password !== process.env.CLOUDMAILIN_PASSWORD
+  ) {
+    console.log('Invalid CloudMailin credentials');
+    return res.status(401).json({ error: 'Invalid credentials' });
+  }
+
+  next();
+};
+
+// Webhook endpoint with authentication
+app.post('/webhook', authenticateCloudMailin, async (req, res) => {
   try {
     console.log('Received webhook:', req.body);
     
     // Add basic validation
     if (!req.body || !req.body.envelope || !req.body.headers) {
+      console.log('Invalid webhook payload - missing required fields');
       return res.status(400).json({ error: 'Invalid webhook payload' });
     }
 
