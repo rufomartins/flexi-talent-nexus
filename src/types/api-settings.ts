@@ -6,7 +6,6 @@ export interface VideoSettings {
 
 export interface CloudMailinSettings {
   enabled: boolean;
-  webhook_url?: string;
 }
 
 export interface ResendSettings {
