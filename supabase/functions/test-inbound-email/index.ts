@@ -19,32 +19,11 @@ const testEmailPayload = {
     to: "test@onboarding.gtmd.studio",
     from: "test@example.com"
   },
-  subject: "Test Email from CloudMailin",
-  plain: "This is a test email body",
-  html: "<p>This is a test email body in HTML format</p>",
-  attachments: [{
-    content_type: "text/plain",
-    file_name: "test.txt",
-    size: 11,
-    url: "https://example.com/test.txt"
-  }]
+  subject: "Test Email - CloudMailin Webhook Verification",
+  plain: "This is a test email to verify CloudMailin webhook integration is working correctly.",
+  html: "<p>This is a test email to verify CloudMailin webhook integration is working correctly.</p>",
+  attachments: []
 };
-
-async function getEmailSettings() {
-  const supabaseClient = createClient(
-    Deno.env.get('SUPABASE_URL') ?? '',
-    Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') ?? ''
-  );
-
-  const { data, error } = await supabaseClient
-    .from('api_settings')
-    .select('value')
-    .eq('name', 'cloudmailin_settings')
-    .single();
-
-  if (error) throw error;
-  return data?.value || { enabled: true };
-}
 
 async function handleTestEmail(req: Request): Promise<Response> {
   console.log('Processing test email request');
@@ -55,26 +34,25 @@ async function handleTestEmail(req: Request): Promise<Response> {
   }
 
   try {
-    const settings = await getEmailSettings();
-    console.log('Retrieved email settings');
-    
-    if (!settings.enabled) {
-      throw new Error('Email integration is disabled');
-    }
-
     // Convert payload to string
     const payloadString = JSON.stringify(testEmailPayload);
 
     console.log('Created test payload:', {
-      payloadLength: payloadString.length
+      payloadLength: payloadString.length,
+      subject: testEmailPayload.subject
     });
-
-    console.log('Sending test email to handler');
 
     // Create Basic Auth credentials
     const username = Deno.env.get('CLOUDMAILIN_USERNAME');
     const password = Deno.env.get('CLOUDMAILIN_PASSWORD');
+    
+    if (!username || !password) {
+      throw new Error('CloudMailin credentials not found in environment variables');
+    }
+    
     const credentials = btoa(`${username}:${password}`);
+
+    console.log('Sending test email to webhook proxy');
 
     // Forward the test email to our email-webhook-proxy
     const response = await fetch(
