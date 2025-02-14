@@ -1,22 +1,7 @@
 
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
-
-export type ProjectTaskStatus = 'Pending' | 'In Progress' | 'Approved';
-export type ProjectReviewStatus = 'Internal Review' | 'Client Review' | 'Approved';
-export type ProjectTalentStatus = 'Booked' | 'Shooting' | 'Delivered' | 'Reshoot' | 'Approved';
-export type ProjectDeliveryStatus = 'Pending' | 'Delivered' | 'R Pending';
-
-interface ProjectTask {
-  id: string;
-  name: string;
-  script_status: ProjectTaskStatus;
-  review_status: ProjectReviewStatus;
-  talent_status: ProjectTalentStatus;
-  delivery_status: ProjectDeliveryStatus;
-  priority?: string;
-  language_id: string;
-}
+import type { ProjectTask } from "@/types/project";
 
 export function useProjectTasks(projectId: string) {
   return useQuery<ProjectTask[]>({
