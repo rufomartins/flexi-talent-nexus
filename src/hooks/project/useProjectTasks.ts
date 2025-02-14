@@ -17,12 +17,14 @@ export function useProjectTasks(projectId: string) {
           talent_status,
           delivery_status,
           priority,
-          language_id
+          language_id,
+          created_at,
+          updated_at
         `)
         .eq('project_id', projectId);
 
       if (error) throw error;
-      return data;
+      return data || [];
     },
     enabled: !!projectId
   });

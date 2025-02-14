@@ -1,26 +1,14 @@
 
 export type ProjectStatus = 'active' | 'completed' | 'on_hold';
 
-export type ProjectScriptStatus = 'Pending' | 'In Progress' | 'Completed';
+export type ProjectScriptStatus = 'Pending' | 'In Progress' | 'Approved';
 export type ProjectReviewStatus = 'Internal Review' | 'Client Review' | 'Approved';
-export type ProjectTalentStatus = 'Booked' | 'Confirmed' | 'Unavailable';
-export type ProjectDeliveryStatus = 'Pending' | 'In Progress' | 'Delivered';
+export type ProjectTalentStatus = 'Booked' | 'Shooting' | 'Delivered' | 'Reshoot' | 'Approved';
+export type ProjectDeliveryStatus = 'Pending' | 'Delivered' | 'R Pending';
 
 export interface Client {
   id: string;
   name: string;
-}
-
-export interface Language {
-  id: string;
-  language_name: string;
-  tasks?: ProjectTask[];
-}
-
-export interface Country {
-  id: string;
-  country_name: string;
-  languages: Language[];
 }
 
 export interface Project {
@@ -36,11 +24,13 @@ export interface Project {
   completion_percentage?: number;
   active_tasks_count?: number;
   upcoming_deadlines_count?: number;
-  client?: Client;
+  client?: {
+    id: string;
+    name: string;
+  };
   project_manager?: {
     full_name: string;
   };
-  countries: Country[];
   created_at: string;
   updated_at: string;
 }
@@ -55,19 +45,5 @@ export interface ProjectTask {
   delivery_status: ProjectDeliveryStatus;
   priority: string;
   created_at: string;
-  updated_at?: string;
-}
-
-export interface ProjectItem extends ProjectTask {
-  created_at: string;
-}
-
-export interface ShotList {
-  id?: string;
-  task_id: string;
-  name: string;
-  shared_with?: any;
-  version?: number;
-  created_at?: string;
   updated_at?: string;
 }

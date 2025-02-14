@@ -1,89 +1,116 @@
 
+import { useState } from 'react';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { GeneralSettings } from "@/components/settings/GeneralSettings";
-import { OnboardingSettings } from "@/components/settings/OnboardingSettings";
-import { TalentSettings } from "@/components/settings/TalentSettings";
-import { CastingSettings } from "@/components/settings/CastingSettings";
 import { ProjectSettings } from "@/components/settings/ProjectSettings";
+import { TalentSettings } from "@/components/settings/TalentSettings";
+import { APISettings } from "@/components/settings/APISettings";
+import { CalendarSettings } from "@/components/settings/CalendarSettings";
+import { CastingSettings } from "@/components/settings/CastingSettings";
 import { MessageSettings } from "@/components/settings/MessageSettings";
 import { FinancialSettings } from "@/components/settings/FinancialSettings";
-import { CalendarSettings } from "@/components/settings/CalendarSettings";
-import { APISettings } from "@/components/settings/APISettings";
-import { useAuth } from "@/contexts/auth";
-import { Navigate } from "react-router-dom";
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import { supabase } from "@/integrations/supabase/client";
+import { OnboardingSettings } from "@/components/settings/OnboardingSettings";
+import { useToast } from "@/hooks/use-toast";
+import type { APIConfigs } from "@/types/api-settings";
 
-export default function Settings() {
-  const { user, userDetails } = useAuth();
+export default function SettingsPage() {
+  const [activeTab, setActiveTab] = useState("general");
+  const { toast } = useToast();
+  const queryClient = useQueryClient();
 
-  // Only super admins can access settings
-  if (!user || userDetails?.role !== 'super_admin') {
-    return <Navigate to="/dashboard" replace />;
-  }
+  const { data: settings } = useQuery({
+    queryKey: ['api-settings'],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from('api_settings')
+        .select('*');
+      
+      if (error) throw error;
+      return data;
+    }
+  });
+
+  const updateSettings = useMutation({
+    mutationFn: async ({ name, value }: { name: string, value: any }) => {
+      const { error } = await supabase
+        .from('api_settings')
+        .upsert({ name, value })
+        .eq('name', name);
+
+      if (error) throw error;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['api-settings'] });
+      toast({
+        title: "Settings updated",
+        description: "Your settings have been saved successfully.",
+      });
+    },
+    onError: (error) => {
+      console.error('Error updating settings:', error);
+      toast({
+        title: "Error",
+        description: "Failed to update settings",
+        variant: "destructive",
+      });
+    }
+  });
+
+  const getSettingValue = <T extends keyof APIConfigs>(name: T): APIConfigs[T] => {
+    const setting = settings?.find(s => s.name === name);
+    return (setting?.value || {}) as APIConfigs[T];
+  };
 
   return (
-    <div className="container mx-auto py-6 space-y-6">
-      <div className="flex items-center justify-between">
-        <div>
-          <h1 className="text-2xl font-bold">Settings</h1>
-          <p className="text-muted-foreground">
-            Manage platform settings and configurations
-          </p>
-        </div>
+    <div className="space-y-6 p-10">
+      <div>
+        <h2 className="text-2xl font-bold tracking-tight">Settings</h2>
+        <p className="text-muted-foreground">
+          Manage your application settings and preferences.
+        </p>
       </div>
-
-      <Tabs defaultValue="general" className="space-y-4">
-        <div className="border-b">
-          <div className="overflow-x-auto">
-            <TabsList className="inline-flex h-10 items-center justify-start w-full px-1 py-1">
-              <TabsTrigger value="general" className="px-4">General</TabsTrigger>
-              <TabsTrigger value="onboarding" className="px-4">Onboarding</TabsTrigger>
-              <TabsTrigger value="talents" className="px-4">Talents</TabsTrigger>
-              <TabsTrigger value="castings" className="px-4">Castings</TabsTrigger>
-              <TabsTrigger value="projects" className="px-4">Projects</TabsTrigger>
-              <TabsTrigger value="messages" className="px-4">Messages</TabsTrigger>
-              <TabsTrigger value="financial" className="px-4">Financial</TabsTrigger>
-              <TabsTrigger value="calendar" className="px-4">Calendar</TabsTrigger>
-              <TabsTrigger value="apis" className="px-4">APIs</TabsTrigger>
-            </TabsList>
-          </div>
-        </div>
-
-        <TabsContent value="general" className="space-y-4">
+      <Tabs value={activeTab} onValueChange={setActiveTab}>
+        <TabsList className="grid w-full grid-cols-4 lg:grid-cols-8">
+          <TabsTrigger value="general">General</TabsTrigger>
+          <TabsTrigger value="projects">Projects</TabsTrigger>
+          <TabsTrigger value="talents">Talents</TabsTrigger>
+          <TabsTrigger value="api">API</TabsTrigger>
+          <TabsTrigger value="calendar">Calendar</TabsTrigger>
+          <TabsTrigger value="casting">Casting</TabsTrigger>
+          <TabsTrigger value="messages">Messages</TabsTrigger>
+          <TabsTrigger value="financial">Financial</TabsTrigger>
+        </TabsList>
+        <TabsContent value="general">
           <GeneralSettings />
         </TabsContent>
-        
-        <TabsContent value="onboarding" className="space-y-4">
-          <OnboardingSettings />
-        </TabsContent>
-        
-        <TabsContent value="talents" className="space-y-4">
-          <TalentSettings />
-        </TabsContent>
-        
-        <TabsContent value="castings" className="space-y-4">
-          <CastingSettings />
-        </TabsContent>
-        
-        <TabsContent value="projects" className="space-y-4">
+        <TabsContent value="projects">
           <ProjectSettings />
         </TabsContent>
-        
-        <TabsContent value="messages" className="space-y-4">
-          <MessageSettings />
+        <TabsContent value="talents">
+          <TalentSettings />
         </TabsContent>
-        
-        <TabsContent value="financial" className="space-y-4">
-          <FinancialSettings />
-        </TabsContent>
-        
-        <TabsContent value="calendar" className="space-y-4">
-          <CalendarSettings />
-        </TabsContent>
-        
-        <TabsContent value="apis" className="space-y-4">
+        <TabsContent value="api">
           <APISettings />
         </TabsContent>
+        <TabsContent value="calendar">
+          <CalendarSettings />
+        </TabsContent>
+        <TabsContent value="casting">
+          <CastingSettings />
+        </TabsContent>
+        <TabsContent value="messages">
+          <MessageSettings />
+        </TabsContent>
+        <TabsContent value="financial">
+          <FinancialSettings />
+        </TabsContent>
       </Tabs>
+      <OnboardingSettings 
+        getSettingValue={getSettingValue}
+        updateSettings={updateSettings.mutate}
+      />
     </div>
   );
 }

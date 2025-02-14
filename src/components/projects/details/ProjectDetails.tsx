@@ -1,3 +1,4 @@
+
 import { useEffect, useState } from "react";
 import { useParams } from "react-router-dom";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
@@ -8,7 +9,7 @@ import { ProjectOverview } from "./ProjectOverview";
 import { ProjectTeam } from "./ProjectTeam";
 import { ProjectDocuments } from "./ProjectDocuments";
 import { ProjectSettings } from "./ProjectSettings";
-import type { Project } from "@/types/projects";
+import type { Project } from "@/types/project";
 
 export function ProjectDetails() {
   const { id } = useParams();
@@ -78,21 +79,15 @@ export function ProjectDetails() {
       status: data.status,
       start_date: data.start_date,
       end_date: data.end_date,
-      budget: data.budget,
-      client: {
-        id: data.client?.id || '',
-        name: data.client?.name || ''
-      },
-      team: data.team?.map((member: any) => ({
-        id: member.id,
-        role: member.role,
-        user: {
-          id: member.user.id,
-          full_name: member.user.full_name,
-          email: member.user.email,
-          avatar_url: member.user.avatar_url
-        }
-      })) || [],
+      client_id: data.client_id,
+      project_manager_id: data.project_manager_id,
+      client: data.client ? {
+        id: data.client.id,
+        name: data.client.name
+      } : undefined,
+      project_manager: data.project_manager ? {
+        full_name: data.project_manager.full_name
+      } : undefined,
       created_at: data.created_at,
       updated_at: data.updated_at
     };
