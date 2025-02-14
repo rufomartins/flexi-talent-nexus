@@ -109,7 +109,9 @@ export default function SettingsPage() {
       </Tabs>
       <OnboardingSettings 
         getSettingValue={getSettingValue}
-        updateSettings={updateSettings.mutate}
+        updateSettings={(args: { name: keyof APIConfigs; value: any }) => 
+          updateSettings.mutate(args)
+        }
       />
     </div>
   );
