@@ -20,7 +20,7 @@ const updateCloudMailinSecrets = async () => {
   );
 
   try {
-    // Update CloudMailin secrets
+    // Update CloudMailin secrets with the correct password
     await supabaseAdmin.functions.setSecret('CLOUDMAILIN_USERNAME', 'inbound');
     await supabaseAdmin.functions.setSecret('CLOUDMAILIN_PASSWORD', 'Navigator145');
 
@@ -31,9 +31,7 @@ const updateCloudMailinSecrets = async () => {
   }
 };
 
-async function handler(req: Request): Promise<Response> {
-  console.log('Processing update CloudMailin secrets request');
-
+serve(async (req: Request) => {
   if (req.method === 'OPTIONS') {
     return new Response(null, { headers: corsHeaders });
   }
@@ -63,6 +61,4 @@ async function handler(req: Request): Promise<Response> {
       }
     );
   }
-}
-
-serve(handler);
+});
