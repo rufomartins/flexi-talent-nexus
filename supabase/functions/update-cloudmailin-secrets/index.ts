@@ -20,11 +20,11 @@ const updateCloudMailinSecrets = async () => {
   );
 
   try {
-    // Update CloudMailin secrets with the correct password
+    // Update CloudMailin secrets with a completely new password
     await supabaseAdmin.functions.setSecret('CLOUDMAILIN_USERNAME', 'inbound');
-    await supabaseAdmin.functions.setSecret('CLOUDMAILIN_PASSWORD', 'Navigator145');
+    await supabaseAdmin.functions.setSecret('CLOUDMAILIN_PASSWORD', 'GTMD_Secure_Mail_2024!');
 
-    return { success: true, message: 'CloudMailin secrets updated successfully' };
+    return { success: true, message: 'CloudMailin secrets updated successfully with new password' };
   } catch (error) {
     console.error('Error updating CloudMailin secrets:', error);
     throw error;

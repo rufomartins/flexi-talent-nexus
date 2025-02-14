@@ -7,7 +7,6 @@ const corsHeaders = {
 };
 
 serve(async (req: Request) => {
-  // Handle CORS
   if (req.method === 'OPTIONS') {
     return new Response(null, { headers: corsHeaders });
   }
@@ -15,36 +14,37 @@ serve(async (req: Request) => {
   try {
     const username = Deno.env.get('CLOUDMAILIN_USERNAME');
     const password = Deno.env.get('CLOUDMAILIN_PASSWORD');
-    
+
     if (!username || !password) {
-      throw new Error('CloudMailin credentials not found in environment variables');
+      throw new Error('CloudMailin credentials not found');
     }
 
-    // URL encode the credentials to handle special characters
-    const encodedUsername = encodeURIComponent(username);
-    const encodedPassword = encodeURIComponent(password);
+    // Create the encoded auth credentials
+    const credentials = btoa(`${username}:${password}`);
     
-    const baseUrl = Deno.env.get('SUPABASE_URL');
-    const webhookUrl = `${baseUrl}/functions/v1/email-webhook-proxy`;
-    
-    // Construct the URL with embedded credentials
-    const secureUrl = webhookUrl.replace('https://', `https://${encodedUsername}:${encodedPassword}@`);
+    // Generate the URL with basic auth
+    const webhookUrl = `${Deno.env.get('SUPABASE_URL')}/functions/v1/email-webhook-proxy`;
+    const urlWithAuth = webhookUrl.replace('https://', `https://${credentials}@`);
 
     return new Response(
       JSON.stringify({ 
-        url: secureUrl,
-        note: "Use this URL in your CloudMailin dashboard as the target URL"
+        success: true,
+        url: urlWithAuth
       }),
       { 
         headers: { ...corsHeaders, 'Content-Type': 'application/json' },
         status: 200 
       }
     );
-
   } catch (error) {
-    console.error('Error generating URL:', error);
+    console.error('Error generating CloudMailin URL:', error);
+    
     return new Response(
-      JSON.stringify({ error: error.message }),
+      JSON.stringify({ 
+        success: false,
+        error: 'Failed to generate CloudMailin URL',
+        details: error.message 
+      }),
       { 
         headers: { ...corsHeaders, 'Content-Type': 'application/json' },
         status: 500 
