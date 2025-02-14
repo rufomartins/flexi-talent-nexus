@@ -19,7 +19,7 @@ interface ProjectTask {
 }
 
 export function useProjectTasks(projectId: string) {
-  return useQuery({
+  return useQuery<ProjectTask[]>({
     queryKey: ['project-tasks', projectId],
     queryFn: async () => {
       const { data, error } = await supabase
@@ -37,7 +37,7 @@ export function useProjectTasks(projectId: string) {
         .eq('project_id', projectId);
 
       if (error) throw error;
-      return data as ProjectTask[];
+      return data;
     },
     enabled: !!projectId
   });
