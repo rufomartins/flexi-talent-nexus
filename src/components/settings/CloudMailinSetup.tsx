@@ -6,7 +6,7 @@ import { Label } from "@/components/ui/label";
 import { Switch } from "@/components/ui/switch";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
-import { Loader2, Copy } from "lucide-react";
+import { Loader2, Copy, Key } from "lucide-react";
 import { APIConfigs } from "@/types/api-settings";
 
 interface CloudMailinSetupProps {
@@ -17,7 +17,34 @@ interface CloudMailinSetupProps {
 export function CloudMailinSetup({ getSettingValue, updateSettings }: CloudMailinSetupProps) {
   const [url, setUrl] = useState<string>("");
   const [loading, setLoading] = useState(false);
+  const [updatingSecrets, setUpdatingSecrets] = useState(false);
   const { toast } = useToast();
+
+  const updateCloudMailinSecrets = async () => {
+    setUpdatingSecrets(true);
+    try {
+      const { error } = await supabase.functions.invoke('update-cloudmailin-secrets');
+      
+      if (error) throw error;
+      
+      toast({
+        title: "Success",
+        description: "CloudMailin credentials updated successfully",
+      });
+
+      // Clear existing URL so user knows they need to generate a new one
+      setUrl("");
+    } catch (error) {
+      console.error('Error updating CloudMailin secrets:', error);
+      toast({
+        title: "Error",
+        description: "Failed to update CloudMailin credentials",
+        variant: "destructive",
+      });
+    } finally {
+      setUpdatingSecrets(false);
+    }
+  };
 
   const getCloudMailinUrl = async () => {
     setLoading(true);
@@ -84,14 +111,29 @@ export function CloudMailinSetup({ getSettingValue, updateSettings }: CloudMaili
         </div>
         
         <div className="space-y-4">
-          <Button
-            onClick={getCloudMailinUrl}
-            disabled={loading}
-            variant="outline"
-          >
-            {loading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-            Generate URL
-          </Button>
+          <div className="flex gap-2">
+            <Button
+              onClick={getCloudMailinUrl}
+              disabled={loading}
+              variant="outline"
+            >
+              {loading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+              Generate URL
+            </Button>
+
+            <Button
+              onClick={updateCloudMailinSecrets}
+              disabled={updatingSecrets}
+              variant="outline"
+            >
+              {updatingSecrets ? (
+                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+              ) : (
+                <Key className="mr-2 h-4 w-4" />
+              )}
+              Update Credentials
+            </Button>
+          </div>
 
           {url && (
             <div className="relative">
