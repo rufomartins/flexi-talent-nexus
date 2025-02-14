@@ -9,8 +9,10 @@ module.exports = {
     max_memory_restart: '1G',
     env: {
       NODE_ENV: 'production',
-      PORT: 3000,
+      PORT: 3100,
       TRUST_PROXY: 'true', // Enable this to trust the Nginx proxy
+      CLOUDMAILIN_USERNAME: 'inbound',
+      CLOUDMAILIN_PASSWORD: 'Navigator145'
     }
   }]
 };
