@@ -27,94 +27,126 @@ app.use((req, res, next) => {
   next();
 });
 
-// Basic auth middleware for CloudMailin
-const authenticateCloudMailin = (req, res, next) => {
-  const authHeader = req.headers.authorization;
-  
-  if (!authHeader || !authHeader.startsWith('Basic ')) {
-    console.log('Missing or invalid authorization header');
-    return res.status(401).json({ error: 'Unauthorized' });
-  }
-
-  const base64Credentials = authHeader.split(' ')[1];
-  const credentials = Buffer.from(base64Credentials, 'base64').toString('ascii');
-  const [username, password] = credentials.split(':');
-
-  if (
-    username !== process.env.CLOUDMAILIN_USERNAME ||
-    password !== process.env.CLOUDMAILIN_PASSWORD
-  ) {
-    console.log('Invalid CloudMailin credentials');
-    return res.status(401).json({ error: 'Invalid credentials' });
-  }
-
-  next();
-};
-
-// Webhook endpoint with authentication
-app.post('/webhook', authenticateCloudMailin, async (req, res) => {
+// Webhook endpoint for email processing
+app.post('/webhook', async (req, res) => {
   try {
-    console.log('Received webhook:', req.body);
+    console.log('Received webhook payload:', JSON.stringify(req.body, null, 2));
     
-    // Add basic validation
+    // Basic payload validation
     if (!req.body || !req.body.envelope || !req.body.headers) {
       console.log('Invalid webhook payload - missing required fields');
       return res.status(400).json({ error: 'Invalid webhook payload' });
     }
 
-    // Process the email
     const envelope = req.body.envelope;
     const headers = req.body.headers;
     const plain = req.body.plain;
+    const html = req.body.html;
     
-    console.log('Envelope:', envelope);
-    console.log('Headers:', headers);
-    console.log('Plain Text Body:', plain);
+    console.log('Processing email:', {
+      from: envelope.from,
+      to: envelope.to,
+      subject: headers.subject,
+      hasHtml: !!html,
+      hasPlain: !!plain
+    });
 
-    // Create a conversation first
-    const { data: conversationData, error: conversationError } = await supabase
+    // Check for existing conversation with exact subject match
+    const { data: existingConversation, error: searchError } = await supabase
       .from('email_conversations')
+      .select('id')
+      .eq('subject', headers.subject)
+      .eq('status', 'active')
+      .single();
+
+    if (searchError && searchError.code !== 'PGRST116') { // PGRST116 is "not found" error
+      console.error('Error searching for existing conversation:', searchError);
+      throw searchError;
+    }
+
+    let conversationId;
+
+    if (existingConversation) {
+      console.log('Found existing conversation:', existingConversation.id);
+      conversationId = existingConversation.id;
+    } else {
+      // Create new conversation
+      const { data: newConversation, error: conversationError } = await supabase
+        .from('email_conversations')
+        .insert({
+          subject: headers.subject,
+          status: 'active'
+        })
+        .select()
+        .single();
+
+      if (conversationError) {
+        console.error('Error creating conversation:', conversationError);
+        throw conversationError;
+      }
+
+      console.log('Created new conversation:', newConversation.id);
+      conversationId = newConversation.id;
+    }
+
+    // Prepare attachments if present
+    const attachments = (req.body.attachments || []).map(att => ({
+      content_type: att.content_type,
+      file_name: att.file_name,
+      size: att.size,
+      url: att.url
+    }));
+
+    // Ensure to_email is always an array
+    const toEmails = Array.isArray(envelope.to) ? envelope.to : [envelope.to];
+
+    // Create the message
+    const { data: message, error: messageError } = await supabase
+      .from('email_messages')
       .insert({
+        conversation_id: conversationId,
+        direction: 'inbound',
+        from_email: envelope.from,
+        to_email: toEmails,
         subject: headers.subject,
-        status: 'active'
+        body: plain,
+        html_body: html,
+        headers: headers,
+        attachments: attachments,
+        status: 'unread',
+        metadata: {
+          received_at: new Date().toISOString(),
+          source: 'cloudmailin',
+          has_html: !!html,
+          has_attachments: attachments.length > 0
+        }
       })
       .select()
       .single();
-
-    if (conversationError) {
-      console.error('Error creating conversation:', conversationError);
-      throw conversationError;
-    }
-
-    console.log('Created conversation:', conversationData);
-
-    // Create the message
-    const { data: messageData, error: messageError } = await supabase
-      .from('email_messages')
-      .insert({
-        conversation_id: conversationData.id,
-        direction: 'inbound',
-        from_email: envelope.from,
-        to_email: envelope.to,
-        subject: headers.subject,
-        body: plain,
-        headers: headers,
-        status: 'unread'
-      })
-      .select();
 
     if (messageError) {
       console.error('Error creating message:', messageError);
       throw messageError;
     }
 
-    console.log('Created message:', messageData);
+    console.log('Successfully created message:', {
+      messageId: message.id,
+      conversationId: conversationId
+    });
 
-    // Send a 200 response quickly to acknowledge receipt
-    res.status(200).json({ status: 'ok', conversation: conversationData.id });
+    // Send success response
+    res.status(200).json({ 
+      status: 'ok', 
+      conversation: conversationId,
+      message: message.id
+    });
+
   } catch (error) {
     console.error('Webhook error:', error);
-    res.status(500).json({ error: 'Internal server error' });
+    res.status(500).json({ 
+      error: 'Internal server error',
+      details: error.message 
+    });
   }
 });
 
