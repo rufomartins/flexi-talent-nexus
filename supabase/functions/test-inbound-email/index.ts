@@ -103,6 +103,81 @@ async function findOrCreateConversation(subject: string): Promise<string> {
   return newConversation.id;
 }
 
+async function handleSNSConfirmation(snsMessage: SNSMessage): Promise<Response> {
+  console.log('Processing SNS subscription confirmation');
+  
+  try {
+    if (!snsMessage.SubscribeURL) {
+      throw new Error('No SubscribeURL provided in confirmation message');
+    }
+
+    const response = await fetch(snsMessage.SubscribeURL);
+    
+    if (!response.ok) {
+      throw new Error(`Failed to confirm subscription: ${response.statusText}`);
+    }
+
+    console.log('SNS subscription confirmed successfully');
+    
+    return new Response(
+      JSON.stringify({ success: true, message: 'Subscription confirmed' }),
+      { 
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+        status: 200 
+      }
+    );
+  } catch (error) {
+    console.error('Error confirming SNS subscription:', error);
+    return new Response(
+      JSON.stringify({ error: 'Failed to confirm subscription' }),
+      { 
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+        status: 500
+      }
+    );
+  }
+}
+
+async function handleSNSNotification(snsMessage: SNSMessage): Promise<Response> {
+  console.log('Processing SNS notification');
+  
+  try {
+    const emailData = JSON.parse(snsMessage.Message);
+    console.log('SNS notification data:', emailData);
+    
+    // Process based on notification type
+    // This is where we'll handle bounces, complaints, delivery notifications, etc.
+    // For now, we'll just log it
+    const { data, error } = await supabaseClient
+      .from('email_events')
+      .insert([{
+        message_id: snsMessage.MessageId,
+        event_type: emailData.eventType || 'unknown',
+        timestamp: snsMessage.Timestamp,
+        raw_data: emailData
+      }]);
+
+    if (error) throw error;
+
+    return new Response(
+      JSON.stringify({ success: true, message: 'Event processed' }),
+      { 
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+        status: 200 
+      }
+    );
+  } catch (error) {
+    console.error('Error processing SNS notification:', error);
+    return new Response(
+      JSON.stringify({ error: 'Failed to process notification' }),
+      { 
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+        status: 500
+      }
+    );
+  }
+}
+
 async function handleInboundEmail(req: Request): Promise<Response> {
   console.log('Received inbound request');
   console.log('Request method:', req.method);
