@@ -898,6 +898,33 @@ export type Database = {
         }
         Relationships: []
       }
+      email_events: {
+        Row: {
+          created_at: string
+          event_type: string
+          id: string
+          message_id: string
+          raw_data: Json
+          timestamp: string
+        }
+        Insert: {
+          created_at?: string
+          event_type: string
+          id?: string
+          message_id: string
+          raw_data: Json
+          timestamp: string
+        }
+        Update: {
+          created_at?: string
+          event_type?: string
+          id?: string
+          message_id?: string
+          raw_data?: Json
+          timestamp?: string
+        }
+        Relationships: []
+      }
       email_logs: {
         Row: {
           body: string
