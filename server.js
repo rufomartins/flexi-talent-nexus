@@ -27,72 +27,21 @@ app.use((req, res, next) => {
   next();
 });
 
-// Normalize email subject for better conversation threading
-const normalizeSubject = (subject) => {
-  if (!subject) return 'No Subject';
-  
-  // Convert to lowercase and trim
-  let normalized = subject.toLowerCase().trim();
-  
-  // Remove common prefixes
-  const prefixes = ['re:', 're :', 'fwd:', 'fwd :', 'fw:', 'fw :'];
-  for (const prefix of prefixes) {
-    if (normalized.startsWith(prefix)) {
-      normalized = normalized.substring(prefix.length).trim();
-    }
-  }
-  
-  // Remove multiple spaces
-  normalized = normalized.replace(/\s+/g, ' ');
-  
-  return normalized;
-};
-
-// Process attachments into the correct format
-const processAttachments = (attachments = []) => {
-  return attachments.map(att => ({
-    contentType: att.content_type,
-    filename: att.file_name,
-    size: att.size,
-    url: att.url
-  }));
-};
-
-// Find or create a conversation based on headers and subject
-const findOrCreateConversation = async (headers, subject, originalSubject) => {
-  console.log('Finding conversation for:', {
-    messageId: headers['message-id'],
-    inReplyTo: headers['in-reply-to'],
-    references: headers.references,
-    normalizedSubject: subject,
-    originalSubject
-  });
+// Find or create a conversation based on subject
+const findOrCreateConversation = async (subject) => {
+  console.log('Finding conversation for subject:', subject);
 
   try {
-    // First try to find by In-Reply-To header
-    if (headers['in-reply-to']) {
-      const { data: byHeader, error: headerError } = await supabase
-        .from('email_messages')
-        .select('conversation_id')
-        .eq('headers->message-id', headers['in-reply-to'])
-        .single();
-
-      if (!headerError && byHeader) {
-        console.log('Found conversation by In-Reply-To header:', byHeader.conversation_id);
-        return byHeader.conversation_id;
-      }
-    }
-
-    // Then try by normalized subject
-    const { data: existing, error: subjectError } = await supabase
+    // First try to find an existing conversation
+    const { data: existing, error: findError } = await supabase
       .from('email_conversations')
       .select('id')
-      .eq('subject', originalSubject)
+      .eq('subject', subject)
       .eq('status', 'active')
       .maybeSingle();
 
-    if (!subjectError && existing) {
-      console.log('Found conversation by subject:', existing.id);
+    if (!findError && existing) {
+      console.log('Found existing conversation:', existing.id);
       return existing.id;
     }
 
@@ -100,7 +49,7 @@ const findOrCreateConversation = async (headers, subject, originalSubject) => {
     const { data: newConversation, error: createError } = await supabase
       .from('email_conversations')
       .insert({
-        subject: originalSubject,
+        subject: subject,
         status: 'active'
       })
       .select()
@@ -114,6 +63,16 @@ const findOrCreateConversation = async (headers, subject, originalSubject) => {
     console.error('Error in findOrCreateConversation:', error);
     throw error;
   }
+};
+
+// Process attachments into the correct format
+const processAttachments = (attachments = []) => {
+  return attachments.map(att => ({
+    contentType: att.content_type,
+    filename: att.file_name,
+    size: att.size,
+    url: att.url
+  }));
 };
 
 // Webhook endpoint for email processing
@@ -137,18 +96,11 @@ app.post('/webhook', async (req, res) => {
       to: envelope.to,
       subject: headers.subject,
       hasHtml: !!html,
-      hasPlain: !!plain,
-      messageId: headers['message-id'],
-      inReplyTo: headers['in-reply-to']
+      hasPlain: !!plain
     });
 
-    // Normalize subject and find/create conversation
-    const normalizedSubject = normalizeSubject(headers.subject);
-    const conversationId = await findOrCreateConversation(
-      headers,
-      normalizedSubject,
-      headers.subject
-    );
+    // Find or create conversation
+    const conversationId = await findOrCreateConversation(headers.subject);
 
     // Ensure to_email is always an array
     const toEmails = Array.isArray(envelope.to) ? envelope.to : [envelope.to];
@@ -156,7 +108,7 @@ app.post('/webhook', async (req, res) => {
     // Process attachments if present
     const attachments = processAttachments(req.body.attachments);
 
-    // Create the message
+    // Insert the email message
     const { data: message, error: messageError } = await supabase
       .from('email_messages')
       .insert({
@@ -165,7 +117,7 @@ app.post('/webhook', async (req, res) => {
         from_email: envelope.from,
         to_email: toEmails,
         subject: headers.subject,
-        body: plain || html?.replace(/<[^>]*>/g, ''), // Strip HTML if no plain text
+        body: plain || (html && html.replace(/<[^>]*>/g, '')),
         html_body: html,
         headers: headers,
         attachments: attachments,
@@ -174,10 +126,7 @@ app.post('/webhook', async (req, res) => {
           received_at: new Date().toISOString(),
           source: 'cloudmailin',
           has_html: !!html,
-          has_attachments: attachments.length > 0,
-          message_id: headers['message-id'],
-          in_reply_to: headers['in-reply-to'],
-          references: headers.references
+          has_attachments: attachments.length > 0
         }
       })
       .select()
@@ -191,8 +140,7 @@ app.post('/webhook', async (req, res) => {
     console.log('Successfully created message:', {
       messageId: message.id,
       conversationId: conversationId,
-      originalSubject: headers.subject,
-      normalizedSubject: normalizedSubject,
+      subject: headers.subject,
       attachmentCount: attachments.length
     });
 
