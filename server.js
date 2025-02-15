@@ -27,6 +27,95 @@ app.use((req, res, next) => {
   next();
 });
 
+// Normalize email subject for better conversation threading
+const normalizeSubject = (subject) => {
+  if (!subject) return 'No Subject';
+  
+  // Convert to lowercase and trim
+  let normalized = subject.toLowerCase().trim();
+  
+  // Remove common prefixes
+  const prefixes = ['re:', 're :', 'fwd:', 'fwd :', 'fw:', 'fw :'];
+  for (const prefix of prefixes) {
+    if (normalized.startsWith(prefix)) {
+      normalized = normalized.substring(prefix.length).trim();
+    }
+  }
+  
+  // Remove multiple spaces
+  normalized = normalized.replace(/\s+/g, ' ');
+  
+  return normalized;
+};
+
+// Process attachments into the correct format
+const processAttachments = (attachments = []) => {
+  return attachments.map(att => ({
+    contentType: att.content_type,
+    filename: att.file_name,
+    size: att.size,
+    url: att.url
+  }));
+};
+
+// Find or create a conversation based on headers and subject
+const findOrCreateConversation = async (headers, subject, originalSubject) => {
+  console.log('Finding conversation for:', {
+    messageId: headers['message-id'],
+    inReplyTo: headers['in-reply-to'],
+    references: headers.references,
+    normalizedSubject: subject,
+    originalSubject
+  });
+
+  try {
+    // First try to find by In-Reply-To header
+    if (headers['in-reply-to']) {
+      const { data: byHeader, error: headerError } = await supabase
+        .from('email_messages')
+        .select('conversation_id')
+        .eq('headers->message-id', headers['in-reply-to'])
+        .single();
+
+      if (!headerError && byHeader) {
+        console.log('Found conversation by In-Reply-To header:', byHeader.conversation_id);
+        return byHeader.conversation_id;
+      }
+    }
+
+    // Then try by normalized subject
+    const { data: existing, error: subjectError } = await supabase
+      .from('email_conversations')
+      .select('id')
+      .eq('subject', originalSubject)
+      .eq('status', 'active')
+      .maybeSingle();
+
+    if (!subjectError && existing) {
+      console.log('Found conversation by subject:', existing.id);
+      return existing.id;
+    }
+
+    // Create new conversation if none found
+    const { data: newConversation, error: createError } = await supabase
+      .from('email_conversations')
+      .insert({
+        subject: originalSubject,
+        status: 'active'
+      })
+      .select()
+      .single();
+
+    if (createError) throw createError;
+    
+    console.log('Created new conversation:', newConversation.id);
+    return newConversation.id;
+  } catch (error) {
+    console.error('Error in findOrCreateConversation:', error);
+    throw error;
+  }
+};
+
 // Webhook endpoint for email processing
 app.post('/webhook', async (req, res) => {
   try {
@@ -48,57 +137,24 @@ app.post('/webhook', async (req, res) => {
       to: envelope.to,
       subject: headers.subject,
       hasHtml: !!html,
-      hasPlain: !!plain
+      hasPlain: !!plain,
+      messageId: headers['message-id'],
+      inReplyTo: headers['in-reply-to']
     });
 
-    // Check for existing conversation with exact subject match
-    const { data: existingConversation, error: searchError } = await supabase
-      .from('email_conversations')
-      .select('id')
-      .eq('subject', headers.subject)
-      .eq('status', 'active')
-      .single();
-
-    if (searchError && searchError.code !== 'PGRST116') { // PGRST116 is "not found" error
-      console.error('Error searching for existing conversation:', searchError);
-      throw searchError;
-    }
-
-    let conversationId;
-
-    if (existingConversation) {
-      console.log('Found existing conversation:', existingConversation.id);
-      conversationId = existingConversation.id;
-    } else {
-      // Create new conversation
-      const { data: newConversation, error: conversationError } = await supabase
-        .from('email_conversations')
-        .insert({
-          subject: headers.subject,
-          status: 'active'
-        })
-        .select()
-        .single();
-
-      if (conversationError) {
-        console.error('Error creating conversation:', conversationError);
-        throw conversationError;
-      }
-
-      console.log('Created new conversation:', newConversation.id);
-      conversationId = newConversation.id;
-    }
-
-    // Prepare attachments if present
-    const attachments = (req.body.attachments || []).map(att => ({
-      content_type: att.content_type,
-      file_name: att.file_name,
-      size: att.size,
-      url: att.url
-    }));
+    // Normalize subject and find/create conversation
+    const normalizedSubject = normalizeSubject(headers.subject);
+    const conversationId = await findOrCreateConversation(
+      headers,
+      normalizedSubject,
+      headers.subject
+    );
 
     // Ensure to_email is always an array
     const toEmails = Array.isArray(envelope.to) ? envelope.to : [envelope.to];
+
+    // Process attachments if present
+    const attachments = processAttachments(req.body.attachments);
 
     // Create the message
     const { data: message, error: messageError } = await supabase
@@ -109,7 +165,7 @@ app.post('/webhook', async (req, res) => {
         from_email: envelope.from,
         to_email: toEmails,
         subject: headers.subject,
-        body: plain,
+        body: plain || html?.replace(/<[^>]*>/g, ''), // Strip HTML if no plain text
         html_body: html,
         headers: headers,
         attachments: attachments,
@@ -118,7 +174,10 @@ app.post('/webhook', async (req, res) => {
           received_at: new Date().toISOString(),
           source: 'cloudmailin',
           has_html: !!html,
-          has_attachments: attachments.length > 0
+          has_attachments: attachments.length > 0,
+          message_id: headers['message-id'],
+          in_reply_to: headers['in-reply-to'],
+          references: headers.references
         }
       })
       .select()
@@ -131,7 +190,10 @@ app.post('/webhook', async (req, res) => {
 
     console.log('Successfully created message:', {
       messageId: message.id,
-      conversationId: conversationId
+      conversationId: conversationId,
+      originalSubject: headers.subject,
+      normalizedSubject: normalizedSubject,
+      attachmentCount: attachments.length
     });
 
     // Send success response
