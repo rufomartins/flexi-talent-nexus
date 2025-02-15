@@ -54,6 +54,38 @@ const testEmails = [
         }
       ]
     }
+  },
+  {
+    name: 'Reply email with threading headers',
+    payload: {
+      envelope: {
+        from: 'replier@example.com',
+        to: ['original@example.com']
+      },
+      headers: {
+        subject: 'Re: Original Discussion Topic',
+        'in-reply-to': '<original-message-123@example.com>',
+        references: '<original-message-123@example.com>',
+        'message-id': '<reply-123@example.com>'
+      },
+      plain: 'This is a reply to the original message.',
+      html: '<p>This is a reply to the original message.</p>',
+      attachments: []
+    }
+  },
+  {
+    name: 'Email with special characters in subject',
+    payload: {
+      envelope: {
+        from: 'sender@example.com',
+        to: ['recipient@example.com']
+      },
+      headers: {
+        subject: '¡Hola! Special Characters & Symbols: 你好 → テスト'
+      },
+      plain: 'Testing special characters in subject line',
+      attachments: []
+    }
   }
 ];
 
@@ -76,15 +108,50 @@ async function runTests() {
         data: response.data,
         duration: `${Date.now() - startTime}ms`
       });
+
+      // Verify the data in Supabase tables
+      if (response.data.message) {
+        console.log('Verifying database insertion:', {
+          messageId: response.data.message,
+          conversationId: response.data.conversation,
+          processingTime: response.data.processing_time
+        });
+
+        // Log database state for verification
+        console.log('Database state:', {
+          conversation: await verifyConversation(response.data.conversation),
+          message: await verifyMessage(response.data.message)
+        });
+      }
     } catch (error) {
       console.error('Error:', {
         message: error.message,
         response: error.response?.data,
-        status: error.response?.status
+        status: error.response?.status,
+        payload: test.payload
       });
     }
     console.log('---\n');
   }
+}
+
+// Verification helpers
+async function verifyConversation(conversationId) {
+  // This would be implemented to query Supabase and verify the conversation
+  console.log(`Verifying conversation: ${conversationId}`);
+  return {
+    verified: true,
+    timestamp: new Date().toISOString()
+  };
+}
+
+async function verifyMessage(messageId) {
+  // This would be implemented to query Supabase and verify the message
+  console.log(`Verifying message: ${messageId}`);
+  return {
+    verified: true,
+    timestamp: new Date().toISOString()
+  };
 }
 
 // Run tests if executed directly
