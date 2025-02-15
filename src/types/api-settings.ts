@@ -1,11 +1,12 @@
 
-export interface VideoSettings {
-  url: string;
-  embed_code: string;
-}
-
 export interface CloudMailinSettings {
   enabled: boolean;
+  webhook_url?: string;
+}
+
+export interface VideoSettings {
+  enabled: boolean;
+  api_key?: string;
 }
 
 export interface ResendSettings {

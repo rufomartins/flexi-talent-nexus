@@ -5,7 +5,7 @@ import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/com
 import { Label } from "@/components/ui/label";
 import { Switch } from "@/components/ui/switch";
 import { useToast } from "@/hooks/use-toast";
-import { APIConfigs } from "@/types/api-settings";
+import { APIConfigs, CloudMailinSettings } from "@/types/api-settings";
 
 interface CloudMailinSetupProps {
   getSettingValue: <T extends keyof APIConfigs>(name: T) => APIConfigs[T];
@@ -14,6 +14,7 @@ interface CloudMailinSetupProps {
 
 export function CloudMailinSetup({ getSettingValue, updateSettings }: CloudMailinSetupProps) {
   const { toast } = useToast();
+  const settings = getSettingValue('cloudmailin_settings') as CloudMailinSettings;
 
   return (
     <Card>
@@ -28,12 +29,11 @@ export function CloudMailinSetup({ getSettingValue, updateSettings }: CloudMaili
           <Label htmlFor="cloudmailin-enabled">Enable CloudMailin Integration</Label>
           <Switch
             id="cloudmailin-enabled"
-            checked={getSettingValue('cloudmailin_settings')?.enabled ?? false}
+            checked={settings?.enabled ?? false}
             onCheckedChange={(checked) => {
-              const currentValue = getSettingValue('cloudmailin_settings');
               updateSettings({
                 name: 'cloudmailin_settings',
-                value: { ...currentValue, enabled: checked }
+                value: { ...settings, enabled: checked }
               });
               
               toast({
