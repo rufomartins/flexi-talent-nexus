@@ -1,3 +1,9 @@
+
+import { useParams } from "react-router-dom";
+import TalentProfile from "@/pages/TalentProfile";
+
 export default function TalentProfileDetails() {
-  return <div>Talent Profile Details Page</div>;
+  const { id } = useParams();
+  
+  return <TalentProfile />;
 }

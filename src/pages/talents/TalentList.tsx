@@ -12,19 +12,71 @@ import { useAuth } from "@/contexts/auth";
 import { useTalents } from "@/hooks/useTalents";
 import type { TalentProfile } from "@/types/talent";
 import { Loader2 } from "lucide-react";
+import { TalentFilterBar, TalentFilter } from "@/components/talents/list/TalentFilterBar";
 
 const TalentList = () => {
   const [searchOpen, setSearchOpen] = useState(false);
   const [addTalentOpen, setAddTalentOpen] = useState(false);
   const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
   const [sortBy, setSortBy] = useState("name");
+  const [filters, setFilters] = useState<TalentFilter>({
+    searchTerm: "",
+    categories: [],
+    status: null,
+    countries: [],
+  });
+  
   const { toast } = useToast();
   const { user } = useAuth();
   const isSuperAdmin = user?.role === 'super_admin';
   const isAdmin = user?.role === 'admin';
 
   // Use our enhanced useTalents hook that includes dummy data
-  const { data: talents, isLoading, error } = useTalents();
+  const { data: allTalents, isLoading, error } = useTalents();
+
+  // Apply filters and sorting
+  const talents = allTalents ? filterTalents(allTalents, filters) : [];
+
+  function filterTalents(talents: TalentProfile[], filters: TalentFilter): TalentProfile[] {
+    return talents.filter((talent) => {
+      // Filter by search term
+      if (filters.searchTerm) {
+        const searchTerm = filters.searchTerm.toLowerCase();
+        const talentName = talent.users?.full_name?.toLowerCase() || '';
+        const talentCountry = talent.country?.toLowerCase() || '';
+        const talentLanguage = talent.native_language?.toLowerCase() || '';
+        
+        if (
+          !talentName.includes(searchTerm) && 
+          !talentCountry.includes(searchTerm) && 
+          !talentLanguage.includes(searchTerm)
+        ) {
+          return false;
+        }
+      }
+      
+      // Filter by categories
+      if (filters.categories.length > 0 && !filters.categories.includes(talent.talent_category)) {
+        return false;
+      }
+      
+      // Filter by status
+      if (filters.status && talent.evaluation_status !== filters.status) {
+        return false;
+      }
+      
+      // Filter by countries
+      if (filters.countries.length > 0 && !filters.countries.includes(talent.country)) {
+        return false;
+      }
+      
+      return true;
+    });
+  }
+
+  const handleFilterChange = (newFilters: TalentFilter) => {
+    setFilters(newFilters);
+  };
 
   const handleSelectAll = () => {
     if (talents) {
@@ -92,6 +144,8 @@ const TalentList = () => {
         isSuperAdmin={isSuperAdmin}
       />
 
+      <TalentFilterBar onFilterChange={handleFilterChange} />
+
       <TalentListControls
         selectedIds={selectedIds}
         onSelectAll={handleSelectAll}
@@ -115,7 +169,7 @@ const TalentList = () => {
         </div>
       ) : (
         <div className="text-center text-muted-foreground py-8">
-          No talents found. Add talents or adjust your search.
+          No talents found. Adjust your filters or search criteria.
         </div>
       )}
 

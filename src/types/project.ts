@@ -1,3 +1,4 @@
+
 export type ProjectStatus = 'active' | 'completed' | 'on_hold';
 
 export type ProjectScriptStatus = 'Pending' | 'In Progress' | 'Approved';
