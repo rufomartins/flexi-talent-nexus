@@ -16,6 +16,12 @@ export const GDPRTab = ({ talent }: GDPRTabProps) => {
   const { toast } = useToast();
   const [loading, setLoading] = useState(false);
   
+  // Simulate GDPR status - this would come from your database
+  const gdprStatus = {
+    agreed: Math.random() > 0.5, // Randomly show agreed or not for demo
+    agreementDate: Math.random() > 0.5 ? new Date().toISOString() : null,
+  };
+
   const handleSendGDPRAgreement = async () => {
     setLoading(true);
     try {
@@ -35,12 +41,6 @@ export const GDPRTab = ({ talent }: GDPRTabProps) => {
     } finally {
       setLoading(false);
     }
-  };
-  
-  // Simulate GDPR status - this would come from your database
-  const gdprStatus = {
-    agreed: Math.random() > 0.5, // Randomly show agreed or not for demo
-    agreementDate: gdprStatus?.agreed ? new Date().toISOString() : null,
   };
 
   return (

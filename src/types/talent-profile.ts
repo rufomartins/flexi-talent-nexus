@@ -1,3 +1,4 @@
+
 import { User } from "./user";
 import { Database } from "@/integrations/supabase/types";
 
@@ -12,6 +13,8 @@ export interface TalentProfileData {
     category: string | null;
     evaluation_status: TalentStatus | null;
     internal_remarks: string | null;
+    country: string | null;
+    whatsapp_number: string | null;
   };
 }
 
