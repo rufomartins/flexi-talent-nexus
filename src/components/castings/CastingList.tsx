@@ -1,66 +1,120 @@
-import { useState } from 'react';
-import { useQuery } from '@tanstack/react-query';
+
+import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { supabase } from '@/integrations/supabase/client';
 import { CastingCard } from './CastingCard';
 import { CastingListControls } from './CastingListControls';
 import { Casting, SortOption } from './types';
+
+// Dummy castings data
+const DUMMY_CASTINGS: Casting[] = [
+  {
+    id: "1",
+    name: "Wolt Finland UGC Campaign",
+    description: "Looking for food delivery talents for UGC campaign",
+    status: 'open',
+    logo_url: "https://upload.wikimedia.org/wikipedia/en/thumb/8/82/Wolt_logo.svg/1200px-Wolt_logo.svg.png",
+    talent_count: 12,
+    guest_remarks_count: 4,
+    created_at: "2025-03-15T10:00:00Z",
+    updated_at: "2025-03-20T14:30:00Z",
+    client: { id: "c1", full_name: "Wolt Finland" },
+    project_manager: { id: "pm1", full_name: "Maria Johnson" }
+  },
+  {
+    id: "2",
+    name: "Nike Running Shoes Campaign",
+    description: "Seeking athletic talents for new running shoes promotion",
+    status: 'open',
+    logo_url: "https://cdn.iconscout.com/icon/free/png-256/free-nike-1-202653.png",
+    talent_count: 8,
+    guest_remarks_count: 2,
+    created_at: "2025-03-18T09:15:00Z",
+    updated_at: "2025-03-21T11:20:00Z",
+    client: { id: "c2", full_name: "Nike Europe" },
+    project_manager: { id: "pm2", full_name: "John Smith" }
+  },
+  {
+    id: "3",
+    name: "Royal Match Game Promo",
+    description: "Looking for gamers to promote Royal Match mobile game",
+    status: 'open',
+    talent_count: 5,
+    guest_remarks_count: 0,
+    created_at: "2025-03-22T14:45:00Z",
+    updated_at: "2025-03-22T14:45:00Z",
+    client: { id: "c3", full_name: "Dream Games" },
+    project_manager: { id: "pm1", full_name: "Maria Johnson" }
+  },
+  {
+    id: "4",
+    name: "Spotify Podcast Campaign",
+    description: "Seeking voice talents for podcast promotions",
+    status: 'closed',
+    logo_url: "https://upload.wikimedia.org/wikipedia/commons/thumb/8/84/Spotify_icon.svg/232px-Spotify_icon.svg.png",
+    talent_count: 15,
+    guest_remarks_count: 8,
+    created_at: "2025-02-10T08:30:00Z",
+    updated_at: "2025-03-01T16:45:00Z",
+    client: { id: "c4", full_name: "Spotify" },
+    project_manager: { id: "pm3", full_name: "Alex Brown" }
+  }
+];
 
 export default function CastingList() {
   const navigate = useNavigate();
   const [search, setSearch] = useState('');
   const [sortBy, setSortBy] = useState<SortOption>('name');
   const [showClosed, setShowClosed] = useState(false);
+  const [filteredCastings, setFilteredCastings] = useState<Casting[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
 
-  const { data: castings, isLoading } = useQuery({
-    queryKey: ['castings', search, sortBy, showClosed],
-    queryFn: async () => {
-      let query = supabase
-        .from('castings')
-        .select(`
-          *,
-          client:client_id(full_name),
-          project_manager:project_manager_id(full_name)
-        `);
+  useEffect(() => {
+    // Simulate loading delay
+    const timer = setTimeout(() => {
+      setIsLoading(false);
+    }, 500);
+    
+    return () => clearTimeout(timer);
+  }, []);
 
-      // Apply filters
-      if (!showClosed) {
-        query = query.eq('status', 'open');
-      }
-
-      if (search) {
-        query = query.ilike('name', `%${search}%`);
-      }
-
-      // Apply sorting
+  useEffect(() => {
+    // Filter and sort castings based on current state
+    let filtered = [...DUMMY_CASTINGS];
+    
+    if (!showClosed) {
+      filtered = filtered.filter(casting => casting.status === 'open');
+    }
+    
+    if (search) {
+      const lowerSearch = search.toLowerCase();
+      filtered = filtered.filter(casting => 
+        casting.name.toLowerCase().includes(lowerSearch) || 
+        casting.description?.toLowerCase().includes(lowerSearch) ||
+        casting.client?.full_name.toLowerCase().includes(lowerSearch)
+      );
+    }
+    
+    // Apply sorting
+    filtered.sort((a, b) => {
       switch (sortBy) {
         case 'name':
-          query = query.order('name');
-          break;
+          return a.name.localeCompare(b.name);
         case 'project_manager':
-          query = query.order('project_manager_id');
-          break;
+          return (a.project_manager?.full_name || '').localeCompare(b.project_manager?.full_name || '');
         case 'creation_date':
-          query = query.order('created_at', { ascending: false });
-          break;
+          return new Date(b.created_at).getTime() - new Date(a.created_at).getTime();
         case 'client_remarks':
-          // For now, we'll sort by created_at since guest_remarks is not implemented yet
-          query = query.order('created_at', { ascending: false });
-          break;
+          return (b.guest_remarks_count || 0) - (a.guest_remarks_count || 0);
         default:
-          query = query.order('created_at', { ascending: false });
+          return 0;
       }
-
-      const { data, error } = await query;
-
-      if (error) throw error;
-      
-      return data as unknown as Casting[];
-    }
-  });
+    });
+    
+    setFilteredCastings(filtered);
+  }, [search, sortBy, showClosed]);
 
   return (
-    <div className="w-full max-w-7xl mx-auto px-4">
+    <div className="w-full max-w-7xl mx-auto">
       {/* Header Navigation */}
       <div className="flex items-center space-x-2 py-4 text-gray-600">
         <a href="/" className="text-gray-500 hover:text-gray-700">
@@ -85,10 +139,10 @@ export default function CastingList() {
       <div className="space-y-4">
         {isLoading ? (
           <div className="text-center py-8 text-gray-500">Loading castings...</div>
-        ) : castings?.length === 0 ? (
+        ) : filteredCastings.length === 0 ? (
           <div className="text-center py-8 text-gray-500">No castings found</div>
         ) : (
-          castings?.map((casting) => (
+          filteredCastings.map((casting) => (
             <CastingCard key={casting.id} casting={casting} />
           ))
         )}
