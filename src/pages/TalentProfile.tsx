@@ -18,15 +18,42 @@ import { CalendarTab } from "@/components/talents/CalendarTab";
 import { Loader2 } from "lucide-react";
 import { TalentProfileData } from "@/types/talent-profile";
 import { useToast } from "@/hooks/use-toast";
+import { useTalents } from "@/hooks/useTalents";
 
 const TalentProfile = () => {
   const { id } = useParams();
   const [activeTab, setActiveTab] = useState("summary");
   const { toast } = useToast();
+  
+  // Fetch all talents to find the one with the matching ID
+  const { data: allTalents, isLoading: isLoadingTalents } = useTalents();
+  
+  // Try to find the talent with the matching ID from the dummy data
+  const talentFromDummyData = allTalents?.find(talent => talent.id === id);
+  
+  // If we found a talent in dummy data, use it directly
+  const dummyTalentData = talentFromDummyData ? {
+    user: {
+      id: talentFromDummyData.users.id,
+      full_name: talentFromDummyData.users.full_name,
+      email: `${talentFromDummyData.users.full_name.toLowerCase().replace(/\s/g, '.')}@example.com`,
+      avatar_url: talentFromDummyData.users.avatar_url
+    },
+    talent_profile: {
+      category: talentFromDummyData.talent_category,
+      evaluation_status: talentFromDummyData.evaluation_status,
+      internal_remarks: "Sample internal remarks for this talent",
+      country: talentFromDummyData.country,
+      whatsapp_number: "+1234567890"
+    }
+  } as TalentProfileData : null;
 
-  const { data: talent, isLoading, refetch } = useQuery({
+  // Only try to fetch from database if we don't have dummy data
+  const { data: talentFromDB, isLoading: isLoadingFromDB } = useQuery({
     queryKey: ["talent", id],
     queryFn: async () => {
+      if (dummyTalentData) return dummyTalentData;
+      
       const { data: talentData, error } = await supabase
         .from("talent_profiles")
         .select(`
@@ -49,7 +76,11 @@ const TalentProfile = () => {
         }
       } as TalentProfileData;
     },
+    enabled: !dummyTalentData && !!id
   });
+
+  const talent = dummyTalentData || talentFromDB;
+  const isLoading = (!dummyTalentData && isLoadingFromDB) || isLoadingTalents;
 
   const handleTalentPortal = () => {
     toast({
@@ -74,14 +105,40 @@ const TalentProfile = () => {
 
   if (isLoading) {
     return (
-      <div className="h-screen w-screen flex items-center justify-center">
+      <div className="h-screen w-full flex items-center justify-center">
         <Loader2 className="h-8 w-8 animate-spin" />
       </div>
     );
   }
 
   if (!talent) {
-    return <div>Talent not found</div>;
+    return (
+      <div className="min-h-screen bg-background p-6">
+        <Breadcrumb>
+          <BreadcrumbList>
+            <BreadcrumbItem>
+              <BreadcrumbLink href="/">
+                <Home className="h-4 w-4" />
+              </BreadcrumbLink>
+            </BreadcrumbItem>
+            <BreadcrumbSeparator>
+              <ChevronRight className="h-4 w-4" />
+            </BreadcrumbSeparator>
+            <BreadcrumbItem>
+              <BreadcrumbLink href="/talents">Talents</BreadcrumbLink>
+            </BreadcrumbItem>
+          </BreadcrumbList>
+        </Breadcrumb>
+        
+        <div className="mt-12 text-center">
+          <h2 className="text-2xl font-semibold">Talent not found</h2>
+          <p className="text-muted-foreground mt-2">The talent with ID {id} could not be found.</p>
+          <Button variant="outline" className="mt-6" onClick={() => window.history.back()}>
+            Go back
+          </Button>
+        </div>
+      </div>
+    );
   }
 
   return (
@@ -107,7 +164,7 @@ const TalentProfile = () => {
                 </BreadcrumbSeparator>
                 <BreadcrumbItem>
                   <BreadcrumbPage>
-                    {talent.user.first_name} {talent.user.last_name}
+                    {talent.user.full_name}
                   </BreadcrumbPage>
                 </BreadcrumbItem>
               </BreadcrumbList>
@@ -144,7 +201,7 @@ const TalentProfile = () => {
           {activeTab === "summary" && <SummaryTab talent={talent} />}
           {activeTab === "experience" && <ExperienceTab talent={talent} />}
           {activeTab === "media" && <MediaTab talent={talent} />}
-          {activeTab === "contact" && <ContactTab talent={talent} onTalentUpdate={refetch} />}
+          {activeTab === "contact" && <ContactTab talent={talent} />}
           {activeTab === "gdpr" && <GDPRTab talent={talent} />}
           {activeTab === "castings" && <CastingsTab talent={talent} />}
           {activeTab === "calendar" && <CalendarTab talent={talent} />}
