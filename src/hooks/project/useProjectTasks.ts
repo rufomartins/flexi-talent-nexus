@@ -1,31 +1,22 @@
 
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
-import type { ProjectTask } from "@/types/project";
+import { ProjectTask, ProjectLanguage } from "@/types/project";
 
-export function useProjectTasks(projectId: string) {
-  return useQuery<ProjectTask[]>({
-    queryKey: ['project-tasks', projectId],
-    queryFn: async () => {
+export function useProjectTasks(languageId?: string) {
+  return useQuery({
+    queryKey: ["project-tasks", languageId],
+    queryFn: async (): Promise<ProjectTask[]> => {
+      if (!languageId) return [];
+      
       const { data, error } = await supabase
-        .from('project_tasks')
-        .select(`
-          id,
-          name,
-          script_status,
-          review_status,
-          talent_status,
-          delivery_status,
-          priority,
-          language_id,
-          created_at,
-          updated_at
-        `)
-        .eq('project_id', projectId);
+        .from("project_tasks")
+        .select("*")
+        .eq("language_id", languageId);
 
       if (error) throw error;
-      return data || [];
+      return data;
     },
-    enabled: !!projectId
+    enabled: !!languageId,
   });
 }

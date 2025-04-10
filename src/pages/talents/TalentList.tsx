@@ -1,3 +1,4 @@
+
 import { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
@@ -8,6 +9,7 @@ import { TalentSearchDialog } from "@/components/talents/TalentSearchDialog";
 import { AddTalentModal } from "@/components/talents/AddTalentModal";
 import { useToast } from "@/hooks/use-toast";
 import { useAuth } from "@/contexts/auth";
+import { useTalents } from "@/hooks/useTalents";
 import type { TalentProfile } from "@/types/talent";
 import { Loader2 } from "lucide-react";
 
@@ -21,79 +23,8 @@ const TalentList = () => {
   const isSuperAdmin = user?.role === 'super_admin';
   const isAdmin = user?.role === 'admin';
 
-  const { data: talents, isLoading, error } = useQuery({
-    queryKey: ["talents", sortBy],
-    queryFn: async () => {
-      const { data, error } = await supabase
-        .from("talent_profiles")
-        .select(`
-          id,
-          user_id,
-          talent_category,
-          country,
-          evaluation_status,
-          is_duo,
-          duo_name,
-          created_at,
-          updated_at,
-          users:user_id (
-            id,
-            full_name,
-            avatar_url
-          ),
-          casting_talents (
-            id,
-            casting_id,
-            castings (
-              name
-            )
-          ),
-          partner:partner_id (
-            id,
-            user_id,
-            users:user_id (
-              id,
-              full_name,
-              avatar_url
-            )
-          ),
-          native_language,
-          experience_level,
-          fee_range,
-          availability,
-          category,
-          whatsapp_number
-        `);
-
-      if (error) {
-        toast({
-          title: "Error loading talents",
-          description: error.message,
-          variant: "destructive",
-        });
-        throw error;
-      }
-
-      return data.map(talent => ({
-        ...talent,
-        users: talent.users || { 
-          id: talent.user_id,
-          full_name: 'Unknown',
-          avatar_url: null
-        },
-        casting_talents: talent.casting_talents || [],
-        partner: talent.partner ? {
-          id: talent.partner.id,
-          user_id: talent.partner.user_id,
-          users: talent.partner.users || {
-            id: talent.partner.user_id,
-            full_name: 'Unknown Partner',
-            avatar_url: null
-          }
-        } : null
-      })) as TalentProfile[];
-    },
-  });
+  // Use our enhanced useTalents hook that includes dummy data
+  const { data: talents, isLoading, error } = useTalents();
 
   const handleSelectAll = () => {
     if (talents) {
@@ -114,6 +45,25 @@ const TalentList = () => {
 
   const handleAction = async (action: string) => {
     console.log("Action:", action, "Selected IDs:", Array.from(selectedIds));
+    
+    // Example of handling actions
+    if (action === 'add-to-casting') {
+      toast({
+        title: "Adding to casting",
+        description: `Adding ${selectedIds.size} talents to casting`,
+      });
+    } else if (action === 'email') {
+      toast({
+        title: "Sending email",
+        description: `Preparing email for ${selectedIds.size} talents`,
+      });
+    } else if (action === 'delete') {
+      toast({
+        title: "Deleting talents",
+        description: `Are you sure you want to delete ${selectedIds.size} talents?`,
+        variant: "destructive",
+      });
+    }
   };
 
   if (error) {
@@ -165,7 +115,7 @@ const TalentList = () => {
         </div>
       ) : (
         <div className="text-center text-muted-foreground py-8">
-          Search for talents to get started
+          No talents found. Add talents or adjust your search.
         </div>
       )}
 
