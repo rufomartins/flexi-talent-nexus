@@ -7,6 +7,8 @@ export interface CloudMailinSettings {
 export interface VideoSettings {
   enabled: boolean;
   api_key?: string;
+  url?: string;
+  embed_code?: string;
 }
 
 export interface ResendSettings {

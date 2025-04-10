@@ -1,3 +1,4 @@
+
 import { useState } from "react";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Label } from "@/components/ui/label";
@@ -13,16 +14,16 @@ interface OnboardingSettingsProps {
 }
 
 export function OnboardingSettings({ getSettingValue, updateSettings }: OnboardingSettingsProps) {
-  const [videoUrl, setVideoUrl] = useState<string>(getSettingValue('video_settings')?.url || "");
-  const [embedCode, setEmbedCode] = useState<string>(getSettingValue('video_settings')?.embed_code || "");
+  const videoSettings = getSettingValue('video_settings') as VideoSettings;
+  const [videoUrl, setVideoUrl] = useState<string>(videoSettings?.url || "");
+  const [embedCode, setEmbedCode] = useState<string>(videoSettings?.embed_code || "");
   const { toast } = useToast();
-
-  const videoSettingsValue = getSettingValue('video_settings') as VideoSettings;
 
   const handleSave = () => {
     updateSettings({
       name: 'video_settings',
       value: {
+        ...videoSettings,
         url: videoUrl,
         embed_code: embedCode
       } as unknown as Json

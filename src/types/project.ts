@@ -1,4 +1,3 @@
-
 export type ProjectStatus = 'active' | 'completed' | 'on_hold';
 
 export type ProjectScriptStatus = 'Pending' | 'In Progress' | 'Approved';
@@ -9,6 +8,18 @@ export type ProjectDeliveryStatus = 'Pending' | 'Delivered' | 'R Pending';
 export interface Client {
   id: string;
   name: string;
+}
+
+export interface ProjectCountry {
+  id: string;
+  country_name: string;
+  languages: ProjectLanguage[];
+}
+
+export interface ProjectLanguage {
+  id: string;
+  language_name: string;
+  tasks?: ProjectTask[];
 }
 
 export interface Project {
@@ -33,6 +44,7 @@ export interface Project {
   };
   created_at: string;
   updated_at: string;
+  countries?: ProjectCountry[];
 }
 
 export interface ProjectTask {
@@ -45,5 +57,15 @@ export interface ProjectTask {
   delivery_status: ProjectDeliveryStatus;
   priority: string;
   created_at: string;
+  updated_at?: string;
+}
+
+export interface ShotList {
+  id?: string;
+  task_id: string;
+  name: string;
+  shared_with?: any;
+  version?: number;
+  created_at?: string;
   updated_at?: string;
 }

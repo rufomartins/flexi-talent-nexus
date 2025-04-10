@@ -14,6 +14,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { OnboardingSettings } from "@/components/settings/OnboardingSettings";
 import { useToast } from "@/hooks/use-toast";
 import type { APIConfigs } from "@/types/api-settings";
+import { Json } from "@/integrations/supabase/types";
 
 export default function SettingsPage() {
   const [activeTab, setActiveTab] = useState("general");
@@ -60,7 +61,7 @@ export default function SettingsPage() {
 
   const getSettingValue = <T extends keyof APIConfigs>(name: T): APIConfigs[T] => {
     const setting = settings?.find(s => s.name === name);
-    return (setting?.value || {}) as APIConfigs[T];
+    return setting?.value as unknown as APIConfigs[T] || {} as APIConfigs[T];
   };
 
   return (
