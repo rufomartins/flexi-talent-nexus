@@ -17,6 +17,7 @@ import InboxPage from "@/pages/InboxPage";
 import Settings from "@/pages/settings";
 import Calendar from "@/pages/Calendar";
 import TalentList from "@/pages/talents/TalentList";
+import TalentProfile from "@/pages/TalentProfile";
 import Castings from "@/pages/Castings";
 import { useAuth } from "@/contexts/auth";
 
@@ -66,6 +67,7 @@ function App() {
       }>
         <Route path="/dashboard" element={<Dashboard />} />
         <Route path="/talents" element={<TalentList />} />
+        <Route path="/talents/:id" element={<TalentProfile />} />
         <Route path="/projects" element={<Projects />} />
         <Route path="/castings" element={<Castings />} />
         <Route path="/calendar" element={<Calendar />} />
