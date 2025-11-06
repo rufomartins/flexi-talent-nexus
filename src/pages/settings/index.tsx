@@ -15,6 +15,7 @@ import { OnboardingSettings } from "@/components/settings/OnboardingSettings";
 import { useToast } from "@/hooks/use-toast";
 import type { APIConfigs } from "@/types/api-settings";
 import { Json } from "@/integrations/supabase/types";
+import { ChangePasswordForm } from "@/components/settings/ChangePasswordForm";
 
 export default function SettingsPage() {
   const [activeTab, setActiveTab] = useState("general");
@@ -73,7 +74,8 @@ export default function SettingsPage() {
         </p>
       </div>
       <Tabs value={activeTab} onValueChange={setActiveTab}>
-        <TabsList className="grid w-full grid-cols-4 lg:grid-cols-8">
+        <TabsList className="grid w-full grid-cols-5 lg:grid-cols-9">
+          <TabsTrigger value="profile">Profile</TabsTrigger>
           <TabsTrigger value="general">General</TabsTrigger>
           <TabsTrigger value="projects">Projects</TabsTrigger>
           <TabsTrigger value="talents">Talents</TabsTrigger>
@@ -83,6 +85,9 @@ export default function SettingsPage() {
           <TabsTrigger value="messages">Messages</TabsTrigger>
           <TabsTrigger value="financial">Financial</TabsTrigger>
         </TabsList>
+        <TabsContent value="profile">
+          <ChangePasswordForm />
+        </TabsContent>
         <TabsContent value="general">
           <GeneralSettings />
         </TabsContent>
